@@ -1,0 +1,312 @@
+[
+  {
+    "id": "TC001",
+    "title": "Verify web scraper collects data from Instagram and public sites",
+    "description": "Test that the web scraping collector successfully acquires up-to-date arts and culture event and grant data from Instagram and configured public sites, and handles pagination and rate limits properly.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Trigger the web scraping collector module manually or via scheduled job."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify data is fetched successfully from Instagram endpoints and public sites."
+      },
+      {
+        "type": "assertion",
+        "description": "Check that scraped data contains required fields such as event name, deadline, category, and source URL."
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure pagination is handled correctly and all pages are crawled."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the system handles HTTP errors (e.g. 429 rate limit, 500 server errors) gracefully and retries or skips as appropriate."
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "Validate AI-powered metadata extraction accuracy",
+    "description": "Confirm that the Google Gemini AI metadata extraction properly analyzes scraped event and grant data to enrich and accurately extract key metadata fields.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Feed a batch of raw scraped event text and images to the AI metadata extractor."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that extracted metadata includes event title, location, deadlines, support details, and categories."
+      },
+      {
+        "type": "assertion",
+        "description": "Check the completeness and correctness of the output fields compared to the raw input."
+      },
+      {
+        "type": "assertion",
+        "description": "Test with edge cases such as incomplete event descriptions or ambiguous information to see AI handling."
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Test image processing pipeline and thumbnail optimization",
+    "description": "Ensure that event images are processed and thumbnails are generated efficiently with optimized quality and size for faster frontend loading.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Upload a variety of original event images of different formats and sizes."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that thumbnails are generated conforming to expected dimensions and file size limits."
+      },
+      {
+        "type": "assertion",
+        "description": "Check that image quality is visually acceptable without unnecessary artifacts."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm that image processing fails gracefully and logs errors for corrupted or unsupported formats."
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Verify frontend search and filtering functionality",
+    "description": "Test the user interface's ability to accept search queries and apply filters such as genre, region, and source, updating results in real-time accurately.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to main dashboard and enter a search query in the search bar."
+      },
+      {
+        "type": "action",
+        "description": "Apply combination filters including genre, region, and source."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm that results update in real-time matching the search and filter criteria."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the metadata displayed on each result card is correct including deadline badges, categories, and links."
+      },
+      {
+        "type": "action",
+        "description": "Test sorting options by deadline urgency, newest entries, and alphabetical order."
+      },
+      {
+        "type": "assertion",
+        "description": "Check that sorting correctly reorders the results based on selection."
+      },
+      {
+        "type": "action",
+        "description": "Input a search query with no matching results."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that an informative empty state UI is displayed guiding the user."
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Test responsive design and accessibility on frontend",
+    "description": "Ensure that the frontend UI is responsive across multiple devices (mobile, tablet, desktop) and supports accessibility features including keyboard navigation and semantic HTML usage.",
+    "category": "ui",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Access the frontend UI from devices with different screen sizes and orientations."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify layout adapts seamlessly without element overlap or content clipping."
+      },
+      {
+        "type": "action",
+        "description": "Navigate the interface using keyboard only (tab, arrow keys, enter)."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm that focus states are visible and all interactive elements accessible."
+      },
+      {
+        "type": "action",
+        "description": "Use accessibility evaluation tools to check for correct usage of semantic HTML tags and ARIA attributes."
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure no critical accessibility violations are found."
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Verify admin dashboard data curation and direct message management",
+    "description": "Test admin dashboard functionalities for managing event/grant data curation and overseeing direct messages to ensure data quality and user communication.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login to admin dashboard with valid admin credentials."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify admin can view a list of scraped events and grants pending curation."
+      },
+      {
+        "type": "action",
+        "description": "Perform updates or corrections on event metadata."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm updated data is saved and reflected in frontend user views."
+      },
+      {
+        "type": "action",
+        "description": "Access direct message management interface."
+      },
+      {
+        "type": "action",
+        "description": "Send, receive, and delete messages."
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure messages are correctly handled and updated in real-time."
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Validate Telegram notification system functionality",
+    "description": "Check that the integrated Telegram alert system sends timely notifications to subscribed users about new or updated grants/events according to defined rules.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Subscribe a test Telegram account to notifications with specific filters."
+      },
+      {
+        "type": "action",
+        "description": "Trigger new event/grant addition or update in the backend."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that the Telegram account receives the appropriate alert with correct details and links."
+      },
+      {
+        "type": "assertion",
+        "description": "Check that notification delays are within acceptable timeframes."
+      },
+      {
+        "type": "action",
+        "description": "Test unsubscription and verify no further notifications are received."
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "API error handling and response time validation",
+    "description": "Ensure all backend API endpoints respond within defined time limits and return correct data formats and error messages under normal and error conditions.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Send valid API requests to all public and admin endpoints."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify response time is within SLA limits."
+      },
+      {
+        "type": "assertion",
+        "description": "Check response data formats conform to API specification (JSON schemas)."
+      },
+      {
+        "type": "action",
+        "description": "Send API requests with invalid or missing parameters."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm appropriate error response codes and messages are returned."
+      },
+      {
+        "type": "action",
+        "description": "Simulate backend service failures."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify system returns graceful fallback error messages without crashing."
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "TypeScript strict mode and typing coverage verification",
+    "description": "Ensure that all frontend components and modules are implemented with strict TypeScript mode enabled and have complete typing coverage for maintainability and clarity.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Perform static code analysis and compilation with TypeScript strict mode enabled."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify no compilation errors or implicit any types."
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure all components, props, and functions have explicit and correct types."
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Empty state UI and error state display on frontend",
+    "description": "Validate frontend displays appropriate UI feedback when no search results match, or when data loading or error states occur.",
+    "category": "ui",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Perform a search/filter with criteria that matches no events or grants."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the empty state message and UI elements are displayed clearly with guidance."
+      },
+      {
+        "type": "action",
+        "description": "Simulate API data loading and network delays."
+      },
+      {
+        "type": "assertion",
+        "description": "Check that loading indicators are visible during data fetch."
+      },
+      {
+        "type": "action",
+        "description": "Simulate API error response."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm that user-friendly error messages are shown."
+      }
+    ]
+  }
+]

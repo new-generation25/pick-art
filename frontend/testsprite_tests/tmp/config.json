@@ -1,0 +1,16 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:3000",
+  "executionArgs": {
+    "projectName": "culture-news",
+    "projectPath": "e:\\developement\\culture-news\\frontend",
+    "testIds": [],
+    "additionalInstruction": "Execute all functional and UI tests for the Gyeongnam Art Navigator frontend. Focus on verifying search, filtering, and data consistency from Supabase. Ensure that the premium detail page design is correctly rendered.",
+    "envs": {
+      "API_KEY": "sk-user-wrvWhpvz1odqRTXzphj6Xz9FIFuSn4ICYtuwmNfo1xlvKuANKpso7KedJwvu3yFkHdcGJlO05WEoinSv0bfxUWaK5ZBIFLQAcg_OzbFo_GLr21PQJsZ8SiW7CwXdRwds00M"
+    }
+  },
+  "proxy": "http://0fa146fe-d3d8-40b2-8448-6e6e1a69dade:l2UJYSlPX1egk3EnHq90bt7kFogLlgGu@tun.testsprite.com:8080"
+}

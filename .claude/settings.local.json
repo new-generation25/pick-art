@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(psql:*)",
+      "Bash(npx supabase migration:*)",
+      "Bash(npx supabase:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker exec:*)"
+    ]
+  }
+}

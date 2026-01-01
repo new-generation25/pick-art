@@ -1,0 +1,34 @@
+{
+    "projectName": "Gyeongnam Art Navigator",
+    "techStack": {
+        "frontend": [
+            "Next.js",
+            "TypeScript",
+            "TailwindCSS",
+            "Lucide React",
+            "Supabase SDK"
+        ],
+        "backend": [
+            "Python",
+            "Playwright",
+            "Streamlit",
+            "Supabase SDK",
+            "Google Gemini AI",
+            "BeautifulSoup4",
+            "AIOHTTP"
+        ],
+        "database": [
+            "Supabase (PostgreSQL)",
+            "Supabase Storage"
+        ]
+    },
+    "coreFeatures": [
+        "Instagram & Public Site Web Scraping",
+        "AI-Powered Event Metadata Extraction (Gemini)",
+        "Image Processing & Thumbnail Optimization",
+        "Admin Dashboard for Data Curation & DM Management",
+        "Telegram Notification System",
+        "User Frontend with Search & Filtering"
+    ],
+    "architecture": "Monorepo with separate modules for frontend, collector, and admin, integrated via Supabase."
+}
