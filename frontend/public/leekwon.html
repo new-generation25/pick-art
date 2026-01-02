@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEE KWON - Cultural Planner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+
+        .serif {
+            font-family: 'Playfair Display', serif;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen bg-[#f5f5f4] text-[#1c1917] font-sans selection:bg-stone-200">
+
+    <!-- Hero Section -->
+    <header class="relative h-screen flex items-center justify-center overflow-hidden">
+        <div class="absolute inset-0">
+            <img src="https://raw.githubusercontent.com/new-generation25/pick-art/main/frontend/public/img_link/Gemini_1.png"
+                alt="이권 기획자 히어로 배경" class="w-full h-full object-cover brightness-[0.4] contrast-[1.1]" />
+        </div>
+
+        <div class="relative z-10 text-center space-y-6 text-white">
+            <h2 class="serif text-xl md:text-3xl tracking-[0.3em] uppercase opacity-90">Cultural Planner</h2>
+            <h1 class="text-6xl md:text-9xl font-bold tracking-tighter mb-4">LEE KWON</h1>
+            <p class="text-xl md:text-2xl font-light tracking-[0.5em]">이권</p>
+        </div>
+
+        <div class="absolute bottom-10 animate-bounce opacity-70 text-white">
+            <i data-lucide="arrow-down" class="w-8 h-8"></i>
+        </div>
+    </header>
+
+    <!-- Profile Section -->
+    <section class="max-w-5xl mx-auto px-6 py-32 grid md:grid-cols-2 gap-20 items-center">
+        <div class="relative">
+            <div class="aspect-[3/4] bg-stone-200 rounded-sm overflow-hidden shadow-2xl">
+                <div class="w-full h-full flex items-center justify-center text-stone-400">
+                    <img src="https://raw.githubusercontent.com/new-generation25/pick-art/main/frontend/public/img_link/Gemini_2.png"
+                        alt="이권 프로필" class="w-full h-full object-cover" />
+                </div>
+            </div>
+            <div class="absolute -bottom-6 -right-6 w-32 h-32 border-r-2 border-b-2 border-stone-300"></div>
+        </div>
+
+        <div class="space-y-10">
+            <div>
+                <h3 class="text-3xl font-bold mb-8 border-b border-stone-900 pb-2 inline-block">Profile</h3>
+                <ul class="space-y-5 text-lg">
+                    <li class="flex gap-8"><span class="font-bold w-20 text-stone-400">Name</span> 이권</li>
+                    <li class="flex gap-8"><span class="font-bold w-20 text-stone-400">Birth</span> 1975 (만 49세)</li>
+                    <li class="flex gap-8"><span class="font-bold w-20 text-stone-400">Expertise</span> 지역문화 콘텐츠 기획, 뮤지컬
+                        교육, 관광 활성화(DMO)</li>
+                    <li class="flex gap-8"><span class="font-bold w-20 text-stone-400">Region</span> 김해 (Gimhae)</li>
+                </ul>
+            </div>
+
+            <div class="pt-6">
+                <h3 class="text-xl font-bold mb-4 italic serif text-stone-500">
+                    "문화를 세우고, 사람을 잇습니다."
+                </h3>
+                <p class="leading-relaxed text-stone-600 text-lg font-light">
+                    텍스트 너머의 문화를 읽어내고, 지역의 숨겨진 가치를 시민의 일상으로 연결하는 과정에 매료되어 기획을 시작했습니다. 시민과 호흡하는 매 순간이 저에게는 가장 소중한 배움의
+                    장입니다.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Experience Section -->
+    <section class="bg-[#262626] text-white py-32 relative overflow-hidden">
+        <div
+            class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/concrete-wall.png')] opacity-20">
+        </div>
+
+        <div class="max-w-5xl mx-auto px-6 relative z-10">
+            <h3 class="serif text-4xl mb-24 text-center tracking-widest">WORK EXPERIENCE</h3>
+
+            <div class="grid md:grid-cols-2 gap-24">
+                <!-- Career -->
+                <div class="space-y-12">
+                    <h4 class="text-2xl font-bold mb-10 flex items-center">
+                        <span class="w-10 h-px bg-white/30 mr-4"></span> Career
+                    </h4>
+                    <div class="space-y-10 border-l border-white/10 pl-8">
+
+                        <div class="relative group">
+                            <div
+                                class="absolute -left-[37px] top-1.5 w-4 h-4 rounded-full bg-stone-700 border-2 border-stone-900 group-hover:bg-stone-400 transition-colors">
+                            </div>
+                            <p class="text-stone-500 text-sm mb-1">2023 - Present</p>
+                            <p class="text-xl font-bold group-hover:text-stone-300 transition-colors">김해DMO사업단 총괄PM</p>
+                            <p class="text-stone-400 font-light">봉황대협동조합</p>
+                        </div>
+
+                        <div class="relative group">
+                            <div
+                                class="absolute -left-[37px] top-1.5 w-4 h-4 rounded-full bg-stone-700 border-2 border-stone-900 group-hover:bg-stone-400 transition-colors">
+                            </div>
+                            <p class="text-stone-500 text-sm mb-1">2015 - 2022</p>
+                            <p class="text-xl font-bold group-hover:text-stone-300 transition-colors">이사 (경영 및 기획 총괄)
+                            </p>
+                            <p class="text-stone-400 font-light">문아트컴퍼니(주)</p>
+                        </div>
+
+                        <div class="relative group">
+                            <div
+                                class="absolute -left-[37px] top-1.5 w-4 h-4 rounded-full bg-stone-700 border-2 border-stone-900 group-hover:bg-stone-400 transition-colors">
+                            </div>
+                            <p class="text-stone-500 text-sm mb-1">2022 - 2023</p>
+                            <p class="text-xl font-bold group-hover:text-stone-300 transition-colors">사무국장 (기획 총괄)</p>
+                            <p class="text-stone-400 font-light">(주)회현동극장</p>
+                        </div>
+
+                        <div class="relative group">
+                            <div
+                                class="absolute -left-[37px] top-1.5 w-4 h-4 rounded-full bg-stone-700 border-2 border-stone-900 group-hover:bg-stone-400 transition-colors">
+                            </div>
+                            <p class="text-stone-500 text-sm mb-1">2017 - 2024</p>
+                            <p class="text-xl font-bold group-hover:text-stone-300 transition-colors">운영위원 (축제 기획·추진)
+                            </p>
+                            <p class="text-stone-400 font-light">김해생활문화연합회</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Projects -->
+                <div class="space-y-12">
+                    <h4 class="text-2xl font-bold mb-10 flex items-center">
+                        <span class="w-10 h-px bg-white/30 mr-4"></span> Projects
+                    </h4>
+                    <div class="space-y-10 border-l border-white/10 pl-8">
+
+                        <div class="group">
+                            <p class="text-stone-500 text-sm mb-1">2018 - 2019</p>
+                            <p class="text-xl font-bold group-hover:text-stone-300 transition-colors">경전철로 떠나는 김해 문화산책
+                            </p>
+                            <p class="text-stone-400 font-light">지역 특화 문화 콘텐츠 총괄 기획</p>
+                        </div>
+
+                        <div class="group">
+                            <p class="text-stone-500 text-sm mb-1">2017</p>
+                            <p class="text-xl font-bold group-hover:text-stone-300 transition-colors">예술산책 '미로(美路)'</p>
+                            <p class="text-stone-400 font-light">문화기획공모사업 두드림 기획 및 운영</p>
+                        </div>
+
+                        <div class="group">
+                            <p class="text-stone-500 text-sm mb-1">2015 - 2018</p>
+                            <p class="text-xl font-bold group-hover:text-stone-300 transition-colors">엄마를 위한 뮤지컬 콘서트</p>
+                            <p class="text-stone-400 font-light">지역문화예술육성지원사업 기획</p>
+                        </div>
+
+                        <div class="group">
+                            <p class="text-stone-500 text-sm mb-1">2016 - 2018</p>
+                            <p class="text-xl font-bold group-hover:text-stone-300 transition-colors">김해생활문화축제 (3회)</p>
+                            <p class="text-stone-400 font-light">생활문화동호회 활성화 지원사업 총괄</p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Award & Education -->
+    <section class="max-w-5xl mx-auto px-6 py-32 border-b border-stone-200">
+        <div class="grid md:grid-cols-3 gap-16 text-center">
+            <div class="space-y-4">
+                <h5 class="serif text-stone-400 uppercase tracking-widest text-sm font-bold">Award</h5>
+                <p class="text-xl font-bold">김해시장 표창장</p>
+                <p class="text-stone-500 text-sm italic">2020.12 지역사회발전 공헌</p>
+            </div>
+            <div class="space-y-4">
+                <h5 class="serif text-stone-400 uppercase tracking-widest text-sm font-bold">Training</h5>
+                <p class="text-xl font-bold">지역문화전문인력 양성</p>
+                <p class="text-stone-500 text-sm italic">경남문화예술진흥원 3기 수료</p>
+            </div>
+            <div class="space-y-4">
+                <h5 class="serif text-stone-400 uppercase tracking-widest text-sm font-bold">Social</h5>
+                <p class="text-xl font-bold">사회적기업가 육성사업</p>
+                <p class="text-stone-500 text-sm italic">5기·9기 참여 및 수료</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <footer class="bg-white py-32 text-center">
+        <h3 class="serif text-4xl mb-12 tracking-tighter">GET IN TOUCH</h3>
+        <p class="text-xl text-stone-500 mb-10 font-light italic">"지역의 가치를 함께 만들어가겠습니다."</p>
+
+        <div class="space-y-4 mb-16">
+            <div class="flex items-center justify-center gap-2 text-xl font-bold text-stone-800">
+                <i data-lucide="mail" class="w-5 h-5 text-stone-400"></i> socialceos@gmail.com
+            </div>
+            <div class="flex items-center justify-center gap-2 text-stone-500">
+                <i data-lucide="map-pin" class="w-[18px] h-[18px] text-stone-400"></i> 경남 김해시 봉황대길 18
+            </div>
+        </div>
+
+        <div class="flex justify-center space-x-12">
+            <a href="#" target="_blank" rel="noreferrer"
+                class="text-stone-400 hover:text-stone-900 transition font-bold uppercase tracking-[0.2em] text-xs flex items-center gap-2">
+                <i data-lucide="facebook" class="w-[14px] h-[14px]"></i> Facebook
+            </a>
+            <a href="#"
+                class="text-stone-400 hover:text-stone-900 transition font-bold uppercase tracking-[0.2em] text-xs flex items-center gap-2">
+                <i data-lucide="external-link" class="w-[14px] h-[14px]"></i> Portfolio PDF
+            </a>
+        </div>
+
+        <p class="mt-24 text-[10px] text-stone-300 uppercase tracking-[0.4em]">
+            © 2025 Cultural Planner Lee Gwon. All Rights Reserved.
+        </p>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>
