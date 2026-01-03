@@ -110,7 +110,7 @@ export default function AdminInboxPage() {
 
         // 서부문화센터 출처인 경우 자동으로 장소, 지역, 카테고리 설정
         const isWGCC = post.source === '김해서부문화센터' ||
-                       (post.source_url && post.source_url.includes('wgcc.ghct.or.kr'));
+            (post.source_url && post.source_url.includes('wgcc.ghct.or.kr'));
 
         // 제목에서 [기획], [특별], [공모] 등의 분류 태그 제거
         const cleanTitle = (title: string) => {
@@ -202,6 +202,18 @@ export default function AdminInboxPage() {
         if (!error) {
             setRejectedPosts(rejectedPosts.filter(p => p.id !== postId));
             setStats(prev => ({ ...prev, rejected: prev.rejected - 1 }));
+        }
+    };
+
+    // 검토 대기 목록에서 직접 삭제
+    const handleDeletePending = async (postId: string) => {
+        const confirmDelete = confirm("이 항목을 영구 삭제하시겠습니까?\n\n거절 휴지통을 거치지 않고 바로 삭제됩니다.");
+        if (!confirmDelete) return;
+
+        const { error } = await supabase.from("raw_posts").delete().eq("id", postId);
+        if (!error) {
+            setPosts(posts.filter(p => p.id !== postId));
+            setStats(prev => ({ ...prev, pending: prev.pending - 1 }));
         }
     };
 
@@ -389,6 +401,15 @@ export default function AdminInboxPage() {
                                                     </Button>
                                                     <Box style={{ flex: 1 }} />
                                                     <Group gap="xs">
+                                                        <ActionIcon
+                                                            variant="light"
+                                                            color="red"
+                                                            size="lg"
+                                                            onClick={() => handleDeletePending(post.id)}
+                                                            title="영구 삭제"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </ActionIcon>
                                                         <Button variant="default" color="gray" onClick={() => handleReject(post.id)} leftSection={<XCircle size={14} />}>
                                                             거절
                                                         </Button>
