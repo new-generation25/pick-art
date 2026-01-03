@@ -228,6 +228,19 @@ export default function AdminInboxPage() {
         }
     };
 
+    // 발행된 이벤트 삭제 (events 테이블에서 삭제)
+    const handleDeleteEvent = async (eventId: string) => {
+        const confirmDelete = confirm("이 행사를 삭제하시겠습니까?\n\n현재 노출 중인 행사가 삭제됩니다.");
+        if (!confirmDelete) return;
+
+        const { error } = await supabase.from("events").delete().eq("id", eventId);
+        if (!error) {
+            setPublishedEvents(publishedEvents.filter(e => e.id !== eventId));
+            setStats(prev => ({ ...prev, published: prev.published - 1 }));
+        }
+    };
+
+
     const copyDMMessage = (post: RawPost) => {
         const author = post.content.username || "작가";
         const title = post.content.title || "작품/행사";
@@ -432,7 +445,57 @@ export default function AdminInboxPage() {
                             <Box w={4} h={24} bg="green" style={{ borderRadius: 999 }} />
                             <Title order={2} size="h3" fw={900}>현재 노출중인 행사 ({stats.published})</Title>
                         </Group>
-                        <EventList key={stats.published} limit={32} />
+                        {publishedEvents.length === 0 ? (
+                            <Text ta="center" c="dimmed" py="xl">발행된 행사가 없습니다.</Text>
+                        ) : (
+                            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+                                {publishedEvents.map((event) => (
+                                    <Paper key={event.id} p="md" radius="md" withBorder>
+                                        <Group align="flex-start" mb="xs">
+                                            <Badge color="green" variant="light" size="sm">{event.category || '행사'}</Badge>
+                                            <Badge color="blue" variant="outline" size="sm">{event.region || '경남'}</Badge>
+                                            <Box style={{ flex: 1 }} />
+                                            <ActionIcon
+                                                variant="light"
+                                                color="red"
+                                                size="sm"
+                                                onClick={() => handleDeleteEvent(event.id)}
+                                                title="행사 삭제"
+                                            >
+                                                <Trash2 size={14} />
+                                            </ActionIcon>
+                                        </Group>
+                                        <Group align="start" wrap="nowrap">
+                                            <Box w={80} h={80} bg="gray.1" style={{ borderRadius: 'var(--mantine-radius-sm)', overflow: 'hidden', flexShrink: 0 }}>
+                                                {event.poster_image_url ? (
+                                                    <ImageWithFallback
+                                                        src={event.poster_image_url}
+                                                        alt={event.title}
+                                                        width={80}
+                                                        height={80}
+                                                        style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                                                    />
+                                                ) : (
+                                                    <Box w="100%" h="100%" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                        <ImageIcon size={24} color="gray" />
+                                                    </Box>
+                                                )}
+                                            </Box>
+                                            <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
+                                                <Text fw={600} size="sm" lineClamp={2}>{event.title}</Text>
+                                                <Text size="xs" c="dimmed" lineClamp={2}>{event.description}</Text>
+                                                {event.venue && (
+                                                    <Group gap={4}>
+                                                        <MapPin size={10} color="gray" />
+                                                        <Text size="xs" c="dimmed">{event.venue}</Text>
+                                                    </Group>
+                                                )}
+                                            </Stack>
+                                        </Group>
+                                    </Paper>
+                                ))}
+                            </SimpleGrid>
+                        )}
                     </Box>
                 )}
 
