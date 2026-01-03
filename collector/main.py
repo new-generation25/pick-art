@@ -71,7 +71,11 @@ async def check_manual_requests():
             print(f"🔔 Manual Request Found: {req['target_name']}")
             db.supabase.table("crawl_logs").update({"status": "RUNNING"}).eq("id", req['id']).execute()
             
-            source_res = db.supabase.table("whitelist").select("*").or_(f"name.eq.\"{req['target_name']}\",value.eq.\"{req['target_name']}\"").limit(1).execute()
+            source_res = db.supabase.table("whitelist")\
+                .select("*")\
+                .or_(f"name.eq.{req['target_name']},value.eq.{req['target_name']}")\
+                .limit(1)\
+                .execute()
             
             if source_res.data:
                 source = source_res.data[0]
