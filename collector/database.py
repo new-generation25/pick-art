@@ -32,12 +32,16 @@ class Database:
         source = data.get('source')
         source_id = data.get('source_id')
         source_url = data.get('source_url')
-        
+        title = data.get('content', {}).get('title', 'N/A')
+
+        print(f"        💾 [DB] save_raw_post called for: {title[:30]}...", flush=True)
+        print(f"        💾 [DB] Source: {source}, URL: {source_url}", flush=True)
+
         # 1. 블랙리스트 체크
         blacklist = self.get_blacklist()
         for item in blacklist:
             if item['value'] in [source_id, source_url]:
-                print(f"🚫 [Blacklist] Skipping blacklisted source: {item['value']}")
+                print(f"        🚫 [DB:Blacklist] Blocked: {item['value']}", flush=True)
                 return None
 
         # 2. 화이트리스트 체크 (자동 승인)
@@ -45,44 +49,75 @@ class Database:
         is_whitelisted = False
         auto_pub = False
         for item in whitelist:
-            if item['value'] in [source_id, source_url]:
+            wl_value = item['value']
+            # 다양한 매칭 전략 사용
+            is_match = False
+
+            # 전략 1: 정확한 매칭 (source_id 또는 source_url 정확히 일치)
+            if wl_value in [source_id, source_url]:
+                is_match = True
+                print(f"        🎯 [DB:Whitelist] Exact match: {wl_value}", flush=True)
+
+            # 전략 2: URL 도메인 기반 매칭 (같은 도메인이면 허용)
+            elif source_url and wl_value:
+                # URL에서 도메인 추출 (https://wgcc.ghct.or.kr/... → wgcc.ghct.or.kr)
+                from urllib.parse import urlparse
+                try:
+                    wl_domain = urlparse(wl_value).netloc if 'http' in wl_value else wl_value
+                    source_domain = urlparse(source_url).netloc if 'http' in source_url else source_url
+
+                    # 도메인이 일치하거나 포함되면 매칭
+                    if wl_domain and source_domain and (wl_domain == source_domain or wl_domain in source_domain or source_domain in wl_domain):
+                        is_match = True
+                        print(f"        🌐 [DB:Whitelist] Domain match: {wl_domain} in {source_domain}", flush=True)
+                    # URL 경로 부분 매칭 (예: show01_01 포함 확인)
+                    elif wl_value and any(part in source_url for part in wl_value.split('/') if part and part not in ['http:', 'https:', '']):
+                        is_match = True
+                        print(f"        🔗 [DB:Whitelist] Path component match: {wl_value}", flush=True)
+                except:
+                    pass
+
+            if is_match:
                 is_whitelisted = True
                 auto_pub = item.get('auto_publish', False)
+                print(f"        ✅ [DB:Whitelist] Matched: {item['value']}, auto_publish={auto_pub}", flush=True)
                 break
 
         # 3. 기본 저장 (raw_posts)
         status = "PUBLISHED" if (is_whitelisted and auto_pub) else "COLLECTED"
         data['status'] = status
-        
+        print(f"        📋 [DB] Status determined: {status}", flush=True)
+
         try:
             # 중복 체크 (URL 기반)
             if self.check_duplicate(source_url):
-                print(f"⏭️ [Duplicate] Skipping: {source_url}")
+                print(f"        ⏭️ [DB:Duplicate] Already exists: {source_url}", flush=True)
                 return None
 
+            print(f"        💾 [DB] Upserting to raw_posts table...", flush=True)
             response = self.supabase.table("raw_posts").upsert(data, on_conflict="source, source_id").execute()
-            
-            # 4. 화이트리스트 자동 승인 시 events 테이블 바로 입력
+
+            if response.data:
+                saved_id = response.data[0].get('id')
+                print(f"        ✅ [DB] Saved to raw_posts: ID={saved_id}, Status={status}", flush=True)
+            else:
+                print(f"        ⚠️ [DB] Upsert returned no data", flush=True)
+
+            # 4. 자동 승인 로직 비활성화 - 모든 데이터는 인박스(검토 대기)로 먼저 이동
+            # 이전: 화이트리스트 + auto_publish=true 시 바로 events 테이블에 삽입
+            # 변경: 모든 데이터는 raw_posts에 COLLECTED 상태로 저장 → 관리자 승인 후 events로 이동
             if is_whitelisted and auto_pub:
-                print(f"⚡ [Whitelist] Auto-publishing: {data.get('content', {}).get('title')}")
-                # 이 시점에는 AI 요약이 아직 안 되었을 수 있으므로 주 수집 로직에서 처리 권장되나, 
-                # 여기서는 원본 데이터를 기반으로 기본 필드를 채워 넣습니다.
-                event_data = {
-                    "title": data['content'].get('title', '제목 없음'),
-                    "description": data['content'].get('description', data['content'].get('text', '')),
-                    "category": data['content'].get('ai_suggestion', {}).get('category', '행사'),
-                    "region": data['content'].get('ai_suggestion', {}).get('region', '경남'),
-                    "poster_image_url": data.get('image_urls', [None])[0],
-                    "source": source,
-                    "original_url": source_url,
-                    "status": "PUBLISHED",
-                    "raw_post_id": response.data[0]['id'] if response.data else None
-                }
-                self.supabase.table("events").insert([event_data]).execute()
+                print(f"        ℹ️ [DB:Auto-publish] Disabled - data will go to inbox for review", flush=True)
+                # 자동 발행 비활성화됨 - 아래 코드는 실행되지 않음
+                # 관리자가 인박스에서 승인해야 events 테이블로 이동
+                pass
+
 
             return response
         except Exception as e:
-            print(f"Error in save_raw_post: {e}")
+            print(f"        ❌ [DB:Error] save_raw_post failed: {str(e)}", flush=True)
+            import traceback
+            print(f"        🔍 [DB:Traceback] {traceback.format_exc()}", flush=True)
             return None
 
     def upload_image(self, image_url: str, filename: str) -> str:

@@ -1,4 +1,5 @@
 import os
+import sys
 import asyncio
 from dotenv import load_dotenv
 from database import Database
@@ -9,6 +10,14 @@ from notifier import TelegramNotifier
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from datetime import datetime
 import pytz
+
+# Force unbuffered output for real-time logging and UTF-8 encoding
+if sys.platform == 'win32':
+    sys.stdout.reconfigure(encoding='utf-8', line_buffering=True)
+    sys.stderr.reconfigure(encoding='utf-8', line_buffering=True)
+else:
+    sys.stdout.reconfigure(line_buffering=True)
+    sys.stderr.reconfigure(line_buffering=True)
 
 # Load environment variables
 load_dotenv(".env.local")
@@ -58,45 +67,90 @@ async def run_crawlers(specific_target=None):
 async def check_manual_requests():
     db = Database()
     try:
-        # 10초 이내의 요청만 처리 (중복 방지)
+        # 중복 실행 방지: 같은 대상이 이미 RUNNING 상태인지 확인
+        running_check = db.supabase.table("crawl_logs")\
+            .select("target_name")\
+            .eq("status", "RUNNING")\
+            .execute()
+
+        running_targets = [log['target_name'] for log in running_check.data] if running_check.data else []
+
+        # REQUESTED 상태 중 RUNNING이 아닌 대상만 처리
         res = db.supabase.table("crawl_logs")\
             .select("*")\
             .eq("status", "REQUESTED")\
             .order("started_at")\
-            .limit(1)\
+            .limit(5)\
             .execute()
-        
+
         if res.data:
-            req = res.data[0]
-            print(f"🔔 Manual Request Found: {req['target_name']}")
-            db.supabase.table("crawl_logs").update({"status": "RUNNING"}).eq("id", req['id']).execute()
-            
-            source_res = db.supabase.table("whitelist")\
-                .select("*")\
-                .or_(f"name.eq.{req['target_name']},value.eq.{req['target_name']}")\
-                .limit(1)\
-                .execute()
-            
-            if source_res.data:
-                source = source_res.data[0]
-                await run_crawlers({
-                    'target_type': 'website',
-                    'value': source['value'],
-                    'name': source.get('name', req['target_name']),
-                    'log_id': req['id']
-                })
-            else:
-                db.supabase.table("crawl_logs").update({"status": "FAIL", "error_msg": "Source not found"}).eq("id", req['id']).execute()
+            for req in res.data:
+                # 이미 실행 중이면 건너뛰기
+                if req['target_name'] in running_targets:
+                    print(f"⏭️ [Manual Request] {req['target_name']} already running, skipping", flush=True)
+                    # REQUESTED 상태를 CANCELLED로 변경
+                    db.supabase.table("crawl_logs").update({
+                        "status": "CANCELLED",
+                        "result_summary": "이미 실행 중인 크롤링이 있어 취소됨",
+                        "finished_at": datetime.now().isoformat()
+                    }).eq("id", req['id']).execute()
+                    continue
+
+                print(f"\n{'='*60}", flush=True)
+                print(f"🔔 [Manual Request] Detected: {req['target_name']}", flush=True)
+                print(f"🔔 [Manual Request] Log ID: {req['id']}", flush=True)
+                print(f"{'='*60}", flush=True)
+
+                db.supabase.table("crawl_logs").update({"status": "RUNNING"}).eq("id", req['id']).execute()
+                print(f"✅ [Manual Request] Status updated to RUNNING", flush=True)
+
+                source_res = db.supabase.table("whitelist")\
+                    .select("*")\
+                    .or_(f"name.eq.{req['target_name']},value.eq.{req['target_name']}")\
+                    .limit(1)\
+                    .execute()
+
+                if source_res.data:
+                    source = source_res.data[0]
+                    print(f"✅ [Manual Request] Source found in whitelist: {source.get('name')}", flush=True)
+                    print(f"🚀 [Manual Request] Starting crawler...\n", flush=True)
+                    running_targets.append(req['target_name'])  # 실행 중 목록에 추가
+                    await run_crawlers({
+                        'target_type': 'website',
+                        'value': source['value'],
+                        'name': source.get('name', req['target_name']),
+                        'log_id': req['id']
+                    })
+                else:
+                    print(f"❌ [Manual Request] Source not found in whitelist!", flush=True)
+                    db.supabase.table("crawl_logs").update({
+                        "status": "FAIL",
+                        "error_msg": "Source not found",
+                        "finished_at": datetime.now().isoformat()
+                    }).eq("id", req['id']).execute()
     except Exception as e:
-        print(f"Error checking manual requests: {e}")
+        print(f"❌ [Manual Request] Error: {e}", flush=True)
+        import traceback
+        print(f"🔍 [Manual Request] Traceback: {traceback.format_exc()}", flush=True)
 
 async def main():
-    print("Gyeongnam Art Navigator - Collector Service Started")
+    print("=" * 80, flush=True)
+    print("🎨 Gyeongnam Art Navigator - Collector Service", flush=True)
+    print("=" * 80, flush=True)
+    print(f"⏰ Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", flush=True)
+    print(f"🔄 Checking for manual requests every 10 seconds...", flush=True)
+    print(f"📅 Scheduled crawls: 04:00 and 18:00 daily", flush=True)
+    print("=" * 80 + "\n", flush=True)
+
     scheduler = AsyncIOScheduler()
     scheduler.add_job(run_crawlers, 'cron', hour='4,18')
     scheduler.add_job(check_manual_requests, 'interval', seconds=10) # 10초로 단축
     scheduler.start()
-    while True: await asyncio.sleep(10)
+
+    print("✅ Scheduler started. Waiting for requests...\n", flush=True)
+
+    while True:
+        await asyncio.sleep(10)
 
 if __name__ == "__main__":
     asyncio.run(main())

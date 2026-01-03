@@ -107,12 +107,24 @@ export default function AdminInboxPage() {
 
     const openEditModal = (post: RawPost) => {
         setEditingPost(post);
+
+        // 서부문화센터 출처인 경우 자동으로 장소, 지역, 카테고리 설정
+        const isWGCC = post.source === '김해서부문화센터' ||
+                       (post.source_url && post.source_url.includes('wgcc.ghct.or.kr'));
+
+        // 제목에서 [기획], [특별], [공모] 등의 분류 태그 제거
+        const cleanTitle = (title: string) => {
+            return title.replace(/^\[.*?\]\s*/g, '').trim();
+        };
+
+        const rawTitle = post.content.title || (post.source === 'instagram' ? `@${post.content.username}의 포스트` : '제목 없음');
+
         setEditForm({
-            title: post.content.title || (post.source === 'instagram' ? `@${post.content.username}의 포스트` : '제목 없음'),
+            title: cleanTitle(rawTitle),
             description: post.content.description || post.content.text || "",
-            category: post.content.ai_suggestion?.category || "행사",
-            region: post.content.ai_suggestion?.region || "경남",
-            venue: post.content.ai_suggestion?.venue || "",
+            category: isWGCC ? "공연" : (post.content.ai_suggestion?.category || "행사"),
+            region: isWGCC ? "김해" : (post.content.ai_suggestion?.region || "경남"),
+            venue: isWGCC ? "김해서부문화센터" : (post.content.ai_suggestion?.venue || ""),
             event_date_start: post.content.ai_suggestion?.date_start || "",
             event_date_end: post.content.ai_suggestion?.date_end || "",
             imageUrl: post.image_urls?.[0] || ""
@@ -544,7 +556,7 @@ export default function AdminInboxPage() {
                                         label="상세 설명"
                                         value={editForm.description}
                                         onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                                        minRows={8}
+                                        minRows={15}
                                         size="md"
                                         radius="md"
                                     />
