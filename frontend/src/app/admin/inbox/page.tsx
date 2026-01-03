@@ -251,15 +251,25 @@ export default function AdminInboxPage() {
         const confirmDelete = confirm(`선택한 ${selectedEvents.length}개의 행사를 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`);
         if (!confirmDelete) return;
 
-        // 선택된 모든 이벤트 삭제
-        for (const eventId of selectedEvents) {
-            await supabase.from("events").delete().eq("id", eventId);
-        }
+        try {
+            // 선택된 모든 이벤트 삭제
+            for (const eventId of selectedEvents) {
+                await supabase.from("events").delete().eq("id", eventId);
+            }
 
-        setPublishedEvents(publishedEvents.filter(e => !selectedEvents.includes(e.id)));
-        setStats(prev => ({ ...prev, published: prev.published - selectedEvents.length }));
-        setSelectedEvents([]);
-        setIsSelectMode(false);
+            // 상태 초기화 후 데이터 새로고침
+            const deletedCount = selectedEvents.length;
+            setSelectedEvents([]);
+            setIsSelectMode(false);
+
+            // 데이터 새로고침
+            await fetchData();
+
+            alert(`${deletedCount}개의 행사가 삭제되었습니다.`);
+        } catch (error) {
+            console.error("Delete error:", error);
+            alert("삭제 중 오류가 발생했습니다.");
+        }
     };
 
 
