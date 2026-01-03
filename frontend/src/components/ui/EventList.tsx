@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { EventCard } from "./EventCard";
 import { supabase } from "@/lib/supabase";
-import { Loader2, AlertCircle } from "lucide-react";
-import { SimpleGrid, Loader, Stack, Text, Paper, ThemeIcon, rem } from "@mantine/core";
+import { Loader2, AlertCircle, Check } from "lucide-react";
+import { SimpleGrid, Loader, Stack, Text, Paper, ThemeIcon, rem, Box } from "@mantine/core";
 
 interface Event {
     id: string;
@@ -20,9 +20,13 @@ interface EventListProps {
     initialEvents?: Event[];
     filters?: any;
     limit?: number; // Optional limit for simple display
+    // 다중 선택 모드 props
+    isSelectMode?: boolean;
+    selectedIds?: string[];
+    onSelect?: (id: string) => void;
 }
 
-export function EventList({ initialEvents = [], filters = {}, limit }: EventListProps) {
+export function EventList({ initialEvents = [], filters = {}, limit, isSelectMode = false, selectedIds = [], onSelect }: EventListProps) {
     const [events, setEvents] = useState<Event[]>(initialEvents);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(!limit); // If limit exists, no infinite scroll
@@ -146,7 +150,59 @@ export function EventList({ initialEvents = [], filters = {}, limit }: EventList
         <Stack gap="xl">
             <SimpleGrid cols={{ base: 1, sm: 2, lg: 3, xl: 4 }} spacing="lg">
                 {events.map((event, idx) => (
-                    <EventCard key={event.id + idx} event={event} priority={idx === 0} />
+                    <Box
+                        key={event.id + idx}
+                        style={{
+                            position: 'relative',
+                            cursor: isSelectMode ? 'pointer' : 'default',
+                            opacity: isSelectMode && !selectedIds.includes(event.id) ? 0.7 : 1,
+                            transition: 'all 0.15s ease'
+                        }}
+                        onClick={(e) => {
+                            if (isSelectMode && onSelect) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onSelect(event.id);
+                            }
+                        }}
+                    >
+                        {/* 선택 모드일 때 체크 표시 */}
+                        {isSelectMode && (
+                            <Box
+                                style={{
+                                    position: 'absolute',
+                                    top: 12,
+                                    right: 12,
+                                    zIndex: 20,
+                                    width: 28,
+                                    height: 28,
+                                    borderRadius: '50%',
+                                    background: selectedIds.includes(event.id) ? 'var(--mantine-color-red-5)' : 'rgba(0,0,0,0.4)',
+                                    border: '2px solid white',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                                }}
+                            >
+                                {selectedIds.includes(event.id) && <Check size={16} color="white" strokeWidth={3} />}
+                            </Box>
+                        )}
+                        {/* 선택 시 빨간 테두리 */}
+                        {isSelectMode && selectedIds.includes(event.id) && (
+                            <Box
+                                style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    border: '3px solid var(--mantine-color-red-5)',
+                                    borderRadius: 'var(--mantine-radius-lg)',
+                                    zIndex: 15,
+                                    pointerEvents: 'none'
+                                }}
+                            />
+                        )}
+                        <EventCard event={event} priority={idx === 0} />
+                    </Box>
                 ))}
             </SimpleGrid>
 

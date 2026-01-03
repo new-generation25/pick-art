@@ -461,7 +461,7 @@ export default function AdminInboxPage() {
                         )}
                     </Box>
                 ) : (
-                    /* Published Events - 다중 선택 삭제 UI */
+                    /* Published Events - 원래 카드 디자인 + 다중 선택 */
                     <Box mb={60}>
                         <Group justify="space-between" mb="lg">
                             <Group>
@@ -481,90 +481,20 @@ export default function AdminInboxPage() {
                             </Button>
                         </Group>
 
-                        {publishedEvents.length === 0 ? (
-                            <Text ta="center" c="dimmed" py="xl">발행된 행사가 없습니다.</Text>
-                        ) : (
-                            <SimpleGrid cols={{ base: 2, sm: 3, lg: 4 }} spacing="md">
-                                {publishedEvents.map((event) => (
-                                    <Paper
-                                        key={event.id}
-                                        p="sm"
-                                        radius="md"
-                                        withBorder
-                                        style={{
-                                            cursor: isSelectMode ? 'pointer' : 'default',
-                                            border: selectedEvents.includes(event.id) ? '2px solid var(--mantine-color-red-5)' : undefined,
-                                            opacity: isSelectMode && !selectedEvents.includes(event.id) ? 0.7 : 1,
-                                            transition: 'all 0.15s ease'
-                                        }}
-                                        onClick={() => {
-                                            if (isSelectMode) {
-                                                setSelectedEvents(prev =>
-                                                    prev.includes(event.id)
-                                                        ? prev.filter(id => id !== event.id)
-                                                        : [...prev, event.id]
-                                                );
-                                            }
-                                        }}
-                                    >
-                                        {/* 체크 표시 (선택 모드일 때) */}
-                                        {isSelectMode && (
-                                            <Box
-                                                style={{
-                                                    position: 'absolute',
-                                                    top: 8,
-                                                    right: 8,
-                                                    zIndex: 10,
-                                                    width: 24,
-                                                    height: 24,
-                                                    borderRadius: '50%',
-                                                    background: selectedEvents.includes(event.id) ? 'var(--mantine-color-red-5)' : 'rgba(0,0,0,0.3)',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center'
-                                                }}
-                                            >
-                                                {selectedEvents.includes(event.id) && <Check size={14} color="white" />}
-                                            </Box>
-                                        )}
-
-                                        {/* 이미지 */}
-                                        <Box
-                                            w="100%"
-                                            h={120}
-                                            bg="gray.1"
-                                            mb="xs"
-                                            style={{
-                                                borderRadius: 'var(--mantine-radius-sm)',
-                                                overflow: 'hidden',
-                                                position: 'relative'
-                                            }}
-                                        >
-                                            {event.poster_image_url ? (
-                                                <ImageWithFallback
-                                                    src={event.poster_image_url}
-                                                    alt={event.title}
-                                                    width={200}
-                                                    height={120}
-                                                    style={{ objectFit: 'cover', width: '100%', height: '100%' }}
-                                                />
-                                            ) : (
-                                                <Box w="100%" h="100%" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                    <ImageIcon size={32} color="gray" />
-                                                </Box>
-                                            )}
-                                        </Box>
-
-                                        {/* 정보 */}
-                                        <Text fw={600} size="sm" lineClamp={2} mb={4}>{event.title}</Text>
-                                        <Group gap={4}>
-                                            <Badge size="xs" color="green" variant="light">{event.category || '행사'}</Badge>
-                                            <Badge size="xs" color="blue" variant="outline">{event.region || '경남'}</Badge>
-                                        </Group>
-                                    </Paper>
-                                ))}
-                            </SimpleGrid>
-                        )}
+                        {/* 원래 EventList 컴포넌트 사용 + 선택 모드 props */}
+                        <EventList
+                            key={stats.published}
+                            limit={32}
+                            isSelectMode={isSelectMode}
+                            selectedIds={selectedEvents}
+                            onSelect={(id) => {
+                                setSelectedEvents(prev =>
+                                    prev.includes(id)
+                                        ? prev.filter(x => x !== id)
+                                        : [...prev, id]
+                                );
+                            }}
+                        />
                     </Box>
                 )}
 
