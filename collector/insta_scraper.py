@@ -1,142 +1,149 @@
+import os
 import asyncio
-import random
-from playwright.async_api import async_playwright
+import instaloader
+from datetime import datetime, timedelta
 from database import Database
+from dotenv import load_dotenv
+
+# 환경 변수 로드 (우선순위: 시스템 -> .env -> .env.local)
+load_dotenv()
+if not os.getenv("INSTAGRAM_USERNAME"):
+    load_dotenv(".env.local")
 
 class InstaScraper:
     def __init__(self, db: Database):
         self.db = db
-        self.hashtags = ["#경남공연", "#창원전시", "#진주문화", "#김해예술", "#경남문화"]
-        self.base_url = "https://www.instagram.com/explore/tags/"
+        # 검색할 프로필 목록 (로그인 문제로 해시태그 대신 프로필 타겟팅)
+        # gncaf: 경남문화예술진흥원, socialceo4: 사용자 요청 타겟
+        self.target_profiles = ["gncaf", "socialceo4", "315art"]
+        
+        # Instaloader 초기화
+        self.L = instaloader.Instaloader(
+            download_pictures=False,
+            download_videos=False, 
+            download_video_thumbnails=False,
+            compress_json=False,
+            max_connection_attempts=3,
+            sleep=True # 요청 간 랜덤 딜레이 자동 적용
+        )
+        
+        # 로그인 시도
+        # [안전 모드] 계정 차단 방지를 위해 로그인을 시도하지 않고 Guest 모드로만 동작합니다.
+        self.login_user = None # os.getenv("INSTAGRAM_USERNAME")
+        self.login_pass = None # os.getenv("INSTAGRAM_PASSWORD")
+        self._login()
+
+    def _login(self):
+        """인스타그램 로그인 (현재 비활성화됨)"""
+        print("ℹ️ Safety Mode: Skipping login to protect account.")
+        print("   Continuing explicitly as Guest.")
+        return
 
     async def scrape(self):
-        async with async_playwright() as p:
-            # 브라우저 런칭 (헤드리스 모드 감지 회피 설정 포함)
-            browser = await p.chromium.launch(headless=False) # 디버깅을 위해 일단 False, 실제 운영시 True 고려
-            context = await browser.new_context(
-                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                viewport={'width': 1280, 'height': 800}
-            )
+        """메인 수집 로직"""
+        print("Starting Instagram scrape (Profile Mode)...")
+        
+        SINCE = datetime.now() - timedelta(days=7)
+        
+        for username in self.target_profiles:
+            print(f"Scanning profile: @{username}")
+            count = 0
             
-            # webdriver 감지 회피
-            await context.add_init_script("""
-                Object.defineProperty(navigator, 'webdriver', {
-                    get: () => undefined
-                })
-            """)
-
-            page = await context.new_page()
-
-            # 로그인 로직 (필요 시 구현, 현재는 비로그인 탐색 시도)
-            # await self.login(page) 
-
-            for tag in self.hashtags:
-                tag_cleaned = tag.replace("#", "")
-                url = f"{self.base_url}{tag_cleaned}/"
-                print(f"Scraping hashtag: {tag}")
+            try:
+                # 프로필 객체 가져오기
+                profile = instaloader.Profile.from_username(self.L.context, username)
                 
-                try:
-                    await page.goto(url, wait_until="networkidle")
-                    await asyncio.sleep(random.uniform(3, 7)) # 랜덤 딜레이
+                posts = profile.get_posts()
 
-                    # 게시물 링크 수집 (첫 페이지만 예시로 수집)
-                    # 실제로는 스크롤 및 더 많은 로직 필요
-                    hrefs = await page.evaluate("""() => {
-                        const posts = document.querySelectorAll('a[href^="/p/"]');
-                        return Array.from(posts).map(a => a.href);
-                    }""")
-
-                    unique_hrefs = list(set(hrefs))
-                    print(f"Found {len(unique_hrefs)} posts for {tag}")
-
-                    for post_url in unique_hrefs[:5]: # 테스트용 5개 제한
-                        if self.db.check_duplicate(post_url):
-                            print(f"Duplicate found: {post_url}")
-                            continue
+                for post in posts:
+                    if post.date_utc < SINCE:
+                        print(f"Old post reached ({post.date_utc}), stopping for @{username}")
+                        break
                         
-                        await self.scrape_post_detail(page, post_url)
-                        await asyncio.sleep(random.uniform(5, 10)) # 요청 간 딜레이
+                    post_url = f"https://www.instagram.com/p/{post.shortcode}/"
+                    if self.db.check_duplicate(post_url):
+                        print(f"Duplicate found: {post_url}")
+                        continue
+                        
+                    print(f"Processing: {post_url} ({post.date_utc})")
+                    await self._process_post(post, post_url, username)
+                    
+                    count += 1
+                    if count >= 3: # 계정당 3개만 (테스트)
+                        print(f"Limit reached for @{username}")
+                        break
+                        
+            except instaloader.ProfileNotExistsException:
+                print(f"Profile @{username} does not exist.")
+            except instaloader.LoginRequiredException:
+                print(f"Login required to view @{username}. Skipping.")
+            except Exception as e:
+                print(f"Error processing @{username}: {e}")
+                
+            await asyncio.sleep(5)
 
-                except Exception as e:
-                    print(f"Error scraping {tag}: {e}")
-
-            await browser.close()
-
-    async def scrape_post_detail(self, page, url):
+    async def _process_post(self, post, post_url, tag):
         try:
-            await page.goto(url, wait_until="networkidle")
+            # 1. 메타데이터 추출
+            description = post.caption or ""
             
-            # 1. Metadata from Meta Tags (More stable)
-            description = await page.evaluate("""() => {
-                const meta = document.querySelector('meta[property="og:description"]');
-                return meta ? meta.content : "";
-            }""")
-            
-            # Clean description (Remove "Like, Comment..." parts if present)
-            if " on Instagram:" in description:
-                description = description.split("Instagram:")[1].strip()
-            if description.startswith('"') and description.endswith('"'):
-                description = description[1:-1]
-
-            # AI Metadata Extraction
+            # AI 메타데이터 분석
             from ai_extractor import AIExtractor
             ai = AIExtractor()
-            ai_suggestion = await ai.extract_metadata(description)
+            # 해시태그 맥락을 AI에게 힌트로 제공
+            ai_input = f"[Hashtag: #{tag}]\n{description}"
+            ai_suggestion = await ai.extract_metadata(ai_input)
             
-            # 2. Image Extraction
-            # Get all images that look like post images
-            img_urls = await page.evaluate("""() => {
-                const imgs = document.querySelectorAll('img[style*="object-fit: cover"]');
-                return Array.from(imgs).map(img => img.src).filter(src => src.includes('https://'));
-            }""")
+            # 2. 이미지 처리
+            # Instaloader의 post.url은 원본 이미지 URL임
+            img_urls = [post.url]
+            # 사이드카(여러 장)인 경우 추가 이미지 수집
+            if post.typename == 'GraphSidecar':
+                img_urls = [node.display_url for node in post.get_sidecar_nodes()]
             
-            if not img_urls:
-                # Fallback: OpenGraph image
-                og_img = await page.evaluate("""() => {
-                    const meta = document.querySelector('meta[property="og:image"]');
-                    return meta ? [meta.content] : [];
-                }""")
-                img_urls = og_img
-
-            # 3. Process and Save to Supabase
-            source_id = url.split("/p/")[1].replace("/", "")
-            
-            # Permanent Storage (Supabase Storage)
+            # Supabase Storage에 영구 저장
             thumbnail_url = None
             permanent_img_urls = []
             img_hashes = []
             from utils import process_and_upload_image
             
-            for i, img_url in enumerate(img_urls[:3]): # Max 3 images for MVP
+            for i, img_url in enumerate(img_urls[:5]): # 최대 5장
                 t_url, p_url, p_hash = await process_and_upload_image(
                     self.db.supabase, 
                     img_url, 
-                    f"insta_{source_id}_{i}"
+                    f"insta_{post.shortcode}_{i}"
                 )
                 if p_url:
                     if i == 0: thumbnail_url = t_url
                     permanent_img_urls.append(p_url)
                     img_hashes.append(p_hash)
+            
+            if not permanent_img_urls:
+                print("Failed to save images. Skipping post.")
+                return
 
-            if permanent_img_urls:
-                post_data = {
-                    "source": "instagram",
-                    "source_id": source_id,
-                    "source_url": url,
-                    "content": {
-                        "description": description,
-                        "raw_img_urls": img_urls,
-                        "ai_suggestion": ai_suggestion
-                    },
-                    "image_urls": permanent_img_urls,
-                    "poster_thumbnail_url": thumbnail_url,
-                    "images_hash": img_hashes,
-                    "status": "COLLECTED"
-                }
-                self.db.save_raw_post(post_data)
-
+            # 3. DB 저장
+            post_data = {
+                "source": "instagram",
+                "source_id": post.shortcode,
+                "source_url": post_url,
+                "content": {
+                    "description": description,
+                    "date": post.date_utc.isoformat(),
+                    "author": post.owner_username,
+                    "likes": post.likes,
+                    "ai_suggestion": ai_suggestion,
+                    "hashtag_context": tag
+                },
+                "image_urls": permanent_img_urls,
+                # "poster_thumbnail_url": thumbnail_url, # DB 컬럼 없음 이슈로 일시 제거
+                # "images_hash": img_hashes, # DB 컬럼 없음 이슈로 일시 제거
+                "status": "CANDIDATE" if ai_suggestion else "COLLECTED" 
+                # AI 분석 결과가 있으면 바로 CANDIDATE로 격상 고려 가능, 일단은 수집 상태로.
+            }
+            
+            self.db.save_raw_post(post_data)
+            print(f"Saved: {post.shortcode}")
+            
         except Exception as e:
-            print(f"Error scraping detail {url}: {e}")
-
-    # async def login(self, page):
-    #     ... 로그인 구현 ...
+            print(f"Error saving post {post.shortcode}: {e}")
