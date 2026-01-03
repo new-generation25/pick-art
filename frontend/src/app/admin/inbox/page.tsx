@@ -64,6 +64,10 @@ export default function AdminInboxPage() {
     const [rejectedPosts, setRejectedPosts] = useState<RawPost[]>([]);
     const [stats, setStats] = useState({ pending: 0, published: 0, rejected: 0 });
 
+    // 다중 선택 모드 (아이폰 스타일 삭제)
+    const [isSelectMode, setIsSelectMode] = useState(false);
+    const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
+
     useEffect(() => {
         fetchData();
     }, []);
@@ -238,6 +242,24 @@ export default function AdminInboxPage() {
             setPublishedEvents(publishedEvents.filter(e => e.id !== eventId));
             setStats(prev => ({ ...prev, published: prev.published - 1 }));
         }
+    };
+
+    // 선택된 이벤트 일괄 삭제
+    const handleDeleteSelectedEvents = async () => {
+        if (selectedEvents.length === 0) return;
+
+        const confirmDelete = confirm(`선택한 ${selectedEvents.length}개의 행사를 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`);
+        if (!confirmDelete) return;
+
+        // 선택된 모든 이벤트 삭제
+        for (const eventId of selectedEvents) {
+            await supabase.from("events").delete().eq("id", eventId);
+        }
+
+        setPublishedEvents(publishedEvents.filter(e => !selectedEvents.includes(e.id)));
+        setStats(prev => ({ ...prev, published: prev.published - selectedEvents.length }));
+        setSelectedEvents([]);
+        setIsSelectMode(false);
     };
 
 
@@ -439,58 +461,105 @@ export default function AdminInboxPage() {
                         )}
                     </Box>
                 ) : (
-                    /* Published Events */
+                    /* Published Events - 다중 선택 삭제 UI */
                     <Box mb={60}>
-                        <Group mb="lg">
-                            <Box w={4} h={24} bg="green" style={{ borderRadius: 999 }} />
-                            <Title order={2} size="h3" fw={900}>현재 노출중인 행사 ({stats.published})</Title>
+                        <Group justify="space-between" mb="lg">
+                            <Group>
+                                <Box w={4} h={24} bg="green" style={{ borderRadius: 999 }} />
+                                <Title order={2} size="h3" fw={900}>현재 노출중인 행사 ({stats.published})</Title>
+                            </Group>
+                            <Button
+                                variant={isSelectMode ? "filled" : "light"}
+                                color={isSelectMode ? "red" : "gray"}
+                                size="sm"
+                                onClick={() => {
+                                    setIsSelectMode(!isSelectMode);
+                                    setSelectedEvents([]);
+                                }}
+                            >
+                                {isSelectMode ? "취소" : "선택"}
+                            </Button>
                         </Group>
+
                         {publishedEvents.length === 0 ? (
                             <Text ta="center" c="dimmed" py="xl">발행된 행사가 없습니다.</Text>
                         ) : (
-                            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+                            <SimpleGrid cols={{ base: 2, sm: 3, lg: 4 }} spacing="md">
                                 {publishedEvents.map((event) => (
-                                    <Paper key={event.id} p="md" radius="md" withBorder>
-                                        <Group align="flex-start" mb="xs">
-                                            <Badge color="green" variant="light" size="sm">{event.category || '행사'}</Badge>
-                                            <Badge color="blue" variant="outline" size="sm">{event.region || '경남'}</Badge>
-                                            <Box style={{ flex: 1 }} />
-                                            <ActionIcon
-                                                variant="light"
-                                                color="red"
-                                                size="sm"
-                                                onClick={() => handleDeleteEvent(event.id)}
-                                                title="행사 삭제"
+                                    <Paper
+                                        key={event.id}
+                                        p="sm"
+                                        radius="md"
+                                        withBorder
+                                        style={{
+                                            cursor: isSelectMode ? 'pointer' : 'default',
+                                            border: selectedEvents.includes(event.id) ? '2px solid var(--mantine-color-red-5)' : undefined,
+                                            opacity: isSelectMode && !selectedEvents.includes(event.id) ? 0.7 : 1,
+                                            transition: 'all 0.15s ease'
+                                        }}
+                                        onClick={() => {
+                                            if (isSelectMode) {
+                                                setSelectedEvents(prev =>
+                                                    prev.includes(event.id)
+                                                        ? prev.filter(id => id !== event.id)
+                                                        : [...prev, event.id]
+                                                );
+                                            }
+                                        }}
+                                    >
+                                        {/* 체크 표시 (선택 모드일 때) */}
+                                        {isSelectMode && (
+                                            <Box
+                                                style={{
+                                                    position: 'absolute',
+                                                    top: 8,
+                                                    right: 8,
+                                                    zIndex: 10,
+                                                    width: 24,
+                                                    height: 24,
+                                                    borderRadius: '50%',
+                                                    background: selectedEvents.includes(event.id) ? 'var(--mantine-color-red-5)' : 'rgba(0,0,0,0.3)',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center'
+                                                }}
                                             >
-                                                <Trash2 size={14} />
-                                            </ActionIcon>
-                                        </Group>
-                                        <Group align="start" wrap="nowrap">
-                                            <Box w={80} h={80} bg="gray.1" style={{ borderRadius: 'var(--mantine-radius-sm)', overflow: 'hidden', flexShrink: 0 }}>
-                                                {event.poster_image_url ? (
-                                                    <ImageWithFallback
-                                                        src={event.poster_image_url}
-                                                        alt={event.title}
-                                                        width={80}
-                                                        height={80}
-                                                        style={{ objectFit: 'cover', width: '100%', height: '100%' }}
-                                                    />
-                                                ) : (
-                                                    <Box w="100%" h="100%" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                        <ImageIcon size={24} color="gray" />
-                                                    </Box>
-                                                )}
+                                                {selectedEvents.includes(event.id) && <Check size={14} color="white" />}
                                             </Box>
-                                            <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
-                                                <Text fw={600} size="sm" lineClamp={2}>{event.title}</Text>
-                                                <Text size="xs" c="dimmed" lineClamp={2}>{event.description}</Text>
-                                                {event.venue && (
-                                                    <Group gap={4}>
-                                                        <MapPin size={10} color="gray" />
-                                                        <Text size="xs" c="dimmed">{event.venue}</Text>
-                                                    </Group>
-                                                )}
-                                            </Stack>
+                                        )}
+
+                                        {/* 이미지 */}
+                                        <Box
+                                            w="100%"
+                                            h={120}
+                                            bg="gray.1"
+                                            mb="xs"
+                                            style={{
+                                                borderRadius: 'var(--mantine-radius-sm)',
+                                                overflow: 'hidden',
+                                                position: 'relative'
+                                            }}
+                                        >
+                                            {event.poster_image_url ? (
+                                                <ImageWithFallback
+                                                    src={event.poster_image_url}
+                                                    alt={event.title}
+                                                    width={200}
+                                                    height={120}
+                                                    style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                                                />
+                                            ) : (
+                                                <Box w="100%" h="100%" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <ImageIcon size={32} color="gray" />
+                                                </Box>
+                                            )}
+                                        </Box>
+
+                                        {/* 정보 */}
+                                        <Text fw={600} size="sm" lineClamp={2} mb={4}>{event.title}</Text>
+                                        <Group gap={4}>
+                                            <Badge size="xs" color="green" variant="light">{event.category || '행사'}</Badge>
+                                            <Badge size="xs" color="blue" variant="outline">{event.region || '경남'}</Badge>
                                         </Group>
                                     </Paper>
                                 ))}
@@ -752,6 +821,46 @@ export default function AdminInboxPage() {
                     </ActionIcon>
                 </Box>
             </Modal>
+
+            {/* 하단 플로팅 삭제 바 (선택 모드에서 항목 선택 시 표시) */}
+            {isSelectMode && selectedEvents.length > 0 && (
+                <Box
+                    style={{
+                        position: 'fixed',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        background: 'linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.7))',
+                        backdropFilter: 'blur(10px)',
+                        padding: '16px 24px',
+                        zIndex: 1000,
+                    }}
+                >
+                    <Container size="lg">
+                        <Group justify="space-between">
+                            <Text c="white" fw={600} size="lg">
+                                {selectedEvents.length}개 선택됨
+                            </Text>
+                            <Group>
+                                <Button
+                                    variant="subtle"
+                                    color="gray"
+                                    onClick={() => setSelectedEvents(publishedEvents.map(e => e.id))}
+                                >
+                                    전체 선택
+                                </Button>
+                                <Button
+                                    color="red"
+                                    leftSection={<Trash2 size={18} />}
+                                    onClick={handleDeleteSelectedEvents}
+                                >
+                                    삭제
+                                </Button>
+                            </Group>
+                        </Group>
+                    </Container>
+                </Box>
+            )}
         </Box>
     );
 }
