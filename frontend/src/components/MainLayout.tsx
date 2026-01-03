@@ -9,10 +9,11 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
     const [opened, { toggle }] = useDisclosure();
     const pathname = usePathname();
 
-    // Admin routes manage their own layout
+    // Admin routes handle their own layout (AdminHeader)
     if (pathname?.startsWith("/admin")) {
         return <>{children}</>;
     }
+
 
     return (
         <AppShell

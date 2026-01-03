@@ -21,8 +21,8 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
     if (!event) return { title: "행사를 찾을 수 없습니다" };
 
     return {
-        title: `${event.title} | 경남 아트 네비게이터`,
-        description: event.description?.slice(0, 160) || "경남의 문화예술 소식을 확인하세요.",
+        title: `${event.title} | 픽아트 pica`,
+        description: event.description?.slice(0, 160) || "경남의 문화예술 소식을 픽아트(pica)에서 확인하세요.",
         openGraph: {
             title: event.title,
             description: event.description?.slice(0, 160),
@@ -68,7 +68,8 @@ export default async function EventDetailPage({ params }: EventPageProps) {
 
     return (
         <main className="min-h-screen bg-neutral-50 pb-20">
-            <Header />
+            {/* layout.tsx에 이미 Header가 있으므로 여기서 제거합니다. */}
+
 
             <div className="container mx-auto px-4 pt-24 pb-8 max-w-6xl">
                 {/* ... (Previous Breadcrumb & Back logic) */}
@@ -88,12 +89,13 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                         <div className="sticky top-24">
                             <div className="relative aspect-[3/4] w-full rounded-3xl overflow-hidden shadow-2xl ring-1 ring-black/5">
                                 <Image
-                                    src={event.poster_image_url}
+                                    src={event.poster_image_url || "/images/placeholder.webp"}
                                     alt={event.title}
                                     fill
                                     className="object-cover"
                                     priority
                                     sizes="(max-width: 768px) 100vw, 450px"
+                                    unoptimized={event.poster_image_url?.startsWith('http')}
                                 />
                                 <div className="absolute top-6 left-6 flex flex-col gap-2">
                                     <span className="px-4 py-2 bg-indigo-600/90 backdrop-blur-md text-white text-xs font-bold rounded-full shadow-lg uppercase tracking-wider">
@@ -198,7 +200,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                                 <Info className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" />
                                 <p className="text-sm text-indigo-900 leading-relaxed">
                                     본 정보는 수집된 데이터를 바탕으로 제공되며, 주최측의 사정에 따라 변동될 수 있습니다.
-                                    정확한 정보는 반드시 <b>원본 소식 방문하기</b>를 통해 확인해 주세요.
+                                    정확한 정보는 반드시 <b>원본 소식 방문하기</b>를 통해 확인해 주세요. - <b>pica</b>
                                 </p>
                             </div>
                         </div>

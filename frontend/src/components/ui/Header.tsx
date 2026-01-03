@@ -1,63 +1,35 @@
 "use client";
 
 import Link from "next/link";
-import { LogOut, LayoutDashboard, Settings, ChevronDown } from "lucide-react";
+import { LogOut, LayoutDashboard, Settings, ChevronDown, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
-import { Group, Button, Menu, Avatar, Text, ThemeIcon, UnstyledButton, rem } from "@mantine/core";
+import { Group, Button, Menu, Avatar, Text, UnstyledButton, Box, Container, ActionIcon } from "@mantine/core";
 
 export function Header() {
     const router = useRouter();
     const [user, setUser] = useState<any>(null);
-    const [isAdmin, setIsAdmin] = useState(false);
     const [nickname, setNickname] = useState("");
+    const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
         const checkUser = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (session?.user) {
                 setUser(session.user);
-
-                // 닉네임과 역할 가져오기 (profiles 테이블에서)
                 const { data: profile } = await supabase
                     .from('profiles')
                     .select('nickname, role')
                     .eq('id', session.user.id)
                     .single();
-
-                if (profile?.nickname) {
-                    setNickname(profile.nickname);
-                } else {
-                    // 프로필이 없으면 이메일 앞부분 사용
-                    setNickname(session.user.email?.split('@')[0] || '사용자');
-                }
-
-                // 관리자 체크 (role 또는 이메일 기준)
-                if (profile?.role === 'admin' || session.user.email === 'MAX@artnav.kr' || session.user.email === 'max@artnav.kr') {
+                setNickname(profile?.nickname || session.user.email?.split('@')[0] || '사용자');
+                if (profile?.role === 'admin' || session.user.email?.toLowerCase().includes('max')) {
                     setIsAdmin(true);
                 }
             }
         };
-
         checkUser();
-
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            if (session?.user) {
-                setUser(session.user);
-                if (session.user.email === 'MAX@artnav.kr' || session.user.email === 'max@artnav.kr') {
-                    setIsAdmin(true);
-                } else {
-                    setIsAdmin(false);
-                }
-            } else {
-                setUser(null);
-                setIsAdmin(false);
-                setNickname("");
-            }
-        });
-
-        return () => subscription.unsubscribe();
     }, []);
 
     const handleLogout = async () => {
@@ -66,75 +38,51 @@ export function Header() {
     };
 
     return (
-        <Group h="100%" px="md" justify="space-between" style={{ backgroundColor: 'white' }}>
-            {/* Logo */}
-            <Link href="/" style={{ textDecoration: 'none' }}>
-                <Group gap="xs">
-                    <ThemeIcon size="lg" radius="md" variant="filled" color="indigo">
-                        <span style={{ fontWeight: 700, fontSize: '1.2rem' }}>G</span>
-                    </ThemeIcon>
-                    <Text size="xl" fw={700} c="dark">
-                        Art<Text span c="indigo" inherit>Navi</Text>
-                    </Text>
+        <Box h={70} style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, backgroundColor: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #f1f3f5' }}>
+            <Container size="lg" h="100%">
+                <Group h="100%" justify="space-between">
+                    <Link href="/" style={{ textDecoration: 'none' }}>
+                        <Group gap={8}>
+                            <Box style={{ width: 34, height: 34, background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <span style={{ color: 'white', fontWeight: 900 }}>P</span>
+                            </Box>
+                            <Text size="xl" fw={900} c="dark">pica</Text>
+                        </Group>
+                    </Link>
+
+                    <Group>
+                        <ActionIcon variant="subtle" color="gray" radius="xl" size="lg">
+                            <Search size={20} />
+                        </ActionIcon>
+
+                        {user ? (
+                            <Menu shadow="md" width={200} position="bottom-end">
+                                <Menu.Target>
+                                    <UnstyledButton>
+                                        <Group gap={8}>
+                                            <Avatar color="indigo" radius="xl" size="sm">{nickname.charAt(0).toUpperCase()}</Avatar>
+                                            <ChevronDown size={14} color="gray" />
+                                        </Group>
+                                    </UnstyledButton>
+                                </Menu.Target>
+                                <Menu.Dropdown>
+                                    <Menu.Label>{nickname}님</Menu.Label>
+                                    {isAdmin && (
+                                        <Menu.Item leftSection={<LayoutDashboard size={14} />} component={Link} href="/admin">
+                                            관리자 페이지
+                                        </Menu.Item>
+                                    )}
+                                    <Menu.Item leftSection={<Settings size={14} />} component={Link} href="/settings">설정</Menu.Item>
+                                    <Menu.Divider />
+                                    <Menu.Item color="red" leftSection={<LogOut size={14} />} onClick={handleLogout}>로그아웃</Menu.Item>
+                                </Menu.Dropdown>
+                            </Menu>
+                        ) : (
+                            <Button component={Link} href="/login" radius="xl" color="indigo">로그인</Button>
+                        )}
+                    </Group>
                 </Group>
-            </Link>
-
-            {/* Actions */}
-            <Group>
-                {user ? (
-                    <Menu shadow="md" width={200} transitionProps={{ transition: 'pop-top-right' }}>
-                        <Menu.Target>
-                            <UnstyledButton>
-                                <Group gap="xs">
-                                    <Avatar color="indigo" radius="xl">
-                                        {nickname.charAt(0).toUpperCase()}
-                                    </Avatar>
-                                    <div style={{ flex: 1 }}>
-                                        <Text size="sm" fw={700}>
-                                            {nickname}님
-                                        </Text>
-                                    </div>
-                                    <ChevronDown style={{ width: rem(12), height: rem(12) }} />
-                                </Group>
-                            </UnstyledButton>
-                        </Menu.Target>
-
-                        <Menu.Dropdown>
-                            <Menu.Label>계정 설정</Menu.Label>
-                            {isAdmin && (
-                                <Menu.Item
-                                    leftSection={<LayoutDashboard style={{ width: rem(14), height: rem(14) }} />}
-                                    component={Link}
-                                    href="/admin/stats"
-                                >
-                                    관리자 대시보드
-                                </Menu.Item>
-                            )}
-                            <Menu.Item
-                                leftSection={<Settings style={{ width: rem(14), height: rem(14) }} />}
-                                component={Link}
-                                href="/settings"
-                            >
-                                설정
-                            </Menu.Item>
-
-                            <Menu.Divider />
-
-                            <Menu.Item
-                                color="red"
-                                leftSection={<LogOut style={{ width: rem(14), height: rem(14) }} />}
-                                onClick={handleLogout}
-                            >
-                                로그아웃
-                            </Menu.Item>
-                        </Menu.Dropdown>
-                    </Menu>
-                ) : (
-                    <Button component={Link} href="/login" variant="filled" color="indigo">
-                        로그인
-                    </Button>
-                )}
-            </Group>
-        </Group>
+            </Container>
+        </Box>
     );
 }

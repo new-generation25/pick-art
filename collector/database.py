@@ -112,13 +112,9 @@ class Database:
             return image_url
 
     def get_crawler_configs(self):
-        """활성화된 크롤링 설정을 가져옵니다."""
-        try:
-            response = self.supabase.table("crawler_configs").select("*").eq("is_active", True).execute()
-            return response.data
-        except Exception as e:
-            print(f"Error fetching configs: {e}")
-            return []
+        """활성화된 크롤링 설정을 가져옵니다. (현재는 whitelist 기반으로 통합 사용)"""
+        # crawler_configs 테이블이 없으므로 빈 리스트 반환 (main.py에서 whitelist를 사용하도록 유도)
+        return []
 
     def check_duplicate(self, source_url: str) -> bool:
         try:

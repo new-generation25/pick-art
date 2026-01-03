@@ -1,43 +1,45 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AdminHeader } from "@/components/ui/AdminHeader";
 import { supabase } from "@/lib/supabase";
-import { Plus, Search, Trash2, Edit2, Shield, CheckCircle, XCircle, Save, X } from "lucide-react";
 import {
-    Box, Container, Title, Text, Button, Group, Stack,
+    Plus, Search, Trash2, Edit2, Check, X,
+    ArrowRight, RefreshCcw, AlertCircle, Play,
+    Clock, Calendar, List, ShieldCheck
+} from "lucide-react";
+import {
+    Container, Title, Text, Button, Group, Stack,
     TextInput, Select, Badge, ActionIcon, Paper,
-    SimpleGrid, Modal, SegmentedControl, ThemeIcon, rem, LoadingOverlay
+    SimpleGrid, Modal, SegmentedControl, ThemeIcon, rem,
+    LoadingOverlay, ScrollArea, Drawer, Timeline, Loader, Box
 } from "@mantine/core";
 
 type SourceType = "trusted" | "blocked";
 
 interface SourceItem {
     id: number;
-    name?: string; // whitelist only
-    value?: string; // whitelist & blacklist shared (url or blocked string)
-    description?: string; // whitelist only (removed from db but kept in type if needed)
-    type?: string; // blacklist only (domain, keyword)
-    reason?: string; // blacklist only
+    name?: string;
+    value: string;
+    type: string;
+    reason?: string;
     created_at: string;
+    schedule?: string;
 }
 
 export default function SourcesPage() {
     const [activeTab, setActiveTab] = useState<SourceType>("trusted");
     const [items, setItems] = useState<SourceItem[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
 
-    // Modal State
+    const [isLogDrawerOpen, setIsLogDrawerOpen] = useState(false);
+    const [logs, setLogs] = useState<any[]>([]);
+    const [isLogsLoading, setIsLogsLoading] = useState(false);
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<SourceItem | null>(null);
     const [formData, setFormData] = useState({
-        name: "",
-        url: "",
-        description: "",
-        type: "domain",
-        value: "",
-        reason: ""
+        name: "", url: "", type: "webpage", value: "", reason: "", schedule: "daily",
     });
 
     useEffect(() => {
@@ -45,12 +47,32 @@ export default function SourcesPage() {
     }, [activeTab]);
 
     const fetchItems = async () => {
-        setLoading(true);
-        const table = activeTab === "trusted" ? "whitelist" : "blacklist";
-        const { data, error } = await supabase.from(table).select("*").order("created_at", { ascending: false });
+        setIsLoading(true);
+        try {
+            const table = activeTab === "trusted" ? "whitelist" : "blacklist";
+            const { data, error } = await supabase.from(table).select("*").order("created_at", { ascending: false });
+            if (!error && data) setItems(data);
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-        if (data) setItems(data);
-        setLoading(false);
+    const fetchLogs = async () => {
+        setIsLogsLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('crawl_logs')
+                .select('*')
+                .order('started_at', { ascending: false })
+                .limit(20);
+            if (!error && data) setLogs(data);
+        } catch (err) {
+            // Silence 404
+        } finally {
+            setIsLogsLoading(false);
+        }
     };
 
     const handleOpenModal = (item?: SourceItem) => {
@@ -59,20 +81,16 @@ export default function SourcesPage() {
             setFormData({
                 name: item.name || "",
                 url: item.value || "",
-                description: item.description || "",
-                type: item.type || "domain",
+                type: item.type || "webpage",
                 value: item.value || "",
-                reason: item.reason || ""
+                reason: item.reason || "",
+                schedule: (item as any).schedule || "daily"
             });
         } else {
             setEditingItem(null);
             setFormData({
-                name: "",
-                url: "",
-                description: "",
-                type: "domain",
-                value: "",
-                reason: ""
+                name: "", url: "", type: activeTab === 'trusted' ? "webpage" : "domain",
+                value: "", reason: "", schedule: "daily"
             });
         }
         setIsModalOpen(true);
@@ -80,220 +98,123 @@ export default function SourcesPage() {
 
     const handleSave = async () => {
         const table = activeTab === "trusted" ? "whitelist" : "blacklist";
-        const payload = activeTab === "trusted"
-            ? { name: formData.name, value: formData.url, type: 'website' }
+        const payload: any = activeTab === "trusted"
+            ? { name: formData.name, value: formData.url, type: formData.type, schedule: formData.schedule }
             : { type: formData.type, value: formData.value, reason: formData.reason };
 
-        if (!payload.value && activeTab === "trusted") return alert("URL은 필수입니다.");
-        if (!payload.value && activeTab === "blocked") return alert("차단할 값은 필수입니다.");
+        if (!payload.value) return alert("필수 항목을 입력해주세요.");
 
-        let error;
-        if (editingItem) {
-            const { error: updateError } = await supabase.from(table).update(payload).eq("id", editingItem.id);
-            error = updateError;
-        } else {
-            const { error: insertError } = await supabase.from(table).insert([payload]);
-            error = insertError;
-        }
+        const result = editingItem
+            ? await supabase.from(table).update(payload).eq("id", editingItem.id)
+            : await supabase.from(table).insert([payload]);
 
-        if (error) {
-            alert("저장 실패: " + error.message);
-        } else {
-            setIsModalOpen(false);
-            fetchItems();
-        }
+        if (result.error) alert(result.error.message);
+        else { setIsModalOpen(false); fetchItems(); }
     };
 
     const handleDelete = async (id: number) => {
         if (!confirm("정말 삭제하시겠습니까?")) return;
-        const table = activeTab === "trusted" ? "whitelist" : "blacklist";
-        await supabase.from(table).delete().eq("id", id);
+        await supabase.from(activeTab === "trusted" ? "whitelist" : "blacklist").delete().eq("id", id);
         fetchItems();
     };
 
-    const filteredItems = items.filter(item => {
-        const searchLower = searchTerm.toLowerCase();
-        if (activeTab === "trusted") {
-            return item.name?.toLowerCase().includes(searchLower) || item.value?.toLowerCase().includes(searchLower);
-        } else {
-            return item.value?.toLowerCase().includes(searchLower) || item.reason?.toLowerCase().includes(searchLower);
+    const handleRunCrawl = async (item: SourceItem) => {
+        try {
+            await supabase.from('crawl_logs').insert([{
+                target_name: item.name || item.value,
+                started_at: new Date().toISOString(),
+                result_summary: '수동 실행 요청됨',
+                status: 'REQUESTED'
+            }]);
+            alert(`${item.name || item.value} 크롤링 요청됨`);
+        } catch (e) {
+            alert(`${item.name || item.value} 수집 시작`);
         }
+    };
+
+    const filteredItems = items.filter(item => {
+        const s = searchTerm.toLowerCase();
+        return (item.name?.toLowerCase().includes(s) || item.value?.toLowerCase().includes(s));
     });
 
     return (
-        <Box bg="gray.0" mih="100vh" pb={80}>
-            <AdminHeader />
-            <Container size="lg" pt={120}>
-
-                {/* Header Section */}
-                <Group justify="space-between" align="end" mb={40}>
-                    <Group gap="sm">
-                        <ThemeIcon size={48} radius="xl" color={activeTab === 'trusted' ? 'indigo' : 'red'} variant="light">
-                            <Shield size={24} />
-                        </ThemeIcon>
-                        <Box>
-                            <Title order={1} size={rem(32)} fw={900}>출처 관리 (Sources)</Title>
-                            <Text c="dimmed" fw={500}>수집 대상 사이트(Trusted)와 차단할 키워드/도메인(Blocked)을 관리합니다.</Text>
-                        </Box>
+        <Box mih="100vh" py={120}>
+            <Container size="lg">
+                <Group justify="space-between" mb="xl">
+                    <Stack gap={0}>
+                        <Title order={2} fw={900}>출처 관리</Title>
+                        <Text c="dimmed" size="sm">수집 소스 및 차단 대상을 관리합니다.</Text>
+                    </Stack>
+                    <Group>
+                        <Button variant="light" color="gray" leftSection={<List size={16} />} onClick={() => { setIsLogDrawerOpen(true); fetchLogs(); }}>
+                            로그 보기
+                        </Button>
+                        <Button leftSection={<Plus size={16} />} onClick={() => handleOpenModal()}>
+                            추가하기
+                        </Button>
                     </Group>
-                    <Button
-                        size="md"
-                        color="dark"
-                        radius="xl"
-                        leftSection={<Plus size={18} />}
-                        onClick={() => handleOpenModal()}
-                    >
-                        새로운 {activeTab === "trusted" ? "출처" : "차단"} 등록
-                    </Button>
                 </Group>
 
-                {/* Tabs & Search */}
-                <Paper p="md" radius="xl" withBorder mb={30}>
-                    <Group justify="space-between">
-                        <SegmentedControl
-                            value={activeTab}
-                            onChange={(val) => setActiveTab(val as SourceType)}
-                            data={[
-                                { label: 'Trusted (Whitelist)', value: 'trusted' },
-                                { label: 'Blocked (Blacklist)', value: 'blocked' },
-                            ]}
-                            size="md"
-                            radius="xl"
-                            color={activeTab === 'trusted' ? 'indigo' : 'red'}
-                        />
-                        <TextInput
-                            placeholder={`${activeTab === "trusted" ? "사이트 이름, URL" : "차단 단어, 사유"} 검색...`}
-                            leftSection={<Search size={16} />}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            radius="xl"
-                            style={{ flex: 1, maxWidth: 300 }}
-                        />
-                    </Group>
-                </Paper>
+                <Group justify="space-between" mb="xl">
+                    <SegmentedControl value={activeTab} onChange={(v) => setActiveTab(v as SourceType)} data={['trusted', 'blocked']} radius="xl" />
+                    <TextInput placeholder="검색..." leftSection={<Search size={16} />} value={searchTerm} onChange={(e) => setSearchTerm(e.currentTarget.value)} radius="xl" w={300} />
+                </Group>
 
-                {/* List */}
-                <Box style={{ position: 'relative', minHeight: 200 }}>
-                    <LoadingOverlay visible={loading} overlayProps={{ radius: 'sm', blur: 2 }} />
-
-                    {filteredItems.length === 0 && !loading ? (
-                        <Paper py={60} radius="xl" withBorder style={{ borderStyle: 'dashed', textAlign: 'center' }}>
-                            <Text c="dimmed" fw={700}>등록된 항목이 없습니다.</Text>
-                        </Paper>
-                    ) : (
-                        <SimpleGrid cols={{ base: 1, md: 2, lg: 3 }} spacing="lg">
-                            {filteredItems.map((item) => (
-                                <Paper
-                                    key={item.id}
-                                    p="lg"
-                                    radius="xl"
-                                    withBorder
-                                    shadow="sm"
-                                    className="hover:shadow-md transition-shadow group relative overflow-hidden"
-                                >
-                                    <Box
-                                        style={{
-                                            position: 'absolute',
-                                            top: 0,
-                                            left: 0,
-                                            width: '100%',
-                                            height: 6,
-                                            backgroundColor: activeTab === 'trusted' ? 'var(--mantine-color-indigo-6)' : 'var(--mantine-color-red-6)'
-                                        }}
-                                    />
-
-                                    <Group justify="space-between" align="start" mb="md">
-                                        <Badge
-                                            variant="light"
-                                            color={activeTab === 'trusted' ? 'indigo' : 'red'}
-                                            size="lg"
-                                        >
-                                            {activeTab === 'trusted' ? 'Safe Source' : item.type}
-                                        </Badge>
-                                        <Group gap="xs" style={{ opacity: 0, transition: 'opacity 0.2s' }} className="group-hover:opacity-100">
-                                            <ActionIcon variant="subtle" color="gray" onClick={() => handleOpenModal(item)}>
-                                                <Edit2 size={16} />
-                                            </ActionIcon>
-                                            <ActionIcon variant="subtle" color="red" onClick={() => handleDelete(item.id)}>
-                                                <Trash2 size={16} />
-                                            </ActionIcon>
+                <Box pos="relative">
+                    <LoadingOverlay visible={isLoading} />
+                    <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
+                        {filteredItems.map((item) => (
+                            <Paper key={item.id} withBorder p="md" radius="md">
+                                <Stack gap="xs">
+                                    <Group justify="space-between">
+                                        <Badge variant="light" size="sm">{item.type}</Badge>
+                                        <Group gap={4}>
+                                            <ActionIcon variant="subtle" size="sm" onClick={() => handleOpenModal(item)}><Edit2 size={14} /></ActionIcon>
+                                            <ActionIcon variant="subtle" color="red" size="sm" onClick={() => handleDelete(item.id)}><Trash2 size={14} /></ActionIcon>
                                         </Group>
                                     </Group>
-
-                                    {activeTab === "trusted" ? (
-                                        <>
-                                            <Title order={3} size="h4" fw={900} mb={4}>{item.name}</Title>
-                                            <Text size="sm" c="indigo" fw={700} mb="xs" lineClamp={1}>{item.value}</Text>
-                                            <Text size="sm" c="dimmed" lineClamp={2}>{item.description || "설명 없음"}</Text>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Title order={3} size="h4" fw={900} mb={4}>{item.value}</Title>
-                                            <Text size="sm" c="red" fw={700} mb="xs">{item.type === 'domain' ? '도메인 차단' : '키워드 차단'}</Text>
-                                            <Text size="sm" c="dimmed" lineClamp={2}>{item.reason || "사유 없음"}</Text>
-                                        </>
+                                    <Text fw={700} lineClamp={1}>{item.name || item.value}</Text>
+                                    <Text size="xs" c="dimmed" lineClamp={1}>{item.value}</Text>
+                                    {activeTab === 'trusted' && (
+                                        <Group justify="space-between" mt="sm">
+                                            <Group gap={4}><Clock size={12} /><Text size="xs" c="dimmed">{item.schedule || 'daily'}</Text></Group>
+                                            <Button size="compact-xs" variant="light" onClick={() => handleRunCrawl(item)}>실행</Button>
+                                        </Group>
                                     )}
-                                </Paper>
-                            ))}
-                        </SimpleGrid>
-                    )}
+                                </Stack>
+                            </Paper>
+                        ))}
+                    </SimpleGrid>
                 </Box>
             </Container>
 
-            {/* Modal */}
-            <Modal
-                opened={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                title={editingItem ? "정보 수정" : "새로 등록하기"}
-                centered
-                radius="lg"
+            <Drawer
+                opened={isLogDrawerOpen}
+                onClose={() => setIsLogDrawerOpen(false)}
+                title="실시간 수집 로그" // plain string to avoid h2 > h4 nesting
+                position="right"
                 size="md"
             >
-                <Stack gap="md">
-                    {activeTab === "trusted" ? (
-                        <>
-                            <TextInput
-                                label="사이트/기관명"
-                                placeholder="예: 경남문화예술회관"
-                                value={formData.name}
-                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                            />
-                            <TextInput
-                                label="URL"
-                                placeholder="https://..."
-                                value={formData.url}
-                                onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                            />
-                        </>
-                    ) : (
-                        <>
-                            <Select
-                                label="차단 유형"
-                                data={[
-                                    { value: 'domain', label: '도메인 (URL)' },
-                                    { value: 'keyword', label: '키워드 (텍스트)' }
-                                ]}
-                                value={formData.type}
-                                onChange={(val) => setFormData({ ...formData, type: val || 'domain' })}
-                            />
-                            <TextInput
-                                label="차단 값"
-                                placeholder={formData.type === 'domain' ? "example.com" : "도박, 불법 등"}
-                                value={formData.value}
-                                onChange={(e) => setFormData({ ...formData, value: e.target.value })}
-                            />
-                            <TextInput
-                                label="차단 사유"
-                                placeholder="관리자 직권 차단"
-                                value={formData.reason}
-                                onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                            />
-                        </>
-                    )}
+                <ScrollArea h="calc(100vh - 80px)" p="md">
+                    {isLogsLoading ? <Loader size="sm" /> : logs.length > 0 ? (
+                        <Timeline active={-1} bulletSize={20} lineWidth={2}>
+                            {logs.map((log) => (
+                                <Timeline.Item key={log.id} bullet={log.status === 'SUCCESS' ? <Check size={10} /> : <Clock size={10} />} title={<Text size="sm" fw={700}>{log.target_name}</Text>}>
+                                    <Text size="xs">{log.result_summary}</Text>
+                                    <Text size="xs" c="dimmed">{new Date(log.started_at).toLocaleString()}</Text>
+                                </Timeline.Item>
+                            ))}
+                        </Timeline>
+                    ) : <Text size="sm" c="dimmed" ta="center" py="xl">로그가 없습니다.</Text>}
+                </ScrollArea>
+            </Drawer>
 
-                    <Button fullWidth onClick={handleSave} color={activeTab === 'trusted' ? 'indigo' : 'red'} mt="md">
-                        {editingItem ? "수정 완료" : "등록하기"}
-                    </Button>
+            <Modal opened={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingItem ? "수정" : "추가"}>
+                <Stack>
+                    <TextInput label="이름" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+                    <TextInput label="URL/값" value={formData.url || formData.value} onChange={(e) => setFormData({ ...formData, url: e.target.value, value: e.target.value })} required />
+                    <Select label="유형" data={['webpage', 'facebook', 'instagram', 'source']} value={formData.type} onChange={(v) => setFormData({ ...formData, type: v || 'webpage' })} />
+                    <Button onClick={handleSave}>저장</Button>
                 </Stack>
             </Modal>
         </Box>

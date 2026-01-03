@@ -12,49 +12,39 @@ from datetime import datetime # added
 # Load environment variables
 load_dotenv(".env.local")
 
-async def run_crawlers():
-    print("🚀 Starting crawlers with dynamic configs...")
+async def run_crawlers(specific_target=None):
+    print(f"🚀 {'Manual request:' if specific_target else 'Routine'} crawler started at {datetime.now()}", flush=True)
     db = Database()
-    # 크롤링 시작 로그 기록 (이후 configs 로드 전)
     start_time = datetime.utcnow().isoformat()
-    db.save_crawl_log({
-        "target_name": "all",
-        "started_at": start_time,
-        "finished_at": None,
-        "result_summary": f"시작 전 설정 {len([])}개",  # placeholder, will be updated after configs load
-        "error_msg": None,
-    })
-    notifier = TelegramNotifier()
     
     try:
-        # DB에서 설정 가져오기
-        configs = db.get_crawler_configs()
-        
-        # whitelist 항목도 크롤링 대상으로 추가
-        whitelist_items = db.get_whitelist()
-        for item in whitelist_items:
-            # type='website' 또는 instagram URL인 경우 추가
-            target_type = 'website'
-            if 'instagram.com' in item['value']:
-                target_type = 'instagram'
-            
-            configs.append({
-                'target_type': target_type,
-                'value': item['value'],
-                'name': item.get('name', 'Whitelist Source')
-            })
+        if specific_target:
+            configs = [specific_target]
+        else:
+            # DB에서 정기 설정 가져오기
+            configs = db.get_crawler_configs()
+            whitelist_items = db.get_whitelist()
+            for item in whitelist_items:
+                target_type = 'website'
+                if 'instagram.com' in item['value']:
+                    target_type = 'instagram'
+                
+                configs.append({
+                    'target_type': target_type,
+                    'value': item['value'],
+                    'name': item.get('name', 'Whitelist Source')
+                })
 
         if not configs:
             print("⚠️ No active crawler configurations found.")
             return
 
-        insta_targets = [c for c in configs if c['target_type'] == 'instagram']
-        insta_targets = [c for c in configs if c['target_type'] == 'instagram']
+        insta_targets = [c for c in configs if c.get('target_type') == 'instagram']
         
         # 웹사이트 타겟 중 페이스북과 일반 분리
-        all_web_targets = [c for c in configs if c['target_type'] == 'website']
-        fb_targets = [c for c in all_web_targets if 'facebook.com' in c['value']]
-        web_targets = [c for c in all_web_targets if 'facebook.com' not in c['value']]
+        all_web_targets = [c for c in configs if c.get('target_type') in ['website', 'webpage', 'source']]
+        fb_targets = [c for c in all_web_targets if 'facebook.com' in (c.get('value') or '')]
+        web_targets = [c for c in all_web_targets if 'facebook.com' not in (c.get('value') or '')]
 
         # 인스타그램 크롤러 실행
         if insta_targets:
@@ -66,7 +56,7 @@ async def run_crawlers():
         # 공공기관 크롤러 실행
         if web_targets:
             public = PublicScraper(db)
-            await public.scrape()
+            await public.scrape(web_targets)
 
         # 페이스북 크롤러 실행
         if fb_targets:

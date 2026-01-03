@@ -21,26 +21,9 @@ class AIExtractor:
             print("⚠️ GEMINI_API_KEY not found. AI extraction disabled.")
 
     def _load_prompt_from_db(self):
-        """Load AI prompt from Supabase configs table"""
-        try:
-            from supabase import create_client
-            import os
-
-            supabase_url = os.getenv("SUPABASE_URL") or os.getenv("NEXT_PUBLIC_SUPABASE_URL")
-            supabase_key = os.getenv("SUPABASE_KEY") or os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
-
-            if not supabase_url or not supabase_key:
-                return None
-
-            supabase = create_client(supabase_url, supabase_key)
-            response = supabase.from_("configs").select("value").eq("key", "ai_prompt").single().execute()
-
-            if response.data:
-                return response.data["value"]
-            return None
-        except Exception as e:
-            print(f"Warning: Could not load prompt from database: {e}")
-            return None
+        """Load AI prompt from Supabase (Disabled if table doesn't exist)"""
+        # 현재 DB 스킴에 configs 테이블이 안정적이지 않으므로 에러 무시 처리
+        return None
 
     async def extract_metadata(self, text: str, image_urls: list = None):
         if not self.enabled:

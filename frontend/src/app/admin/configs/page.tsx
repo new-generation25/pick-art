@@ -49,7 +49,7 @@ export default function AdminConfigPage() {
                     <div>
                         <h1 className="text-4xl font-black text-neutral-900 flex items-center gap-3">
                             <Settings className="w-10 h-10 text-indigo-600" />
-                            크롤링 설정 관리
+                            픽아트 크롤링 설정
                         </h1>
                         <div className="flex gap-4 mt-2">
                             <Link href="/admin/inbox" className="text-sm font-bold text-indigo-600 hover:underline">인박스 바로가기</Link>

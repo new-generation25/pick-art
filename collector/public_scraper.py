@@ -2,6 +2,9 @@ import aiohttp
 from bs4 import BeautifulSoup
 from database import Database
 import asyncio
+import random
+from urllib.parse import urljoin
+from ai_extractor import AIExtractor
 
 class PublicScraper:
     def __init__(self, db: Database):
@@ -15,35 +18,56 @@ class PublicScraper:
             }
         ]
 
-    async def scrape(self):
+    async def scrape(self, dynamic_targets=None):
+        targets_to_run = dynamic_targets if dynamic_targets else self.targets
+        
         async with aiohttp.ClientSession(headers={"User-Agent": "Mozilla/5.0"}) as session:
-            for target in self.targets:
-                print(f"Scraping public site: {target['name']}")
+            for target in targets_to_run:
+                target_name = target.get('name', 'unknown')
+                target_url = target.get('url') or target.get('value')
+                if not target_url or not target_url.startswith("http"): continue
+
+                print(f"Scraping public site: {target_name} ({target_url})", flush=True)
                 try:
-                    async with session.get(target['url']) as response:
+                    async with session.get(target_url) as response:
                         html = await response.text()
                         soup = BeautifulSoup(html, 'html.parser')
                         
                         # Board List Parsing
-                        # Example: gncaf.or.kr uses table or div list
-                        rows = soup.select(".board_list tbody tr") or soup.select("ul.list_type li")
+                        is_wgcc = "wgcc.ghct.or.kr" in target_url
+                        if is_wgcc:
+                            rows = soup.select("ul.img_list li")
+                        else:
+                            rows = soup.select(".board_list tbody tr") or soup.select("ul.list_type li") or soup.select(".table-list tr")
+                        
+                        print(f"  - Found {len(rows)} items in list", flush=True)
                         
                         for row in rows:
-                            link_elem = row.select_one("a")
-                            if not link_elem: continue
-                                
-                            href = link_elem.get('href')
-                            if not href.startswith("http"):
-                                full_url = f"{target['base_url']}{href}"
+                            if is_wgcc:
+                                # data-idx와 data-board-id를 사용하여 URL 생성
+                                data_idx = row.attrs.get('data-idx')
+                                if not data_idx: continue
+                                full_url = f"https://wgcc.ghct.or.kr/board/detail/show01_01/{data_idx}?boardId=show01_01"
+                                title_elem = row.select_one("p")
+                                title = title_elem.get_text(strip=True) if title_elem else "제목 없음"
                             else:
-                                full_url = href
-                                
-                            if self.db.check_duplicate(full_url): continue
+                                link_elem = row.select_one("a")
+                                if not link_elem: continue
                                     
-                            title = link_elem.get_text(strip=True)
-                            
+                                href = link_elem.get('href')
+                                if not href or href == "#": continue
+                                
+                                base_url = target.get('base_url') or "/".join(target_url.split("/")[:3])
+                                full_url = urljoin(base_url, href)
+                                title = link_elem.get_text(strip=True)
+                                
+                            if self.db.check_duplicate(full_url): 
+                                print(f"  - Skipping duplicate: {title[:20]}...", flush=True)
+                                continue
+                                    
+                            print(f"  * New event found: {title}", flush=True)
                             # Scrape Detail
-                            await self.scrape_detail(session, full_url, target["name"], title)
+                            await self.scrape_detail(session, full_url, target_name, title)
                             await asyncio.sleep(random.uniform(1, 3))
                                 
                 except Exception as e:
@@ -60,9 +84,9 @@ class PublicScraper:
                 description = content_div.get_text(strip=True) if content_div else ""
                 
                 # AI Metadata Extraction
-                from ai_extractor import AIExtractor
                 ai = AIExtractor()
                 ai_input = f"제목: {title}\n본문: {description}"
+                print(f"  - Extracting AI metadata for: {title[:20]}...")
                 ai_suggestion = await ai.extract_metadata(ai_input)
                 
                 img_elements = soup.select(".board_view_cont img") or soup.select(".view_content img")
@@ -74,7 +98,6 @@ class PublicScraper:
                 permanent_img_urls = []
                 img_hashes = []
                 from utils import process_and_upload_image
-                from urllib.parse import urljoin
                 
                 if img_urls:
                     source_id = url.split("=")[-1] # Simplified ID extraction

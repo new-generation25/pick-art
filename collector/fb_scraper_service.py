@@ -98,8 +98,7 @@ class FacebookScraper:
                             const linkTag = article.querySelector('a[href*="/story.php"], a[href*="/groups/"]');
                             let link = linkTag ? linkTag.href : window.location.href;
                             
-                            console.log(`Extracted: ${text.substring(0, 30)}... [${imgs.length} imgs]`);
-
+                            // 개인정보 보호: 추출 과정 로깅 제거
                             if (text.length < 5 && imgs.length === 0) return null;
 
                             return { text, images: imgs, link };
@@ -119,10 +118,9 @@ class FacebookScraper:
                         post_link = post['link'] if post['link'] else f"{url}#{hash(post['text'][:20])}"
                         
                         if self.db.check_duplicate(post_link):
-                            print(f"Duplicate found: {post_link}")
                             continue
 
-                        print(f"Processing post: {post['text'][:30]}...")
+                        print(f"  * Analyzing new Facebook post from {source_name}...")
 
                         # 1. Image Processing (Download first!)
                         permanent_img_urls = []

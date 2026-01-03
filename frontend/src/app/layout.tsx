@@ -8,9 +8,9 @@ import { cn } from "@/lib/utils";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("http://localhost:3001"),
-  title: "경남 아트 네비게이터 | Gyeongnam Art Navi",
-  description: "경남 지역의 모든 문화예술 정보를 한눈에",
+  metadataBase: new URL("http://localhost:3000"),
+  title: "픽아트 | pica - 경남 문화예술 큐레이션",
+  description: "경남의 전시, 공연, 행사를 가장 빠르고 정확하게 찾아보세요. 픽아트(pica)가 당신의 예술 생활을 안내합니다.",
 };
 
 const theme = createTheme({

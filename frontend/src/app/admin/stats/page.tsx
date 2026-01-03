@@ -68,8 +68,8 @@ export default function AdminStatsPage() {
                             <BarChart3 size={24} />
                         </ThemeIcon>
                         <Box>
-                            <Title order={1} size={rem(32)} fw={900}>시스템 통계</Title>
-                            <Text c="dimmed" fw={500}>경남 아트 네비게이터의 실시간 운영 지표를 확인합니다.</Text>
+                            <Title order={1} size={rem(32)} fw={900}>픽아트 시스템 통계</Title>
+                            <Text c="dimmed" fw={500}>픽아트(pica)의 실시간 수집 및 발행 지표를 확인합니다.</Text>
                         </Box>
                     </Group>
                 </Group>

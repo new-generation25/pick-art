@@ -128,6 +128,7 @@ class InstaScraper:
                 "source_id": post.shortcode,
                 "source_url": post_url,
                 "content": {
+                    "title": (description.split('\n')[0].strip()[:50] or "제목 없음") if description else "제목 없음",
                     "description": description,
                     "date": post.date_utc.isoformat(),
                     "author": post.owner_username,

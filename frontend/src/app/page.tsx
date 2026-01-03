@@ -87,7 +87,7 @@ export default async function Home({ searchParams }: HomeProps) {
           </Title>
           <Text size="xl" c="dimmed" mb={50} maw={600} mx="auto">
             전시, 공연, 축제부터 숨겨진 문화 행사까지.<br />
-            경남 아트 네비게이터가 엄선한 정보를 한눈에 확인하세요.
+            당신이 놓쳤던 감동적인 순간을 픽아트(pica)가 찾아드립니다.
           </Text>
 
           <Box maw={600} mx="auto">
@@ -208,8 +208,8 @@ export default async function Home({ searchParams }: HomeProps) {
       {/* Footer */}
       <Box component="footer" py={60} bg="white" style={{ borderTop: '1px solid var(--mantine-color-gray-2)' }}>
         <Container size="lg" ta="center">
-          <Text c="dimmed" size="sm" mb={8}>&copy; 2024 Gyeongnam Art Navigator. All rights reserved.</Text>
-          <Text c="dimmed" size="sm">Created by Max with AI Assistant</Text>
+          <Text c="dimmed" size="sm" mb={8}>&copy; 2024 pickart (pica). All rights reserved.</Text>
+          <Text c="dimmed" size="sm" fw={700} variant="gradient" gradient={{ from: 'indigo', to: 'violet', deg: 45 }}>Pick Art for Your Creative Life</Text>
         </Container>
       </Box>
     </Box>

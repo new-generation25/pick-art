@@ -207,7 +207,7 @@ export default function AdminInboxPage() {
     const copyDMMessage = (post: RawPost) => {
         const author = post.content.username || "작가";
         const title = post.content.title || "작품/행사";
-        const message = `안녕하세요, 경남 아트 네비게이터입니다.\n@${author}님께서 올리신 '${title}' 정보를 저희 사이트에 소개하고 싶어 연락드렸습니다.\n\n출처 표기 및 원본 링크를 함께 게시하며, 언제든 삭제 요청이 가능합니다.\n내용 확인차 연락드렸는데, 혹시 게시를 허락해 주실 수 있을까요?\n감사합니다!`;
+        const message = `안녕하세요, 픽아트(pica)입니다.\n@${author}님께서 올리신 '${title}' 정보를 저희 사이트에 소개하고 싶어 연락드렸습니다.\n\n출처 표기 및 원본 링크를 함께 게시하며, 언제든 삭제 요청이 가능합니다.\n내용 확인차 연락드렸는데, 혹시 게시를 허락해 주실 수 있을까요?\n감사합니다!`;
 
         navigator.clipboard.writeText(message);
         setCopiedId(post.id);
@@ -226,8 +226,8 @@ export default function AdminInboxPage() {
                             <Inbox size={24} />
                         </ThemeIcon>
                         <Box>
-                            <Title order={1} size={rem(32)} fw={900}>인박스 (Curation)</Title>
-                            <Text c="dimmed" fw={500}>수집된 원본 데이터를 검토하고 발행 승인을 결정합니다.</Text>
+                            <Title order={1} size={rem(32)} fw={900}>픽아트 인박스 (Curation)</Title>
+                            <Text c="dimmed" fw={500}>수집된 원본 데이터를 픽아트 스타일로 검토하고 발행합니다.</Text>
                         </Box>
                     </Group>
 
