@@ -75,7 +75,7 @@ export function AdminHeader() {
                             variant={pathname === '/admin' ? "filled" : "subtle"}
                             color="indigo" size="xs" leftSection={<Home size={14} />}
                         >
-                            홈
+                            관리자 홈
                         </Button>
                         <Button
                             component={Link} href="/admin/inbox"
