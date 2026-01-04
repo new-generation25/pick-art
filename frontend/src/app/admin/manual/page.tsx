@@ -149,38 +149,41 @@ export default function AdminManualAddPage() {
                     </Group>
                     <Button
                         component={Link}
-                        href="/admin/configs"
-                        variant="subtle"
+                        href="/admin"
+                        variant="light"
                         color="gray"
+                        radius="xl"
                         leftSection={<ArrowLeft size={18} />}
                     >
-                        관리자 홈으로
+                        관리자 홈
                     </Button>
                 </Group>
 
-                <Paper radius="xl" p={{ base: 'md', md: 60 }} withBorder shadow="md" style={{ position: 'relative', overflow: 'hidden' }}>
-                    <LoadingOverlay visible={loading || uploading} overlayProps={{ radius: 'sm', blur: 2 }} />
+                <Paper radius="xl" p="xl" withBorder shadow="sm" style={{ position: 'relative', overflow: 'hidden' }}>
+                    <LoadingOverlay visible={loading || uploading} overlayProps={{ radius: 'xl', blur: 2 }} />
 
                     <form onSubmit={handleSubmit}>
-                        <Stack gap="xl">
+                        <Stack gap="lg">
+                            {/* Title Section */}
                             <TextInput
                                 label="행사 제목"
                                 placeholder="예: 2024 경남 아트 페스티벌"
                                 required
                                 value={formData.title}
                                 onChange={e => setFormData({ ...formData, title: e.target.value })}
-                                size="lg"
+                                size="md"
                                 radius="md"
                                 fw={700}
                             />
 
-                            <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg">
+                            {/* Row 1: Basic Info (3 columns) */}
+                            <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
                                 <Select
                                     label="카테고리"
                                     data={['공연', '전시', '축제', '강연', '체험']}
                                     value={formData.category}
                                     onChange={val => setFormData({ ...formData, category: val || '공연' })}
-                                    size="lg"
+                                    size="md"
                                     radius="md"
                                 />
                                 <Select
@@ -188,117 +191,120 @@ export default function AdminManualAddPage() {
                                     data={['창원', '김해', '진주', '통영', '거제', '양산', '밀양']}
                                     value={formData.region}
                                     onChange={val => setFormData({ ...formData, region: val || '창원' })}
-                                    size="lg"
+                                    size="md"
+                                    radius="md"
+                                />
+                                <TextInput
+                                    label="장소"
+                                    placeholder="예: 경남도립미술관"
+                                    value={formData.venue}
+                                    onChange={e => setFormData({ ...formData, venue: e.target.value })}
+                                    size="md"
                                     radius="md"
                                 />
                             </SimpleGrid>
 
-                            <TextInput
-                                label="장소"
-                                placeholder="예: 경남도립미술관"
-                                value={formData.venue}
-                                onChange={e => setFormData({ ...formData, venue: e.target.value })}
-                                size="lg"
-                                radius="md"
-                            />
+                            {/* Row 2: Event Details (3 columns) */}
+                            <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
+                                <TextInput
+                                    type="date"
+                                    label="시작 일자"
+                                    value={formData.event_date_start}
+                                    onChange={e => setFormData({ ...formData, event_date_start: e.target.value })}
+                                    size="md"
+                                    radius="md"
+                                />
+                                <TextInput
+                                    label="가격 정보"
+                                    placeholder="예: 무료 또는 5,000원"
+                                    value={formData.price_info}
+                                    onChange={e => setFormData({ ...formData, price_info: e.target.value })}
+                                    size="md"
+                                    radius="md"
+                                />
+                                <TextInput
+                                    label="출처 URL"
+                                    placeholder="https://..."
+                                    value={formData.source_url}
+                                    onChange={e => setFormData({ ...formData, source_url: e.target.value })}
+                                    size="md"
+                                    radius="md"
+                                />
+                            </SimpleGrid>
 
-                            <TextInput
-                                type="date"
-                                label="시작 일자"
-                                value={formData.event_date_start}
-                                onChange={e => setFormData({ ...formData, event_date_start: e.target.value })}
-                                size="lg"
-                                radius="md"
-                            />
-
-                            <TextInput
-                                label="가격 정보"
-                                placeholder="예: 무료 또는 5,000원"
-                                value={formData.price_info}
-                                onChange={e => setFormData({ ...formData, price_info: e.target.value })}
-                                size="lg"
-                                radius="md"
-                            />
-
-                            <TextInput
-                                label="출처 URL"
-                                placeholder="https://..."
-                                value={formData.source_url}
-                                onChange={e => setFormData({ ...formData, source_url: e.target.value })}
-                                size="lg"
-                                radius="md"
-                                description="행사 정보의 원본 링크를 입력해주세요."
-                            />
-
-                            <Box>
-                                <Text fw={700} mb="xs">포스터 이미지</Text>
-
-                                <Paper p="xl" withBorder radius="lg" bg="gray.0" style={{ borderStyle: 'dashed' }}>
-                                    {imagePreview ? (
-                                        <Box pos="relative" maw={400} mx="auto">
-                                            <img
-                                                src={imagePreview}
-                                                alt="미리보기"
-                                                style={{ width: '100%', borderRadius: 'var(--mantine-radius-md)', display: 'block' }}
-                                            />
-                                            <ActionIcon
-                                                color="red"
-                                                variant="filled"
-                                                size="lg"
-                                                radius="xl"
-                                                style={{ position: 'absolute', top: 10, right: 10 }}
-                                                onClick={removeImage}
-                                            >
-                                                <X size={18} />
-                                            </ActionIcon>
-                                        </Box>
-                                    ) : (
-                                        <Stack align="center" gap="md">
-                                            <ThemeIcon size={64} radius="xl" color="indigo" variant="light">
-                                                <Upload size={32} />
-                                            </ThemeIcon>
-                                            <Box ta="center">
-                                                <Text size="lg" fw={700}>이미지 파일 업로드</Text>
-                                                <Text c="dimmed" size="sm">클릭하여 파일을 선택하세요 (최대 5MB)</Text>
+                            {/* Row 3: Image & Description (2 columns) */}
+                            <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl">
+                                <Box>
+                                    <Text fw={700} mb={6} size="sm">포스터 이미지</Text>
+                                    <Paper p="md" withBorder radius="md" bg="gray.0" style={{ borderStyle: 'dashed', minHeight: 180, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        {imagePreview ? (
+                                            <Box pos="relative" w="100%" maw={240}>
+                                                <img
+                                                    src={imagePreview}
+                                                    alt="미리보기"
+                                                    style={{ width: '100%', borderRadius: 'var(--mantine-radius-md)', display: 'block' }}
+                                                />
+                                                <ActionIcon
+                                                    color="red"
+                                                    variant="filled"
+                                                    size="sm"
+                                                    radius="md"
+                                                    style={{ position: 'absolute', top: -10, right: -10 }}
+                                                    onClick={removeImage}
+                                                >
+                                                    <X size={14} />
+                                                </ActionIcon>
                                             </Box>
-                                            <FileButton onChange={handleImageUpload} accept="image/png,image/jpeg">
-                                                {(props) => <Button {...props} variant="outline" color="indigo">파일 선택하기</Button>}
-                                            </FileButton>
+                                        ) : (
+                                            <Stack align="center" gap={8} w="100%">
+                                                <ThemeIcon size={40} radius="md" color="indigo" variant="light">
+                                                    <Upload size={20} />
+                                                </ThemeIcon>
+                                                <Box ta="center">
+                                                    <Text fw={700} size="sm">이미지 업로드</Text>
+                                                    <Text c="dimmed" style={{ fontSize: rem(10) }}>최대 5MB (png, jpg)</Text>
+                                                </Box>
+                                                <Group gap={5}>
+                                                    <FileButton onChange={handleImageUpload} accept="image/png,image/jpeg">
+                                                        {(props) => <Button {...props} variant="outline" color="indigo" radius="md" size="xs">파일 선택</Button>}
+                                                    </FileButton>
+                                                </Group>
+                                                <TextInput
+                                                    placeholder="또는 URL 입력"
+                                                    value={formData.poster_image_url}
+                                                    onChange={e => setFormData({ ...formData, poster_image_url: e.target.value })}
+                                                    w="100%"
+                                                    size="xs"
+                                                    radius="md"
+                                                    leftSection={<ImageIcon size={12} />}
+                                                />
+                                            </Stack>
+                                        )}
+                                    </Paper>
+                                </Box>
 
-                                            <Text size="sm" c="dimmed" my="xs">또는</Text>
-
-                                            <TextInput
-                                                placeholder="이미지 URL 입력 (https://...)"
-                                                value={formData.poster_image_url}
-                                                onChange={e => setFormData({ ...formData, poster_image_url: e.target.value })}
-                                                w="100%"
-                                                maw={400}
-                                                leftSection={<ImageIcon size={16} />}
-                                            />
-                                        </Stack>
-                                    )}
-                                </Paper>
-                            </Box>
-
-                            <Textarea
-                                label="상세 설명"
-                                placeholder="행사 내용을 상세히 입력하세요."
-                                value={formData.description}
-                                onChange={e => setFormData({ ...formData, description: e.target.value })}
-                                minRows={6}
-                                size="lg"
-                                radius="md"
-                            />
+                                <Textarea
+                                    label="상세 설명"
+                                    placeholder="행사 내용을 상세히 입력하세요."
+                                    value={formData.description}
+                                    onChange={e => setFormData({ ...formData, description: e.target.value })}
+                                    minRows={15}
+                                    size="md"
+                                    radius="md"
+                                    styles={{ root: { display: 'flex', flexDirection: 'column' }, wrapper: { flex: 1 }, input: { flex: 1 } }}
+                                />
+                            </SimpleGrid>
 
                             <Button
                                 type="submit"
-                                size="xl"
-                                radius="xl"
-                                color="dark"
-                                h={70}
+                                size="lg"
+                                radius="md"
+                                color="indigo"
+                                h={54}
                                 disabled={loading || uploading}
-                                leftSection={<Save size={24} />}
-                                style={{ boxShadow: 'var(--mantine-shadow-xl)' }}
+                                leftSection={<Save size={20} />}
+                                mt="md"
+                                style={{ boxShadow: 'var(--mantine-shadow-md)' }}
                             >
                                 {uploading ? "이미지 업로드 중..." : loading ? "저장 중..." : "행사 등록 완료"}
                             </Button>
