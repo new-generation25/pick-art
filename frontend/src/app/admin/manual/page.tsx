@@ -288,10 +288,13 @@ export default function AdminManualAddPage() {
                                     placeholder="행사 내용을 상세히 입력하세요."
                                     value={formData.description}
                                     onChange={e => setFormData({ ...formData, description: e.target.value })}
-                                    minRows={15}
                                     size="md"
                                     radius="md"
-                                    styles={{ root: { display: 'flex', flexDirection: 'column' }, wrapper: { flex: 1 }, input: { flex: 1 } }}
+                                    styles={{
+                                        root: { flex: 1, display: 'flex', flexDirection: 'column' },
+                                        wrapper: { flex: 1, display: 'flex', flexDirection: 'column' },
+                                        input: { flex: 1, minHeight: rem(280) }
+                                    }}
                                 />
                             </SimpleGrid>
 
