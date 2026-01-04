@@ -29,21 +29,31 @@ export default function AdminDashboard() {
     const fetchStats = async () => {
         setIsLoading(true);
         try {
-            // 1. 전체 이벤트 수
-            const { count: eventCount } = await supabase.from('events').select('*', { count: 'exact', head: true });
-
-            // 2. 오늘 수집된 로그 수 (간이 계산)
-            const today = new Date().toISOString().split('T')[0];
-            const { count: crawlCount } = await supabase
-                .from('crawl_logs')
+            // 1. 전체 이벤트 수 (발행된 것만)
+            const { count: eventCount } = await supabase
+                .from('events')
                 .select('*', { count: 'exact', head: true })
-                .gte('started_at', today);
+                .eq('status', 'PUBLISHED');
 
-            // 3. 인박스 대기 건수
-            const { count: inboxCount } = await supabase.from('inbox').select('*', { count: 'exact', head: true });
+            // 2. 오늘 수집된 로그 수 (crawl_logs가 없는 경우 raw_posts의 collected_at 기준)
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const { count: crawlCount } = await supabase
+                .from('raw_posts')
+                .select('*', { count: 'exact', head: true })
+                .gte('collected_at', today.toISOString());
+
+            // 3. 인박스 대기 건수 (raw_posts 중 COLLECTED 또는 PENDING 상태)
+            const { count: inboxCount } = await supabase
+                .from('raw_posts')
+                .select('*', { count: 'exact', head: true })
+                .or('status.eq.COLLECTED,status.eq.PENDING');
 
             // 4. 구독자 수
-            const { count: subCount } = await supabase.from('subscribers').select('*', { count: 'exact', head: true });
+            const { count: subCount } = await supabase
+                .from('subscribers')
+                .select('*', { count: 'exact', head: true });
 
             setStats({
                 totalEvents: eventCount || 0,
