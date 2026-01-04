@@ -51,9 +51,10 @@ export function AdminHeader() {
             position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000
         }}>
             <Container size="xl" h="100%">
-                <Group h="100%" justify="space-between">
-                    <Group gap={30}>
-                        <Link href="/" style={{ textDecoration: 'none' }}>
+                <Box h="100%" style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+                    {/* Left: Logo */}
+                    <Box style={{ position: 'absolute', left: 0 }}>
+                        <Link href="/admin" style={{ textDecoration: 'none' }}>
                             <Group gap={8}>
                                 <Box style={{
                                     width: 32, height: 32,
@@ -65,51 +66,52 @@ export function AdminHeader() {
                                 <Text fw={900} size="lg" c="dark">pica Admin</Text>
                             </Group>
                         </Link>
+                    </Box>
 
-                        {/* Admin Navigation Menu */}
-                        <Group gap="md">
-                            <Button
-                                component={Link} href="/admin/inbox"
-                                variant={isActive('/inbox') ? "filled" : "subtle"}
-                                color="indigo" size="xs" leftSection={<Inbox size={14} />}
-                            >
-                                인박스
-                            </Button>
-                            <Button
-                                component={Link} href="/admin/manual"
-                                variant={isActive('/manual') ? "filled" : "subtle"}
-                                color="indigo" size="xs" leftSection={<PlusCircle size={14} />}
-                            >
-                                직접등록
-                            </Button>
-                            <Button
-                                component={Link} href="/admin/sources"
-                                variant={isActive('/sources') ? "filled" : "subtle"}
-                                color="indigo" size="xs" leftSection={<Database size={14} />}
-                            >
-                                출처관리
-                            </Button>
-                            <Button
-                                component={Link} href="/admin/subscribers"
-                                variant={isActive('/subscribers') ? "filled" : "subtle"}
-                                color="indigo" size="xs" leftSection={<Users size={14} />}
-                            >
-                                구독자
-                            </Button>
-                            <Button
-                                component={Link} href="/admin/ai-prompt"
-                                variant={isActive('/ai-prompt') ? "filled" : "subtle"}
-                                color="indigo" size="xs" leftSection={<Sparkles size={14} />}
-                            >
-                                AI프롬프트
-                            </Button>
-                        </Group>
+                    {/* Center: Admin Navigation Menu */}
+                    <Group gap="xs" style={{ flex: 1, justifyContent: 'center' }}>
+                        <Button
+                            component={Link} href="/admin"
+                            variant={pathname === '/admin' ? "filled" : "subtle"}
+                            color="indigo" size="xs" leftSection={<Home size={14} />}
+                        >
+                            홈
+                        </Button>
+                        <Button
+                            component={Link} href="/admin/inbox"
+                            variant={isActive('/inbox') ? "filled" : "subtle"}
+                            color="indigo" size="xs" leftSection={<Inbox size={14} />}
+                        >
+                            인박스
+                        </Button>
+                        <Button
+                            component={Link} href="/admin/sources"
+                            variant={isActive('/sources') ? "filled" : "subtle"}
+                            color="indigo" size="xs" leftSection={<Database size={14} />}
+                        >
+                            출처관리
+                        </Button>
+                        <Button
+                            component={Link} href="/admin/manual"
+                            variant={isActive('/manual') ? "filled" : "subtle"}
+                            color="indigo" size="xs" leftSection={<PlusCircle size={14} />}
+                        >
+                            직접등록
+                        </Button>
+                        <Button
+                            component={Link} href="/admin/subscribers"
+                            variant={isActive('/subscribers') ? "filled" : "subtle"}
+                            color="indigo" size="xs" leftSection={<Users size={14} />}
+                        >
+                            구독자
+                        </Button>
                     </Group>
 
-                    <Group gap="sm">
+                    {/* Right: User Menu */}
+                    <Group gap="sm" style={{ position: 'absolute', right: 0 }}>
                         <Tooltip label="사용자 페이지로 이동">
                             <ActionIcon component={Link} href="/" variant="light" color="blue" size="lg" radius="md">
-                                <Home size={20} />
+                                <LayoutDashboard size={20} />
                             </ActionIcon>
                         </Tooltip>
 
@@ -130,7 +132,7 @@ export function AdminHeader() {
                             </Menu.Dropdown>
                         </Menu>
                     </Group>
-                </Group>
+                </Box>
             </Container>
         </Box>
     );

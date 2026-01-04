@@ -1,16 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import {
     Plus, Search, Trash2, Edit2, Check, X,
-    RefreshCcw, AlertCircle, Clock, Loader2, StopCircle
+    RefreshCcw, AlertCircle, Clock, Loader2, StopCircle, Sparkles
 } from "lucide-react";
 import {
     Container, Title, Text, Button, Group, Stack,
     TextInput, Select, Badge, ActionIcon, Paper,
     SimpleGrid, Modal, SegmentedControl,
-    LoadingOverlay, Timeline, Box, Alert, Progress
+    LoadingOverlay, Timeline, Box, Alert, Progress, Tooltip
 } from "@mantine/core";
 
 type SourceType = "trusted" | "blocked";
@@ -257,9 +258,20 @@ export default function SourcesPage() {
                             )}
                         </Group>
                     </Stack>
-                    <Button leftSection={<Plus size={16} />} onClick={() => handleOpenModal()}>
-                        추가하기
-                    </Button>
+                    <Group gap="sm">
+                        <Button
+                            component={Link}
+                            href="/admin/ai-prompt"
+                            variant="light"
+                            color="grape"
+                            leftSection={<Sparkles size={16} />}
+                        >
+                            AI 프롬프트 설정
+                        </Button>
+                        <Button leftSection={<Plus size={16} />} onClick={() => handleOpenModal()}>
+                            출처 추가
+                        </Button>
+                    </Group>
                 </Group>
 
                 {/* 실시간 크롤링 상태 영역 */}
