@@ -13,16 +13,15 @@ interface EventProps {
     isFree?: boolean;
 }
 
-export function EventCard({ event, priority = false }: { event: EventProps; priority?: boolean }) {
-    return (
-        <Link href={`/events/${event.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-            <Card
+export function EventCard({ event, priority = false, disableNavigation = false }: { event: EventProps; priority?: boolean; disableNavigation?: boolean }) {
+    const CardContent = (
+        <Card
                 shadow="sm"
                 padding="md"
                 radius="lg"
                 withBorder
-                className="transition-all duration-300 hover:shadow-xl hover:-translate-y-2"
-                style={{ height: '100%' }}
+                className={disableNavigation ? "" : "transition-all duration-300 hover:shadow-xl hover:-translate-y-2"}
+                style={{ height: '100%', cursor: disableNavigation ? 'pointer' : 'default' }}
             >
                 {/* 카드 상단 이미지 영역 (기존 Card.Section 역할 대체) */}
                 <div style={{ margin: rem(-16), marginBottom: rem(16), position: 'relative', overflow: 'hidden', borderTopLeftRadius: 'inherit', borderTopRightRadius: 'inherit' }}>
@@ -31,7 +30,7 @@ export function EventCard({ event, priority = false }: { event: EventProps; prio
                             src={event.imageUrl || `https://picsum.photos/seed/${event.id}/400/600`}
                             alt={event.title}
                             fill
-                            className="object-cover transition-transform duration-500 hover:scale-105"
+                            className={disableNavigation ? "object-cover" : "object-cover transition-transform duration-500 hover:scale-105"}
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                             priority={priority}
                         />
@@ -70,6 +69,24 @@ export function EventCard({ event, priority = false }: { event: EventProps; prio
                     </Box>
                 </Stack>
             </Card>
+    );
+
+    if (disableNavigation) {
+        return CardContent;
+    }
+
+    return (
+        <Link
+            href={`/events/${event.id}`}
+            style={{
+                textDecoration: 'none',
+                color: 'inherit',
+                display: 'block',
+                WebkitTapHighlightColor: 'transparent',
+                touchAction: 'manipulation'
+            }}
+        >
+            {CardContent}
         </Link>
     );
 }

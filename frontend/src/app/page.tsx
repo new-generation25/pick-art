@@ -23,6 +23,7 @@ interface HomeProps {
     region?: string;
     category?: string;
     q?: string;
+    date?: string;
     subscribed?: string;
   }>;
 }
@@ -32,7 +33,8 @@ export default async function Home({ searchParams }: HomeProps) {
   const filters = {
     region: resolvedParams.region,
     category: resolvedParams.category,
-    search: resolvedParams.q
+    search: resolvedParams.q,
+    date: resolvedParams.date
   };
 
   const dbEvents = await getPublishedEvents(filters);

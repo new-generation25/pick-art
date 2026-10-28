@@ -103,7 +103,7 @@ export function AdminHeader() {
                             variant={isActive('/subscribers') ? "filled" : "subtle"}
                             color="indigo" size="xs" leftSection={<Users size={14} />}
                         >
-                            구독자
+                            구독자 관리
                         </Button>
                     </Group>
 

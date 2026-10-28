@@ -1,34 +1,193 @@
 {
-    "projectName": "Gyeongnam Art Navigator",
-    "techStack": {
-        "frontend": [
-            "Next.js",
-            "TypeScript",
-            "TailwindCSS",
-            "Lucide React",
-            "Supabase SDK"
-        ],
-        "backend": [
-            "Python",
-            "Playwright",
-            "Streamlit",
-            "Supabase SDK",
-            "Google Gemini AI",
-            "BeautifulSoup4",
-            "AIOHTTP"
-        ],
-        "database": [
-            "Supabase (PostgreSQL)",
-            "Supabase Storage"
-        ]
-    },
-    "coreFeatures": [
-        "Instagram & Public Site Web Scraping",
-        "AI-Powered Event Metadata Extraction (Gemini)",
-        "Image Processing & Thumbnail Optimization",
-        "Admin Dashboard for Data Curation & DM Management",
-        "Telegram Notification System",
-        "User Frontend with Search & Filtering"
+    "tech_stack": [
+        "TypeScript",
+        "Next.js 16",
+        "React 19",
+        "Mantine UI",
+        "Tailwind CSS 4",
+        "Supabase",
+        "PostgreSQL",
+        "Lucide React Icons"
     ],
-    "architecture": "Monorepo with separate modules for frontend, collector, and admin, integrated via Supabase."
+    "features": [
+        {
+            "name": "Main Landing Page",
+            "description": "Main page displaying cultural and art events with newsletter subscription feature",
+            "files": [
+                "frontend/src/app/page.tsx",
+                "frontend/src/app/layout.tsx",
+                "frontend/src/app/globals.css"
+            ]
+        },
+        {
+            "name": "Event List Component",
+            "description": "Displays list of curated cultural events with filtering and pagination",
+            "files": [
+                "frontend/src/components/ui/EventList.tsx",
+                "frontend/src/components/ui/EventCard.tsx"
+            ]
+        },
+        {
+            "name": "Filter Bar",
+            "description": "Filter component for filtering events by category, date, and region",
+            "files": [
+                "frontend/src/components/ui/FilterBar.tsx"
+            ]
+        },
+        {
+            "name": "Header Component",
+            "description": "Main navigation header with logo and navigation links",
+            "files": [
+                "frontend/src/components/ui/Header.tsx"
+            ]
+        },
+        {
+            "name": "Admin Dashboard",
+            "description": "Admin dashboard for managing events, configurations, and subscribers",
+            "files": [
+                "frontend/src/app/admin/page.tsx",
+                "frontend/src/app/admin/layout.tsx"
+            ]
+        },
+        {
+            "name": "Admin Header",
+            "description": "Admin navigation header with logout and navigation",
+            "files": [
+                "frontend/src/components/ui/AdminHeader.tsx"
+            ]
+        },
+        {
+            "name": "Admin Inbox",
+            "description": "Inbox for reviewing and approving/rejecting crawled events",
+            "files": [
+                "frontend/src/app/admin/inbox/page.tsx"
+            ]
+        },
+        {
+            "name": "Admin Subscribers",
+            "description": "Subscriber management for newsletter subscribers",
+            "files": [
+                "frontend/src/app/admin/subscribers/page.tsx"
+            ]
+        },
+        {
+            "name": "Admin Configs",
+            "description": "Crawler configuration management page",
+            "files": [
+                "frontend/src/app/admin/configs/page.tsx"
+            ]
+        },
+        {
+            "name": "Admin Manual Registration",
+            "description": "Manual event registration page for adding events manually",
+            "files": [
+                "frontend/src/app/admin/manual/page.tsx"
+            ]
+        },
+        {
+            "name": "Admin Sources",
+            "description": "Crawl source management for managing crawl targets",
+            "files": [
+                "frontend/src/app/admin/sources/page.tsx"
+            ]
+        },
+        {
+            "name": "Admin Whitelist",
+            "description": "Keyword whitelist management for auto-approval",
+            "files": [
+                "frontend/src/app/admin/whitelist/page.tsx"
+            ]
+        },
+        {
+            "name": "Admin Blacklist",
+            "description": "Keyword blacklist management for auto-rejection",
+            "files": [
+                "frontend/src/app/admin/blacklist/page.tsx"
+            ]
+        },
+        {
+            "name": "Admin Stats",
+            "description": "Statistics dashboard showing crawl and event metrics",
+            "files": [
+                "frontend/src/app/admin/stats/page.tsx"
+            ]
+        },
+        {
+            "name": "Admin AI Prompt",
+            "description": "AI prompt configuration for event classification",
+            "files": [
+                "frontend/src/app/admin/ai-prompt/page.tsx"
+            ]
+        },
+        {
+            "name": "Login Page",
+            "description": "User login page with email/password authentication",
+            "files": [
+                "frontend/src/app/login/page.tsx"
+            ]
+        },
+        {
+            "name": "Signup Page",
+            "description": "User registration page",
+            "files": [
+                "frontend/src/app/signup/page.tsx"
+            ]
+        },
+        {
+            "name": "Events Page",
+            "description": "Public events listing page",
+            "files": [
+                "frontend/src/app/events/page.tsx"
+            ]
+        },
+        {
+            "name": "Settings Page",
+            "description": "User settings and preferences page",
+            "files": [
+                "frontend/src/app/settings/page.tsx"
+            ]
+        },
+        {
+            "name": "Supabase Client",
+            "description": "Supabase client configuration for database and auth",
+            "files": [
+                "frontend/src/lib/supabase.ts"
+            ]
+        },
+        {
+            "name": "Utility Functions",
+            "description": "Common utility functions including class name merging",
+            "files": [
+                "frontend/src/lib/utils.ts"
+            ]
+        },
+        {
+            "name": "Image With Fallback",
+            "description": "Image component with fallback handling for broken images",
+            "files": [
+                "frontend/src/components/ui/ImageWithFallback.tsx"
+            ]
+        },
+        {
+            "name": "Share Button",
+            "description": "Social sharing button component",
+            "files": [
+                "frontend/src/components/ui/ShareButton.tsx"
+            ]
+        },
+        {
+            "name": "Main Layout",
+            "description": "Main layout wrapper component",
+            "files": [
+                "frontend/src/components/MainLayout.tsx"
+            ]
+        },
+        {
+            "name": "API Routes",
+            "description": "Next.js API routes for backend functionality",
+            "files": [
+                "frontend/src/app/api/"
+            ]
+        }
+    ]
 }

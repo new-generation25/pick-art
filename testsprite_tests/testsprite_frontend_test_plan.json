@@ -1,0 +1,385 @@
+[
+  {
+    "id": "TC001",
+    "title": "Instagram Hashtag Crawling - Normal Flow",
+    "description": "Verify that the crawler correctly collects posts from Instagram hashtags relevant to Gyeongnam art events without duplicates and with error rate below threshold.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Trigger the Instagram hashtag crawler to collect data"
+      },
+      {
+        "type": "assertion",
+        "description": "Check collected posts are stored in the database"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify no duplicate posts are saved beyond the allowed 20% threshold"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm error rate of crawling is below 5%"
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "Public Institution Website Crawling - Edge Cases and Error Handling",
+    "description": "Validate crawler behavior when the public institution websites have invalid HTML, slow response, or missing data fields.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Simulate crawling of public sites with malformed HTML"
+      },
+      {
+        "type": "assertion",
+        "description": "Crawler handles invalid HTML without crashing and skips problematic entries"
+      },
+      {
+        "type": "action",
+        "description": "Simulate slow server response from public site"
+      },
+      {
+        "type": "assertion",
+        "description": "Crawler respects timeout limits and retries appropriately"
+      },
+      {
+        "type": "action",
+        "description": "Simulate missing required metadata fields in collected posts"
+      },
+      {
+        "type": "assertion",
+        "description": "Crawler flags incomplete data and does not store invalid entries"
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "AI Metadata Extraction Accuracy",
+    "description": "Test that AI-based metadata extraction (using Google Gemini AI) accurately extracts event name, date, location, and description from raw content.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Feed sample raw event data to AI metadata extractor"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify extracted metadata matches expected values with at least 95% accuracy"
+      },
+      {
+        "type": "action",
+        "description": "Test with ambiguous or noisy input data"
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure extractor handles ambiguity gracefully and flags uncertain fields"
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Duplicate Detection Logic",
+    "description": "Verify the system detects duplicates effectively and removes them to keep duplicate rate under 20%.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Input multiple event entries with overlapping metadata simulating duplicates"
+      },
+      {
+        "type": "assertion",
+        "description": "System identifies duplicates and removes or marks them accordingly"
+      },
+      {
+        "type": "assertion",
+        "description": "Final stored data has duplicates below 20% threshold"
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Image Optimization and Storage",
+    "description": "Check that event images are optimized in size and resolution, and correctly stored in Supabase Storage with permanent URL linkage.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Upload raw images via crawler or admin upload"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify images are optimized (thumbnails created, size reduced)"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm images are stored in Supabase Storage with correct permissions and retention"
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Admin Dashboard Workflow - Data Verification and Approval",
+    "description": "Verify that the admin dashboard allows efficient review of collected data with UI response time under 200ms and that admins can approve, reject (as spam), or send DMs efficiently within 30 seconds per item.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login to admin dashboard"
+      },
+      {
+        "type": "action",
+        "description": "Load data entry for review"
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure page loads within 200ms"
+      },
+      {
+        "type": "action",
+        "description": "Perform approval workflow: reject spam, approve promising info, send DM to artist"
+      },
+      {
+        "type": "assertion",
+        "description": "Validate admin can complete workflow within 30 seconds per item"
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Admin Dashboard - DM Management and Response Handling",
+    "description": "Test that DMs sent to artists via the admin dashboard are correctly sent and admin can update approval status based on artist response.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Send DM via dashboard to artist for event confirmation"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm DM is sent and notification received via Telegram"
+      },
+      {
+        "type": "action",
+        "description": "Receive artist response (approve or reject)"
+      },
+      {
+        "type": "assertion",
+        "description": "Dashboard updates event status correctly based on response"
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "User Website - Event Search and Filtering",
+    "description": "Verify that users can search and filter events by date, category, location with results displayed visually and page loads within 3 seconds.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to user event search page"
+      },
+      {
+        "type": "action",
+        "description": "Apply filters: event date, category, location"
+      },
+      {
+        "type": "assertion",
+        "description": "Results are filtered correctly and displayed with event images"
+      },
+      {
+        "type": "assertion",
+        "description": "Page loads in 3 seconds or less"
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "User Event Detail and Sharing Functionality",
+    "description": "Validate that users can view detailed event information and share event details through supported platforms.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click on event from listing to open detail page"
+      },
+      {
+        "type": "assertion",
+        "description": "All event details (name, date, location, images, description) are visible and accurate"
+      },
+      {
+        "type": "action",
+        "description": "Share event using provided share buttons"
+      },
+      {
+        "type": "assertion",
+        "description": "Sharing functionality correctly opens respective platform (e.g., social media or copy link)"
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Security - Admin Access Control",
+    "description": "Ensure only authorized admins can access the admin dashboard and perform data curation and DM sending, with proper authentication and role-based permissions.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Attempt to access admin dashboard without login"
+      },
+      {
+        "type": "assertion",
+        "description": "Access is denied and redirected to login page"
+      },
+      {
+        "type": "action",
+        "description": "Login as admin with valid credentials"
+      },
+      {
+        "type": "assertion",
+        "description": "Dashboard is accessible with admin privileges"
+      },
+      {
+        "type": "action",
+        "description": "Login as regular user and try to access admin dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Access is denied due to insufficient permissions"
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "System Uptime and Recovery",
+    "description": "Simulate system failures and verify that system uptime is maintained above 99.5% and recovery time after failure is under 1 hour.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Simulate server crash or network outage"
+      },
+      {
+        "type": "assertion",
+        "description": "System monitoring alerts via Telegram are triggered"
+      },
+      {
+        "type": "action",
+        "description": "Recover service and restore functionality"
+      },
+      {
+        "type": "assertion",
+        "description": "Full service restoration within 1 hour"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify overall uptime remains above 99.5% over monitoring period"
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Telegram Notification System",
+    "description": "Confirm that Telegram-based notifications are sent to admins for system status and data collection updates reliably and in real-time.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Trigger system event requiring notification (e.g., crawling completed, error detected)"
+      },
+      {
+        "type": "assertion",
+        "description": "Telegram notification is received by admin immediately"
+      },
+      {
+        "type": "action",
+        "description": "Verify that notification content is accurate and actionable"
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Privacy Compliance and Data Protection",
+    "description": "Test that user data and event data handle privacy laws compliance, with proper consent and secure storage mechanisms.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Attempt to access sensitive data without proper authorization"
+      },
+      {
+        "type": "assertion",
+        "description": "Access denied and data protection enforced"
+      },
+      {
+        "type": "action",
+        "description": "Check that user personal data collected via website is encrypted and stored securely"
+      },
+      {
+        "type": "assertion",
+        "description": "Data is encrypted at rest and in transit"
+      },
+      {
+        "type": "action",
+        "description": "Verify consent workflow for users to agree to privacy terms"
+      },
+      {
+        "type": "assertion",
+        "description": "Operations that require user data comply with consent and privacy laws"
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "Performance - API Response Times Under Load",
+    "description": "Measure API response times for backend endpoints under expected user loads to ensure responses are within 200ms.",
+    "category": "performance",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Simulate concurrent user requests to key APIs (search, event details, admin data)"
+      },
+      {
+        "type": "assertion",
+        "description": "API response times remain under 200ms for at least 95% of requests"
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "User Experience - Mobile First Responsive Design",
+    "description": "Validate that the user website's UI is mobile-first, responsive, and usable on common mobile devices and resolutions.",
+    "category": "ui",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open user event site on various mobile devices and screen sizes"
+      },
+      {
+        "type": "assertion",
+        "description": "UI elements are displayed correctly without overflow or truncation"
+      },
+      {
+        "type": "assertion",
+        "description": "Navigation and filtering are usable and intuitive on touch screens"
+      }
+    ]
+  }
+]

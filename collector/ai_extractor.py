@@ -10,6 +10,11 @@ load_dotenv(".env.local")
 
 class AIExtractor:
     def __init__(self):
+        # 🚨 EMERGENCY: AI 비활성화 (비용 문제로 임시 중단)
+        self.enabled = False
+        print("⚠️ AI extraction temporarily disabled due to cost concerns.")
+        return
+
         api_key = os.getenv("GEMINI_API_KEY") or os.getenv("NEXT_PUBLIC_GEMINI_API_KEY")
         if api_key:
             genai.configure(api_key=api_key)
@@ -125,10 +130,18 @@ Return ONLY valid JSON. No markdown, no explanations, no extra text."""
             except Exception as e:
                 print(f"Failed to load image for AI analysis: {e}")
 
-        try:
-            response = self.model.generate_content(content_parts)
-            clean_json = response.text.replace('```json', '').replace('```', '').strip()
-            return json.loads(clean_json)
-        except Exception as e:
-            print(f"AI Extraction failed: {e}")
-            return None
+        import time
+        max_retries = 2
+        for attempt in range(max_retries):
+            try:
+                response = self.model.generate_content(content_parts)
+                clean_json = response.text.replace('```json', '').replace('```', '').strip()
+                return json.loads(clean_json)
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    print(f"AI Extraction failed (attempt {attempt + 1}/{max_retries}): {e}")
+                    print(f"Retrying in 2 seconds...")
+                    time.sleep(2)
+                else:
+                    print(f"AI Extraction failed after {max_retries} attempts: {e}")
+                    return None

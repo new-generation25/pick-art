@@ -151,11 +151,23 @@ class PublicScraper:
                 ai = AIExtractor()
                 ai_suggestion = await ai.extract_metadata(f"제목: {clean_title}\n본문: {description[:1000]}")
 
+                # AI 실패 시 기본값 설정
+                if ai_suggestion is None:
+                    ai_suggestion = {
+                        'category': '행사',
+                        'region': '경남',
+                        'venue': '',
+                        'date_start': '',
+                        'date_end': ''
+                    }
+                    print(f"      ⚠️ AI extraction failed, using defaults", flush=True)
+
                 # 서부문화센터는 지역과 카테고리 강제 설정
                 is_wgcc = 'wgcc.ghct.or.kr' in url
                 if is_wgcc:
                     ai_suggestion['region'] = '김해'
                     ai_suggestion['category'] = '공연'
+                    ai_suggestion['venue'] = '김해서부문화센터'
                     print(f"      🏛️ WGCC auto-classification: region=김해, category=공연", flush=True)
 
                 print(f"      🤖 AI suggestion: category={ai_suggestion.get('category')}, region={ai_suggestion.get('region')}", flush=True)

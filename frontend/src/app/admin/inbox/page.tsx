@@ -234,11 +234,22 @@ export default function AdminInboxPage() {
 
     // 발행된 이벤트 삭제 (events 테이블에서 삭제)
     const handleDeleteEvent = async (eventId: string) => {
-        const confirmDelete = confirm("이 행사를 삭제하시겠습니까?\n\n현재 노출 중인 행사가 삭제됩니다.");
+        const confirmDelete = confirm("이 행사를 삭제하시겠습니까?\n\n현재 노출 중인 행사는 물론, 수집 원본(인박스 데이터)도 함께 삭제되어 재수집이 가능해집니다.");
         if (!confirmDelete) return;
 
-        const { error } = await supabase.from("events").delete().eq("id", eventId);
-        if (!error) {
+        // 1. Get raw_post_id first
+        const { data: eventData } = await supabase.from("events").select("raw_post_id").eq("id", eventId).single();
+        const rawPostId = eventData?.raw_post_id;
+
+        // 2. Delete from events
+        const { error: eventError } = await supabase.from("events").delete().eq("id", eventId);
+
+        if (!eventError) {
+            // 3. Delete from raw_posts if linked
+            if (rawPostId) {
+                await supabase.from("raw_posts").delete().eq("id", rawPostId);
+            }
+
             setPublishedEvents(publishedEvents.filter(e => e.id !== eventId));
             setStats(prev => ({ ...prev, published: prev.published - 1 }));
         }
@@ -248,24 +259,42 @@ export default function AdminInboxPage() {
     const handleDeleteSelectedEvents = async () => {
         if (selectedEvents.length === 0) return;
 
-        const confirmDelete = confirm(`선택한 ${selectedEvents.length}개의 행사를 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`);
+        const confirmDelete = confirm(`선택한 ${selectedEvents.length}개의 행사를 삭제하시겠습니까?\n\n수집 원본도 함께 삭제되어 다시 수집할 수 있게 됩니다.`);
         if (!confirmDelete) return;
 
         try {
+            const deletedCount = selectedEvents.length;
+            let errorCount = 0;
+
             // 선택된 모든 이벤트 삭제
             for (const eventId of selectedEvents) {
-                await supabase.from("events").delete().eq("id", eventId);
+                // Get raw_post_id first
+                const { data: evData } = await supabase.from("events").select("raw_post_id").eq("id", eventId).single();
+
+                // Delete from events
+                const { error: eventError } = await supabase.from("events").delete().eq("id", eventId);
+
+                if (eventError) {
+                    console.error(`Failed to delete event ${eventId}:`, eventError);
+                    errorCount++;
+                } else if (evData?.raw_post_id) {
+                    // Delete from raw_posts if exists
+                    await supabase.from("raw_posts").delete().eq("id", evData.raw_post_id);
+                }
             }
 
-            // 상태 초기화 후 데이터 새로고침
-            const deletedCount = selectedEvents.length;
+            // 상태 초기화
             setSelectedEvents([]);
             setIsSelectMode(false);
 
             // 데이터 새로고침
             await fetchData();
 
-            alert(`${deletedCount}개의 행사가 삭제되었습니다.`);
+            if (errorCount > 0) {
+                alert(`${deletedCount - errorCount}개의 행사가 삭제되었습니다.\n${errorCount}개의 행사 삭제에 실패했습니다.`);
+            } else {
+                alert(`${deletedCount}개의 행사가 삭제되었습니다.`);
+            }
         } catch (error) {
             console.error("Delete error:", error);
             alert("삭제 중 오류가 발생했습니다.");
@@ -295,48 +324,60 @@ export default function AdminInboxPage() {
                             <Inbox size={24} />
                         </ThemeIcon>
                         <Box>
-                            <Title order={1} size={rem(32)} fw={900}>픽아트 인박스 (Curation)</Title>
+                            <Title order={1} size={rem(32)} fw={900}>수집 인박스</Title>
                             <Text c="dimmed" fw={500}>수집된 원본 데이터를 픽아트 스타일로 검토하고 발행합니다.</Text>
                         </Box>
                     </Group>
 
-                    <Group>
-                        <Button
-                            variant="white"
-                            color="gray"
-                            leftSection={<Clock size={16} />}
-                            onClick={fetchData}
-                        >
-                            새로고침
-                        </Button>
-                        <Button
-                            variant="white"
-                            color="gray"
-                            leftSection={<Settings size={16} />}
-                            onClick={async () => {
-                                setPromptLoading(true);
-                                const res = await fetch('/api/getPrompt');
-                                const data = await res.json();
-                                setPromptText(data.prompt || '');
-                                setPromptLoading(false);
-                                openSettingsModal();
-                            }}
-                        >
-                            설정
-                        </Button>
-                        <Button
-                            variant="white"
-                            color="gray"
-                            leftSection={<List size={16} />}
-                            onClick={async () => {
-                                const res = await fetch('/api/crawlLogs');
-                                const data = await res.json();
-                                setReportLogs(data);
-                                openReportModal();
-                            }}
-                        >
-                            리포트
-                        </Button>
+                    <Group align="flex-end" gap="lg">
+                        <Stack gap={0} align="flex-end">
+                            <Text size="xs" fw={700} c="indigo" tt="uppercase">검토 대기중</Text>
+                            <Title order={2} size="h1" c="indigo" fw={900} style={{ fontSize: rem(48), lineHeight: 1 }}>
+                                {stats.pending}
+                            </Title>
+                        </Stack>
+                        <Group gap="xs">
+                            <ActionIcon
+                                variant="light"
+                                color="gray"
+                                radius="xl"
+                                size="lg"
+                                onClick={fetchData}
+                                loading={loading}
+                            >
+                                <RefreshCcw size={18} />
+                            </ActionIcon>
+                            <Button
+                                variant="light"
+                                color="gray"
+                                radius="xl"
+                                leftSection={<Settings size={16} />}
+                                onClick={async () => {
+                                    setPromptLoading(true);
+                                    const res = await fetch('/api/getPrompt');
+                                    const data = await res.json();
+                                    setPromptText(data.prompt || '');
+                                    setPromptLoading(false);
+                                    openSettingsModal();
+                                }}
+                            >
+                                설정
+                            </Button>
+                            <Button
+                                variant="light"
+                                color="gray"
+                                radius="xl"
+                                leftSection={<List size={16} />}
+                                onClick={async () => {
+                                    const res = await fetch('/api/crawlLogs');
+                                    const data = await res.json();
+                                    setReportLogs(data);
+                                    openReportModal();
+                                }}
+                            >
+                                리포트
+                            </Button>
+                        </Group>
                     </Group>
                 </Group>
 
@@ -404,6 +445,7 @@ export default function AdminInboxPage() {
                                                     <Group gap="xs">
                                                         <Button
                                                             size="xs"
+                                                            radius="xl"
                                                             variant={copiedId === post.id ? "light" : "default"}
                                                             color={copiedId === post.id ? "green" : "gray"}
                                                             leftSection={copiedId === post.id ? <Check size={12} /> : <Copy size={12} />}
@@ -415,6 +457,7 @@ export default function AdminInboxPage() {
                                                             color={post.source === 'instagram' ? 'pink' : post.source === 'blog' ? 'indigo' : 'blue'}
                                                             variant="light"
                                                             size="lg"
+                                                            radius="md"
                                                             leftSection={post.source === 'blog' && <BookOpen size={12} />}
                                                         >
                                                             {post.source}
@@ -450,15 +493,16 @@ export default function AdminInboxPage() {
                                                             variant="light"
                                                             color="red"
                                                             size="lg"
+                                                            radius="xl"
                                                             onClick={() => handleDeletePending(post.id)}
                                                             title="영구 삭제"
                                                         >
                                                             <Trash2 size={16} />
                                                         </ActionIcon>
-                                                        <Button variant="default" color="gray" onClick={() => handleReject(post.id)} leftSection={<XCircle size={14} />}>
+                                                        <Button variant="default" color="gray" radius="xl" onClick={() => handleReject(post.id)} leftSection={<XCircle size={14} />}>
                                                             거절
                                                         </Button>
-                                                        <Button color="indigo" onClick={() => openEditModal(post)} leftSection={<Edit3 size={14} />}>
+                                                        <Button color="indigo" radius="xl" onClick={() => openEditModal(post)} leftSection={<Edit3 size={14} />}>
                                                             검토
                                                         </Button>
                                                     </Group>
@@ -478,17 +522,31 @@ export default function AdminInboxPage() {
                                 <Box w={4} h={24} bg="green" style={{ borderRadius: 999 }} />
                                 <Title order={2} size="h3" fw={900}>현재 노출중인 행사 ({stats.published})</Title>
                             </Group>
-                            <Button
-                                variant={isSelectMode ? "filled" : "light"}
-                                color={isSelectMode ? "red" : "gray"}
-                                size="sm"
-                                onClick={() => {
-                                    setIsSelectMode(!isSelectMode);
-                                    setSelectedEvents([]);
-                                }}
-                            >
-                                {isSelectMode ? "취소" : "선택"}
-                            </Button>
+                            <Group gap="xs">
+                                {isSelectMode && selectedEvents.length > 0 && (
+                                    <Button
+                                        variant="filled"
+                                        color="red"
+                                        size="sm"
+                                        leftSection={<Trash2 size={16} />}
+                                        onClick={handleDeleteSelectedEvents}
+                                    >
+                                        삭제 ({selectedEvents.length})
+                                    </Button>
+                                )}
+                                <Button
+                                    variant={isSelectMode ? "light" : "light"}
+                                    color="gray"
+                                    size="sm"
+                                    leftSection={<Trash2 size={16} />}
+                                    onClick={() => {
+                                        setIsSelectMode(!isSelectMode);
+                                        setSelectedEvents([]);
+                                    }}
+                                >
+                                    {isSelectMode ? "취소" : "삭제선택"}
+                                </Button>
+                            </Group>
                         </Group>
 
                         {/* 원래 EventList 컴포넌트 사용 + 선택 모드 props */}
@@ -762,45 +820,6 @@ export default function AdminInboxPage() {
                 </Box>
             </Modal>
 
-            {/* 하단 플로팅 삭제 바 (선택 모드에서 항목 선택 시 표시) */}
-            {isSelectMode && selectedEvents.length > 0 && (
-                <Box
-                    style={{
-                        position: 'fixed',
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        background: 'linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.7))',
-                        backdropFilter: 'blur(10px)',
-                        padding: '16px 24px',
-                        zIndex: 1000,
-                    }}
-                >
-                    <Container size="lg">
-                        <Group justify="space-between">
-                            <Text c="white" fw={600} size="lg">
-                                {selectedEvents.length}개 선택됨
-                            </Text>
-                            <Group>
-                                <Button
-                                    variant="subtle"
-                                    color="gray"
-                                    onClick={() => setSelectedEvents(publishedEvents.map(e => e.id))}
-                                >
-                                    전체 선택
-                                </Button>
-                                <Button
-                                    color="red"
-                                    leftSection={<Trash2 size={18} />}
-                                    onClick={handleDeleteSelectedEvents}
-                                >
-                                    삭제
-                                </Button>
-                            </Group>
-                        </Group>
-                    </Container>
-                </Box>
-            )}
         </Box>
     );
 }

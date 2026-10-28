@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { EventCard } from "./EventCard";
 import { supabase } from "@/lib/supabase";
-import { Loader2, AlertCircle, Check } from "lucide-react";
+import { AlertCircle, Check } from "lucide-react";
 import { SimpleGrid, Loader, Stack, Text, Paper, ThemeIcon, rem, Box } from "@mantine/core";
 
 interface Event {
@@ -156,7 +156,9 @@ export function EventList({ initialEvents = [], filters = {}, limit, isSelectMod
                             position: 'relative',
                             cursor: isSelectMode ? 'pointer' : 'default',
                             opacity: isSelectMode && !selectedIds.includes(event.id) ? 0.7 : 1,
-                            transition: 'all 0.15s ease'
+                            transition: 'all 0.15s ease',
+                            WebkitTapHighlightColor: 'transparent',
+                            touchAction: isSelectMode ? 'manipulation' : 'auto'
                         }}
                         onClick={(e) => {
                             if (isSelectMode && onSelect) {
@@ -201,7 +203,7 @@ export function EventList({ initialEvents = [], filters = {}, limit, isSelectMod
                                 }}
                             />
                         )}
-                        <EventCard event={event} priority={idx === 0} />
+                        <EventCard event={event} priority={idx < 4} disableNavigation={isSelectMode} />
                     </Box>
                 ))}
             </SimpleGrid>

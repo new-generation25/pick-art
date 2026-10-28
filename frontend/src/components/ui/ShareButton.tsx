@@ -30,7 +30,27 @@ export function ShareButton({ title }: { title: string }) {
             setTimeout(() => setCopied(false), 2000);
             alert("링크가 클립보드에 복사되었습니다. 지인에게 공유해 보세요!");
         } catch (err) {
-            console.error("Copy failed", err);
+            console.error("Clipboard API failed, using fallback", err);
+
+            // 3. Legacy fallback using textarea
+            try {
+                const textarea = document.createElement('textarea');
+                textarea.value = url;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+                alert("링크가 복사되었습니다. 지인에게 공유해 보세요!");
+            } catch (legacyErr) {
+                console.error("Legacy copy also failed", legacyErr);
+                // Final fallback: show URL in alert
+                alert(`아래 링크를 복사해 주세요:\n${url}`);
+            }
         }
     };
 
@@ -38,6 +58,7 @@ export function ShareButton({ title }: { title: string }) {
         <button
             onClick={handleShare}
             className="w-14 h-14 shrink-0 inline-flex items-center justify-center bg-white text-neutral-600 rounded-2xl hover:text-indigo-600 transition-all shadow-md active:scale-95 ring-1 ring-neutral-200 group relative"
+            style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
         >
             {copied ? <Check className="w-6 h-6 text-green-500" /> : <Share2 className="w-6 h-6" />}
             {copied && (
