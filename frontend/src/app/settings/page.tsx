@@ -54,8 +54,8 @@ export default function SettingsPage() {
             setEmailNotifications(profile.email_notifications ?? true);
             setNewEventNotifications(profile.new_event_notifications ?? true);
         } else {
-            // 프로필이 없으면 기본값 사용
-            setNickname(session.user.email?.split('@')[0] || '');
+            // 프로필이 없으면(구글·카카오 첫 로그인 포함) 실명·이메일 대신 자동 이름을 제안한다
+            setNickname(`픽아트회원${session.user.id.slice(0, 4)}`);
         }
 
         setLoading(false);

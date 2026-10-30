@@ -6,6 +6,7 @@ import { Header } from "@/components/ui/Header";
 import { Lock, Mail, AlertCircle, User, UserPlus } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import { SocialLoginButtons } from "@/components/ui/SocialLoginButtons";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -95,6 +96,11 @@ export default function LoginPage() {
                             {loading ? "로그인 중..." : "로그인"}
                         </button>
                     </form>
+
+                    <div className="my-8 flex items-center gap-4 text-xs font-bold text-neutral-400">
+                        <div className="h-px flex-1 bg-neutral-200" />또는<div className="h-px flex-1 bg-neutral-200" />
+                    </div>
+                    <SocialLoginButtons />
 
                     <div className="mt-8 text-center text-sm font-medium">
                         <p className="text-neutral-400">

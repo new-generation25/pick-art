@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { UserPlus, Lock, Mail, Phone, MapPin, Heart, User } from "lucide-react";
 import Link from "next/link";
+import { SocialLoginButtons } from "@/components/ui/SocialLoginButtons";
 
 export default function SignupPage() {
     const router = useRouter();
@@ -68,6 +69,11 @@ export default function SignupPage() {
                     </div>
                     <h1 className="text-4xl font-black text-neutral-900 mb-2">회원가입</h1>
                     <p className="text-neutral-500 font-medium">경남 아트 네비게이터의 새로운 가족이 되어주세요.</p>
+                </div>
+
+                <SocialLoginButtons />
+                <div className="my-8 flex items-center gap-4 text-xs font-bold text-neutral-400">
+                    <div className="h-px flex-1 bg-neutral-200" />또는 이메일로 가입<div className="h-px flex-1 bg-neutral-200" />
                 </div>
 
                 <form onSubmit={handleSignup} className="space-y-6">
