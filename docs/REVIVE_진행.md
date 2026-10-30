@@ -25,7 +25,9 @@
   - `GOOGLE_SUPPORT_GUIDE.md`: 루트 `.env.local`이 지금 쓰는 Gemini 키가 본문에 그대로 들어 있다.
   - `testsprite_tests/tmp/config.json`: TestSprite 키가 들어 있다.
   - 디버그 산출물(`facebook_debug.*`, `delete_log*.txt`, `*.backup`)과 KOPIS 가이드 PDF
-- 아직 남은 것: 원격 저장소의 git 이력 정리. 하려면 force push가 필요해서 사용자 판단으로 남겨 뒀다.
+- `61734e7` (2026-10-30): `frontend/testsprite_tests/tmp/config.json`의 git 추적을 해제했다. 파일은 디스크에 남겨 두고 `.gitignore`에 추가했다.
+  - 결과: 현재 추적 중인 파일에서 실제 키는 0건이다. 남은 JWT 9개는 데모 키 7개와 `ref:"project"` 자리표시자 2개다.
+- 원격 git 이력은 정리하지 않기로 했다(사용자 결정). 과거 커밋에는 키가 그대로 남아 있으므로 TestSprite 키는 따로 폐기해야 한다.
 
 ## S1 스키마: 파일 작성 완료, DB 적용 전
 
