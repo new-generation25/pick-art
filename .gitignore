@@ -55,3 +55,6 @@ collector/*.txt
 .idea/
 *.swp
 *.swo
+
+# TestSprite config (contains API key)
+**/testsprite_tests/tmp/config.json
