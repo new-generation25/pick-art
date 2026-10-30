@@ -8,7 +8,7 @@ from public_scraper import PublicScraper
 from fb_scraper_service import FacebookScraper
 from notifier import TelegramNotifier
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 # Force unbuffered output for real-time logging and UTF-8 encoding
 if sys.platform == 'win32':
@@ -21,6 +21,23 @@ else:
 # Load environment variables
 load_dotenv(".env.local")
 notifier = TelegramNotifier()
+
+RUNNING_TIMEOUT = timedelta(minutes=30)
+
+def reclaim_running(db, older_than=None, reason="시간 초과"):
+    """RUNNING으로 남은 crawl_logs를 FAIL로 마감한다. older_than이 없으면 전부."""
+    q = db.supabase.table("crawl_logs").select("id, target_name").eq("status", "RUNNING")
+    if older_than:
+        q = q.lt("started_at", (datetime.now(timezone.utc) - older_than).isoformat())
+    stale = q.execute().data or []
+    for log in stale:
+        db.supabase.table("crawl_logs").update({
+            "status": "FAIL",
+            "error_msg": reason,
+            "finished_at": datetime.now(timezone.utc).isoformat()
+        }).eq("id", log['id']).execute()
+        print(f"♻️ [Reclaim] {log['target_name']} (log {log['id']}) RUNNING → FAIL: {reason}", flush=True)
+    return len(stale)
 
 async def run_crawlers(specific_target=None):
     print(f"🚀 {'Manual request:' if specific_target else 'Routine'} crawler started at {datetime.now()}", flush=True)
@@ -66,6 +83,9 @@ async def run_crawlers(specific_target=None):
 async def check_manual_requests():
     db = Database()
     try:
+        # 오래 RUNNING으로 남은 요청은 결과를 기록하지 못한 것으로 보고 마감
+        reclaim_running(db, RUNNING_TIMEOUT, f"시간 초과: {int(RUNNING_TIMEOUT.total_seconds() // 60)}분 안에 결과가 기록되지 않음")
+
         # 중복 실행 방지: 같은 대상이 이미 RUNNING 상태인지 확인
         running_check = db.supabase.table("crawl_logs")\
             .select("target_name")\
@@ -100,7 +120,10 @@ async def check_manual_requests():
                 print(f"🔔 [Manual Request] Log ID: {req['id']}", flush=True)
                 print(f"{'='*60}", flush=True)
 
-                db.supabase.table("crawl_logs").update({"status": "RUNNING"}).eq("id", req['id']).execute()
+                db.supabase.table("crawl_logs").update({
+                    "status": "RUNNING",
+                    "started_at": datetime.now(timezone.utc).isoformat()
+                }).eq("id", req['id']).execute()
                 print(f"✅ [Manual Request] Status updated to RUNNING", flush=True)
 
                 source_res = db.supabase.table("whitelist")\
@@ -114,12 +137,23 @@ async def check_manual_requests():
                     print(f"✅ [Manual Request] Source found in whitelist: {source.get('name')}", flush=True)
                     print(f"🚀 [Manual Request] Starting crawler...\n", flush=True)
                     running_targets.append(req['target_name'])  # 실행 중 목록에 추가
-                    await run_crawlers({
-                        'target_type': 'website',
-                        'value': source['value'],
-                        'name': source.get('name', req['target_name']),
-                        'log_id': req['id']
-                    })
+                    try:
+                        await run_crawlers({
+                            'target_type': 'website',
+                            'value': source['value'],
+                            'name': source.get('name', req['target_name']),
+                            'log_id': req['id']
+                        })
+                    finally:
+                        # 스크래퍼가 결과를 기록하지 못했으면 RUNNING으로 남기지 않는다
+                        after = db.supabase.table("crawl_logs").select("status").eq("id", req['id']).single().execute()
+                        if after.data and after.data.get('status') == 'RUNNING':
+                            db.supabase.table("crawl_logs").update({
+                                "status": "FAIL",
+                                "error_msg": "수집기가 결과를 기록하지 않고 끝남",
+                                "finished_at": datetime.now(timezone.utc).isoformat()
+                            }).eq("id", req['id']).execute()
+                            print(f"❌ [Manual Request] Log {req['id']} was left RUNNING → FAIL", flush=True)
                 else:
                     print(f"❌ [Manual Request] Source not found in whitelist!", flush=True)
                     db.supabase.table("crawl_logs").update({
@@ -140,6 +174,9 @@ async def main():
     print(f"🔄 Checking for manual requests every 10 seconds...", flush=True)
     print(f"📅 Scheduled crawls: 04:00 and 18:00 daily", flush=True)
     print("=" * 80 + "\n", flush=True)
+
+    # 수집기는 한 대만 돈다: 시작 시점의 RUNNING은 이전 프로세스가 남긴 것
+    reclaim_running(Database(), reason="수집기 재시작으로 중단됨")
 
     scheduler = AsyncIOScheduler()
     scheduler.add_job(run_crawlers, 'cron', hour='4,18')
