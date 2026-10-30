@@ -1,5 +1,6 @@
 import os
 import sys
+import atexit
 import asyncio
 from dotenv import load_dotenv
 from database import Database
@@ -24,6 +25,21 @@ load_dotenv(".env.local")
 notifier = TelegramNotifier()
 
 RUNNING_TIMEOUT = timedelta(minutes=30)
+PID_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".running.pid")
+
+def write_pid_file():
+    """프론트 상태 API가 '아무 파이썬'이 아니라 이 수집기의 생존을 보도록 PID를 남긴다."""
+    with open(PID_FILE, "w") as f:
+        f.write(str(os.getpid()))
+    atexit.register(remove_pid_file)
+
+def remove_pid_file():
+    try:
+        with open(PID_FILE) as f:
+            if f.read().strip() == str(os.getpid()):
+                os.remove(PID_FILE)
+    except FileNotFoundError:
+        pass
 
 def reclaim_running(db, older_than=None, reason="시간 초과"):
     """RUNNING으로 남은 crawl_logs를 FAIL로 마감한다. older_than이 없으면 전부."""
@@ -187,6 +203,8 @@ async def main():
     print(f"🔄 Checking for manual requests every 10 seconds...", flush=True)
     print(f"📅 Scheduled crawls: 04:00 and 18:00 daily", flush=True)
     print("=" * 80 + "\n", flush=True)
+
+    write_pid_file()
 
     # 수집기는 한 대만 돈다: 시작 시점의 RUNNING은 이전 프로세스가 남긴 것
     reclaim_running(Database(), reason="수집기 재시작으로 중단됨")

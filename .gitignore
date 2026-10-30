@@ -58,3 +58,7 @@ collector/*.txt
 
 # TestSprite config (contains API key)
 **/testsprite_tests/tmp/config.json
+
+# Collector runtime
+collector/.running.pid
+collector/collector_auto.log
