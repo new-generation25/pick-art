@@ -57,3 +57,19 @@ DB가 없어서 저장 대신 가짜 DB로 결과만 받았다. `PublicScraper`�
   - true면 수집 직후 raw_posts가 PUBLISHED로 저장된다.
   - 그러면 인박스에 나타나지 않는데 events에도 들어가지 않는다.
 - 검증하지 못한 것: SQL이 실제로 적용되는지는 새 프로젝트에 넣어 봐야 안다.
+
+### 2026-10-31 새 프로젝트에 적용: 완료
+
+- 기존 `culture-news`는 사용자가 삭제했다. 노출된 service_role 키 문제는 이것으로 끝났다.
+- 새 프로젝트 `pick-art`를 만들었다: ref `bebnijyqhzcftvlueeyn`, ap-northeast-2(서울), Free, 조직은 new-generation25's Org.
+  - 무료 플랜의 활성 프로젝트 한도(2개) 때문에 `culture-news`를 지운 뒤에야 만들 수 있었다.
+  - DB 비밀번호는 생성 화면의 Generate 버튼으로 만들었다. 저장소 어디에도 기록하지 않았다. 필요하면 Database 설정에서 다시 지정한다.
+- SQL Editor로 baseline을 실행했다. 실행 전에 커밋본과 SHA-256이 같은지 확인했고, 결과는 "Success. No rows returned"였다.
+- 확인 결과
+  - REST 테이블 10개: blacklist, configs, crawl_logs, crawler_configs, events, keywords, profiles, raw_posts, subscribers, whitelist
+  - anon 키로 `configs.ai_prompt`를 읽을 수 있다.
+  - 버킷 2개가 모두 public이다: posters, event-images.
+  - `collector/database.Database()`로 접속된다. whitelist 0건, crawl_logs 0건.
+- env 파일에 새 URL과 키를 넣었다: `collector/.env.local`, `collector/.env`, `frontend/.env.local`, 루트 `.env.local`.
+  - 기존 파일은 `*.bak-20261031`로 백업했다. git 무시 대상이다.
+- 다음 할 일: whitelist가 비어 있다. S2에서 수집 대상을 등록한다.
