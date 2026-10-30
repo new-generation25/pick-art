@@ -6,12 +6,14 @@
 ## 2026-10-28 진단 (실측)
 
 - DB 연결 불가
-  - `collector/.env`가 가리키는 클라우드 Supabase는 DNS에 이름이 없다(8.8.8.8 조회 포함). 프로젝트가 삭제된 상태다.
+  - `collector/.env`가 가리키는 클라우드 Supabase는 2026-10-28에 DNS에 이름이 없었다(8.8.8.8 조회 포함). 그래서 「삭제됨」으로 판단했다.
+    - **정정(2026-10-30): 판단이 틀렸다.** Management API로 조회하니 이 프로젝트는 살아 있다(`culture-news`, ref `kbmw…`, ap-northeast-1, ACTIVE_HEALTHY). 10-28에는 일시정지 상태였던 것으로 본다(확인 못 함).
+    - 테이블은 3개(events, raw_posts, blacklist)뿐이다. events 10건은 시드 더미이고, raw_posts는 0건이다.
   - `.env.local` 계열은 로컬 `127.0.0.1:54321`을 가리킨다. Docker Desktop이 꺼져 있어 연결이 거부된다.
 - Python 3.13.14, requirements 12종 모두 설치됨(전역)
 - frontend `tsc --noEmit` 오류 0건. `npm run build`는 아직 실행하지 않았다.
 - 공개 저장소(`new-generation25/pick-art`, PUBLIC)에 키가 노출돼 있다.
-  - `collector/.env.example`: 삭제된 프로젝트의 service_role JWT. 프로젝트가 없어져 현재는 무효다.
+  - `collector/.env.example`: `culture-news` 프로젝트의 service_role JWT. **2026-10-30 확인 결과 이 키는 지금도 유효하다(REST 200).** 키 교체가 필요하다.
   - `frontend/testsprite_tests/tmp/config.json`: TestSprite API 키. **폐기가 필요하다.**
   - 그 밖의 `*.mjs`에 있는 JWT는 로컬 Supabase 기본 데모 키(`iss: supabase-demo`)나 자리표시자라서 위험하지 않다.
 
