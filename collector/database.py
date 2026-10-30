@@ -84,7 +84,8 @@ class Database:
                 break
 
         # 3. 기본 저장 (raw_posts)
-        status = "PUBLISHED" if (is_whitelisted and auto_pub) else "COLLECTED"
+        # 자동 발행이 꺼져 있으므로 항상 COLLECTED. PUBLISHED로 저장하면 인박스에도 events에도 안 보인다
+        status = "COLLECTED"
         data['status'] = status
         print(f"        📋 [DB] Status determined: {status}", flush=True)
 
@@ -97,11 +98,17 @@ class Database:
             print(f"        💾 [DB] Upserting to raw_posts table...", flush=True)
             response = self.supabase.table("raw_posts").upsert(data, on_conflict="source, source_id").execute()
 
-            if response.data:
-                saved_id = response.data[0].get('id')
-                print(f"        ✅ [DB] Saved to raw_posts: ID={saved_id}, Status={status}", flush=True)
-            else:
-                print(f"        ⚠️ [DB] Upsert returned no data", flush=True)
+            if not response.data:
+                print(f"        ❌ [DB:Error] Upsert returned no data", flush=True)
+                return None
+            saved_id = response.data[0].get('id')
+
+            # 저장됐다는 응답만 믿지 않고 다시 읽어서 확인한다
+            check = self.supabase.table("raw_posts").select("id").eq("id", saved_id).execute()
+            if not check.data:
+                print(f"        ❌ [DB:Error] Saved row not found on re-read: ID={saved_id}", flush=True)
+                return None
+            print(f"        ✅ [DB] Saved and verified in raw_posts: ID={saved_id}, Status={status}", flush=True)
 
             # 4. 자동 승인 로직 비활성화 - 모든 데이터는 인박스(검토 대기)로 먼저 이동
             # 이전: 화이트리스트 + auto_publish=true 시 바로 events 테이블에 삽입
