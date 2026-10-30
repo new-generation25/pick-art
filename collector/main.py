@@ -7,6 +7,7 @@ from insta_scraper import InstaScraper
 from public_scraper import PublicScraper
 from fb_scraper_service import FacebookScraper
 from notifier import TelegramNotifier
+from ai_extractor import AIExtractor
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from datetime import datetime, timezone, timedelta
 
@@ -51,8 +52,10 @@ async def run_crawlers(specific_target=None):
         else:
             whitelist_items = db.get_whitelist()
             for item in whitelist_items:
+                value = item.get('value') or ''
                 target_type = 'website'
-                if 'instagram.com' in (item.get('value') or ''): target_type = 'instagram'
+                if 'instagram.com' in value: target_type = 'instagram'
+                elif 'facebook.com' in value: target_type = 'facebook'
                 configs.append({
                     'target_type': target_type,
                     'value': item['value'],
@@ -66,14 +69,24 @@ async def run_crawlers(specific_target=None):
             public = PublicScraper(db)
             await public.scrape([specific_target])
         elif not specific_target:
-            # 루틴 실행 시
+            # 루틴 실행 시: website만 수집한다. 나머지 유형은 건너뛴 것으로 센다
             public = PublicScraper(db)
-            await public.scrape([c for c in configs if c['target_type'] == 'website'])
-            # ... 다른 스크래퍼들 (FB, Insta) ...
-        
-        # 전체 종료 알림 (루틴 시에만)
-        if not specific_target:
-            await notifier.send_message(f"✅ 정기 크롤링 완료")
+            results = await public.scrape([c for c in configs if c['target_type'] == 'website'])
+            skipped = {}
+            for c in configs:
+                if c['target_type'] != 'website':
+                    skipped[c['target_type']] = skipped.get(c['target_type'], 0) + 1
+
+            # 전체 종료 알림: 처리·실패·건너뜀을 숫자로 남긴다
+            failed = [r for r in results if r['status'] != 'SUCCESS']
+            lines = [f"{'⚠️' if failed else '✅'} 정기 크롤링 완료 — website {len(results)}곳 처리 (실패 {len(failed)})"]
+            lines += [f"• {r['name']}: {r['summary']}" for r in results]
+            for t, n in skipped.items():
+                lines.append(f"• {t} {n}곳 건너뜀 (미구현)")
+            lines.append(f"• AI 추출: {'켜짐' if AIExtractor().enabled else '꺼짐 (기본값 사용)'}")
+            message = "\n".join(lines)
+            print(message, flush=True)
+            await notifier.send_message(message)
         
     except Exception as e:
         print(f"Crawler error: {e}")

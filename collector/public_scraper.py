@@ -12,7 +12,9 @@ class PublicScraper:
         self.db = db
 
     async def scrape(self, dynamic_targets):
-        if not dynamic_targets: return
+        """대상별 결과 [{name, status, summary}]를 돌려준다."""
+        results = []
+        if not dynamic_targets: return results
 
         async with aiohttp.ClientSession(headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}) as session:
             for target in dynamic_targets:
@@ -58,6 +60,7 @@ class PublicScraper:
                             summary = f"❌ 데이터 없음: 선택자 불일치 (Found 0 items)"
                             print(f"[Scraper] {summary}", flush=True)
                             self._update_log(log_id, summary, "FAIL")
+                            results.append({"name": target_name, "status": "FAIL", "summary": summary})
                             continue
 
                         print(f"[Scraper] 🔄 Processing {total_found} items...", flush=True)
@@ -108,14 +111,19 @@ class PublicScraper:
                                 print(f"  [{idx}/{total_found}] ⚠️ Error: {str(e)}", flush=True)
                                 error_count += 1
 
-                        final_summary = f"✅ 수집 완료: 발견 {total_found}건 (신규 {new_count}, 중복 {skip_count}, 실패 {error_count})"
+                        status = "SUCCESS" if new_count > 0 or skip_count > 0 else "FAIL"
+                        mark = "❌" if status == "FAIL" else ("⚠️" if error_count else "✅")
+                        final_summary = f"{mark} 수집 완료: 발견 {total_found}건 (신규 {new_count}, 중복 {skip_count}, 실패 {error_count})"
                         print(f"\n{'='*60}", flush=True)
                         print(f"[Scraper] {final_summary}", flush=True)
                         print(f"{'='*60}\n", flush=True)
-                        self._update_log(log_id, final_summary, "SUCCESS" if new_count > 0 or skip_count > 0 else "FAIL")
-                                
+                        self._update_log(log_id, final_summary, status)
+                        results.append({"name": target_name, "status": status, "summary": final_summary})
+
                 except Exception as e:
                     self._update_log(log_id, f"사이트 오류: {str(e)}", "FAIL")
+                    results.append({"name": target_name, "status": "FAIL", "summary": f"❌ 사이트 오류: {str(e)}"})
+        return results
 
     def _update_log(self, log_id, summary, status):
         if not log_id: return
@@ -147,11 +155,15 @@ class PublicScraper:
                 clean_title = re.sub(r'^\[.*?\]\s*', '', title).strip()
                 print(f"      ✂️ Title cleaned: '{title}' → '{clean_title}'", flush=True)
 
-                print(f"      🤖 Running AI metadata extraction...", flush=True)
                 ai = AIExtractor()
-                ai_suggestion = await ai.extract_metadata(f"제목: {clean_title}\n본문: {description[:1000]}")
+                if ai.enabled:
+                    print(f"      🤖 Running AI metadata extraction...", flush=True)
+                    ai_suggestion = await ai.extract_metadata(f"제목: {clean_title}\n본문: {description[:1000]}")
+                else:
+                    print(f"      ⏭️ AI 추출 비활성 — 기본값 사용", flush=True)
+                    ai_suggestion = None
 
-                # AI 실패 시 기본값 설정
+                # AI 미사용·실패 시 기본값 설정
                 if ai_suggestion is None:
                     ai_suggestion = {
                         'category': '행사',
@@ -160,7 +172,8 @@ class PublicScraper:
                         'date_start': '',
                         'date_end': ''
                     }
-                    print(f"      ⚠️ AI extraction failed, using defaults", flush=True)
+                    if ai.enabled:
+                        print(f"      ⚠️ AI extraction failed, using defaults", flush=True)
 
                 # 서부문화센터는 지역과 카테고리 강제 설정
                 is_wgcc = 'wgcc.ghct.or.kr' in url

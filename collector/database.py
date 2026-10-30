@@ -22,7 +22,7 @@ class Database:
     def get_whitelist(self):
         """화이트리스트 목록을 가져옵니다."""
         try:
-            res = self.supabase.table("whitelist").select("type, value, auto_publish").execute()
+            res = self.supabase.table("whitelist").select("type, value, name, auto_publish").execute()
             return res.data
         except:
             return []

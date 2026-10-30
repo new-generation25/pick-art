@@ -1,4 +1,5 @@
 import os
+import re
 import asyncio
 from telegram import Bot
 from dotenv import load_dotenv
@@ -9,11 +10,14 @@ class TelegramNotifier:
     def __init__(self):
         self.token = os.getenv("TELEGRAM_BOT_TOKEN")
         self.chat_id = os.getenv("TELEGRAM_CHAT_ID")
-        self.enabled = all([self.token, self.chat_id])
+        # 예시값(your_bot_token 등)은 설정되지 않은 것으로 본다
+        token_ok = bool(self.token and re.fullmatch(r"\d+:[A-Za-z0-9_-]{30,}", self.token))
+        chat_ok = bool(self.chat_id and re.fullmatch(r"-?\d+|@\w+", self.chat_id))
+        self.enabled = token_ok and chat_ok
         if self.enabled:
             self.bot = Bot(token=self.token)
         else:
-            print("⚠️ Telegram Notifier not configured. Skipping.")
+            print("⚠️ Telegram Notifier not configured (token/chat_id missing or placeholder). Skipping.")
 
     async def send_message(self, text: str):
         if not self.enabled:
