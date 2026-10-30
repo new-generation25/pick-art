@@ -170,7 +170,7 @@ class Database:
     def get_crawl_logs(self, limit: int = 20):
         """Fetch recent crawl logs ordered by started_at desc."""
         try:
-            res = self.supabase.table("crawl_logs").select("*").order("started_at", {"ascending": false}).limit(limit).execute()
+            res = self.supabase.table("crawl_logs").select("*").order("started_at", desc=True).limit(limit).execute()
             return res.data
         except Exception as e:
             print(f"Error fetching crawl logs: {e}")

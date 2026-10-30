@@ -5,7 +5,7 @@ import asyncio
 import random
 from urllib.parse import urljoin
 from ai_extractor import AIExtractor
-from datetime import datetime
+from datetime import datetime, timezone
 
 class PublicScraper:
     def __init__(self, db: Database):
@@ -123,7 +123,7 @@ class PublicScraper:
             self.db.supabase.table("crawl_logs").update({
                 "result_summary": summary, 
                 "status": status,
-                "finished_at": datetime.utcnow().isoformat()
+                "finished_at": datetime.now(timezone.utc).isoformat()
             }).eq("id", log_id).execute()
         except: pass
 

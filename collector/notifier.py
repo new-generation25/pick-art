@@ -3,7 +3,7 @@ import asyncio
 from telegram import Bot
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(".env.local")
 
 class TelegramNotifier:
     def __init__(self):

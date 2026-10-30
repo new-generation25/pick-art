@@ -8,8 +8,7 @@ from public_scraper import PublicScraper
 from fb_scraper_service import FacebookScraper
 from notifier import TelegramNotifier
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from datetime import datetime
-import pytz
+from datetime import datetime, timezone
 
 # Force unbuffered output for real-time logging and UTF-8 encoding
 if sys.platform == 'win32':
@@ -26,7 +25,7 @@ notifier = TelegramNotifier()
 async def run_crawlers(specific_target=None):
     print(f"🚀 {'Manual request:' if specific_target else 'Routine'} crawler started at {datetime.now()}", flush=True)
     db = Database()
-    start_time = datetime.utcnow().isoformat()
+    start_time = datetime.now(timezone.utc).isoformat()
     
     try:
         configs = []
@@ -92,7 +91,7 @@ async def check_manual_requests():
                     db.supabase.table("crawl_logs").update({
                         "status": "CANCELLED",
                         "result_summary": "이미 실행 중인 크롤링이 있어 취소됨",
-                        "finished_at": datetime.now().isoformat()
+                        "finished_at": datetime.now(timezone.utc).isoformat()
                     }).eq("id", req['id']).execute()
                     continue
 
@@ -126,7 +125,7 @@ async def check_manual_requests():
                     db.supabase.table("crawl_logs").update({
                         "status": "FAIL",
                         "error_msg": "Source not found",
-                        "finished_at": datetime.now().isoformat()
+                        "finished_at": datetime.now(timezone.utc).isoformat()
                     }).eq("id", req['id']).execute()
     except Exception as e:
         print(f"❌ [Manual Request] Error: {e}", flush=True)

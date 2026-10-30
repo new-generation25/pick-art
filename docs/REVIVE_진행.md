@@ -73,3 +73,33 @@ DB가 없어서 저장 대신 가짜 DB로 결과만 받았다. `PublicScraper`�
 - env 파일에 새 URL과 키를 넣었다: `collector/.env.local`, `collector/.env`, `frontend/.env.local`, 루트 `.env.local`.
   - 기존 파일은 `*.bak-20261031`로 백업했다. git 무시 대상이다.
 - 다음 할 일: whitelist가 비어 있다. S2에서 수집 대상을 등록한다.
+
+## S2 수집기가 F:에서 돈다: 완료 (2026-10-31)
+
+### 코드 수정
+
+| 파일 | 내용 |
+|---|---|
+| `main.py` | 쓰지 않는 `import pytz`를 제거했다(requirements에 없음). `crawl_logs` 시각을 UTC로 기록하게 했다. |
+| `public_scraper.py` | `utcnow()`를 `now(timezone.utc)`로 바꿨다. |
+| `database.py` | `get_crawl_logs`의 `{"ascending": false}`(NameError)를 `desc=True`로 고쳤다. |
+| `notifier.py` | `load_dotenv()`(.env)를 `.env.local`로 바꿨다. |
+
+- `main.py`의 시각 기록 수정 이유: 기존 `datetime.now().isoformat()`은 KST 시각을 시간대 없이 넘겨서, DB에 9시간 어긋나게 저장된다.
+- `notifier.py` 수정 이유: 이제 수집기의 모든 모듈이 `.env.local` 하나만 읽는다.
+- 계획과 다른 점: 계획에는 `.env`로 통일한다고 적었지만 `.env.local`로 통일했다. main, kopis, ai_extractor가 이미 `.env.local`을 읽고 있기 때문이다. 이제 `collector/.env`는 읽는 코드가 없다.
+- `kopis_scraper.py`의 `utcnow`는 S4에서 이 파일을 고칠 때 함께 바꾼다.
+
+### 실행 결과
+
+- whitelist에 1건 등록: 김해서부문화센터 (`webpage`, `https://wgcc.ghct.or.kr/board/show01_01`, auto_publish=false)
+- `python -u main.py` 기동: 예외 없이 "Scheduler started"가 출력됐다.
+- 수동 요청 1회(crawl_logs id 1): 50초 만에 SUCCESS로 끝났다. "발견 10건 (신규 10, 중복 0, 실패 0)".
+- 수동 요청 2회(id 2): 10초 만에 SUCCESS. "신규 0, 중복 10". 중복 처리가 정상이다.
+- raw_posts 10건, 모두 COLLECTED 상태. 이미지 10장이 Storage `posters/`에 올라갔고, 공개 URL 10개 모두 HTTP 200을 돌려준다.
+- 실행 로그에 Error나 Traceback은 0건이다.
+
+### 남은 문제 (S3 이후)
+
+- 날짜가 10건 모두 비어 있다(AI 꺼짐).
+- 텔레그램 토큰이 자리표시자(`your_bot_token`)인데도 알림이 "켜짐"으로 판정된다. 실제 전송은 실패하고 로그만 남는다.
