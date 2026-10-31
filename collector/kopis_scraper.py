@@ -41,6 +41,17 @@ def city_of(*texts) -> str:
     return "기타"
 
 
+def clean_venue(name):
+    """KOPIS 공연장명이 '시설 (홀)' 꼴인데 홀 자리에 시설명이 또 들어간 경우를 줄인다: 'A (A )' -> 'A'"""
+    name = (name or "").strip()
+    if name.endswith(")"):
+        for i in [k for k in range(len(name)) if name.startswith(" (", k)]:
+            head, inner = name[:i].strip(), name[i + 2:-1].strip()
+            if head and head == inner:
+                return head
+    return name
+
+
 class KopisScraper:
     def __init__(self, db: Database):
         self.db = db
@@ -128,7 +139,7 @@ class KopisScraper:
                                 "category": "공연",
                                 "genre": d.findtext("genrenm"),
                                 "region": region,
-                                "venue": d.findtext("fcltynm"),
+                                "venue": clean_venue(d.findtext("fcltynm")),
                                 "address": fac["adres"],
                                 "date_start": to_iso(d.findtext("prfpdfrom")),
                                 "date_end": to_iso(d.findtext("prfpdto")),
