@@ -1,358 +1,175 @@
-import aiohttp
-import sys
+"""KOPIS(공연예술통합전산망) 공연 수집기.
+
+KOPIS API는 제목·기간·장소·가격·포스터를 이미 구조화해서 주므로 AI를 쓰지 않는다.
+원본 링크는 실제로 열리는지 확인한 것만 쓴다(예매처 → 공연장 홈페이지 → KOPIS 상세 순).
+"""
 import os
-import io
-
-# Force UTF-8 encoding for stdout/stderr to prevent cp949 errors on Windows
-if sys.platform == 'win32':
-    sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding='utf-8')
-    sys.stderr = io.TextIOWrapper(sys.stderr.detach(), encoding='utf-8')
-
+import re
 import asyncio
-
 import xml.etree.ElementTree as ET
-from datetime import datetime, timedelta
-from database import Database
-from public_scraper import LogCollector
-import random
+from datetime import datetime, timedelta, timezone
 
+import aiohttp
 from dotenv import load_dotenv
+
+from database import Database
+from utils import check_link
+
 load_dotenv(".env.local")
 API_KEY = os.getenv("KOPIS_API_KEY")
-BASE_URL_LIST = "http://www.kopis.or.kr/openApi/restful/pblprfr"
-BASE_URL_DETAIL = "http://www.kopis.or.kr/openApi/restful/pblprfr"
+BASE = "http://www.kopis.or.kr/openApi/restful"
+KOPIS_VIEW = "https://www.kopis.or.kr/por/db/pblprfr/pblprfrView.do?menuId=MNU_00020&mt20Id={}"
+SIDO_CODE = os.getenv("KOPIS_SIDO_CODE", "48")          # 48 = 경상남도
+REGION_FILTER = [r for r in os.getenv("KOPIS_REGION_FILTER", "").split(",") if r]  # 비우면 경남 전체
+
+CITIES = ["창원", "김해", "진주", "양산", "거제", "통영", "사천", "밀양", "거창", "함안",
+          "창녕", "고성", "하동", "합천", "남해", "함양", "산청", "의령"]
+TICKET_HINTS = ["인터파크", "놀유니버스", "예스24", "YES24", "티켓링크", "멜론", "네이버", "공식", "홈페이지"]
+
+
+def to_iso(d: str) -> str:
+    """'2026.11.13' -> '2026-11-13'"""
+    m = re.match(r"(\d{4})\.(\d{1,2})\.(\d{1,2})", d or "")
+    return f"{m.group(1)}-{int(m.group(2)):02d}-{int(m.group(3)):02d}" if m else ""
+
+
+def city_of(*texts) -> str:
+    for t in texts:
+        for c in CITIES:
+            if t and c in t:
+                return c
+    return "기타"
+
 
 class KopisScraper:
     def __init__(self, db: Database):
         self.db = db
-        self.log_collector = LogCollector(db=db)
-    
-    async def fetch_detail(self, session, mt20id):
-        url = f"{BASE_URL_DETAIL}/{mt20id}"
-        params = {"service": API_KEY}
-        async with session.get(url, params=params) as response:
-            if response.status != 200: return None
-            text = await response.text()
-            root = ET.fromstring(text)
-            db = root.find("db")
-            if db is None: return None
-            
-            # Extract fields
-            description = db.findtext("sty") or ""
-            poster = db.findtext("poster")
-            
-            # Extract Intro Images (styurls)
-            styurls = []
-            styurls_tag = db.find("styurls")
-            if styurls_tag is not None:
-                for styurl in styurls_tag.findall("styurl"):
-                    if styurl.text:
-                        styurls.append(styurl.text)
-            
-            # Logic for Description using AI
-            # KOPIS descriptions are often technical or incomplete. 
-            # Aggressively use AI to structure information.
-            ai_used = False
-            
-            if styurls or description:
-                self.log_collector.add(f"      🤖 Invoking AI Vision/Text analysis for better metadata...", flush_to_db=True)
-                try:
-                    from ai_extractor import AIExtractor
-                    ai = AIExtractor()
-                    
-                    # Combine poster and styurls for comprehensive analysis
-                    analysis_images = []
-                    if poster: analysis_images.append(poster)
-                    if styurls: analysis_images.extend(styurls)
-                    
-                    # Call AI to extract metadata/summary from images or text
-                    # (Fixed parameter name from 'text_content' to 'text')
-                    ai_suggestion = await ai.extract_metadata(
-                        text=f"공연 제목: {db.findtext('prfnm')}\n기존 설명: {description}\n장소: {db.findtext('fcltynm')}",
-                        image_urls=analysis_images[:5] # Analyze up to 5 key images
-                    )
-                    
-                    if ai_suggestion and ai_suggestion.get('description'):
-                        new_desc = ai_suggestion.get('description')
-                        # 만약 AI가 생성한 설명이 더 구조적이라면 교체
-                        description = new_desc
-                        ai_used = True
-                        self.log_collector.add(f"      ✅ AI Structured Analysis: {len(description)} chars")
-                        
-                        # AI가 추천한 값을 필드에 덮어쓰기 위해 저장 (scrape 함수에서 활용)
-                        self.last_ai_suggestion = ai_suggestion
-                    else:
-                        self.log_collector.add(f"      ⚠️ AI Result empty. Keeping original.")
-                except Exception as e:
-                    self.log_collector.add(f"      ⚠️ AI Extraction failed or skipped: {e}")
-            else:
-                self.log_collector.add(f"      ℹ️ AI skipped: No description or images available to analyze.")
+        self.facilities = {}
 
-            return {
-                "mt20id": db.findtext("mt20id"),
-                "prfnm": db.findtext("prfnm"),
-                "prfpdfrom": db.findtext("prfpdfrom"),
-                "prfpdto": db.findtext("prfpdto"),
-                "fcltynm": db.findtext("fcltynm"),
-                "prfcast": db.findtext("prfcast"),
-                "prfcrew": db.findtext("prfcrew"),
-                "prfruntime": db.findtext("prfruntime"),
-                "prfage": db.findtext("prfage"),
-                "entrpsnm": db.findtext("entrpsnm"),
-                "pcseguidance": db.findtext("pcseguidance"),
-                "relateurls": [
-                    {"name": r.findtext("relatenm"), "url": r.findtext("relateurl")}
-                    for r in db.findall("./relates/relate")
-                    if r.findtext("relateurl")
-                ],
-                "poster": poster,
-                "sty": description,
-                "genre": db.findtext("genrenm"),
-                "description": description,
-                "styurls": styurls,
-                "ai_used": ai_used,
-                "ai_suggestion": getattr(self, 'last_ai_suggestion', None)
+    async def _xml(self, session, path, **params):
+        params["service"] = API_KEY
+        async with session.get(f"{BASE}/{path}", params=params, timeout=aiohttp.ClientTimeout(total=30)) as r:
+            if r.status != 200:
+                return None
+            return ET.fromstring(await r.text())
+
+    async def _facility(self, session, mt10id):
+        if mt10id not in self.facilities:
+            root = await self._xml(session, f"prfplc/{mt10id}")
+            db = root.find("db") if root is not None else None
+            self.facilities[mt10id] = {
+                "adres": db.findtext("adres") if db is not None else "",
+                "url": (db.findtext("relateurl") or "").strip() if db is not None else "",
             }
+        return self.facilities[mt10id]
 
-    def map_genre(self, kopis_genre):
-        return "공연"
+    async def _best_link(self, session, relates, facility_url, mt20id):
+        """열리는 링크만 고른다. 실패한 후보는 기록한다."""
+        tried = []
+        ordered = sorted(relates, key=lambda r: next((i for i, h in enumerate(TICKET_HINTS) if h in (r[0] or "")), 99))
+        for name, url in ordered + [("공연장 홈페이지", facility_url), ("KOPIS", KOPIS_VIEW.format(mt20id))]:
+            if not url:
+                continue
+            ok, status, final = await check_link(session, url)
+            tried.append(f"{name}:{status}")
+            if ok:
+                return url, name, tried
+        return None, None, tried
 
-    def extract_region(self, fcltynm, default="경남"):
-        """
-        Extract Gyeongnam city name from facility name.
-        """
-        cities = ["창원", "김해", "진주", "양산", "거제", "통영", "사천", "밀양", "거창", "함안", "창녕", "고성", "하동", "합천", "남해", "함양", "산청", "의령"]
-        if not fcltynm: return default
-        
-        for city in cities:
-            if city in fcltynm:
-                return city
-        return default
-
-    async def scrape(self, log_id=None):
-        """
-        Fetch performance data from KOPIS for Gyeongnam area (48)
-        """
-        # 만약 외부에서 log_id를 주지 않았다면 직접 생성
-        if not log_id:
-            try:
-                log_entry = {
-                    "target_name": "KOPIS (API)",
-                    "status": "RUNNING",
-                    "started_at": datetime.utcnow().isoformat(),
-                    "result_summary": "KOPIS 수집 시작 중..."
-                }
-                res = self.db.supabase.table("crawl_logs").insert(log_entry).execute()
-                if res.data:
-                    log_id = res.data[0]['id']
-            except Exception as e:
-                print(f"⚠️ Failed to create crawl log: {e}")
-
-        self.log_collector.set_log_id(log_id)
-        
-        self.log_collector.add(f"\n{'='*60}")
-        self.log_collector.add(f"[KOPIS] 🎭 Starting KOPIS data collection (Log ID: {log_id})", flush_to_db=True)
-        self.log_collector.add(f"[KOPIS] 📅 Target Region: Gyeongnam (48) -> Filter: 김해 Only")
-        self.log_collector.add(f"{'='*60}", flush_to_db=True)
-        
+    async def scrape(self, start: str = None, end: str = None, log_id=None):
+        """start/end: 'YYYYMMDD'. 기본은 오늘부터 60일. 결과 dict를 돌려준다."""
         if not API_KEY:
-            self.log_collector.add(f"[KOPIS] ❌ API_KEY is missing!")
-            if log_id:
-                self.db.supabase.table("crawl_logs").update({"status": "FAIL", "result_summary": "API_KEY 누락"}).eq("id", log_id).execute()
-            return
-        
-        # Date range: Today to +60 days
-        start_date = datetime.now().strftime("%Y%m%d")
-        end_date = (datetime.now() + timedelta(days=60)).strftime("%Y%m%d")
-        
-        params = {
-            "service": API_KEY,
-            "stdate": start_date,
-            "eddate": end_date,
-            "cpage": 1,
-            "rows": 100, 
-            "signgucode": 48 
-        }
-        
+            return {"name": "KOPIS", "status": "FAIL", "summary": "❌ KOPIS_API_KEY 누락"}
+        start = start or datetime.now().strftime("%Y%m%d")
+        end = end or (datetime.now() + timedelta(days=60)).strftime("%Y%m%d")
+        new = dup = fail = skipped_region = 0
+        failures = []
+
         async with aiohttp.ClientSession() as session:
-            try:
-                self.log_collector.add(f"[KOPIS] 📥 Fetching list from {start_date} to {end_date}...")
-                async with session.get(BASE_URL_LIST, params=params) as response:
-                    if response.status != 200:
-                        self.log_collector.add(f"[KOPIS] ❌ List API Error: {response.status}")
-                        return
-                    
-                    text = await response.text()
-                    root = ET.fromstring(text)
-                    items = root.findall("db")
-                    
-                    total_found = len(items)
-                    self.log_collector.add(f"[KOPIS] 📊 Found {total_found} items in Gyeongnam. Filtering for '김해'...", flush_to_db=True)
-                    
-                    new_count = 0
-                    skip_count = 0
-                    region_skip_count = 0
-                    error_count = 0
-                    
-                    for idx, item in enumerate(items, 1):
-                        try:
-                            mt20id = item.findtext("mt20id")
-                            prfnm = item.findtext("prfnm")
-                            fcltynm = item.findtext("fcltynm") or "장소 정보 없음"
-                            
-                            # Filter: Only process if region is '김해'
-                            region = self.extract_region(fcltynm)
-                            if region != '김해':
-                                # 김해가 아닌 경우 로그에 남기되 간략하게 표시 (너무 많을 수 있으므로 5개마다 한 줄씩 표시하거나 생략 가능)
-                                # 여기서는 명확성을 위해 모든 지역 스킵 사유를 남깁니다.
-                                self.log_collector.add(f"  [{idx}/{total_found}] ⏩ Skipping: {prfnm[:20]}... (Region: {region})")
-                                region_skip_count += 1
-                                continue
+            items, page = [], 1
+            while True:
+                root = await self._xml(session, "pblprfr", stdate=start, eddate=end, cpage=page, rows=100, signgucode=SIDO_CODE)
+                dbs = root.findall("db") if root is not None else []
+                items += dbs
+                if len(dbs) < 100:
+                    break
+                page += 1
+            print(f"[KOPIS] {start}~{end} 경남 공연 {len(items)}건", flush=True)
 
-                            source_id = mt20id
-                            self.log_collector.add(f"  [{idx}/{total_found}] 🎯 TARGET FOUND: {prfnm} @ {fcltynm}")
-                            
-                            # Check duplicates
-                            detail_url = f"https://www.kopis.or.kr/home/perf/perf_view.do?pfm_id={mt20id}"
-                            
-                            if self.db.check_duplicate(detail_url) or self.db.check_duplicate_by_id(source_id):
-                                self.log_collector.add(f"  [{idx}/{total_found}] ⏭️ DUPLICATE - Skipping")
-                                skip_count += 1
-                                continue
-                            
-                            # Fetch Detail
-                            self.log_collector.add(f"  [{idx}/{total_found}] 📥 Fetching details for {mt20id}...")
-                            detail_data = await self.fetch_detail(session, mt20id)
-                            
-                            if not detail_data:
-                                self.log_collector.add(f"  [{idx}/{total_found}] ❌ Failed to fetch details")
-                                error_count += 1
-                                continue
+            for idx, it in enumerate(items, 1):
+                mt20id = it.findtext("mt20id")
+                title = it.findtext("prfnm")
+                try:
+                    if self.db.check_duplicate_source("KOPIS", mt20id):
+                        dup += 1
+                        continue
+                    root = await self._xml(session, f"pblprfr/{mt20id}")
+                    d = root.find("db") if root is not None else None
+                    if d is None:
+                        fail += 1; failures.append(f"{title}: 상세 없음"); continue
+                    fac = await self._facility(session, d.findtext("mt10id"))
+                    region = city_of(fac["adres"], d.findtext("fcltynm"), title)
+                    if REGION_FILTER and region not in REGION_FILTER:
+                        skipped_region += 1
+                        continue
+                    relates = [(r.findtext("relatenm"), r.findtext("relateurl")) for r in d.findall("./relates/relate")]
+                    link, link_name, tried = await self._best_link(session, relates, fac["url"], mt20id)
+                    if not link:
+                        fail += 1; failures.append(f"{title}: 열리는 링크 없음 ({', '.join(tried)})"); continue
+                    poster = d.findtext("poster") or ""
+                    post = {
+                        "source": "KOPIS",
+                        "source_id": mt20id,
+                        "source_url": link,
+                        "content": {
+                            "title": title,
+                            "description": (d.findtext("sty") or "").strip(),
+                            "ai_suggestion": {
+                                "category": "공연",
+                                "genre": d.findtext("genrenm"),
+                                "region": region,
+                                "venue": d.findtext("fcltynm"),
+                                "address": fac["adres"],
+                                "date_start": to_iso(d.findtext("prfpdfrom")),
+                                "date_end": to_iso(d.findtext("prfpdto")),
+                                "time": (d.findtext("dtguidance") or "").strip(),
+                                "runtime": (d.findtext("prfruntime") or "").strip(),
+                                "age": (d.findtext("prfage") or "").strip(),
+                                "price": (d.findtext("pcseguidance") or "").strip(),
+                                "cast": (d.findtext("prfcast") or "").strip(),
+                                "poster_url": poster,
+                                "link_name": link_name,
+                                "extracted_by": "kopis_api",
+                            },
+                        },
+                        "image_urls": [poster] if poster else [],
+                        "status": "COLLECTED",
+                    }
+                    if self.db.save_raw_post(post):
+                        new += 1
+                    else:
+                        fail += 1; failures.append(f"{title}: DB 저장 실패")
+                    await asyncio.sleep(0.2)
+                except Exception as e:
+                    fail += 1; failures.append(f"{title}: {e}")
 
-                            # 원본보기 링크 결정: 전문 티켓사 -> 공식홈페이지 -> 네이버예약 순으로 우선순위 부여
-                            relate_list = detail_data.get('relateurls', [])
-                            final_source_url = detail_url # 기본값
-                            
-                            # 우선순위 키워드 정의
-                            priority_keywords = ['예스24', '인터파크', '티켓링크', '멜론티켓', '옥션티켓', '공연장', '홈페이지', '공식']
-                            
-                            best_link = None
-                            # 1단계: 티켓 전문 사이트 및 공식 사이트 찾기
-                            for kw in priority_keywords:
-                                for link_obj in relate_list:
-                                    if kw in (link_obj.get('name') or ''):
-                                        best_link = link_obj.get('url')
-                                        break
-                                if best_link: break
-                            
-                            # 2단계: 1단계 실패 시 아무 링크나 하나 선택 (네이버 예약 등)
-                            if not best_link and relate_list:
-                                best_link = relate_list[0].get('url')
-                                
-                            final_source_url = best_link or detail_url
+        status = "SUCCESS" if (new or dup) else "FAIL"
+        mark = "❌" if status == "FAIL" else ("⚠️" if fail else "✅")
+        summary = f"{mark} KOPIS 수집 완료: 경남 {len(items)}건 (신규 {new}, 중복 {dup}, 실패 {fail}, 지역제외 {skipped_region})"
+        print(f"[KOPIS] {summary}", flush=True)
+        for f in failures[:20]:
+            print(f"  - {f}", flush=True)
+        if log_id:
+            self.db.supabase.table("crawl_logs").update({
+                "status": status, "result_summary": summary,
+                "detailed_log": "\n".join(failures) or None,
+                "finished_at": datetime.now(timezone.utc).isoformat(),
+            }).eq("id", log_id).execute()
+        return {"name": "KOPIS", "status": status, "summary": summary, "failures": failures}
 
-                            # AI 추천 데이터가 있으면 우선 활용
-                            ai_sug = detail_data.get('ai_suggestion') or {}
-                            
-                            # Save to DB
-                            post_data = {
-                                "source": "KOPIS",
-                                "source_id": source_id,
-                                "source_url": final_source_url,
-                                "content": {
-                                    "title": prfnm,
-                                    "description": detail_data.get('description', ''),
-                                    "ai_suggestion": {
-                                        "category": ai_sug.get('category') or self.map_genre(detail_data.get('genre', '')),
-                                        "region": ai_sug.get('region') or region,
-                                        "venue": ai_sug.get('venue') or fcltynm,
-                                        "date_start": ai_sug.get('date_start') or detail_data.get('prfpdfrom', '').replace('.', '-'),
-                                        "date_end": ai_sug.get('date_end') or detail_data.get('prfpdto', '').replace('.', '-'),
-                                        "runtime": ai_sug.get('runtime') or detail_data.get('prfruntime', ''),
-                                        "age": ai_sug.get('age') or detail_data.get('prfage', ''),
-                                        "price": ai_sug.get('price') or detail_data.get('pcseguidance', ''),
-                                        "cast": ai_sug.get('cast') or detail_data.get('prfcast', ''),
-                                        "crew": ai_sug.get('crew') or detail_data.get('prfcrew', ''),
-                                        "poster_url": ai_sug.get('poster_url') or detail_data.get('poster', '')
-                                    }
-                                },
-                                "image_urls": [detail_data.get('poster')] if detail_data.get('poster') else [],
-                                "status": "COLLECTED"
-                            }
-                            
-                            result = self.db.save_raw_post(post_data)
-                            if result:
-                                self.log_collector.add(f"  [{idx}/{total_found}] ✅ Saved to DB (AI used: {detail_data.get('ai_used', False)})", flush_to_db=True)
-                                new_count += 1
-                            else:
-                                self.log_collector.add(f"  [{idx}/{total_found}] ❌ DB Save Failed")
-                                error_count += 1
-                                
-                            await asyncio.sleep(0.5) # Polite delay
-                            
-                        except Exception as e:
-                            self.log_collector.add(f"  [{idx}/{total_found}] ⚠️ Error: {e}")
-                            error_count += 1
-                            
-                    summary = f"✅ KOPIS Crawl Finished: 전체 {total_found}건 중 김해 {total_found - region_skip_count}건 발견 (신규 {new_count}, 중복 {skip_count}, 지역불일치 {region_skip_count})"
-                    self.log_collector.add(f"\n{'='*60}")
-                    self.log_collector.add(summary)
-                    self.log_collector.add(f"{'='*60}\n")
-                    
-                    if log_id:
-                        self.db.supabase.table("crawl_logs").update({
-                            "result_summary": summary,
-                            "status": "SUCCESS", 
-                            "finished_at": datetime.utcnow().isoformat(),
-                            "detailed_log": self.log_collector.get_all()
-                        }).eq("id", log_id).execute()
-
-            except Exception as e:
-                self.log_collector.add(f"Critical Error: {e}")
-                import traceback
-                self.log_collector.add(traceback.format_exc())
-                if log_id:
-                    self.db.supabase.table("crawl_logs").update({
-                        "status": "FAIL",
-                        "error_msg": str(e),
-                        "detailed_log": self.log_collector.get_all()
-                    }).eq("id", log_id).execute()
 
 if __name__ == "__main__":
-    from dotenv import load_dotenv
-    import os
-    
-    # Load env from parent/frontend (adjusted path)
-    # Actually Database class handles loading .env.local if present in cwd or similar.
-    # But usually we run from project root.
-    
-    # Assuming running from e:/developement/pick-art/
-    load_dotenv(".env.local")
-    
-    async def main():
-        print("Testing KopisScraper...")
-        db = Database()
-        
-        # Create a log entry first so UI can see it running
-        log_entry = {
-            "target_name": "KOPIS (Manual)",
-            "status": "RUNNING",
-            "started_at": datetime.utcnow().isoformat(),
-            "result_summary": "수동 실행 시작..."
-        }
-        
-        try:
-            res = db.supabase.table("crawl_logs").insert(log_entry).execute()
-            log_id = res.data[0]['id']
-            print(f"Created Log ID: {log_id}")
-            
-            scraper = KopisScraper(db)
-            await scraper.scrape(log_id=log_id)
-            
-        except Exception as e:
-            print(f"Failed to initialize logging: {e}")
-            # Fallback without logging to DB if DB fails
-            scraper = KopisScraper(db)
-            await scraper.scrape()
-        
-    asyncio.run(main())
+    import sys
+    args = sys.argv[1:]
+    result = asyncio.run(KopisScraper(Database()).scrape(*args[:2]))
+    print(result["summary"])

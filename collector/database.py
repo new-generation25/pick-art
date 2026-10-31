@@ -90,8 +90,9 @@ class Database:
         print(f"        📋 [DB] Status determined: {status}", flush=True)
 
         try:
-            # 중복 체크 (URL 기반)
-            if self.check_duplicate(source_url):
+            # 중복 체크: (source, source_id)가 있으면 그것으로. 같은 공연장 홈페이지를 링크로 쓰는 공연이 여럿일 수 있다
+            is_dup = self.check_duplicate_source(source, source_id) if (source and source_id) else self.check_duplicate(source_url)
+            if is_dup:
                 print(f"        ⏭️ [DB:Duplicate] Already exists: {source_url}", flush=True)
                 return None
 
@@ -157,6 +158,14 @@ class Database:
         """활성화된 크롤링 설정을 가져옵니다. (현재는 whitelist 기반으로 통합 사용)"""
         # crawler_configs 테이블이 없으므로 빈 리스트 반환 (main.py에서 whitelist를 사용하도록 유도)
         return []
+
+    def check_duplicate_source(self, source: str, source_id: str) -> bool:
+        """(source, source_id) 기준 중복 확인. raw_posts의 UNIQUE 키와 같다."""
+        try:
+            response = self.supabase.table("raw_posts").select("id").eq("source", source).eq("source_id", source_id).execute()
+            return len(response.data) > 0
+        except Exception:
+            return False
 
     def check_duplicate(self, source_url: str) -> bool:
         try:

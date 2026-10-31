@@ -7,6 +7,18 @@ from io import BytesIO
 from datetime import datetime
 from supabase import Client
 
+LINK_HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
+
+async def check_link(session: aiohttp.ClientSession, url: str) -> tuple:
+    """링크가 실제로 열리는지 확인한다. (ok, status, 최종 URL)"""
+    if not url or not url.startswith("http"):
+        return False, None, url
+    try:
+        async with session.get(url, headers=LINK_HEADERS, timeout=aiohttp.ClientTimeout(total=20), allow_redirects=True) as r:
+            return r.status < 400, r.status, str(r.url)
+    except Exception as e:
+        return False, type(e).__name__, url
+
 async def process_and_upload_image(supabase: Client, img_url: str, storage_path: str) -> tuple:
     """
     이미지를 다운로드하여 원본과 썸네일(600px) WebP로 변환 후 업로드합니다.

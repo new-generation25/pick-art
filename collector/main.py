@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from database import Database
 from insta_scraper import InstaScraper
 from public_scraper import PublicScraper
+from kopis_scraper import KopisScraper
 from fb_scraper_service import FacebookScraper
 from notifier import TelegramNotifier
 from ai_extractor import AIExtractor
@@ -88,6 +89,8 @@ async def run_crawlers(specific_target=None):
             # 루틴 실행 시: website만 수집한다. 나머지 유형은 건너뛴 것으로 센다
             public = PublicScraper(db)
             results = await public.scrape([c for c in configs if c['target_type'] == 'website'])
+            # KOPIS(공연 API)는 화이트리스트와 무관하게 정기 크롤마다 돈다
+            results.append(await KopisScraper(db).scrape())
             skipped = {}
             for c in configs:
                 if c['target_type'] != 'website':
@@ -95,7 +98,7 @@ async def run_crawlers(specific_target=None):
 
             # 전체 종료 알림: 처리·실패·건너뜀을 숫자로 남긴다
             failed = [r for r in results if r['status'] != 'SUCCESS']
-            lines = [f"{'⚠️' if failed else '✅'} 정기 크롤링 완료 — website {len(results)}곳 처리 (실패 {len(failed)})"]
+            lines = [f"{'⚠️' if failed else '✅'} 정기 크롤링 완료 — 출처 {len(results)}곳 처리 (웹사이트 {len(results) - 1} + KOPIS, 실패 {len(failed)})"]
             lines += [f"• {r['name']}: {r['summary']}" for r in results]
             for t, n in skipped.items():
                 lines.append(f"• {t} {n}곳 건너뜀 (미구현)")
