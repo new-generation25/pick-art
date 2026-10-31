@@ -20,6 +20,8 @@ export default function SettingsPage() {
     const [interests, setInterests] = useState<string[]>([]);
     const [emailNotifications, setEmailNotifications] = useState(true);
     const [newEventNotifications, setNewEventNotifications] = useState(true);
+    // 구글·카카오 첫 로그인(/auth/callback → ?welcome=1): 저장하면 바로 홈으로 보낸다
+    const [isWelcome, setIsWelcome] = useState(false);
 
     const regions = ["창원", "김해", "진주", "통영", "거제", "양산", "밀양", "함안", "기타"];
     const categories = ["전시", "공연", "축제", "전통문화", "체험/교육"];
@@ -38,6 +40,7 @@ export default function SettingsPage() {
 
         setUser(session.user);
         setEmail(session.user.email || '');
+        setIsWelcome(new URLSearchParams(window.location.search).get('welcome') === '1');
 
         // 프로필 정보 가져오기
         const { data: profile } = await supabase
@@ -84,6 +87,10 @@ export default function SettingsPage() {
 
             if (error) throw error;
 
+            if (isWelcome) {
+                router.replace('/');
+                return;
+            }
             setMessage("✅ 설정이 저장되었습니다!");
             setTimeout(() => setMessage(""), 3000);
         } catch (error: any) {
@@ -112,6 +119,12 @@ export default function SettingsPage() {
                     <h1 className="text-3xl font-black text-neutral-900 mb-2">설정</h1>
                     <p className="text-neutral-500">프로필 정보와 알림 설정을 관리하세요</p>
                 </div>
+
+                {isWelcome && (
+                    <div className="mb-6 p-4 rounded-xl font-bold bg-indigo-50 text-indigo-700">
+                        환영합니다! 다른 사람에게 보일 닉네임을 정하고 저장하면 바로 시작합니다.
+                    </div>
+                )}
 
                 {message && (
                     <div className={`mb-6 p-4 rounded-xl font-bold ${message.includes("✅") ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
