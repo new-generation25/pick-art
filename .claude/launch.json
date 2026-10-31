@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["--prefix", "frontend", "run", "dev"],
       "port": 3000
+    },
+    {
+      "name": "pick-art-frontend-webpack",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "set NODE_OPTIONS=--max-old-space-size=2048&& npm --prefix frontend run dev -- --webpack"],
+      "port": 3000
     }
   ]
 }
