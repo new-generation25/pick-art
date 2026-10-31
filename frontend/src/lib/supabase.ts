@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { todayKST } from './utils';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -6,10 +7,12 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export async function getPublishedEvents(filters?: { region?: string; category?: string; search?: string; date?: string }) {
+    // 끝난 행사는 빼고, 가까운 날짜부터 보여 준다
     let query = supabase
         .from('events')
         .select('*')
-        .eq('status', 'PUBLISHED');
+        .eq('status', 'PUBLISHED')
+        .gte('event_date_end', todayKST());
 
     if (filters?.region && filters.region !== '전체') {
         query = query.eq('region', filters.region);
@@ -55,7 +58,9 @@ export async function getPublishedEvents(filters?: { region?: string; category?:
         }
     }
 
-    const { data, error } = await query.order('published_at', { ascending: false });
+    const { data, error } = await query
+        .order('event_date_start', { ascending: true })
+        .order('event_date_end', { ascending: true });
 
     if (error) {
         console.error('Error fetching events:', error);

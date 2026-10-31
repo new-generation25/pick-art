@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Group, Button } from "@mantine/core";
 import { Calendar } from "lucide-react";
 
-const REGIONS = ["전체", "창원", "김해", "진주", "통영", "거제", "양산", "밀양"];
+const REGIONS = ["전체", "창원", "김해", "진주", "통영", "거제", "양산", "밀양", "사천", "함안", "고성", "합천", "거창", "함양", "창녕", "의령"];
 const CATEGORIES = ["전체", "공연", "전시", "축제", "행사"];
 const DATE_FILTERS = [
     { label: "전체", value: "all" },

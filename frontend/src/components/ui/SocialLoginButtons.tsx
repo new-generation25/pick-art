@@ -5,6 +5,10 @@ import { supabase } from "@/lib/supabase";
 
 type Provider = "google" | "kakao";
 
+// Supabase에서 카카오 공급자를 켠 뒤 .env.local 에 NEXT_PUBLIC_KAKAO_LOGIN=on 을 넣으면 버튼이 보인다.
+// 켜기 전에 누르면 'provider is not enabled' 오류 화면이 나오기 때문에 기본은 숨긴다.
+const KAKAO_ENABLED = process.env.NEXT_PUBLIC_KAKAO_LOGIN === "on";
+
 // 구글·카카오 로그인. 로그인과 가입이 같은 흐름이다 — 처음 온 사람은
 // /auth/callback 에서 닉네임을 정하는 설정 화면으로 보낸다.
 export function SocialLoginButtons() {
@@ -42,7 +46,7 @@ export function SocialLoginButtons() {
                 </svg>
                 {pending === "google" ? "구글로 이동 중..." : "구글로 계속하기"}
             </button>
-            <button
+            {KAKAO_ENABLED && <button
                 type="button"
                 onClick={() => signIn("kakao")}
                 disabled={pending !== null}
@@ -52,7 +56,7 @@ export function SocialLoginButtons() {
                     <path fill="#191919" d="M12 3C6.5 3 2 6.5 2 10.8c0 2.8 1.9 5.2 4.7 6.6l-1 3.6c-.1.3.3.6.6.4l4.2-2.8c.5.1 1 .1 1.5.1 5.5 0 10-3.5 10-7.8S17.5 3 12 3z" />
                 </svg>
                 {pending === "kakao" ? "카카오로 이동 중..." : "카카오로 계속하기"}
-            </button>
+            </button>}
             {error && <p className="text-sm font-bold text-red-600">{error}</p>}
         </div>
     );

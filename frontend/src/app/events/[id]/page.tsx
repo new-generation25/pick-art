@@ -1,4 +1,5 @@
 import { Header } from "@/components/ui/Header";
+import { formatPeriod } from "@/lib/utils";
 import { getEventById, getPublishedEvents } from "@/lib/supabase";
 import { Calendar, MapPin, ExternalLink, ArrowLeft, Tag, Share2, Info, Ticket, Sparkles } from "lucide-react";
 import { ShareButton } from "@/components/ui/ShareButton";
@@ -60,7 +61,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
             id: e.id,
             title: e.title,
             category: e.category,
-            date: `${e.event_date_start}${e.event_date_end ? ` ~ ${e.event_date_end}` : ''}`,
+            date: formatPeriod(e.event_date_start, e.event_date_end),
             location: e.venue || e.region,
             imageUrl: e.poster_image_url,
             isFree: e.is_free,
@@ -150,7 +151,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                                     <div>
                                         <div className="text-xs text-neutral-400 font-bold uppercase tracking-tight mb-0.5">일시</div>
                                         <div className="text-base font-extrabold text-neutral-800">
-                                            {event.event_date_start} {event.event_date_end ? ` ~ ${event.event_date_end}` : ""}
+                                            {formatPeriod(event.event_date_start, event.event_date_end)}
                                         </div>
                                     </div>
                                 </div>

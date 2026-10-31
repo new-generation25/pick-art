@@ -4,19 +4,7 @@ import { FilterBar } from "@/components/ui/FilterBar";
 import { Search, Mail, Bell } from "lucide-react";
 import { Container, Title, Text, TextInput, Button, SimpleGrid, Paper, ThemeIcon, Group, Box, rem, Alert, Stack } from "@mantine/core";
 
-// Mock Data for Fallback/Demo
-const MOCK_EVENTS = [
-  {
-    id: "1",
-    title: "2024 창원 조각 비엔날레: 미래의 도시",
-    category: "전시",
-    date: "2024.09.27 - 2024.11.10",
-    location: "창원 성산아트홀 및 용지공원",
-    imageUrl: "https://images.unsplash.com/photo-1545989253-02cc26577452?q=80&w=800&auto=format&fit=crop",
-    isFree: false,
-  },
-  // ... other mock events
-];
+import { formatPeriod } from "@/lib/utils";
 
 interface HomeProps {
   searchParams: Promise<{
@@ -45,13 +33,14 @@ export default async function Home({ searchParams }: HomeProps) {
     id: event.id,
     title: event.title,
     category: event.category,
-    date: `${event.event_date_start}${event.event_date_end ? ` ~ ${event.event_date_end}` : ''} `,
+    date: formatPeriod(event.event_date_start, event.event_date_end),
     location: event.venue || event.region,
     imageUrl: event.poster_image_url,
     isFree: event.is_free,
   }));
 
-  const allEvents = formattedDbEvents.length > 0 ? formattedDbEvents : (filters.region || filters.category || filters.search ? [] : MOCK_EVENTS);
+  // 예전에는 DB가 비면 2024년 예시 카드를 보여 줬다. 이제는 실제 결과만 보여 준다(없으면 빈 상태 안내)
+  const allEvents = formattedDbEvents;
 
   return (
     <Box>

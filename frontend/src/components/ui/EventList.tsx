@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { EventCard } from "./EventCard";
 import { supabase } from "@/lib/supabase";
+import { formatPeriod } from "@/lib/utils";
 import { AlertCircle, Check } from "lucide-react";
 import { SimpleGrid, Loader, Stack, Text, Paper, ThemeIcon, rem, Box } from "@mantine/core";
 
@@ -26,17 +27,21 @@ interface EventListProps {
     onSelect?: (id: string) => void;
 }
 
-export function EventList({ initialEvents = [], filters = {}, limit, isSelectMode = false, selectedIds = [], onSelect }: EventListProps) {
-    const [events, setEvents] = useState<Event[]>(initialEvents);
+export function EventList({ initialEvents, filters = {}, limit, isSelectMode = false, selectedIds = [], onSelect }: EventListProps) {
+    // initialEvents 를 받으면(빈 배열 포함) 서버가 필터를 적용한 전체 목록이다 → 다시 불러오거나 이어 붙이지 않는다.
+    // 예전에는 빈 배열이면 필터를 무시한 전체 목록을 다시 불러왔고, 목록이 있어도 무한 스크롤이 같은 행사를 또 붙였다.
+    const serverProvided = initialEvents !== undefined;
+    const [events, setEvents] = useState<Event[]>(initialEvents ?? []);
     const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(!limit); // If limit exists, no infinite scroll
-    const [loading, setLoading] = useState(!initialEvents.length);
+    const [hasMore, setHasMore] = useState(!limit && !serverProvided); // If limit exists, no infinite scroll
+    const [loading, setLoading] = useState(!serverProvided);
     const observerTarget = useRef<HTMLDivElement>(null);
 
     // Initial fetch if no props provided or filtering
     useEffect(() => {
-        if (initialEvents.length > 0) {
-            setEvents(initialEvents);
+        if (serverProvided) {
+            setEvents(initialEvents ?? []);
+            setHasMore(false);
             setLoading(false);
             return;
         }
@@ -71,7 +76,7 @@ export function EventList({ initialEvents = [], filters = {}, limit, isSelectMod
                     id: event.id,
                     title: event.title,
                     category: event.category,
-                    date: `${event.event_date_start}${event.event_date_end ? ` ~ ${event.event_date_end}` : ''}`,
+                    date: formatPeriod(event.event_date_start, event.event_date_end),
                     location: event.venue || event.region,
                     imageUrl: event.poster_image_url,
                     isFree: event.is_free,
@@ -118,7 +123,7 @@ export function EventList({ initialEvents = [], filters = {}, limit, isSelectMod
                 id: event.id,
                 title: event.title,
                 category: event.category,
-                date: `${event.event_date_start}${event.event_date_end ? ` ~ ${event.event_date_end}` : ''}`,
+                date: formatPeriod(event.event_date_start, event.event_date_end),
                 location: event.venue || event.region,
                 imageUrl: event.poster_image_url,
                 isFree: event.is_free,
