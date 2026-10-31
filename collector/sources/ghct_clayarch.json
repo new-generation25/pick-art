@@ -1,0 +1,22 @@
+{
+  "slug": "ghct_clayarch",
+  "name": "클레이아크김해미술관",
+  "_comment": "사이트 개편 시 이 파일만 고친다. 파이썬은 건드리지 않는다",
+  "verified_at": "2026-10-31",
+  "match": ["clayarch.ghct.or.kr"],
+  "region": "김해",
+  "venue": "클레이아크김해미술관",
+  "boards": [
+    {"url": "https://clayarch.ghct.or.kr/board/exhibition01", "category": "전시",
+     "link_template": "https://clayarch.ghct.or.kr/board/detail/exhibition01/{idx}"}
+  ],
+  "list": {
+    "rows": "div.col",
+    "id": "a@data-idx",
+    "title": "p.title",
+    "period": ".figcaption > span",
+    "venue": ".figcaption > span:nth-of-type(2)",
+    "image": "img@src"
+  },
+  "expect": {"min_rows": 1, "required": ["title", "link", "period"]}
+}

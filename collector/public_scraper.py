@@ -88,7 +88,7 @@ class PublicScraper:
                 suggestion = {
                     "category": board["category"],
                     "region": d["region"],
-                    "venue": d["venue"],
+                    "venue": f"{d['venue']} {it['venue']}".strip() if it.get("venue") and d["venue"] not in it["venue"] else (it.get("venue") or d["venue"]),
                     "date_start": period["start"],
                     "date_end": period["end"],
                     "date_raw": period["raw"],
@@ -192,7 +192,8 @@ class PublicScraper:
         async with session.get(board["url"], timeout=aiohttp.ClientTimeout(total=20)) as r:
             soup = BeautifulSoup(await r.text(), "html.parser")
         for row in soup.select(lst["rows"]):
-            values = {**row.attrs, "idx": row.get(lst.get("id_attr", "data-idx"))}
+            rid = _pick(row, lst["id"]) if lst.get("id") else row.get(lst.get("id_attr", "data-idx"))
+            values = {**row.attrs, "idx": rid}
             link = fill(board["link_template"], values) if board.get("link_template") else urljoin(board["url"], _pick(row, lst["link"]))
             image = _pick(row, lst.get("image"))
             items.append({
@@ -200,6 +201,7 @@ class PublicScraper:
                 "period": parse_period(_pick(row, lst["period"]), datetime.now().year),
                 "link": link,
                 "image": urljoin(board["url"], image) if image else "",
+                "venue": _pick(row, lst.get("venue")),
             })
         return items
 
