@@ -1,0 +1,52 @@
+{
+  "slug": "ghct_wgcc",
+  "name": "김해서부문화센터",
+  "_comment": "사이트 개편 시 이 파일만 고친다. 파이썬은 건드리지 않는다. api가 있으면 월별 JSON(이번 달~months_ahead), 없으면 목록 HTML",
+  "verified_at": "2026-10-31",
+  "match": [
+    "wgcc.ghct.or.kr"
+  ],
+  "region": "김해",
+  "venue": "김해서부문화센터",
+  "boards": [
+    {
+      "url": "https://wgcc.ghct.or.kr/board/show01_01",
+      "category": "공연",
+      "link_template": "https://wgcc.ghct.or.kr/board/detail/show01_01/{idx}",
+      "api": "https://wgcc.ghct.or.kr/board/show01_01/monthlyList?boardId=BOARD_000000111&searchYear={year}&searchMonth={month}&pageIndex={page}&searchText="
+    },
+    {
+      "url": "https://wgcc.ghct.or.kr/board/show02_01",
+      "category": "전시",
+      "link_template": "https://wgcc.ghct.or.kr/board/detail/show02_01/{idx}",
+      "api": "https://wgcc.ghct.or.kr/board/show02_01/monthlyList?boardId=BOARD_000000110&searchYear={year}&searchMonth={month}&pageIndex={page}&searchText="
+    }
+  ],
+  "list": {
+    "rows": "ul.img_list li",
+    "id_attr": "data-idx",
+    "title": ".txt p",
+    "period": ".txt i",
+    "image": "img@src"
+  },
+  "detail": {
+    "body": ".view_content"
+  },
+  "expect": {
+    "min_rows": 1,
+    "required": [
+      "title",
+      "link",
+      "period"
+    ]
+  },
+  "api_fields": {
+    "id": "idx",
+    "title": "title",
+    "start": "sdate",
+    "end": "edate",
+    "image_template": "https://wgcc.ghct.or.kr/file/download?fileKey={fileKey}",
+    "page_size": 20
+  },
+  "months_ahead": 1
+}

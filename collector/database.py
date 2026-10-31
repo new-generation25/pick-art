@@ -60,7 +60,7 @@ class Database:
 
             # 전략 2: URL 도메인 기반 매칭 (같은 도메인이면 허용)
             elif source_url and wl_value:
-                # URL에서 도메인 추출 (https://wgcc.ghct.or.kr/... → wgcc.ghct.or.kr)
+                # URL에서 도메인 추출 (https://host/... → host)
                 from urllib.parse import urlparse
                 try:
                     wl_domain = urlparse(wl_value).netloc if 'http' in wl_value else wl_value
@@ -158,6 +158,13 @@ class Database:
         """활성화된 크롤링 설정을 가져옵니다. (현재는 whitelist 기반으로 통합 사용)"""
         # crawler_configs 테이블이 없으므로 빈 리스트 반환 (main.py에서 whitelist를 사용하도록 유도)
         return []
+
+    def get_raw_post(self, source: str, source_id: str):
+        try:
+            res = self.supabase.table("raw_posts").select("id, content, status").eq("source", source).eq("source_id", source_id).limit(1).execute()
+            return res.data[0] if res.data else None
+        except Exception:
+            return None
 
     def check_duplicate_source(self, source: str, source_id: str) -> bool:
         """(source, source_id) 기준 중복 확인. raw_posts의 UNIQUE 키와 같다."""

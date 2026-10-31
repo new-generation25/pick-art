@@ -35,8 +35,11 @@ async def process_and_upload_image(supabase: Client, img_url: str, storage_path:
             return None, None, None
 
     try:
-        # 1. 이미지 처리 (Pillow)
+        # 1. 이미지 처리 (Pillow). 공공기관 포스터는 수억 픽셀짜리도 있어 상한을 풀고 긴 변 1600px로 줄인다
+        Image.MAX_IMAGE_PIXELS = None
         img = Image.open(io.BytesIO(img_data))
+        img.draft("RGB", (1600, 1600))
+        img.thumbnail((1600, 1600))
         
         # 파일명 생성
         filename = os.path.basename(storage_path)
