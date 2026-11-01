@@ -3,6 +3,7 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import fs from 'fs';
 import path from 'path';
+import { blockOnDeploy, LOCAL_ONLY_MESSAGE } from '@/lib/localOnly';
 
 const execAsync = promisify(exec);
 
@@ -32,10 +33,14 @@ async function checkCollector(): Promise<{ running: boolean; message: string; pi
 }
 
 export async function GET() {
+    // 배포 환경: 수집기는 이 PC에서만 돈다. 화면이 깨지지 않게 '꺼짐'으로 답한다
+    if (process.env.VERCEL) return NextResponse.json({ running: false, message: LOCAL_ONLY_MESSAGE });
     return NextResponse.json(await checkCollector());
 }
 
 export async function POST() {
+    const blocked = blockOnDeploy();
+    if (blocked) return blocked;
     if (!fs.existsSync(path.join(collectorPath, 'main.py'))) {
         return NextResponse.json({
             success: false,

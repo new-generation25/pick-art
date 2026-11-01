@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { blockOnDeploy } from '@/lib/localOnly';
 
 export async function GET() {
+    const blocked = blockOnDeploy();
+    if (blocked) return blocked;
     const envPath = path.resolve(process.cwd(), '.env.local');
     const envData = await fs.promises.readFile(envPath, 'utf-8');
     const match = envData.match(/AI_PROMPT=(.*)/);

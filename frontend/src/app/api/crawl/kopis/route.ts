@@ -2,10 +2,13 @@ import { NextResponse } from 'next/server';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import path from 'path';
+import { blockOnDeploy } from '@/lib/localOnly';
 
 const execAsync = promisify(exec);
 
 export async function POST() {
+    const blocked = blockOnDeploy();
+    if (blocked) return blocked;
     try {
         // Define path to collector directory
         const projectRoot = path.resolve(process.cwd(), '..', 'collector');
