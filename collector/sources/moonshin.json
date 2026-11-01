@@ -24,7 +24,8 @@
     "id_regex": "idx=([0-9]+)",
     "title": ".detail em",
     "period": "tr:nth-of-type(2) td",
-    "venue": "tr:nth-of-type(4) td"
+    "venue": "tr:nth-of-type(4) td",
+    "image": "@style"
   },
   "expect": {
     "min_rows": 0,

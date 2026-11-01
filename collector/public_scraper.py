@@ -6,7 +6,7 @@ import random
 import re
 import html
 import json
-from urllib.parse import urljoin
+from urllib.parse import urljoin, quote
 from ai_extractor import AIExtractor
 from datetime import datetime, timezone, timedelta
 
@@ -193,12 +193,13 @@ class PublicScraper:
                         start, end = str(row.get(f["start"]) or ""), str(row.get(f["end"]) or "")
                         period_text = f"{start} ~ {end}" if end and end != start else start
                     img = f.get("image_template")
+                    quoted = {k: quote(str(v)) for k, v in row.items() if v is not None}
                     items.append({
                         "id": rid,
                         "title": clean(row.get(f["title"])),
                         "period": parse_period(period_text, year),
                         "link": fill(board["link_template"], row),
-                        "image": fill(img, row) if img and row.get(f.get("image_key", "fileKey")) else "",
+                        "image": fill(img, quoted) if img and row.get(f.get("image_key", "fileKey")) else "",
                         "venue": clean(str(row.get(f["venue"]) or "")) if f.get("venue") else "",
                         # 한 API에 공연·전시가 섞여 있으면 category 필드 값으로 나눈다 (category_map: {"전시": "전시"} 처럼 포함 문자열 → 분류)
                         "category": next((v for k, v in (f.get("category_map") or {}).items() if k in str(row.get(f.get("category"), ""))), None),
@@ -285,6 +286,9 @@ class PublicScraper:
                 m = re.search(lst["id_regex"], link)
                 rid = m.group(1) if m else rid
             image = _pick(row, lst.get("image"))
+            bg = re.search(r"url[(]['\"]?([^'\")]+)", image or "")
+            if bg:  # style="background-image: url(...)" 로 포스터를 거는 목록
+                image = bg.group(1)
             items.append({
                 "id": rid,
                 "title": clean(_pick(row, lst["title"])),

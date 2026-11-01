@@ -31,7 +31,9 @@
     "period": "date_txt",
     "venue": "HALL_NAME",
     "page_size": 8,
-    "max_pages": 30
+    "max_pages": 30,
+    "image_template": "https://ticketnew.cwcf.or.kr/rev/upload/play/{FILE_IMG0}",
+    "image_key": "FILE_IMG0"
   },
   "expect": {
     "min_rows": 1,

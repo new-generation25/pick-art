@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 import os
 import io
 import asyncio
@@ -23,9 +24,12 @@ async def process_and_upload_image(supabase: Client, img_url: str, storage_path:
     """
     이미지를 다운로드하여 원본과 썸네일(600px) WebP로 변환 후 업로드합니다.
     """
-    async with aiohttp.ClientSession() as session:
+    origin = "{0.scheme}://{0.netloc}/".format(urlparse(img_url))
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+               "Referer": origin}
+    async with aiohttp.ClientSession(headers=headers) as session:
         try:
-            async with session.get(img_url, timeout=10) as resp:
+            async with session.get(img_url, timeout=aiohttp.ClientTimeout(total=40)) as resp:
                 if resp.status != 200:
                     print(f"Failed to download image: {img_url} (status: {resp.status})")
                     return None, None, None
