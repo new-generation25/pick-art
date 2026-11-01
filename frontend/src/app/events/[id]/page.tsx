@@ -3,7 +3,7 @@ import { formatPeriod, todayKST } from "@/lib/utils";
 import { getEventById, getPublishedEvents } from "@/lib/supabase";
 import { Calendar, MapPin, ExternalLink, ArrowLeft, Info, Ticket } from "lucide-react";
 import { ShareButton } from "@/components/ui/ShareButton";
-import Image from "next/image";
+import { PosterViewer } from "@/components/ui/PosterViewer";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
@@ -91,17 +91,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                     {/* 포스터 + 바로가기 */}
                     <div>
                         <div className="lg:sticky lg:top-24">
-                            <div className="pica-box relative mx-auto aspect-[3/4] w-full max-w-[400px] overflow-hidden">
-                                <Image
-                                    src={event.poster_image_url || "/images/placeholder.webp"}
-                                    alt={event.title}
-                                    fill
-                                    className={isEnded ? "object-cover grayscale" : "object-cover"}
-                                    priority
-                                    sizes="(max-width: 768px) 100vw, 400px"
-                                    unoptimized={event.poster_image_url?.startsWith('http')}
-                                />
-                            </div>
+                            <PosterViewer src={event.poster_image_url} alt={event.title} ended={isEnded} />
 
                             <div className="mx-auto mt-4 flex max-w-[400px] gap-2">
                                 <a
