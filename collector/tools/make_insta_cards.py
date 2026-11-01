@@ -124,15 +124,15 @@ body { background: #888; }
 .pad { position: absolute; left: 72px; right: 72px; }
 
 /* 1. 표지 */
-.cover .poster { position: absolute; right: -50px; top: 300px; width: 500px; transform: rotate(4deg);
+.cover .poster { position: absolute; right: -12px; top: 232px; transform: rotate(3deg);
   border: 4px solid %(ink)s; box-shadow: 14px 14px 0 %(blue)s; background: #fff; }
-.cover .poster img { display: block; width: 100%%; height: auto; max-height: 700px; object-fit: cover; object-position: top; }
-.cover .hook { position: absolute; left: 72px; top: 250px; width: 520px; font-size: 100px; line-height: 1.08; }
+.cover .poster img { display: block; height: 910px; width: auto; max-width: 780px; object-fit: contain; }
+.cover .hook { position: absolute; left: 72px; top: 250px; width: 420px; font-size: 76px; line-height: 1.08; }
 .cover .chips { position: absolute; left: 72px; top: 150px; display: flex; gap: 14px; }
-.cover .sticker { position: absolute; right: 40px; top: 860px; transform: rotate(-5deg); background: %(pink)s; border: 4px solid %(ink)s; padding: 12px 22px; font-size: 32px; font-weight: 900; }
-.cover .titlebox { position: absolute; left: 0; right: 0; bottom: 100px; padding: 34px 72px; }
-.cover .titlebox .t { font-size: 50px; font-weight: 900; line-height: 1.22; }
-.cover .titlebox .s { font-size: 32px; margin-top: 10px; opacity: .92; font-weight: 600; }
+.cover .sticker { position: absolute; right: 70px; top: 960px; z-index: 3; transform: rotate(-5deg); background: %(pink)s; border: 4px solid %(ink)s; padding: 12px 22px; font-size: 32px; font-weight: 900; }
+.cover .titlebox { position: absolute; left: 0; right: 0; bottom: 96px; padding: 24px 72px; }
+.cover .titlebox .t { font-size: 44px; font-weight: 900; line-height: 1.22; }
+.cover .titlebox .s { font-size: 30px; margin-top: 6px; opacity: .92; font-weight: 600; }
 .cover .swipe { position: absolute; left: 72px; top: 720px; font-size: 30px; font-weight: 800; background: %(ink)s; color: %(paper)s; padding: 10px 20px; }
 
 /* 2. 정보표 (입장권 모양) */
