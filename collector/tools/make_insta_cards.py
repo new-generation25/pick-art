@@ -21,6 +21,7 @@ import base64
 import html
 import json
 import os
+import re
 import sys
 from datetime import date
 
@@ -70,19 +71,22 @@ def build_facts(ev: dict, facts: dict) -> dict:
     s, e = ev["event_date_start"], ev["event_date_end"]
     date_label = kdate(s) if s == e else f"{kdate(s)} ~ {kdate(e)}"
     price = ev.get("price_info") or ("무료" if ev.get("is_free") else "")
-    region = ev.get("region") or "경남"
+    # 지역은 시군 이름만 쓴다. '경남'을 앞세우지 않는다(2026-11-01 사용자 지시)
+    region = ev.get("region") or ""
     cat = ev.get("category") or "행사"
+    title_tag = "#" + re.sub(r"[^0-9A-Za-z가-힣]", "", ev["title"])
     f = {
         "title": ev["title"],
-        "kicker": f"{region} · {cat}",
-        "hook": f"오늘 {region}에서\n{cat} 한 편 어때요?",
+        "kicker": f"{region} · {cat}" if region else cat,
+        "hook": f"오늘 {region}에서\n{cat} 한 편 어때요?" if region else f"오늘\n{cat} 한 편 어때요?",
         "date_label": date_label,
         "time": "", "venue": ev.get("venue") or "", "address": "",
         "price": price, "audience": "",
         "what": [], "how": [], "contact": "", "notice": "", "cover_note": "",
         "source_name": ev.get("source") or "", "source_url": ev.get("original_url") or "",
         "poster_credit": "",
-        "hashtags": [f"#{region}가볼만한곳", f"#경남{cat}", f"#{region}{cat}", "#경남문화예술", "#픽아트"],
+        "hashtags": ([f"#{region}가볼만한곳", f"#{region}{cat}", title_tag, f"#{region}주말"]
+                     if region else [title_tag, f"#{cat}"]) + ["#픽아트"],
         "hashtags_pool": [],
         "caption_lead": "", "mentions": [],
     }
@@ -181,7 +185,7 @@ def slides_html(f: dict, poster: str, handle: str) -> list:
     def top(i):
         return f'<div class="top">{brand}<div class="page">{i}/{n_total}</div></div>'
 
-    credit = f'<div class="credit"><span>{esc(f["poster_credit"])}</span><span>경남 문화예술 큐레이션</span></div>'
+    credit = f'<div class="credit"><span>{esc(f["poster_credit"])}</span><span>문화예술 큐레이션</span></div>'
     out = []
 
     # 1. 표지: 훅 + 포스터 + 제목 띠
@@ -247,7 +251,7 @@ def slides_html(f: dict, poster: str, handle: str) -> list:
     <div class="act"><span class="i">➕</span>팔로우하고<br>매일 받기</div>
   </div>
   <div class="pad src" style="top:1010px">출처 · {esc(f['source_name'])}<br>{esc(f['source_url'])[:90]}<br>방문 전 공식 안내에서 변경 사항을 꼭 확인하세요.</div>
-  <div class="credit"><span>{esc(f['poster_credit'])}</span><span>경남 문화예술 큐레이션</span></div>
+  <div class="credit"><span>{esc(f['poster_credit'])}</span><span>문화예술 큐레이션</span></div>
 </div>""")
     return out
 
