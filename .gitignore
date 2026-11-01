@@ -62,3 +62,6 @@ collector/*.txt
 # Collector runtime
 collector/.running.pid
 collector/collector_auto.log
+
+# 인스타그램 수집 세션·상태 (로그인 쿠키 포함)
+collector/.cache/
