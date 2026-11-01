@@ -115,10 +115,14 @@ class PublicScraper:
                     continue
                 description = ""
                 body_sel = (d.get("detail") or {}).get("body")
-                if body_sel:
+                title_sel = (d.get("detail") or {}).get("title")  # 목록 제목이 '..'로 잘리는 사이트
+                if body_sel or title_sel:
                     try:
-                        async with session.get(link, timeout=aiohttp.ClientTimeout(total=20)) as r:
-                            description = _pick(BeautifulSoup(await r.text(), "html.parser"), body_sel)
+                        detail = BeautifulSoup(await self._fetch_text(session, link, d, board), "html.parser")
+                        description = _pick(detail, body_sel) if body_sel else ""
+                        full = _pick(detail, title_sel) if title_sel else ""
+                        if full:
+                            title = re.sub(r"\s+", " ", full).strip()
                     except Exception:
                         pass
                 image = it["image"]
@@ -168,7 +172,9 @@ class PublicScraper:
 
         def clean(t):
             t = html.unescape(re.sub(r"<br\s*/?>", " ", t or ""))
-            return re.sub(r"\s+", " ", re.sub(r"^\[[^\]]*\]\s*", "", t)).strip()
+            t = re.sub(r"\s+", " ", re.sub(r"^\[[^\]]*\]\s*", "", t)).strip()
+            # 목록에 붙은 구분 표시('기획 ', '대관 ', '(대관) ')는 제목이 아니다
+            return re.sub(r"^\(?(기획|대관|초청|공동기획)\)?\s*", "", t)
 
         if board.get("api"):
             f = {**d.get("api_fields", {}), **board.get("api_fields", {})}
@@ -229,7 +235,9 @@ class PublicScraper:
             return items
 
         lst = board.get("list") or d["list"]
-        soup = BeautifulSoup(await self._fetch_text(session, board["url"], d, board), "html.parser")
+        frm = now.date()
+        page_url = fill(board["url"], {"from": frm.isoformat(), "to": (frm + timedelta(days=d.get("range_days", 62))).isoformat()})
+        soup = BeautifulSoup(await self._fetch_text(session, page_url, d, board), "html.parser")
         for row in soup.select(lst["rows"]):
             rid = _pick(row, lst["id"]) if lst.get("id") else row.get(lst.get("id_attr", "data-idx"))
             values = {**row.attrs, "idx": rid}
@@ -239,7 +247,7 @@ class PublicScraper:
                 if not m:
                     continue
                 values["m"] = m.group(1)
-            link = fill(board["link_template"], values) if board.get("link_template") else urljoin(board["url"], _pick(row, lst["link"]))
+            link = fill(board["link_template"], values) if board.get("link_template") else urljoin(page_url, _pick(row, lst["link"]))
             if lst.get("id_regex"):
                 m = re.search(lst["id_regex"], link)
                 rid = m.group(1) if m else rid
@@ -249,9 +257,9 @@ class PublicScraper:
                 "title": clean(_pick(row, lst["title"])),
                 "period": parse_period(_pick(row, lst["period"]), now.year),
                 "link": link,
-                "image": urljoin(board["url"], image) if image else "",
+                "image": urljoin(page_url, image) if image else "",
                 # "장소 : 남가람박물관" 처럼 앞에 붙은 이름표는 뗀다
-                "venue": re.sub(r"^[^:]{1,6}:\s*", "", _pick(row, lst.get("venue"))),
+                "venue": re.sub(r"^([^:]{1,6}:|(공연|전시)?장소)\s*", "", _pick(row, lst.get("venue"))),
                 "category": next((v for k, v in (lst.get("category_map") or {}).items() if k in _pick(row, lst.get("category"))), None),
             })
         if lst.get("dedupe"):

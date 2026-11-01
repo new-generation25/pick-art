@@ -1,0 +1,38 @@
+{
+  "slug": "haman_art",
+  "name": "함안문화예술회관",
+  "_comment": "",
+  "verified_at": "2026-11-01",
+  "match": [
+    "haman.go.kr/02574"
+  ],
+  "region": "함안",
+  "venue": "함안문화예술회관",
+  "boards": [
+    {
+      "url": "https://www.haman.go.kr/02574/02587.web",
+      "category": "공연"
+    },
+    {
+      "url": "https://www.haman.go.kr/02574/02589.web",
+      "category": "전시"
+    }
+  ],
+  "list": {
+    "rows": "li:has(> div.wrap1 > div.tg1)",
+    "link": "a.button.default@href",
+    "id_regex": "sno=([0-9]+)",
+    "title": "strong.h1",
+    "period": "li.date .t2",
+    "venue": "li.place .t2",
+    "image": "img@src"
+  },
+  "expect": {
+    "min_rows": 1,
+    "required": [
+      "title",
+      "link",
+      "period"
+    ]
+  }
+}

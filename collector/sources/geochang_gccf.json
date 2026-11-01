@@ -1,0 +1,42 @@
+{
+  "slug": "geochang_gccf",
+  "name": "거창문화재단",
+  "_comment": "첫 요청이 jsessionid 쿠키로 302 된다(세션 쿠키로 처리)",
+  "verified_at": "2026-11-01",
+  "match": [
+    "gccf.or.kr"
+  ],
+  "region": "거창",
+  "venue": "거창문화센터",
+  "boards": [
+    {
+      "url": "https://www.gccf.or.kr/front/M0000017/schedule/list.do",
+      "category": "공연"
+    },
+    {
+      "url": "https://www.gccf.or.kr/front/M0000095/schedule/list.do",
+      "category": "공연"
+    },
+    {
+      "url": "https://www.gccf.or.kr/front/M0000019/exhibit/list.do",
+      "category": "전시"
+    }
+  ],
+  "list": {
+    "rows": "li:has(> div.txtBox)",
+    "link": "a[href*='view.do?idx=']@href",
+    "id_regex": "idx=([0-9]+)",
+    "title": "h4.tit",
+    "period": "div.txtBox li:nth-of-type(1) span.txt",
+    "venue": "div.txtBox li:nth-of-type(3) span.txt",
+    "image": "img@src"
+  },
+  "expect": {
+    "min_rows": 1,
+    "required": [
+      "title",
+      "link",
+      "period"
+    ]
+  }
+}

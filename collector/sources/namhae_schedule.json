@@ -1,0 +1,33 @@
+{
+  "slug": "namhae_schedule",
+  "name": "남해군 행사일정",
+  "_comment": "군 행사 일정(체육 행사도 섞여 있다)",
+  "verified_at": "2026-11-01",
+  "match": [
+    "namhae.go.kr/modules/publicschedule"
+  ],
+  "region": "남해",
+  "venue": "",
+  "boards": [
+    {
+      "url": "https://www.namhae.go.kr/modules/publicschedule/list.do?pageCd=SM010107000&siteGubun=socialm",
+      "category": "행사"
+    }
+  ],
+  "list": {
+    "rows": ".spc5card4 li.column",
+    "link": "a.a1@href",
+    "id_regex": "sno=([0-9]+)",
+    "title": "strong.t1",
+    "period": ".date",
+    "image": "img@src"
+  },
+  "expect": {
+    "min_rows": 1,
+    "required": [
+      "title",
+      "link",
+      "period"
+    ]
+  }
+}

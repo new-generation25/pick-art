@@ -1,0 +1,46 @@
+{
+  "slug": "sacheon_sccf",
+  "name": "사천문화재단",
+  "_comment": "사천시문화예술회관. 공연은 예매 목록, 전시는 gnuboard 게시판",
+  "verified_at": "2026-11-01",
+  "match": [
+    "sccf.or.kr"
+  ],
+  "region": "사천",
+  "venue": "사천시문화예술회관",
+  "boards": [
+    {
+      "url": "https://www.sccf.or.kr/sub/ticketReservation.php",
+      "category": "공연",
+      "list": {
+        "rows": "li.column.col-md-4",
+        "link": "a@href",
+        "id_regex": "group_id=([0-9]+)",
+        "title": "h3",
+        "period": "div.showList2 li:nth-of-type(1)",
+        "venue": "div.showList2 li:nth-of-type(2) span:nth-of-type(2)",
+        "image": "img@src"
+      }
+    },
+    {
+      "url": "https://www.sccf.or.kr/bbs/board.php?bo_table=exhibition",
+      "category": "전시",
+      "list": {
+        "rows": "div:has(> .postTitle)",
+        "link": "a@href",
+        "id_regex": "wr_id=([0-9]+)",
+        "title": ".postTitle h4",
+        "period": ".postTitle p",
+        "image": "img@src"
+      }
+    }
+  ],
+  "expect": {
+    "min_rows": 1,
+    "required": [
+      "title",
+      "link",
+      "period"
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "slug": "moonshin",
+  "name": "창원시립마산문신미술관",
+  "_comment": "",
+  "verified_at": "2026-11-01",
+  "match": [
+    "changwon.go.kr/moonshin"
+  ],
+  "region": "창원",
+  "venue": "창원시립마산문신미술관",
+  "boards": [
+    {
+      "url": "https://changwon.go.kr/moonshin/exhibition/list.php?case=N",
+      "category": "전시"
+    },
+    {
+      "url": "https://changwon.go.kr/moonshin/exhibition/list.php?case=F",
+      "category": "전시"
+    }
+  ],
+  "list": {
+    "rows": "a.thumbs",
+    "link": "@href",
+    "id_regex": "idx=([0-9]+)",
+    "title": ".detail em",
+    "period": "tr:nth-of-type(2) td",
+    "venue": "tr:nth-of-type(4) td"
+  },
+  "expect": {
+    "min_rows": 0,
+    "required": [
+      "title",
+      "link",
+      "period"
+    ]
+  }
+}
