@@ -21,7 +21,8 @@ SEEN_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".cache", "
 EVENT_WORDS = re.compile(r"축제|공연|전시|음악회|콘서트|페스티벌|문화제|마켓|플리마켓|버스킹|연주회|체험|클래스|상영|야행|행사")
 # 행정 안내·모집·헌혈처럼 행사 정보가 아닌 글 (캡션 앞부분 기준)
 NOT_EVENT = re.compile(r"헌혈|노선|시내버스|야구|축구|배구|농구|마라톤|채용|구인|모집합니다|지원사업|과태료|체납|세금|보험료|실종|검진|예방접종|상품권|할인 ?행사|공사|통제")
-ALT_DATE =re.compile(r"on (January|February|March|April|May|June|July|August|September|October|November|December) (\d{1,2}), (20\d\d)")
+MENTION = re.compile(r"(?<![\w.])@([A-Za-z0-9._]{3,30}[A-Za-z0-9_])")
+ALT_DATE = re.compile(r"on (January|February|March|April|May|June|July|August|September|October|November|December) (\d{1,2}), (20\d\d)")
 MONTHS = {m: i for i, m in enumerate(["January", "February", "March", "April", "May", "June", "July", "August",
                                       "September", "October", "November", "December"], 1)}
 
@@ -135,6 +136,10 @@ async def collect_account(page, db, account, published, seen, max_age_days=21, d
         n_new += 1
         author, cap = await fetch_caption(page, code)
         await asyncio.sleep(1.5)
+        for m in set(MENTION.findall(cap or "")):  # 리포스트 출처·협업 계정은 관련 계정 후보가 된다
+            if m.lower() != handle.lower():
+                cands = seen.setdefault("_mentions", {})
+                cands[m] = cands.get(m, 0) + 1
         if not cap or NOT_EVENT.search(cap[:200]):
             continue
         url = f"https://www.instagram.com/p/{code}/"
@@ -170,3 +175,64 @@ async def collect_account(page, db, account, published, seen, max_age_days=21, d
             })
     seen[handle] = sorted(done)[-200:]
     return n_new, len(found), found
+
+
+# ---------- 계정 채점 (관련 계정 찾기·기존 계정 유지에 쓴다) ----------
+GN = re.compile(r"경남|창원|마산|진해|진주|통영|사천|김해|밀양|거제|양산|의령|함안|창녕|고성|남해|하동|산청|함양|거창|합천|장유|율하")
+EV = re.compile(r"축제|공연|전시|행사|페스티벌|음악회|콘서트|문화제|마켓|체험|야행|클래스|버스킹")
+DT = re.compile(r"📅|🗓|일시|기간|\d{1,2}\s*[./월]\s*\d{1,2}\s*(일|\.|\(|~)")
+AD = re.compile(r"협찬|광고|제작지원|#ad\b")
+ORG = re.compile(r"공식|재단|문화원|문화회관|예술회관|아트센터|미술관|박물관|축제|조직위|시청|군청|도청|구청|센터|협회|도서관|극장|창작소")
+
+
+def _followers(s):
+    m = re.search(r"팔로워\s*([\d.,]+)\s*(만|천)?", s)
+    if not m:
+        return 0
+    n = float(m.group(1).replace(",", ""))
+    return int(n * (10000 if m.group(2) == "만" else 1000 if m.group(2) == "천" else 1))
+
+
+async def score_profile(page, handle):
+    """로그인 세션으로 프로필 최근 24개 캡션을 읽어 채점한다. 반환: dict 또는 None(없는 계정)"""
+    await page.goto(f"https://www.instagram.com/{handle}/", wait_until="domcontentloaded")
+    await page.wait_for_timeout(3500)
+    header = await page.query_selector("header")
+    if not header:
+        return None
+    htext = await header.inner_text()
+    for _ in range(2):
+        await page.mouse.wheel(0, 2500)
+        await page.wait_for_timeout(1500)
+    items = await page.eval_on_selector_all(
+        'a[href*="/p/"],a[href*="/reel/"]',
+        'els => els.slice(0, 24).map(e => [e.getAttribute("href"), (e.querySelector("img") || {}).alt || ""])')
+    caps = [a for _, a in items]
+    newest = None
+    if items:  # 가장 최근 게시물(고정 게시물 3개를 피해 앞 4개 중 가장 최근)의 게시 시각
+        dates = []
+        for href, _ in items[:4]:
+            await page.goto("https://www.instagram.com" + href, wait_until="domcontentloaded")
+            await page.wait_for_timeout(2000)
+            t = await page.get_attribute("time[datetime]", "datetime")
+            if t:
+                dates.append(t[:10])
+        newest = max(dates) if dates else None
+    n = len(caps) or 1
+    gn = sum(1 for c in caps if GN.search(c))
+    ev = sum(1 for c in caps if EV.search(c) and DT.search(c))
+    ad = sum(1 for c in caps if AD.search(c))
+    fol = _followers(htext)
+    recent = bool(newest) and (date.today() - date.fromisoformat(newest)).days <= 35
+    lines = [ln for ln in htext.split("\n") if ln.strip()]
+    name = lines[1] if len(lines) > 1 else handle
+    is_org = bool(ORG.search(htext[:300]))
+    score = round(max(gn / n * 40 + min(ev, 12) / 12 * 40 + (10 if fol >= 10000 else 5 if fol >= 1000 else 0)
+                      + (10 if recent else 0) - min(ad / n * 40, 40), 0))
+    passed_inf = gn / n >= .5 and ev >= 5 and ad / n <= .25 and recent
+    passed_org = is_org and gn / n >= .5 and ev >= 3 and recent
+    detail = (f"최근 {len(caps)}개 중 경남 {gn}·날짜+행사 {ev}·광고 {ad}, 팔로워 {fol:,}, "
+              f"최근게시 {newest or '?'} ({date.today().isoformat()} 채점)")
+    return {"handle": handle, "name": name[:40], "score": score, "detail": detail, "is_org": is_org,
+            "role": "official" if passed_org else "informant" if passed_inf else None,
+            "gn": gn, "ev": ev, "ad": ad, "n": len(caps), "followers": fol, "recent": recent}

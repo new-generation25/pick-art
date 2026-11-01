@@ -22,6 +22,11 @@ PROFILE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 REGIONS = "창원 진주 통영 사천 김해 밀양 거제 양산 의령 함안 창녕 고성 남해 하동 산청 함양 거창 합천".split()
 
 
+async def logged_in(ctx):
+    """세션 쿠키(sessionid)가 있으면 로그인 상태다(값은 읽지 않는다)."""
+    return any(c["name"] == "sessionid" for c in await ctx.cookies("https://www.instagram.com"))
+
+
 def arg(name):
     return next((a.split("=", 1)[1] for a in sys.argv if a.startswith(f"--{name}=")), None)
 
@@ -34,7 +39,7 @@ async def main(dry):
     accounts = []
     for w in rows:
         h = w["value"].rstrip("/").split("/")[-1]
-        if (only and h not in only) or (role and w.get("role") != role):
+        if (only and h not in only) or (role and w.get("role") != role) or w.get("role") == "dormant":
             continue
         accounts.append({"handle": h, "role": w.get("role"), "name": w.get("name") or h,
                          "region": next((r for r in REGIONS if r in (w.get("name") or "")), "")})
@@ -47,9 +52,7 @@ async def main(dry):
         # 로그아웃 상태로 여러 계정을 읽으면 곧 로그인 화면으로 돌려보낸다(is_from_rle). --login 으로 만든 세션을 쓴다
         ctx = await p.chromium.launch_persistent_context(PROFILE_DIR, headless=True, locale="ko-KR", user_agent=UA)
         page = ctx.pages[0] if ctx.pages else await ctx.new_page()
-        await page.goto("https://www.instagram.com/", wait_until="domcontentloaded")
-        await page.wait_for_timeout(3000)
-        if "/accounts/login" in page.url or not await page.query_selector('a[href*="/direct/"], svg[aria-label="홈"], svg[aria-label="Home"]'):
+        if not await logged_in(ctx):
             print("⚠️ 인스타그램 로그인 세션이 없다. 먼저 python tools/collect_instagram.py --login 으로 한 번 로그인한다")
             await ctx.close()
             return
