@@ -44,7 +44,7 @@ export function Header() {
                     <Link href="/" style={{ textDecoration: 'none' }} aria-label="pica 홈">
                         <Group gap={10} align="center">
                             <Text className="pica-display" fz={26} c="var(--pk-accent)" style={{ lineHeight: 1 }}>pica</Text>
-                            <Text fz={13} fw={600} c="var(--pk-ink-soft)" visibleFrom="xs" style={{ lineHeight: 1 }}>경남 문화예술 안내</Text>
+                            <Text fz={13} fw={600} c="var(--pk-ink-soft)" visibleFrom="xs" style={{ lineHeight: 1 }}>가까운 공연·전시·축제</Text>
                         </Group>
                     </Link>
 

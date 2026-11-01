@@ -14,7 +14,7 @@ export function ShareButton({ title }: { title: string }) {
             try {
                 await navigator.share({
                     title: title,
-                    text: `[경남 아트 네비게이터] ${title}`,
+                    text: `[피카] ${title}`,
                     url: url,
                 });
                 return;

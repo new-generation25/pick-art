@@ -9,8 +9,8 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL("http://localhost:3000"),
-  title: "픽아트 | pica - 경남 문화예술 큐레이션",
-  description: "경남의 전시, 공연, 행사를 가장 빠르고 정확하게 찾아보세요. 픽아트(pica)가 당신의 예술 생활을 안내합니다.",
+  title: "피카 pica | 가까운 공연·전시·축제",
+  description: "이번 주 가까운 곳에서 열리는 공연·전시·축제를 공식 출처로 확인해 날짜순으로 알려 드립니다. 피카(pica)는 픽아트의 준말입니다.",
 };
 
 const theme = createTheme({

@@ -48,7 +48,7 @@ export default function LoginPage() {
                             <User className="w-8 h-8 text-white" />
                         </div>
                         <h1 className="text-3xl font-black text-neutral-900 mb-2">로그인</h1>
-                        <p className="text-neutral-500 font-medium">경남의 예술 정보를 만나보세요.</p>
+                        <p className="text-neutral-500 font-medium">가까운 곳의 공연·전시 소식을 만나보세요.</p>
                     </div>
 
                     {error && (

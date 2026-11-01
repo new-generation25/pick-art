@@ -68,7 +68,7 @@ export default function SignupPage() {
                         <UserPlus className="w-10 h-10 text-white" />
                     </div>
                     <h1 className="text-4xl font-black text-neutral-900 mb-2">회원가입</h1>
-                    <p className="text-neutral-500 font-medium">경남 아트 네비게이터의 새로운 가족이 되어주세요.</p>
+                    <p className="text-neutral-500 font-medium">피카의 새로운 가족이 되어주세요.</p>
                 </div>
 
                 <SocialLoginButtons />

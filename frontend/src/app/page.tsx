@@ -57,7 +57,7 @@ export default async function Home({ searchParams }: HomeProps) {
     <Box>
       {isSubscribed && (
         <Alert variant="filled" color="teal" title="구독 완료" withCloseButton styles={{ root: { borderRadius: 0 } }}>
-          뉴스레터 구독이 완료되었습니다. 매주 경남의 문화예술 소식을 메일로 보내 드립니다.
+          뉴스레터 구독이 완료되었습니다. 매주 가까운 곳의 공연·전시·축제 소식을 메일로 보내 드립니다.
         </Alert>
       )}
 
@@ -68,7 +68,7 @@ export default async function Home({ searchParams }: HomeProps) {
             <div>
               <p className="text-[14px] font-bold text-accent">{todayMonth}월 {todayDay}일 기준</p>
               <h1 className="pica-display mt-2 text-[34px] leading-[1.15] text-ink sm:text-[52px]">
-                경남에서 열리는<br />공연·전시·축제
+                가까운 곳에서 열리는<br />공연·전시·축제
               </h1>
               <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
                 {hasFilter ? "조건에 맞는 행사" : "지금 볼 수 있는 행사"}{" "}
@@ -105,7 +105,7 @@ export default async function Home({ searchParams }: HomeProps) {
           <SimpleGrid cols={{ base: 1, md: 2 }} spacing={{ base: 40, md: 64 }}>
             <Box>
               <Title order={2} fz={{ base: 22, sm: 26 }} className="pica-display" mb={8}>
-                매주 한 번, 경남 문화예술 소식
+                매주 한 번, 가까운 공연·전시 소식
               </Title>
               <Text fz="sm" c="rgba(255,255,255,0.75)" mb="lg">새로 올라온 공연과 전시를 정리해 메일로 보내 드립니다.</Text>
               <form action="/api/newsletter" method="POST">
@@ -171,7 +171,7 @@ export default async function Home({ searchParams }: HomeProps) {
       <Box component="footer" py={32} bg="var(--pk-paper)" style={{ borderTop: '2px solid var(--pk-line)' }}>
         <Container size="xl">
           <Group justify="space-between" gap="xs">
-            <Text fz="sm" fw={700} c="var(--pk-ink)">pica · 경남 문화예술 안내</Text>
+            <Text fz="sm" fw={700} c="var(--pk-ink)">pica · 가까운 공연·전시·축제</Text>
             <Text fz="xs" c="var(--pk-ink-soft)">&copy; 2024 pickart (pica). All rights reserved.</Text>
           </Group>
         </Container>

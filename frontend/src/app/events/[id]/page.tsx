@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
 
     return {
         title: `${event.title} | 픽아트 pica`,
-        description: event.description?.slice(0, 160) || "경남의 문화예술 소식을 픽아트(pica)에서 확인하세요.",
+        description: event.description?.slice(0, 160) || "가까운 곳의 공연·전시·축제 소식을 피카(pica)에서 확인하세요.",
         openGraph: {
             title: event.title,
             description: event.description?.slice(0, 160),
@@ -167,7 +167,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                 {suggestions.length > 0 && (
                     <section className="mt-16 border-t-2 border-line pt-10">
                         <h2 className="pica-display text-[26px] text-ink">같은 분야의 다른 행사</h2>
-                        <p className="mt-1 text-[14px] text-ink-soft">경남에서 열리는 {event.category} 행사를 더 골랐습니다.</p>
+                        <p className="mt-1 text-[14px] text-ink-soft">가까운 곳에서 열리는 {event.category} 행사를 더 골랐습니다.</p>
                         <div className="mt-6 grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
                             {suggestions.map((suggestion) => (
                                 <EventCard key={suggestion.id} event={suggestion} />
