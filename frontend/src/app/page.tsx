@@ -2,7 +2,7 @@ import { getPublishedEvents } from "@/lib/supabase";
 import { FeedSections } from "@/components/ui/FeedSections";
 import { INSTAGRAM_URL, InstagramIcon } from "@/components/ui/InstagramLink";
 import { FilterBar } from "@/components/ui/FilterBar";
-import { Search } from "lucide-react";
+import { SearchBox } from "@/components/ui/SearchBox";
 import { Container, Title, Text, TextInput, Button, SimpleGrid, Group, Box, Alert, Stack } from "@mantine/core";
 
 import { formatPeriod, todayKST } from "@/lib/utils";
@@ -77,18 +77,7 @@ export default async function Home({ searchParams }: HomeProps) {
                 {hasFilter ? "조건에 맞는 행사" : "지금 볼 수 있는 행사"}{" "}
                 <strong className="font-bold text-ink">{allEvents.length}건</strong>을 날짜별로 묶었습니다.
               </p>
-              <form action="/" method="GET" className="mt-5" role="search">
-                <TextInput
-                  name="q"
-                  defaultValue={resolvedParams.q || ""}
-                  placeholder="행사 이름으로 찾기"
-                  aria-label="행사 이름으로 찾기"
-                  size="md"
-                  radius={0}
-                  leftSection={<Search size={18} />}
-                  styles={{ input: { borderColor: 'var(--pk-line)', borderWidth: 1.5, backgroundColor: 'var(--pk-card)' } }}
-                />
-              </form>
+              <SearchBox key={resolvedParams.q || ""} initialQuery={resolvedParams.q || ""} />
             </div>
             <div className="lg:pt-8">
               <FilterBar />
