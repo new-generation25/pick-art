@@ -9,7 +9,8 @@
        (빈칸)  : 다음 주에 다시 본다
      title·category·region·venue·start·end·time·price 는 고쳐 써도 된다(포스터만 있는 글은 날짜를 채운다)
 2) 반영: python tools/review_instagram.py --apply collector/review/instagram_<날짜>.json [--dry-run]
-   - publish: 내용 반영 → 포스터 업로드 → status COLLECTED → publish_verified 와 같은 검사(날짜·링크·중복)로 공개
+   - publish: 내용 반영 → 포스터 업로드 → 링크·중복 검사 후 events 에 직접 넣는다(이미 끝난 행사도 넣는다.
+              publish_verified 는 끝난 행사를 EXPIRED 로 돌리므로 거기에 맡기지 않는다)
    - reject : status REJECTED
 """
 import asyncio
@@ -18,7 +19,9 @@ import json
 import os
 import re
 import sys
-from datetime import date
+from datetime import date, datetime, timezone
+
+import aiohttp
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -26,7 +29,7 @@ os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from dotenv import load_dotenv  # noqa: E402
 load_dotenv(".env.local")
 from database import Database  # noqa: E402
-from utils import process_and_upload_image  # noqa: E402
+from utils import check_link, process_and_upload_image  # noqa: E402
 from naver_blog_scraper import _norm  # noqa: E402
 import publish_verified as pv  # noqa: E402
 
@@ -116,7 +119,8 @@ async def apply(db, path, dry):
         a["date_parsed"] = True
         a["evidence"] = (f"@{it.get('account')} 게시물 {it['post_url']}" +
                          (f" · 공식 채널 {it['official_url']}" if it.get("official_url") else " · 공식 채널 없음(게시물을 출처로 공개)"))
-        upd = {"content": c, "status": "COLLECTED", "source_url": it.get("official_url") or it["post_url"]}
+        # COLLECTED 로 두면 정기 공개가 먼저 집어 가거나 EXPIRED 로 돌린다. 이 도구가 바로 넣으므로 REVIEW 를 유지한다
+        upd = {"content": c, "status": "REVIEW", "source_url": it.get("official_url") or it["post_url"]}
         if not dry and a.get("poster_url"):
             key = "ig_" + hashlib.sha1(it["id"].encode()).hexdigest()[:12]
             _, p_url, _ = await process_and_upload_image(db.supabase, a["poster_url"], key)
@@ -132,40 +136,51 @@ async def apply(db, path, dry):
 
 
 async def publish_only(ids):
-    """publish_verified.main 을 지정한 raw_posts 에만 적용한다(다른 출처 행은 후보에서 뺀다)."""
-    keep = set(ids)
-
-    class Q:
-        def __init__(s, q): s.q = q
-        def __getattr__(s, n):
-            f = getattr(s.q, n)
-            return lambda *a, **k: Q(f(*a, **k))
-        def execute(s):
-            res = s.q.execute()
-            res.data = [r for r in res.data if r.get("id") in keep]
-            return res
-
-    class T:
-        def __init__(s, t): s.t = t
-        def select(s, *a, **k): return Q(s.t.select(*a, **k))
-        def __getattr__(s, n): return getattr(s.t, n)
-
-    class SB:
-        def __init__(s, sb): s.sb = sb
-        def table(s, n): return T(s.sb.table(n)) if n == "raw_posts" else s.sb.table(n)
-
-    real = pv.Database
-
-    class DB(real):
-        def __init__(s):
-            super().__init__()
-            s.supabase = SB(s.supabase)
-
-    pv.Database = DB
-    try:
-        await pv.main("2000-01-01", "2099-12-31", False)
-    finally:
-        pv.Database = real
+    """검토에서 공개로 정한 raw_posts 를 events 에 직접 넣는다.
+    publish_verified 는 이미 끝난 행사를 EXPIRED 로 돌리지만, 사람이 검토해 공개로 정한 것은 끝났어도 넣는다
+    (피드는 끝난 지 한 달 안의 행사를 따로 보여준다). 링크 확인과 제목+시작일 중복 검사는 publish_verified 와 같다."""
+    db = Database()
+    published = {(pv.norm(e["title"]), e["event_date_start"]) for e in
+                 db.supabase.table("events").select("title,event_date_start").execute().data}
+    done = dup = fail = 0
+    async with aiohttp.ClientSession() as session:
+        for rid in ids:
+            r = db.supabase.table("raw_posts").select("*").eq("id", rid).execute().data
+            if not r:
+                continue
+            r = r[0]
+            a = r["content"].get("ai_suggestion") or {}
+            if (pv.norm(r["content"]["title"]), a.get("date_start")) in published:
+                db.supabase.table("raw_posts").update({"status": "DUPLICATE"}).eq("id", rid).execute()
+                dup += 1
+                continue
+            ok, status, _ = await check_link(session, r["source_url"])
+            if not ok:
+                print(f"❌ 링크 열리지 않음 ({status}): {r['content']['title']} {r['source_url']}")
+                fail += 1
+                continue
+            price = a.get("price", "")
+            desc = "\n".join(p for p in [(r["content"].get("description") or "").strip(),
+                                          f"일시: {a['time']}" if a.get("time") else "",
+                                          f"관람료: {price}" if price else ""] if p)
+            event = {
+                "title": r["content"]["title"], "description": desc[:4000],
+                "category": a.get("category") or "행사", "region": a.get("region") or "경남", "venue": a.get("venue") or "",
+                "event_date_start": a["date_start"], "event_date_end": a["date_end"],
+                "price_info": price, "is_free": "무료" in price,
+                "poster_image_url": (r.get("image_urls") or [None])[0],
+                "source": r["source"], "original_url": r["source_url"], "status": "PUBLISHED",
+                "published_at": datetime.now(timezone.utc).isoformat(), "raw_post_id": rid,
+            }
+            res = db.supabase.table("events").insert(event).execute()
+            if not res.data:
+                fail += 1
+                continue
+            db.supabase.table("raw_posts").update({"status": "PUBLISHED"}).eq("id", rid).execute()
+            published.add((pv.norm(event["title"]), event["event_date_start"]))
+            done += 1
+            print(f"✅ {event['event_date_start']}~{event['event_date_end']} {event['region']} {event['title']}")
+    print(f"공개 {done}건, 이미 공개돼 중복 {dup}건, 실패 {fail}건")
 
 
 if __name__ == "__main__":

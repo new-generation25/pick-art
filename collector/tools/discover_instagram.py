@@ -139,11 +139,12 @@ async def main(dry):
         save_seen(seen)
         os.makedirs(".cache", exist_ok=True)
         json.dump(st, open(STATE, "w", encoding="utf-8"), ensure_ascii=False)
-    print(f"유지: 재채점 {len(log['rescored'])}, 휴면 {len(log['dormant'])} | 찾기: 후보 {len(pool)}, "
-          f"추가 {len(log['added'])}, 탈락 {len(log['rejected'])}")
     for k in ("added", "dormant", "rescored", "rejected"):
         for x in log[k]:
             print(f"  [{k}] {x}")
+    # 마지막 줄은 정기 루틴 요약에 그대로 쓰인다
+    print(f"계정 유지: 재채점 {len(log['rescored'])}개·휴면 {len(log['dormant'])}개 | 새 계정: 후보 {len(pool)}개 중 "
+          f"추가 {len(log['added'])}개·탈락 {len(log['rejected'])}개")
 
 
 if __name__ == "__main__":
