@@ -115,9 +115,14 @@ async def main(dry):
                 if h.lower() not in known and h.lower() not in SKIP_HANDLES and st["rejected"].get(h.lower(), "") < cutoff]
         for h in pool[:max_new]:
             r = await score_profile(page, h)
+            if r and not r["role"] and not r["kind"] and r["gn"] >= 8 and r["ev"] >= 3 and r["recent"]:
+                # 경남 행사를 꾸준히 올리지만 소개 글로 역할을 못 가른 계정. 주간 검토 때 사람이 역할을 정한다
+                st.setdefault("maybe", {})[h] = f"{r['name']} · {r['detail']}"
+                log["rejected"].append(f"{h}: 보류(역할 미분류) · {r['detail']}")
+                continue
             if not r or not r["role"]:
                 st["rejected"][h.lower()] = today.isoformat()
-                log["rejected"].append(f"{h} ({r['score'] if r else '없음'})")
+                log["rejected"].append(f"{h}: {r['detail'] if r else '프로필 없음'}")
                 continue
             if not dry:
                 db.supabase.table("whitelist").insert({

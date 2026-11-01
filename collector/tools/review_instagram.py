@@ -37,8 +37,21 @@ EDITABLE = ("title", "category", "region", "venue", "start", "end", "time", "pri
 def export(db):
     rows = db.supabase.table("raw_posts").select("id,source_url,content,collected_at").eq("status", "REVIEW").execute().data
     published = {}
-    for ev in db.supabase.table("events").select("title,event_date_start").execute().data:
+    all_events = db.supabase.table("events").select("title,venue,event_date_start,event_date_end").execute().data
+    for ev in all_events:
         published.setdefault(ev["event_date_start"], []).append(_norm(ev["title"]))
+
+    def maybe_dup(title, venue, start):
+        """그날 열리는 기존 행사 중 장소 낱말이나 제목 낱말(3자 이상)이 겹치는 것. 제목 표기가 달라 위에서 못 거른 중복 표시용"""
+        if not start:
+            return ""
+        generic = {"2025", "2026", "2027", "축제", "페스티벌", "공연", "행사", "전시", "특별한", "김해", "창원", "진주", "통영"}
+        toks = lambda s: {t for t in re.findall(r"[가-힣A-Za-z0-9]{2,}", s or "") if t not in generic and not t.isdigit()}
+        tt, vt = {t for t in toks(title) if len(t) >= 3}, toks(venue) - {"공연장소", "장소", "일원", "일대"}
+        for ev in (e for e in all_events if e["event_date_start"] <= start <= (e["event_date_end"] or e["event_date_start"])):
+            if (vt and vt & toks(ev["venue"])) or (tt & {t for t in toks(ev["title"]) if len(t) >= 3}):
+                return ev["title"]
+        return ""
     items, dup = [], 0
     for r in rows:
         c, a = r["content"], r["content"].get("ai_suggestion") or {}
@@ -54,6 +67,7 @@ def export(db):
             "time": a.get("time", ""), "price": a.get("price", ""),
             "account": a.get("account"), "role": a.get("role"), "posted_at": a.get("posted_at"),
             "image_only": a.get("image_only", False), "post_url": r["source_url"],
+            "maybe_dup_of": maybe_dup(c.get("title"), a.get("venue"), a.get("date_start")),
             "search_hint": f"{c.get('title', '')} {a.get('venue', '')} {(a.get('date_start') or '')[:7]}".strip(),
             "caption": (c.get("description") or "")[:600],
         })
@@ -62,8 +76,17 @@ def export(db):
     path = os.path.join("review", f"instagram_{date.today().isoformat()}.json")
     json.dump(items, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     print(f"검토 대기 {len(rows)}건 → 기존 행사와 중복 {dup}건 정리, 검토할 것 {len(items)}건 "
-          f"(포스터만 {sum(1 for i in items if i['image_only'])}건)")
+          f"(포스터만 {sum(1 for i in items if i['image_only'])}건, 중복 의심 {sum(1 for i in items if i['maybe_dup_of'])}건)")
     print(f"파일: {os.path.abspath(path)}")
+    # 탐색에서 역할을 못 가른 계정(보류). 관리자 페이지에서 역할을 정해 whitelist 에 넣거나 버린다
+    try:
+        maybe = json.load(open(os.path.join(".cache", "insta_discover.json"), encoding="utf-8")).get("maybe", {})
+    except (OSError, ValueError):
+        maybe = {}
+    if maybe:
+        print(f"\n역할 미분류 계정 {len(maybe)}개 (확인 후 관리자 › 출처관리에서 추가):")
+        for h, d in maybe.items():
+            print(f"  https://www.instagram.com/{h}/  {d}")
 
 
 async def apply(db, path, dry):
