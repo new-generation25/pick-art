@@ -1,0 +1,23 @@
+{
+  "slug": "tongyeong_hall",
+  "name": "통영시민문화회관",
+  "_comment": "citizen.tongyeong.go.kr 은 403 이라 www.tongyeong.go.kr/citizen 경로를 쓴다",
+  "verified_at": "2026-11-01",
+  "match": ["tongyeong.go.kr/citizen"],
+  "region": "통영",
+  "venue": "통영시민문화회관",
+  "boards": [
+    {"url": "https://www.tongyeong.go.kr/citizen/01790/02535/02536.web", "category": "공연"},
+    {"url": "https://www.tongyeong.go.kr/citizen/01790/02535/02537.web", "category": "전시"}
+  ],
+  "list": {
+    "rows": "li.li1",
+    "link": "strong.t2 a@href",
+    "id_regex": "sno=([0-9]+)",
+    "title": "strong.t2",
+    "period": ".di.period .dd",
+    "venue": ".di.location .dd",
+    "image": "img@src"
+  },
+  "expect": {"min_rows": 1, "required": ["title", "link", "period"]}
+}

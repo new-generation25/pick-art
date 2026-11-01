@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { blockOnDeploy } from '@/lib/localOnly';
 
 export async function GET() {
+    const blocked = blockOnDeploy();
+    if (blocked) return blocked;
     const { data, error } = await supabase
         .from('crawl_logs')
         .select('*')

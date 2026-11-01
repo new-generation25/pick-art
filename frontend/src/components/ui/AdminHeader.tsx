@@ -26,9 +26,13 @@ export function AdminHeader() {
                 setUser(session.user);
                 const { data: profile } = await supabase
                     .from('profiles')
-                    .select('nickname')
+                    .select('nickname, role')
                     .eq('id', session.user.id)
                     .single();
+                if (profile?.role !== 'admin') {
+                    router.replace('/'); // 관리자가 아니면 관리자 화면에 머물 수 없다
+                    return;
+                }
                 setNickname(profile?.nickname || session.user.email?.split('@')[0] || '관리자');
             } else {
                 router.push('/login'); // 관리자 페이지인데 로그인 안되어있으면 쫓아냄

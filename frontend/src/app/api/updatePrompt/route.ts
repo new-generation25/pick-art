@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { blockOnDeploy } from '@/lib/localOnly';
 
 export async function POST(request: Request) {
+    const blocked = blockOnDeploy();
+    if (blocked) return blocked;
     const { prompt } = await request.json();
     if (typeof prompt !== 'string') {
         return NextResponse.json({ error: 'Invalid prompt' }, { status: 400 });

@@ -65,6 +65,7 @@ body {
   --pk-cat-exhibit-bg: #2350d8;   --pk-cat-exhibit-fg: #ffffff;
   --pk-cat-festival-bg: #1a1a1a;  --pk-cat-festival-fg: #ecede6;
   --pk-cat-event-bg: transparent; --pk-cat-event-fg: #1a1a1a;
+  --pk-cat-learn-bg: #ffe14d;     --pk-cat-learn-fg: #1a1a1a;
   --pk-radius: 0px;
   --pk-chip-radius: 0px;
   --pk-border: 1.5px;
@@ -94,6 +95,7 @@ body {
   --pk-cat-exhibit-bg: transparent;  --pk-cat-exhibit-fg: #8fd0ff;
   --pk-cat-festival-bg: transparent; --pk-cat-festival-fg: #ffb36b;
   --pk-cat-event-bg: transparent;    --pk-cat-event-fg: #c7b8ff;
+  --pk-cat-learn-bg: transparent;    --pk-cat-learn-fg: #9be3b4;
   --pk-radius: 14px;
   --pk-chip-radius: 999px;
   --pk-border: 1px;
@@ -122,6 +124,7 @@ body {
   --pk-cat-exhibit-bg: #3e9bdb;  --pk-cat-exhibit-fg: #ffffff;
   --pk-cat-festival-bg: #ffc83d; --pk-cat-festival-fg: #263238;
   --pk-cat-event-bg: #5cc9a7;    --pk-cat-event-fg: #263238;
+  --pk-cat-learn-bg: #b48ef0;    --pk-cat-learn-fg: #ffffff;
   --pk-radius: 18px;
   --pk-chip-radius: 999px;
   --pk-border: 2px;
@@ -179,6 +182,7 @@ body {
 .pica-cat[data-cat="공연"] { background: var(--pk-cat-show-bg); color: var(--pk-cat-show-fg); }
 .pica-cat[data-cat="전시"] { background: var(--pk-cat-exhibit-bg); color: var(--pk-cat-exhibit-fg); }
 .pica-cat[data-cat="축제"] { background: var(--pk-cat-festival-bg); color: var(--pk-cat-festival-fg); }
+.pica-cat[data-cat="체험·교육"] { background: var(--pk-cat-learn-bg); color: var(--pk-cat-learn-fg); }
 .pica-cat[data-cat="행사"] { background: var(--pk-cat-event-bg); color: var(--pk-cat-event-fg); border-color: currentColor; }
 .pica-cat[data-ended="true"] { background: transparent; color: var(--pk-ink-soft); border-color: var(--pk-ink-soft); }
 

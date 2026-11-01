@@ -6,9 +6,9 @@ import random
 import re
 import html
 import json
-from urllib.parse import urljoin
+from urllib.parse import urljoin, quote
 from ai_extractor import AIExtractor
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from source_loader import find_for_url
 from rule_extractor import parse_period
@@ -65,7 +65,6 @@ class PublicScraper:
 
     async def _scrape_definition(self, session, d, target_name):
         """collector/sources/<slug>.json 정의를 그대로 실행한다. 사이트별 분기 없음."""
-        lst = d["list"]
         new = dup = fail = updated = 0
         found = 0
         expired = []
@@ -81,12 +80,15 @@ class PublicScraper:
                 title = it["title"]
                 period = it["period"]
                 link = it["link"]
-                source_id = link.rstrip("/").split("/")[-1]
+                # 정의가 id 를 주면 그것을, 아니면 링크 끝부분을 쓴다 (같은 출처 안에서 유일하면 된다)
+                lst = board.get("list") or d.get("list") or {}
+                source_id = str(it.get("id") or "") if (board.get("api") or lst.get("id") or lst.get("id_regex") or lst.get("id_from_title")) else ""
+                source_id = source_id or link.rstrip("/").split("/")[-1]
                 if not title or not source_id:
                     fail += 1
                     continue
                 suggestion = {
-                    "category": board["category"],
+                    "category": it.get("category") or board["category"],
                     "region": d["region"],
                     "venue": f"{d['venue']} {it['venue']}".strip() if it.get("venue") and d["venue"] not in it["venue"] else (it.get("venue") or d["venue"]),
                     "date_start": period["start"],
@@ -113,10 +115,14 @@ class PublicScraper:
                     continue
                 description = ""
                 body_sel = (d.get("detail") or {}).get("body")
-                if body_sel:
+                title_sel = (d.get("detail") or {}).get("title")  # 목록 제목이 '..'로 잘리는 사이트
+                if body_sel or title_sel:
                     try:
-                        async with session.get(link, timeout=aiohttp.ClientTimeout(total=20)) as r:
-                            description = _pick(BeautifulSoup(await r.text(), "html.parser"), body_sel)
+                        detail = BeautifulSoup(await self._fetch_text(session, link, d, board), "html.parser")
+                        description = _pick(detail, body_sel) if body_sel else ""
+                        full = _pick(detail, title_sel) if title_sel else ""
+                        if full:
+                            title = re.sub(r"\s+", " ", full).strip()
                     except Exception:
                         pass
                 image = it["image"]
@@ -141,68 +147,175 @@ class PublicScraper:
         if expired and not found:
             return {"name": target_name, "status": "FAIL",
                     "summary": f"❌ 정의 만료 의심: {d['slug']} 목록 선택자가 0건 ({', '.join(expired)})"}
-        status = "SUCCESS" if new or dup else "FAIL"
+        # 목록이 비어도 정의가 허용(min_rows 0)했으면 실패가 아니다 (예: 아직 이달 일정이 안 올라온 달력)
+        status = "SUCCESS" if new or dup or (found == 0 and not expired) else "FAIL"
         mark = "❌" if status == "FAIL" else ("⚠️" if fail or expired else "✅")
         extra = f", 날짜보완 {updated}" if updated else ""
         warn = f" / 정의 만료 의심 게시판 {len(expired)}" if expired else ""
         return {"name": target_name, "status": status,
                 "summary": f"{mark} 수집 완료: 발견 {found}건 (신규 {new}, 중복 {dup}, 실패 {fail}{extra}){warn}"}
 
+    async def _fetch_text(self, session, url, d, board, headers=None):
+        """정의의 encoding(예: euc-kr)을 따른다. 없으면 응답 헤더, 그다음 utf-8."""
+        async with session.get(url, headers=headers or {}, timeout=aiohttp.ClientTimeout(total=30)) as r:
+            raw = await r.read()
+            enc = board.get("encoding") or d.get("encoding") or r.charset or "utf-8"
+        return raw.decode(enc, errors="replace")
+
     async def _list_items(self, session, d, board):
-        """게시판 하나의 항목을 [{title, period, link, image}]로 만든다.
-        board.api 가 있으면 월별 JSON(이번 달부터 months_ahead 개월), 없으면 목록 HTML."""
+        """게시판 하나의 항목을 [{id, title, period, link, image, venue}]로 만든다.
+        board.api 가 있으면 JSON(월별 또는 기간 조회), 없으면 목록 HTML. 게시판마다 list 를 따로 둘 수 있다."""
         items = []
+        now = datetime.now()
 
         def fill(template, values):
             return re.sub(r"\{([\w-]+)\}", lambda m: str(values.get(m.group(1)) or ""), template)
 
         def clean(t):
             t = html.unescape(re.sub(r"<br\s*/?>", " ", t or ""))
-            return re.sub(r"\s+", " ", re.sub(r"^\[[^\]]*\]\s*", "", t)).strip()
+            t = re.sub(r"\s+", " ", re.sub(r"^\[[^\]]*\]\s*", "", t)).strip()
+            # 목록에 붙은 구분 표시('기획 ', '대관 ', '(대관) ')는 제목이 아니다
+            return re.sub(r"^\(?(기획|대관|초청|공동기획)\)?\s*", "", t)
 
         if board.get("api"):
-            f = d["api_fields"]
-            now = datetime.now()
+            f = {**d.get("api_fields", {}), **board.get("api_fields", {})}
             seen = set()
+
+            def take(rows, year):
+                for row in rows:
+                    rid = str(row.get(f["id"]))
+                    if rid in seen:
+                        continue
+                    seen.add(rid)
+                    if f.get("period"):
+                        period_text = str(row.get(f["period"]) or "")
+                    else:
+                        start, end = str(row.get(f["start"]) or ""), str(row.get(f["end"]) or "")
+                        period_text = f"{start} ~ {end}" if end and end != start else start
+                    img = f.get("image_template")
+                    quoted = {k: quote(str(v)) for k, v in row.items() if v is not None}
+                    items.append({
+                        "id": rid,
+                        "title": clean(row.get(f["title"])),
+                        "period": parse_period(period_text, year),
+                        "link": fill(board["link_template"], row),
+                        "image": fill(img, quoted) if img and row.get(f.get("image_key", "fileKey")) else "",
+                        "venue": clean(str(row.get(f["venue"]) or "")) if f.get("venue") else "",
+                        # 한 API에 공연·전시가 섞여 있으면 category 필드 값으로 나눈다 (category_map: {"전시": "전시"} 처럼 포함 문자열 → 분류)
+                        "category": next((v for k, v in (f.get("category_map") or {}).items() if k in str(row.get(f.get("category"), ""))), None),
+                    })
+
+            def rows_of(data):
+                for key in (f.get("rows") or "").split("."):
+                    if key:
+                        data = data.get(key, []) if isinstance(data, dict) else []
+                return data if isinstance(data, list) else []
+
+            if board.get("api_mode") == "range":
+                # 기간 조회 API: 오늘부터 range_days 일 뒤까지. 페이지가 page_size 미만이면 멈춘다
+                frm = now.date()
+                to = frm + timedelta(days=d.get("range_days", 62))
+                for page in range(1, f.get("max_pages", 10) + 1):
+                    url = fill(board["api"], {"from": frm.isoformat(), "to": to.isoformat(),
+                                              "from_compact": frm.strftime("%Y%m%d"), "to_compact": to.strftime("%Y%m%d"), "page": page})
+                    rows = rows_of(json.loads(await self._fetch_text(session, url, d, board)))
+                    take(rows, now.year)
+                    if "{page}" not in board["api"] or len(rows) < f.get("page_size", 20):
+                        break
+                return items
+
             for k in range(d.get("months_ahead", 0) + 1):
                 y, m = now.year + (now.month - 1 + k) // 12, (now.month - 1 + k) % 12 + 1
                 page = 1
                 while True:
                     url = fill(board["api"], {"year": y, "month": m, "page": page})
-                    async with session.get(url, headers={"X-Requested-With": "XMLHttpRequest"}, timeout=aiohttp.ClientTimeout(total=20)) as r:
-                        data = json.loads(await r.text())
-                    for row in data:
-                        rid = str(row.get(f["id"]))
-                        if rid in seen:
-                            continue
-                        seen.add(rid)
-                        start, end = row.get(f["start"]) or "", row.get(f["end"]) or ""
-                        items.append({
-                            "title": clean(row.get(f["title"])),
-                            "period": parse_period(f"{start} ~ {end}" if end and end != start else start, y),
-                            "link": fill(board["link_template"], row),
-                            "image": fill(f["image_template"], row) if row.get("fileKey") else "",
-                        })
+                    data = rows_of(json.loads(await self._fetch_text(session, url, d, board, {"X-Requested-With": "XMLHttpRequest"})))
+                    take(data, y)
                     if len(data) < f.get("page_size", 20):
                         break
                     page += 1
             return items
 
-        lst = d["list"]
-        async with session.get(board["url"], timeout=aiohttp.ClientTimeout(total=20)) as r:
-            soup = BeautifulSoup(await r.text(), "html.parser")
-        for row in soup.select(lst["rows"]):
+        lst = board.get("list") or d["list"]
+        frm = now.date()
+        pages = []
+        for k in range(d.get("months_ahead", 0) + 1):
+            y, m = now.year + (now.month - 1 + k) // 12, (now.month - 1 + k) % 12 + 1
+            url = fill(board["url"], {"from": frm.isoformat(), "to": (frm + timedelta(days=d.get("range_days", 62))).isoformat(),
+                                      "ym": f"{y}-{m:02d}"})
+            if url not in pages:
+                pages.append(url)
+        if lst.get("follow"):
+            # 달력형: 월 화면에서 일정이 있는 날의 링크를 따라가 그 날의 목록을 읽는다
+            followed = []
+            for url in pages:
+                month = BeautifulSoup(await self._fetch_text(session, url, d, board), "html.parser")
+                for a in month.select(lst["follow"]):
+                    nxt = urljoin(url, (a.get("href") or "").split("#")[0])
+                    if nxt not in followed:
+                        followed.append(nxt)
+            pages = followed
+        rows = []
+        for page_url in pages:
+            soup = BeautifulSoup(await self._fetch_text(session, page_url, d, board), "html.parser")
+            rows += [(page_url, r) for r in soup.select(lst["rows"])]
+            if lst.get("follow"):
+                await asyncio.sleep(0.3)
+        # 행정·체육 일정이 섞인 목록: include 에 맞는 제목만 남기고, 그중 exclude 에 맞는 것은 뺀다
+        include = re.compile(lst["include"]) if lst.get("include") else None
+        exclude = re.compile(lst["exclude"]) if lst.get("exclude") else None
+        for page_url, row in rows:
+            row_title = _pick(row, lst["title"])
+            if (include and not include.search(row_title)) or (exclude and exclude.search(row_title)):
+                continue
             rid = _pick(row, lst["id"]) if lst.get("id") else row.get(lst.get("id_attr", "data-idx"))
             values = {**row.attrs, "idx": rid}
-            link = fill(board["link_template"], values) if board.get("link_template") else urljoin(board["url"], _pick(row, lst["link"]))
+            if lst.get("link_regex"):
+                # onclick="goView('123')" 처럼 링크가 스크립트 안에 있을 때: 첫 그룹을 {m} 으로 쓴다
+                m = re.search(lst["link_regex"], str(row))
+                if not m:
+                    continue
+                values["m"] = m.group(1)
+            if board.get("link_template"):
+                link = fill(board["link_template"], values)
+            elif lst.get("link"):
+                link = urljoin(page_url, _pick(row, lst["link"]))
+            else:
+                link = page_url  # 항목마다 상세 주소가 없는 목록(달력의 그날 화면)
+            if lst.get("id_regex"):
+                m = re.search(lst["id_regex"], link)
+                rid = m.group(1) if m else rid
             image = _pick(row, lst.get("image"))
+            bg = re.search(r"url[(]['\"]?([^'\")]+)", image or "")
+            if bg:  # style="background-image: url(...)" 로 포스터를 거는 목록
+                image = bg.group(1)
             items.append({
+                "id": rid,
                 "title": clean(_pick(row, lst["title"])),
-                "period": parse_period(_pick(row, lst["period"]), datetime.now().year),
+                "period": parse_period(_pick(row, lst["period"]), now.year),
                 "link": link,
-                "image": urljoin(board["url"], image) if image else "",
-                "venue": _pick(row, lst.get("venue")),
+                "image": urljoin(page_url, image) if image else "",
+                # "장소 : 남가람박물관" 처럼 앞에 붙은 이름표는 뗀다
+                "venue": re.sub(r"^([^:]{1,6}:|(공연|전시)?장소)\s*", "", _pick(row, lst.get("venue"))),
+                "category": next((v for k, v in (lst.get("category_map") or {}).items() if k in _pick(row, lst.get("category"))), None),
             })
+        if lst.get("id_from_title"):
+            # 상세 주소가 없어 링크가 여러 항목에 겹친다: 제목+시작일로 id 를 만든다
+            for it in items:
+                it["id"] = re.sub(r"[^0-9A-Za-z가-힣]", "", f"{it['period']['start']}{it['title']}")[:80]
+        if lst.get("dedupe"):
+            # 회차마다 한 줄인 목록: 같은 id 는 하나로 합치고 기간을 첫 회~마지막 회로 넓힌다
+            merged = {}
+            for it in items:
+                k = it["id"] or it["link"]
+                if k in merged:
+                    p, q = merged[k]["period"], it["period"]
+                    if q["parsed"] and p["parsed"]:
+                        p["start"], p["end"] = min(p["start"], q["start"]), max(p["end"], q["end"])
+                        p["raw"] = f"{p['start']} ~ {p['end']}"
+                else:
+                    merged[k] = it
+            items = list(merged.values())
         return items
 
     async def _scrape_generic(self, session, target_url, target_name):

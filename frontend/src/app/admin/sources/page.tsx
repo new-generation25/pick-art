@@ -24,7 +24,18 @@ interface SourceItem {
     reason?: string;
     created_at: string;
     schedule?: string;
+    role?: string | null;          // official 기관 · group 단체 · artist 예술인 · informant 인플루언서 · dormant 휴면
+    score?: number | null;         // 인스타그램 계정 채점(100점)
+    score_detail?: string | null;  // 채점 근거
 }
+
+const ROLE_LABEL: Record<string, { label: string; color: string }> = {
+    official: { label: "공식", color: "blue" },
+    group: { label: "단체", color: "teal" },
+    artist: { label: "예술인", color: "grape" },
+    informant: { label: "정보제공", color: "orange" },
+    dormant: { label: "휴면", color: "gray" },
+};
 
 export default function SourcesPage() {
     const [activeTab, setActiveTab] = useState<SourceType>("trusted");
@@ -353,7 +364,15 @@ export default function SourcesPage() {
                             <Paper key={item.id} withBorder p="md" radius="md">
                                 <Stack gap="xs">
                                     <Group justify="space-between">
-                                        <Badge variant="light" size="sm">{item.type}</Badge>
+                                        <Group gap={4}>
+                                            <Badge variant="light" size="sm">{item.type}</Badge>
+                                            {item.role && ROLE_LABEL[item.role] && (
+                                                <Badge variant="light" size="sm" color={ROLE_LABEL[item.role].color}>{ROLE_LABEL[item.role].label}</Badge>
+                                            )}
+                                            {item.score != null && (
+                                                <Badge variant="filled" size="sm" color={item.score >= 80 ? "green" : item.score >= 60 ? "yellow" : "gray"}>{item.score}점</Badge>
+                                            )}
+                                        </Group>
                                         <Group gap={4}>
                                             <ActionIcon variant="subtle" size="sm" onClick={() => handleOpenModal(item)}><Edit2 size={14} /></ActionIcon>
                                             <ActionIcon variant="subtle" color="red" size="sm" onClick={() => handleDelete(item.id)}><Trash2 size={14} /></ActionIcon>
@@ -361,6 +380,11 @@ export default function SourcesPage() {
                                     </Group>
                                     <Text fw={700} lineClamp={1}>{item.name || item.value}</Text>
                                     <Text size="xs" c="dimmed" lineClamp={1}>{item.value}</Text>
+                                    {item.score_detail && (
+                                        <Tooltip label={item.score_detail} multiline w={280}>
+                                            <Text size="xs" c="dimmed" lineClamp={2}>{item.score_detail}</Text>
+                                        </Tooltip>
+                                    )}
                                     {activeTab === 'trusted' && (
                                         <Group justify="space-between" mt="sm">
                                             <Group gap={4}><Clock size={12} /><Text size="xs" c="dimmed">{item.schedule || 'daily'}</Text></Group>

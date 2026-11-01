@@ -1,0 +1,40 @@
+{
+  "slug": "geoje_art",
+  "name": "거제문화예술회관",
+  "_comment": "목록은 이번 달만 보이고 연도가 없다(올해로 본다). 상세는 onview('ID')",
+  "verified_at": "2026-11-01",
+  "match": [
+    "geojeart.or.kr"
+  ],
+  "region": "거제",
+  "venue": "거제문화예술회관",
+  "boards": [
+    {
+      "url": "https://www.geojeart.or.kr/program/program_1.asp",
+      "category": "공연",
+      "link_template": "https://www.geojeart.or.kr/program/program_view.asp?group_id={m}"
+    },
+    {
+      "url": "https://www.geojeart.or.kr/program/program_2.asp",
+      "category": "전시",
+      "link_template": "https://www.geojeart.or.kr/program/program_view.asp?group_id={m}"
+    }
+  ],
+  "list": {
+    "rows": "ul.reseveList > li",
+    "link_regex": "onview[(].([0-9]+)",
+    "id_regex": "group_id=([0-9]+)",
+    "title": "p.tit",
+    "period": "ul.info2 li:nth-of-type(1)",
+    "venue": "ul.info2 li:nth-of-type(2)",
+    "image": "img@src"
+  },
+  "expect": {
+    "min_rows": 1,
+    "required": [
+      "title",
+      "link",
+      "period"
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "slug": "hamyang_art",
+  "name": "함양문화예술회관",
+  "_comment": "공연일은 select option 안에 있다(여러 회차면 첫 회)",
+  "verified_at": "2026-11-01",
+  "match": [
+    "hygn.go.kr/02020"
+  ],
+  "region": "함양",
+  "venue": "함양문화예술회관",
+  "boards": [
+    {
+      "url": "https://www.hygn.go.kr/02020/02027.web",
+      "category": "공연"
+    },
+    {
+      "url": "https://www.hygn.go.kr/02020/02028.web",
+      "category": "전시"
+    }
+  ],
+  "list": {
+    "rows": "li.li1",
+    "link": "strong.t1 a@href",
+    "id_regex": "idx=([0-9]+)",
+    "title": "strong.t1",
+    "period": ".cp19info1 li.di:nth-of-type(1) .dd",
+    "image": "img@src"
+  },
+  "expect": {
+    "min_rows": 1,
+    "required": [
+      "title",
+      "link",
+      "period"
+    ]
+  }
+}

@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 import os
 import io
 import asyncio
@@ -14,8 +15,13 @@ async def check_link(session: aiohttp.ClientSession, url: str) -> tuple:
     if not url or not url.startswith("http"):
         return False, None, url
     try:
-        async with session.get(url, headers=LINK_HEADERS, timeout=aiohttp.ClientTimeout(total=20), allow_redirects=True) as r:
-            return r.status < 400, r.status, str(r.url)
+        for attempt in range(2):
+            async with session.get(url, headers=LINK_HEADERS, timeout=aiohttp.ClientTimeout(total=20), allow_redirects=True) as r:
+                status, final = r.status, str(r.url)
+            # 첫 접속에 세션 쿠키를 주며 주소 뒤 값을 떨어뜨리는 사이트(거창문화재단 등): 쿠키를 받은 뒤 한 번 더 연다
+            if status < 400 or final == url or attempt == 1:
+                return status < 400, status, final
+        return False, status, final
     except Exception as e:
         return False, type(e).__name__, url
 
@@ -23,9 +29,12 @@ async def process_and_upload_image(supabase: Client, img_url: str, storage_path:
     """
     이미지를 다운로드하여 원본과 썸네일(600px) WebP로 변환 후 업로드합니다.
     """
-    async with aiohttp.ClientSession() as session:
+    origin = "{0.scheme}://{0.netloc}/".format(urlparse(img_url))
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+               "Referer": origin}
+    async with aiohttp.ClientSession(headers=headers) as session:
         try:
-            async with session.get(img_url, timeout=10) as resp:
+            async with session.get(img_url, timeout=aiohttp.ClientTimeout(total=40)) as resp:
                 if resp.status != 200:
                     print(f"Failed to download image: {img_url} (status: {resp.status})")
                     return None, None, None

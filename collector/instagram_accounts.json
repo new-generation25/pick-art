@@ -1,0 +1,741 @@
+{
+ "criteria": {
+  "score": "경남 비중 40 + 날짜·행사 게시물(12개=만점) 40 + 팔로워(1만↑10, 1천↑5) + 최근 게시 10 − 광고 비중×40",
+  "informant_pass": "경남 비중 ≥50%, 날짜+행사 게시물 ≥5/24, 광고 ≤25%, 최근 5주 내 게시, 공개 계정, 업체 홍보 계정 제외",
+  "measured": "2026-11-01 프로필 최근 게시물 24개(캡션 alt) 기준"
+ },
+ "accounts": [
+  {
+   "handle": "gcaf19",
+   "name": "경남문화예술진흥원",
+   "region": "경남",
+   "role": "official",
+   "kind": "재단",
+   "basis": "홈페이지 SNS 링크: gcaf.or.kr 메인 SNS 링크",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: gcaf.or.kr 메인 SNS 링크"
+  },
+  {
+   "handle": "gam_art_museum",
+   "name": "경남도립미술관",
+   "region": "창원",
+   "role": "official",
+   "kind": "미술관",
+   "basis": "홈페이지 SNS 링크: gyeongnam.go.kr/gam/index.gyeong SNS 링크 (gam.gyeongnam.go.kr은 접속 거부)",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: gyeongnam.go.kr/gam/index.gyeong SNS 링크 (gam.gyeongnam.go.kr은 접속 거부)"
+  },
+  {
+   "handle": "gncac",
+   "name": "경상남도문화예술회관",
+   "region": "진주",
+   "role": "official",
+   "kind": "공연장",
+   "basis": "홈페이지 SNS 링크: artcenter.gyeongnam.go.kr 메인 SNS 링크",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: artcenter.gyeongnam.go.kr 메인 SNS 링크"
+  },
+  {
+   "handle": "changwonculture",
+   "name": "창원문화재단(성산아트홀·3.15아트센터·진해문화센터)",
+   "region": "창원",
+   "role": "official",
+   "kind": "재단",
+   "basis": "홈페이지 SNS 링크: cwcf.or.kr 메인 SNS 링크",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: cwcf.or.kr 메인 SNS 링크"
+  },
+  {
+   "handle": "moonshin.art.museum",
+   "name": "창원시립마산문신미술관",
+   "region": "창원",
+   "role": "official",
+   "kind": "미술관",
+   "basis": "홈페이지 SNS 링크: changwon.go.kr/moonshin/ 메인 SNS 링크",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: changwon.go.kr/moonshin/ 메인 SNS 링크"
+  },
+  {
+   "handle": "real_ghct",
+   "name": "김해문화관광재단",
+   "region": "김해",
+   "role": "official",
+   "kind": "재단",
+   "basis": "홈페이지 SNS 링크: ghct.or.kr 메인 SNS 링크",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: ghct.or.kr 메인 SNS 링크"
+  },
+  {
+   "handle": "gimhaeart",
+   "name": "김해문화의전당(윤슬미술관 포함)",
+   "region": "김해",
+   "role": "official",
+   "kind": "공연장",
+   "basis": "홈페이지 SNS 링크: gasc.ghct.or.kr 메인 SNS 링크",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: gasc.ghct.or.kr 메인 SNS 링크"
+  },
+  {
+   "handle": "gimhae_wgcc",
+   "name": "김해서부문화센터",
+   "region": "김해",
+   "role": "official",
+   "kind": "공연장",
+   "basis": "홈페이지 SNS 링크: wgcc.ghct.or.kr 메인 SNS 링크",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: wgcc.ghct.or.kr 메인 SNS 링크"
+  },
+  {
+   "handle": "clayarchmuseum",
+   "name": "클레이아크김해미술관",
+   "region": "김해",
+   "role": "official",
+   "kind": "미술관",
+   "basis": "홈페이지 SNS 링크: clayarch.ghct.or.kr 메인 SNS 링크",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: clayarch.ghct.or.kr 메인 SNS 링크"
+  },
+  {
+   "handle": "gimhaekimyoungwon",
+   "name": "김해시립김영원미술관",
+   "region": "김해",
+   "role": "official",
+   "kind": "미술관",
+   "basis": "홈페이지 SNS 링크: gma.ghct.or.kr 메인 SNS 링크",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: gma.ghct.or.kr 메인 SNS 링크"
+  },
+  {
+   "handle": "ghcc_2042",
+   "name": "문화도시김해(김해문화관광재단)",
+   "region": "김해",
+   "role": "official",
+   "kind": "재단",
+   "basis": "홈페이지 SNS 링크: culture.ghct.or.kr 메인 SNS 링크",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: culture.ghct.or.kr 메인 SNS 링크"
+  },
+  {
+   "handle": "daeoullim",
+   "name": "김해다어울림생활문화센터",
+   "region": "김해",
+   "role": "official",
+   "kind": "공연장",
+   "basis": "홈페이지 SNS 링크: culture.ghct.or.kr 메인 SNS 링크",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: culture.ghct.or.kr 메인 SNS 링크"
+  },
+  {
+   "handle": "ghcraftcenter",
+   "name": "김해공예창작지원센터",
+   "region": "김해",
+   "role": "official",
+   "kind": "재단",
+   "basis": "홈페이지 SNS 링크: gccc.ghct.or.kr 메인 SNS 링크",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: gccc.ghct.or.kr 메인 SNS 링크"
+  },
+  {
+   "handle": "gimhae_astro",
+   "name": "김해천문대",
+   "region": "김해",
+   "role": "official",
+   "kind": "재단",
+   "basis": "홈페이지 SNS 링크: astro.ghct.or.kr 메인 SNS 링크",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: astro.ghct.or.kr 메인 SNS 링크"
+  },
+  {
+   "handle": "jinju_national_museum",
+   "name": "국립진주박물관",
+   "region": "진주",
+   "role": "official",
+   "kind": "박물관",
+   "basis": "홈페이지 SNS 링크: museum.go.kr 계열 점검 안내 페이지의 국립진주박물관 SNS 링크",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: museum.go.kr 계열 점검 안내 페이지의 국립진주박물관 SNS 링크"
+  },
+  {
+   "handle": "jjctf_",
+   "name": "진주문화관광재단",
+   "region": "진주",
+   "role": "official",
+   "kind": "재단",
+   "basis": "홈페이지 SNS 링크: jjct.or.kr 메인 SNS 링크",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: jjct.or.kr 메인 SNS 링크"
+  },
+  {
+   "handle": "yudeung_festival",
+   "name": "진주남강유등축제",
+   "region": "진주",
+   "role": "official",
+   "kind": "축제",
+   "basis": "홈페이지 SNS 링크: yudeung.com 홈페이지 JS 번들 SNS 목록('진주남강유등축제 공식')",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: yudeung.com 홈페이지 JS 번들 SNS 목록('진주남강유등축제 공식')"
+  },
+  {
+   "handle": "gaecheonart",
+   "name": "개천예술제",
+   "region": "진주",
+   "role": "official",
+   "kind": "축제",
+   "basis": "홈페이지 SNS 링크: WebSearch (gaecheonart.com에는 SNS 링크 없음)",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: WebSearch (gaecheonart.com에는 SNS 링크 없음)"
+  },
+  {
+   "handle": "timf_tongyeong",
+   "name": "통영국제음악재단(통영국제음악당)",
+   "region": "통영",
+   "role": "official",
+   "kind": "재단",
+   "basis": "홈페이지 SNS 링크: timf.org/kr 메인 SNS 링크",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: timf.org/kr 메인 SNS 링크"
+  },
+  {
+   "handle": "tongyeongcf",
+   "name": "통영문화재단",
+   "region": "통영",
+   "role": "official",
+   "kind": "재단",
+   "basis": "홈페이지 SNS 링크: tyhansancf.or.kr 메인 SNS 링크",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: tyhansancf.or.kr 메인 SNS 링크"
+  },
+  {
+   "handle": "hansan_fest",
+   "name": "통영한산대첩축제",
+   "region": "통영",
+   "role": "official",
+   "kind": "축제",
+   "basis": "홈페이지 SNS 링크: hansanf.org 메인 SNS 링크",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: hansanf.org 메인 SNS 링크"
+  },
+  {
+   "handle": "geojeart_official",
+   "name": "거제문화예술재단(거제문화예술회관)",
+   "region": "거제",
+   "role": "official",
+   "kind": "재단",
+   "basis": "홈페이지 SNS 링크: geojeart.or.kr 메인 SNS 링크",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: geojeart.or.kr 메인 SNS 링크"
+  },
+  {
+   "handle": "sccf_official",
+   "name": "사천문화재단",
+   "region": "사천",
+   "role": "official",
+   "kind": "재단",
+   "basis": "홈페이지 SNS 링크: sccf.or.kr 메인 SNS 링크",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: sccf.or.kr 메인 SNS 링크"
+  },
+  {
+   "handle": "yangsan_cf",
+   "name": "양산문화재단",
+   "region": "양산",
+   "role": "official",
+   "kind": "재단",
+   "basis": "홈페이지 SNS 링크: culture.ycf.or.kr 메인 SNS 링크",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: culture.ycf.or.kr 메인 SNS 링크"
+  },
+  {
+   "handle": "yangsanart",
+   "name": "양산문화예술회관·쌍벽루아트홀",
+   "region": "양산",
+   "role": "official",
+   "kind": "공연장",
+   "basis": "홈페이지 SNS 링크: WebSearch (홈페이지에는 yangsan_cf만 링크)",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: WebSearch (홈페이지에는 yangsan_cf만 링크)"
+  },
+  {
+   "handle": "cng_artscenter",
+   "name": "창녕문화예술회관",
+   "region": "창녕",
+   "role": "official",
+   "kind": "공연장",
+   "basis": "홈페이지 SNS 링크: cng.go.kr/art.web 메인 SNS 링크",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: cng.go.kr/art.web 메인 SNS 링크"
+  },
+  {
+   "handle": "gsdinoexpo",
+   "name": "고성문화관광재단(경남고성공룡세계엑스포)",
+   "region": "고성",
+   "role": "official",
+   "kind": "축제",
+   "basis": "홈페이지 SNS 링크: gngsctf.or.kr 및 /dinoexpo 메인 SNS 링크",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: gngsctf.or.kr 및 /dinoexpo 메인 SNS 링크"
+  },
+  {
+   "handle": "kift_official",
+   "name": "거창국제연극제",
+   "region": "거창",
+   "role": "official",
+   "kind": "축제",
+   "basis": "홈페이지 SNS 링크: kift.or.kr / gift.or.kr 메인 SNS 링크",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: kift.or.kr / gift.or.kr 메인 SNS 링크"
+  },
+  {
+   "handle": "saaanisaaami",
+   "name": "함양산삼축제",
+   "region": "함양",
+   "role": "official",
+   "kind": "축제",
+   "basis": "홈페이지 SNS 링크: sansamfestival.or.kr 메인 SNS 링크",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: sansamfestival.or.kr 메인 SNS 링크"
+  },
+  {
+   "handle": "scherbfest",
+   "name": "산청한방약초축제",
+   "region": "산청",
+   "role": "official",
+   "kind": "축제",
+   "basis": "홈페이지 SNS 링크: scherb.or.kr/main/main.php 메인 SNS 링크",
+   "score": null,
+   "score_detail": "홈페이지 SNS 링크: scherb.or.kr/main/main.php 메인 SNS 링크"
+  },
+  {
+   "handle": "musisis.gn",
+   "name": "경남음악창작소 뮤지시스",
+   "region": "창원",
+   "role": "official",
+   "kind": "재단·기관",
+   "basis": "해시태그 탐색에서 발견, 프로필 이름으로 확인(홈페이지 링크 미확인)",
+   "score": 93,
+   "score_detail": "최근 24개 중 경남 23·날짜+행사 19·광고 0, 팔로워 2619, 최근게시 O"
+  },
+  {
+   "handle": "cbmfestival",
+   "name": "체리블라썸뮤직페스티벌",
+   "region": "",
+   "role": "official",
+   "kind": "축제",
+   "basis": "해시태그 탐색에서 발견, 프로필 이름으로 확인(홈페이지 링크 미확인)",
+   "score": 88,
+   "score_detail": "최근 24개 중 경남 20·날짜+행사 17·광고 0, 팔로워 4768, 최근게시 O"
+  },
+  {
+   "handle": "night_of_gimhae_heritage",
+   "name": "김해국가유산야행",
+   "region": "김해",
+   "role": "official",
+   "kind": "축제",
+   "basis": "해시태그 탐색에서 발견, 프로필 이름으로 확인(홈페이지 링크 미확인)",
+   "score": 95,
+   "score_detail": "최근 24개 중 경남 24·날짜+행사 24·광고 0, 팔로워 3166, 최근게시 O"
+  },
+  {
+   "handle": "changwontour",
+   "name": "창원관광",
+   "region": "창원",
+   "role": "official",
+   "kind": "관광",
+   "basis": "해시태그 탐색에서 발견, 프로필 이름으로 확인(홈페이지 링크 미확인)",
+   "score": 97,
+   "score_detail": "최근 24개 중 경남 23·날짜+행사 16·광고 1, 팔로워 2.1만, 최근게시 O"
+  },
+  {
+   "handle": "mamf_official",
+   "name": "맘프(MAMF) 축제",
+   "region": "창원",
+   "role": "official",
+   "kind": "축제",
+   "basis": "해시태그 탐색에서 발견, 프로필 이름으로 확인(홈페이지 링크 미확인)",
+   "score": 88,
+   "score_detail": "최근 24개 중 경남 20·날짜+행사 21·광고 0, 팔로워 5833, 최근게시 O"
+  },
+  {
+   "handle": "gccf_official",
+   "name": "거창문화재단",
+   "region": "거창",
+   "role": "official",
+   "kind": "재단",
+   "basis": "해시태그 탐색에서 발견, 프로필 이름으로 확인(홈페이지 링크 미확인)",
+   "score": 88,
+   "score_detail": "최근 24개 중 경남 23·날짜+행사 22·광고 0, 팔로워 318, 최근게시 O"
+  },
+  {
+   "handle": "ty_tonight_wave",
+   "name": "통영 청년문화의 거리 투나잇",
+   "region": "통영",
+   "role": "official",
+   "kind": "행사",
+   "basis": "해시태그 탐색에서 발견, 프로필 이름으로 확인(홈페이지 링크 미확인)",
+   "score": 85,
+   "score_detail": "최근 24개 중 경남 18·날짜+행사 17·광고 0, 팔로워 1405, 최근게시 O"
+  },
+  {
+   "handle": "river_night_jinju",
+   "name": "리버나이트 진주(진주관광)",
+   "region": "진주",
+   "role": "official",
+   "kind": "관광",
+   "basis": "해시태그 탐색에서 발견, 프로필 이름으로 확인(홈페이지 링크 미확인)",
+   "score": 87,
+   "score_detail": "최근 24개 중 경남 24·날짜+행사 8·광고 0, 팔로워 1만, 최근게시 O"
+  },
+  {
+   "handle": "jinjugogo",
+   "name": "진주관광",
+   "region": "진주",
+   "role": "official",
+   "kind": "관광",
+   "basis": "해시태그 탐색에서 발견, 프로필 이름으로 확인(홈페이지 링크 미확인)",
+   "score": 98,
+   "score_detail": "최근 24개 중 경남 24·날짜+행사 15·광고 1, 팔로워 2만, 최근게시 O"
+  },
+  {
+   "handle": "yangsan_eggya",
+   "name": "양산에그야페스타",
+   "region": "양산",
+   "role": "official",
+   "kind": "축제",
+   "basis": "해시태그 탐색에서 발견, 프로필 이름으로 확인(홈페이지 링크 미확인)",
+   "score": 90,
+   "score_detail": "최근 18개 중 경남 18·날짜+행사 13·광고 0, 팔로워 916, 최근게시 O"
+  },
+  {
+   "handle": "jinjupic",
+   "name": "진주픽tv",
+   "region": "",
+   "role": "informant",
+   "kind": "인플루언서·시민·지역언론",
+   "basis": "최근 24개 중 경남 21, 날짜+행사 12, 광고 0, 팔로워 4169, 최근 게시 2026-10",
+   "score": 90,
+   "score_detail": "최근 24개 중 경남 21·날짜+행사 12·광고 0, 팔로워 4169, 최근게시 O"
+  },
+  {
+   "handle": "so_hee_log",
+   "name": "소희로그(양산·부산)",
+   "region": "",
+   "role": "informant",
+   "kind": "인플루언서·시민·지역언론",
+   "basis": "최근 24개 중 경남 15, 날짜+행사 5, 광고 0, 팔로워 7192, 최근 게시 2026-10",
+   "score": 57,
+   "score_detail": "최근 24개 중 경남 15·날짜+행사 5·광고 0, 팔로워 7192, 최근게시 O"
+  },
+  {
+   "handle": "mmeokdori",
+   "name": "먹도리(진주·경남 축제)",
+   "region": "",
+   "role": "informant",
+   "kind": "인플루언서·시민·지역언론",
+   "basis": "최근 24개 중 경남 23, 날짜+행사 16, 광고 0, 팔로워 5811, 최근 게시 2026-10",
+   "score": 93,
+   "score_detail": "최근 24개 중 경남 23·날짜+행사 16·광고 0, 팔로워 5811, 최근게시 O"
+  },
+  {
+   "handle": "juroadgada",
+   "name": "주로가다",
+   "region": "",
+   "role": "informant",
+   "kind": "인플루언서·시민·지역언론",
+   "basis": "최근 24개 중 경남 22, 날짜+행사 9, 광고 3, 팔로워 7293, 최근 게시 2026-10",
+   "score": 77,
+   "score_detail": "최근 24개 중 경남 22·날짜+행사 9·광고 3, 팔로워 7293, 최근게시 O"
+  },
+  {
+   "handle": "_chaem_trip",
+   "name": "챔챔(경남 창원 여행)",
+   "region": "",
+   "role": "informant",
+   "kind": "인플루언서·시민·지역언론",
+   "basis": "최근 24개 중 경남 24, 날짜+행사 10, 광고 4, 팔로워 4.7만, 최근 게시 2026-10",
+   "score": 87,
+   "score_detail": "최근 24개 중 경남 24·날짜+행사 10·광고 4, 팔로워 4.7만, 최근게시 O"
+  },
+  {
+   "handle": "changwon_note",
+   "name": "창원경남정보",
+   "region": "",
+   "role": "informant",
+   "kind": "인플루언서·시민·지역언론",
+   "basis": "최근 24개 중 경남 24, 날짜+행사 15, 광고 0, 팔로워 1586, 최근 게시 2026-10",
+   "score": 95,
+   "score_detail": "최근 24개 중 경남 24·날짜+행사 15·광고 0, 팔로워 1586, 최근게시 O"
+  },
+  {
+   "handle": "neolzzida",
+   "name": "경남에널찌다",
+   "region": "",
+   "role": "informant",
+   "kind": "인플루언서·시민·지역언론",
+   "basis": "최근 24개 중 경남 18, 날짜+행사 7, 광고 5, 팔로워 1.5만, 최근 게시 2026-10",
+   "score": 65,
+   "score_detail": "최근 24개 중 경남 18·날짜+행사 7·광고 5, 팔로워 1.5만, 최근게시 O"
+  },
+  {
+   "handle": "changwonplanet",
+   "name": "창원플래닛",
+   "region": "",
+   "role": "informant",
+   "kind": "인플루언서·시민·지역언론",
+   "basis": "최근 24개 중 경남 18, 날짜+행사 7, 광고 1, 팔로워 9.9만, 최근 게시 2026-10",
+   "score": 72,
+   "score_detail": "최근 24개 중 경남 18·날짜+행사 7·광고 1, 팔로워 9.9만, 최근게시 O"
+  },
+  {
+   "handle": "gn.on__",
+   "name": "경남온",
+   "region": "",
+   "role": "informant",
+   "kind": "인플루언서·시민·지역언론",
+   "basis": "최근 24개 중 경남 24, 날짜+행사 6, 광고 0, 팔로워 6705, 최근 게시 2026-10",
+   "score": 75,
+   "score_detail": "최근 24개 중 경남 24·날짜+행사 6·광고 0, 팔로워 6705, 최근게시 O"
+  },
+  {
+   "handle": "miryangpeoples",
+   "name": "밀양 이만희",
+   "region": "",
+   "role": "informant",
+   "kind": "인플루언서·시민·지역언론",
+   "basis": "최근 24개 중 경남 23, 날짜+행사 13, 광고 1, 팔로워 3450, 최근 게시 2026-10",
+   "score": 92,
+   "score_detail": "최근 24개 중 경남 23·날짜+행사 13·광고 1, 팔로워 3450, 최근게시 O"
+  },
+  {
+   "handle": "gimhaee",
+   "name": "김해맛집·핫플",
+   "region": "",
+   "role": "informant",
+   "kind": "인플루언서·시민·지역언론",
+   "basis": "최근 24개 중 경남 23, 날짜+행사 5, 광고 0, 팔로워 4.5만, 최근 게시 2026-10",
+   "score": 75,
+   "score_detail": "최근 24개 중 경남 23·날짜+행사 5·광고 0, 팔로워 4.5만, 최근게시 O"
+  },
+  {
+   "handle": "geojenews_",
+   "name": "거제신문",
+   "region": "",
+   "role": "informant",
+   "kind": "인플루언서·시민·지역언론",
+   "basis": "최근 24개 중 경남 21, 날짜+행사 6, 광고 0, 팔로워 4036, 최근 게시 2026-10",
+   "score": 70,
+   "score_detail": "최근 24개 중 경남 21·날짜+행사 6·광고 0, 팔로워 4036, 최근게시 O"
+  },
+  {
+   "handle": "scs.tv",
+   "name": "서경방송",
+   "region": "",
+   "role": "informant",
+   "kind": "인플루언서·시민·지역언론",
+   "basis": "최근 24개 중 경남 23, 날짜+행사 16, 광고 0, 팔로워 1675, 최근 게시 2026-10",
+   "score": 93,
+   "score_detail": "최근 24개 중 경남 23·날짜+행사 16·광고 0, 팔로워 1675, 최근게시 O"
+  }
+ ],
+ "rejected": [
+  {
+   "handle": "may_0823_love",
+   "name": "메이의 4계절 여행",
+   "role": "rejected",
+   "score": 50,
+   "score_detail": "최근 24개 중 경남 19·날짜+행사 5·광고 5, 팔로워 2.7만, 최근게시 X",
+   "reason": "최근 게시 없음"
+  },
+  {
+   "handle": "jinju_kingkong",
+   "name": "진주킹콩",
+   "role": "rejected",
+   "score": 67,
+   "score_detail": "최근 24개 중 경남 20·날짜+행사 4·광고 0, 팔로워 4.2만, 최근게시 O",
+   "reason": "행사 게시물<5"
+  },
+  {
+   "handle": "aru_mii_",
+   "name": "쪼꼬부부",
+   "role": "rejected",
+   "score": 43,
+   "score_detail": "최근 24개 중 경남 10·날짜+행사 8·광고 3, 팔로워 3323, 최근게시 X",
+   "reason": "경남 비중<50%, 최근 게시 없음"
+  },
+  {
+   "handle": "eunjin11018",
+   "name": "은진 여행크리에이터",
+   "role": "rejected",
+   "score": 57,
+   "score_detail": "최근 24개 중 경남 16·날짜+행사 10·광고 14, 팔로워 6.4만, 최근게시 O",
+   "reason": "광고>25%"
+  },
+  {
+   "handle": "hoondol_pick",
+   "name": "김해·창원맛집",
+   "role": "rejected",
+   "score": 55,
+   "score_detail": "최근 24개 중 경남 24·날짜+행사 3·광고 0, 팔로워 4032, 최근게시 X",
+   "reason": "행사 게시물<5, 최근 게시 없음"
+  },
+  {
+   "handle": "nana_e.u.n",
+   "name": "나나은",
+   "role": "rejected",
+   "score": 33,
+   "score_detail": "최근 24개 중 경남 15·날짜+행사 3·광고 7, 팔로워 5.1만, 최근게시 X",
+   "reason": "행사 게시물<5, 광고>25%, 최근 게시 없음"
+  },
+  {
+   "handle": "wdtt_juno",
+   "name": "준오",
+   "role": "rejected",
+   "score": 27,
+   "score_detail": "최근 24개 중 경남 6·날짜+행사 2·광고 0, 팔로워 2.2만, 최근게시 X",
+   "reason": "경남 비중<50%, 행사 게시물<5, 최근 게시 없음"
+  },
+  {
+   "handle": "yangsan.eats",
+   "name": "양산잇츠",
+   "role": "rejected",
+   "score": 60,
+   "score_detail": "최근 24개 중 경남 22·날짜+행사 4·광고 0, 팔로워 3.6만, 최근게시 X",
+   "reason": "행사 게시물<5, 최근 게시 없음"
+  },
+  {
+   "handle": "lian_1210",
+   "name": "리안일상",
+   "role": "rejected",
+   "score": 72,
+   "score_detail": "최근 24개 중 경남 9·날짜+행사 11·광고 0, 팔로워 6만, 최근게시 O",
+   "reason": "경남 비중<50%"
+  },
+  {
+   "handle": "hasol_amsido",
+   "name": "솔람이네",
+   "role": "rejected",
+   "score": 38,
+   "score_detail": "최근 24개 중 경남 12·날짜+행사 4·광고 0, 팔로워 2020, 최근게시 X",
+   "reason": "행사 게시물<5, 최근 게시 없음"
+  },
+  {
+   "handle": "gimhae.eats",
+   "name": "김해잇츠",
+   "role": "rejected",
+   "score": 63,
+   "score_detail": "최근 24개 중 경남 24·날짜+행사 4·광고 0, 팔로워 5.8만, 최근게시 X",
+   "reason": "행사 게시물<5, 최근 게시 없음"
+  },
+  {
+   "handle": "thegil.mong",
+   "name": "길몽 커플",
+   "role": "rejected",
+   "score": 60,
+   "score_detail": "최근 24개 중 경남 22·날짜+행사 1·광고 0, 팔로워 1.3만, 최근게시 O",
+   "reason": "행사 게시물<5"
+  },
+  {
+   "handle": "changwon.eats",
+   "name": "창원잇츠",
+   "role": "rejected",
+   "score": 68,
+   "score_detail": "최근 24개 중 경남 23·날짜+행사 3·광고 0, 팔로워 9만, 최근게시 O",
+   "reason": "행사 게시물<5"
+  },
+  {
+   "handle": "zumi____luv",
+   "name": "다정한 주미",
+   "role": "rejected",
+   "score": 60,
+   "score_detail": "최근 24개 중 경남 16·날짜+행사 4·광고 0, 팔로워 1.2만, 최근게시 O",
+   "reason": "행사 게시물<5"
+  },
+  {
+   "handle": "blanc.moca",
+   "name": "별엄마",
+   "role": "rejected",
+   "score": 60,
+   "score_detail": "최근 24개 중 경남 6·날짜+행사 18·광고 0, 팔로워 928, 최근게시 O",
+   "reason": "경남 비중<50%"
+  },
+  {
+   "handle": "mana_login",
+   "name": "긍정의마나",
+   "role": "rejected",
+   "score": 32,
+   "score_detail": "최근 24개 중 경남 10·날짜+행사 3·광고 3, 팔로워 5.5만, 최근게시 X",
+   "reason": "경남 비중<50%, 행사 게시물<5, 최근 게시 없음"
+  },
+  {
+   "handle": "jinju_holic",
+   "name": "진주홀릭",
+   "role": "rejected",
+   "score": 72,
+   "score_detail": "최근 24개 중 경남 23·날짜+행사 4·광고 0, 팔로워 6만, 최근게시 O",
+   "reason": "행사 게시물<5"
+  },
+  {
+   "handle": "jinju_nu",
+   "name": "진주앤유",
+   "role": "rejected",
+   "score": 60,
+   "score_detail": "최근 24개 중 경남 19·날짜+행사 4·광고 0, 팔로워 2476, 최근게시 O",
+   "reason": "행사 게시물<5"
+  },
+  {
+   "handle": "hamo_in_jinju",
+   "name": "하모",
+   "role": "rejected",
+   "score": 63,
+   "score_detail": "최근 24개 중 경남 18·날짜+행사 4·광고 0, 팔로워 3.4만, 최근게시 O",
+   "reason": "행사 게시물<5"
+  },
+  {
+   "handle": "yangsan_holic_",
+   "name": "양산홀릭",
+   "role": "rejected",
+   "score": 68,
+   "score_detail": "최근 24개 중 경남 23·날짜+행사 3·광고 0, 팔로워 4.4만, 최근게시 O",
+   "reason": "행사 게시물<5"
+  },
+  {
+   "handle": "yangsan_ajumma",
+   "name": "양산아줌마",
+   "role": "rejected",
+   "score": 61,
+   "score_detail": "최근 19개 중 경남 19·날짜+행사 4·광고 1, 팔로워 555, 최근게시 O",
+   "reason": "행사 게시물<5"
+  },
+  {
+   "handle": "hotgeoje",
+   "name": "거제맛집",
+   "role": "rejected",
+   "score": 72,
+   "score_detail": "최근 24개 중 경남 23·날짜+행사 4·광고 0, 팔로워 5.3만, 최근게시 O",
+   "reason": "행사 게시물<5"
+  },
+  {
+   "handle": "geoje.eats",
+   "name": "거제잇츠",
+   "role": "rejected",
+   "score": 53,
+   "score_detail": "최근 24개 중 경남 24·날짜+행사 1·광고 0, 팔로워 5.3만, 최근게시 X",
+   "reason": "행사 게시물<5, 최근 게시 없음"
+  },
+  {
+   "handle": "homefourest",
+   "name": "거제호텔 홈포레스트",
+   "role": "rejected",
+   "score": 67,
+   "score_detail": "최근 24개 중 경남 23·날짜+행사 4·광고 0, 팔로워 2533, 최근게시 O",
+   "reason": "행사 게시물<5"
+  },
+  {
+   "handle": "infopia_official",
+   "name": "인포피아",
+   "role": "rejected",
+   "score": 62,
+   "score_detail": "최근 24개 중 경남 4·날짜+행사 22·광고 0, 팔로워 3236, 최근게시 O",
+   "reason": "경남 비중<50%"
+  }
+ ]
+}

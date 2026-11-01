@@ -10,9 +10,8 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "Email is required" }, { status: 400 });
         }
 
-        const { error } = await supabase
-            .from("subscribers")
-            .upsert([{ email, is_active: true }], { onConflict: "email" });
+        // 구독자 표는 관리자만 읽고 쓴다. 익명 등록은 DB 함수로만 받는다(security_rls 마이그레이션)
+        const { error } = await supabase.rpc("subscribe_newsletter", { p_email: email });
 
         if (error) {
             console.error("Subscription error:", error);

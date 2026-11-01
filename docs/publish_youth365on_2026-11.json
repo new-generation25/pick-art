@@ -1,0 +1,28 @@
+{
+ "published": [
+  {
+   "title": "봉리단길 MUSIC SPOT 사연 라이브 공연",
+   "category": "공연",
+   "region": "김해",
+   "start": "2026-10-30",
+   "end": "2026-10-30",
+   "source": "인스타그램",
+   "url": "https://www.instagram.com/p/Dev_EvJkhjp/"
+  },
+  {
+   "title": "기묘한 봉리단길 축제",
+   "category": "축제",
+   "region": "김해",
+   "start": "2026-10-31",
+   "end": "2026-10-31",
+   "source": "인스타그램",
+   "url": "https://www.instagram.com/p/DfBYykUkkcj/"
+  }
+ ],
+ "duplicates": [],
+ "link_failed": [],
+ "skipped": {
+  "날짜없음/형식오류": 0,
+  "기간밖": 0
+ }
+}

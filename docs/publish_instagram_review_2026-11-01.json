@@ -1,0 +1,29 @@
+{
+ "published": [
+  {
+   "title": "「2026 울림」 생활문화 결과 발표 공연",
+   "category": "공연",
+   "region": "김해",
+   "start": "2026-11-22",
+   "end": "2026-11-22",
+   "source": "인스타그램",
+   "url": "https://www.instagram.com/p/Dc0N1t5EwfQ/"
+  },
+  {
+   "title": "전통연 만들기·날리기 (김해다어울림생활문화센터)",
+   "category": "행사",
+   "region": "김해",
+   "start": "2026-10-31",
+   "end": "2026-11-01",
+   "source": "인스타그램",
+   "url": "https://www.instagram.com/p/DeLs6rqk0D1/"
+  }
+ ],
+ "duplicates": [],
+ "link_failed": [],
+ "skipped": {
+  "날짜없음/형식오류": 0,
+  "기간밖": 0,
+  "기간지남": 2
+ }
+}
