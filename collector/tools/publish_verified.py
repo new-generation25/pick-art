@@ -50,6 +50,10 @@ async def main(date_from, date_to, dry):
             skipped["기간밖"] += 1; continue
         cands.append(r)
 
+    # 이미 공개된 행사와 같은 것(제목+시작일)은 다시 공개하지 않는다 (정기 실행 때 다른 출처에서 같은 행사가 들어와도)
+    published = {(norm(e["title"]), e["event_date_start"]) for e in
+                 db.supabase.table("events").select("title,event_date_start").execute().data}
+
     groups = {}
     for r in cands:
         a = r["content"]["ai_suggestion"]
@@ -58,6 +62,12 @@ async def main(date_from, date_to, dry):
     report = {"published": [], "duplicates": [], "link_failed": [], "skipped": skipped}
     async with aiohttp.ClientSession() as session:
         for key, grp in groups.items():
+            if key in published:
+                for r in grp:
+                    report["duplicates"].append({"title": r["content"]["title"], "source": r["source"], "kept": "이미 공개됨"})
+                    if not dry:
+                        db.supabase.table("raw_posts").update({"status": "DUPLICATE"}).eq("id", r["id"]).execute()
+                continue
             grp.sort(key=rank)
             chosen = None
             for r in grp:
@@ -107,9 +117,11 @@ async def main(date_from, date_to, dry):
 
     out = os.path.join("..", "docs", f"publish_{date_from}_{date_to}{'_dryrun' if dry else ''}.json")
     json.dump(report, open(out, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-    print(f"후보 {len(cands)}건 → 발행 {len(report['published'])}, 중복 {len(report['duplicates'])}, "
-          f"링크실패 {len(report['link_failed'])}, 제외 {skipped}")
+    summary = (f"후보 {len(cands)}건 → 발행 {len(report['published'])}, 중복 {len(report['duplicates'])}, "
+               f"링크실패 {len(report['link_failed'])}, 제외 {skipped}")
+    print(summary)
     print(f"결과: {os.path.abspath(out)}")
+    return summary
 
 
 if __name__ == "__main__":

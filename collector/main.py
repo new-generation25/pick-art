@@ -96,12 +96,23 @@ async def run_crawlers(specific_target=None):
                 if c['target_type'] != 'website':
                     skipped[c['target_type']] = skipped.get(c['target_type'], 0) + 1
 
+            # 검증(날짜·열리는 링크·중복)을 통과한 것만 오늘~60일 뒤 범위에서 공개한다. AUTO_PUBLISH=off 면 인박스 검토로 남긴다
+            publish_line = "• 자동 공개: 꺼짐 (AUTO_PUBLISH=off)"
+            if os.getenv("AUTO_PUBLISH", "on").lower() != "off":
+                from tools.publish_verified import main as publish_verified
+                today = datetime.now(timezone(timedelta(hours=9))).date()
+                try:
+                    publish_line = "• 자동 공개: " + await publish_verified(today.isoformat(), (today + timedelta(days=60)).isoformat(), False)
+                except Exception as e:
+                    publish_line = f"• 자동 공개 실패: {e}"
+
             # 전체 종료 알림: 처리·실패·건너뜀을 숫자로 남긴다
             failed = [r for r in results if r['status'] != 'SUCCESS']
             lines = [f"{'⚠️' if failed else '✅'} 정기 크롤링 완료 — 출처 {len(results)}곳 처리 (웹사이트 {len(results) - 1} + KOPIS, 실패 {len(failed)})"]
             lines += [f"• {r['name']}: {r['summary']}" for r in results]
             for t, n in skipped.items():
                 lines.append(f"• {t} {n}곳 건너뜀 (미구현)")
+            lines.append(publish_line)
             lines.append(f"• AI 추출: {'켜짐' if AIExtractor().enabled else '꺼짐 (기본값 사용)'}")
             message = "\n".join(lines)
             print(message, flush=True)
