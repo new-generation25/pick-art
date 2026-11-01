@@ -16,14 +16,8 @@ export async function POST(request: Request) {
 
         // Upsert keywords for the user
         // We'll store one row per keyword per user to make searching easier later
-        const insertData = keywords.map(keyword => ({
-            email,
-            keyword
-        }));
-
-        const { error } = await supabase
-            .from("keywords")
-            .upsert(insertData, { onConflict: "email, keyword" });
+        // 키워드 표는 관리자만 읽고 쓴다. 익명 등록은 DB 함수로만 받는다(security_rls 마이그레이션)
+        const { error } = await supabase.rpc("add_keyword_alerts", { p_email: email, p_keywords: keywords });
 
         if (error) {
             console.error("Error saving keywords:", error);

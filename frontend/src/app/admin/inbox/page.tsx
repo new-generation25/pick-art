@@ -369,9 +369,12 @@ export default function AdminInboxPage() {
                                 radius="xl"
                                 leftSection={<List size={16} />}
                                 onClick={async () => {
-                                    const res = await fetch('/api/crawlLogs');
-                                    const data = await res.json();
-                                    setReportLogs(data);
+                                    const { data } = await supabase
+                                        .from('crawl_logs')
+                                        .select('*')
+                                        .order('started_at', { ascending: false })
+                                        .limit(20);
+                                    setReportLogs(data || []);
                                     openReportModal();
                                 }}
                             >
