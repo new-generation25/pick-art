@@ -109,3 +109,33 @@
     1. **브라우저 기반 수집기:** Playwright가 로그인된 크롬 프로필로 프로필 그리드의 alt 캡션을 읽는다. 날짜·장소는 정규식(📅·📍·"일시"·"장소" 줄)으로 1차 추출하고, 애매한 것만 AI로 보낸다. 이번 게시물 대부분이 `📅 일시 / 📍 장소` 형식이라 정규식 적중률이 높다.
     2. **게시물 원천을 따라가기:** @love_jangyu_kimhae 게시물의 상당수는 `Repost @gimhae_city`다. 시청 행사일정(`gimhae.go.kr/03360/00023/05583.web`)이 같은 정보를 HTML로 제공하므로, 이 페이지를 웹 소스로 수집하는 편이 AI 없이 더 안정적이다.
   - 날짜가 포스터 이미지에만 있는 게시물(봉황예술극장 원도심 투어 등)은 OCR·비전 모델 없이는 읽을 수 없다.
+
+## 6. 경남 지자체 공식 인스타그램 팔로우·whitelist 등록 (추가 요청)
+- 경상남도와 18개 시군의 대표 계정 **19개**를 Chrome "pick" 프로필로 팔로우했다. 김해시는 이미 팔로우 중이었다.
+- 같은 19개를 Supabase `whitelist`에 넣었다(type=instagram, auto_publish=false, schedule=daily). 기존 4개와 합쳐 인스타그램 whitelist는 **23개**다.
+- 계정은 각 시군청 홈페이지에 걸린 인스타그램 링크로 찾았다. 그다음 프로필을 직접 열어 계정 이름과 소개("○○군청 공식 계정" 등)를 확인했다.
+
+| 지자체 | 계정 | 비고 |
+|---|---|---|
+| 경상남도 | @gsnd_korea | |
+| 창원시 | @changwon_city | |
+| 진주시 | @jinjucity | |
+| 통영시 | @tongyeongsi | |
+| 사천시 | @sacheoncity | |
+| 김해시 | @gimhae_city | 이미 팔로우 중이었음 |
+| 밀양시 | @miryangsi | |
+| 거제시 | @geojecity | 시정 계정. 홈페이지 JSON-LD의 geoje__geojesi는 존재하지 않는 계정 |
+| 양산시 | @yangsancity | |
+| 의령군 | @uiryeong_official | 홈페이지 링크(uiryeonginfo)는 없는 계정이다. 인스타그램 검색으로 찾았고, 소개가 "의령군청 공식계정"이며 군 블로그(uiryeonginfo)를 링크한다 |
+| 함안군 | @haman_official_ | |
+| 창녕군 | @changnyeonggun | |
+| 고성군 | @dinogoseong | |
+| 남해군 | @namhaegun | |
+| 하동군 | @hadonggun_official | |
+| 산청군 | @sancheong_official | |
+| 함양군 | @hamyang_korea | 홈페이지 링크(hamyanggun)는 없는 계정이다. 인스타그램 검색으로 찾았고, 소개가 "경남 함양군청 공식 계정"이다 |
+| 거창군 | @geochang_welcome | 관광 공식 계정(거창군관광_official). 군정 계정은 검색해도 없다 |
+| 합천군 | @travelhc_official | 관광 공식 계정(합천군 공식 여행 가이드). 군정 계정은 검색해도 없다 |
+
+- 넣지 않은 관광 계정(필요하면 추가): @gsnd_kr(경남관광), @tyaeonna(통영), @gimhae_tour(김해), @bigheart_geoje(거제), @here_ur_tour(의령), @cittaslow_hadong(하동), @sancheong_tour(산청).
+- whitelist에 넣었다고 바로 수집되지는 않는다. 5절대로 instaloader 무로그인 요청은 지금 429로 막혀 있다. 이 계정들은 이번처럼 브라우저로 읽거나, 브라우저 기반 수집기를 만들어야 실제로 수집된다.
