@@ -13,7 +13,7 @@ Playwright(Chromium)로 HTML 을 렌더링해 PNG 를 찍고, Graph API 발행�
   python tools/make_insta_cards.py --today 2026-11-01      (오늘 열리는 후보만 출력)
 
 facts JSON 키(모두 선택): hook, kicker, title, date_label, time, venue, address, price,
-  audience, what[], how[], contact, notice, cover_note, source_name, source_url, poster_credit,
+  audience, what[], how[], contact, notice, cover_note, poster(로컬 경로·URL, DB 포스터 대신), source_name, source_url, poster_credit,
   hashtags[](본 캡션용, 5개 이하), hashtags_pool[](예비), caption_lead, mentions[](주관 측 @계정)
 """
 import argparse
@@ -56,6 +56,9 @@ def esc(s) -> str:
 def poster_data_uri(url: str) -> str:
     if not url:
         return ""
+    if os.path.exists(url):
+        ext = os.path.splitext(url)[1].lstrip(".").lower().replace("jpg", "jpeg")
+        return f"data:image/{ext};base64,{base64.b64encode(open(url, 'rb').read()).decode()}"
     r = requests.get(url, timeout=30)
     r.raise_for_status()
     ctype = r.headers.get("content-type", "image/webp").split(";")[0]
@@ -124,9 +127,9 @@ body { background: #888; }
 .pad { position: absolute; left: 72px; right: 72px; }
 
 /* 1. 표지 */
-.cover .poster { position: absolute; right: -12px; top: 104px; transform: rotate(3deg);
+.cover .poster { position: absolute; right: 18px; top: 165px; transform: rotate(3deg);
   border: 4px solid %(ink)s; box-shadow: 14px 14px 0 %(blue)s; background: #fff; }
-.cover .poster img { display: block; height: 1000px; width: auto; max-width: 800px; object-fit: contain; }
+.cover .poster img { display: block; height: 925px; width: auto; max-width: 760px; object-fit: contain; }
 .cover .hook { position: absolute; left: 72px; top: 250px; width: 420px; font-size: 76px; line-height: 1.08; }
 .cover .chips { position: absolute; left: 72px; top: 150px; display: flex; gap: 14px; z-index: 3; }
 .cover .sticker { position: absolute; right: 70px; top: 960px; z-index: 3; transform: rotate(-5deg); background: %(pink)s; border: 4px solid %(ink)s; padding: 12px 22px; font-size: 32px; font-weight: 900; }
@@ -337,7 +340,7 @@ def main():
     f = build_facts(ev, facts)
     slug = a.slug or a.event_id[:8]
     os.makedirs(a.out, exist_ok=True)
-    pages = slides_html(f, poster_data_uri(ev.get("poster_image_url")), a.handle)
+    pages = slides_html(f, poster_data_uri(facts.get("poster") or ev.get("poster_image_url")), a.handle)
     files = render(pages, a.out, slug)
     cap = os.path.join(a.out, f"{slug}_caption.txt")
     with open(cap, "w", encoding="utf-8") as fh:
