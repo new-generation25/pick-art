@@ -62,6 +62,25 @@ def reclaim_running(db, older_than=None, reason="시간 초과"):
 BLOG_REGIONS = "창원 진주 통영 사천 김해 밀양 거제 양산 의령 함안 창녕 고성 남해 하동 산청 함양 거창 합천".split()
 
 
+async def run_tool(script, timeout_min=60):
+    """collector/tools/<script> 를 별도 프로세스로 실행하고 결과 한 줄을 돌려준다."""
+    here = os.path.dirname(os.path.abspath(__file__))
+    proc = await asyncio.create_subprocess_exec(
+        sys.executable, "-u", os.path.join(here, "tools", script),
+        cwd=here, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT,
+        env={**os.environ, "PYTHONIOENCODING": "utf-8"})
+    try:
+        out, _ = await asyncio.wait_for(proc.communicate(), timeout=timeout_min * 60)
+    except asyncio.TimeoutError:
+        proc.kill()
+        return {"name": script, "status": "FAIL", "summary": f"❌ {timeout_min}분 안에 끝나지 않아 중단"}
+    lines = [l for l in out.decode("utf-8", "replace").splitlines() if l.strip()]
+    last = lines[-1][:200] if lines else ""
+    if proc.returncode != 0:
+        return {"name": script, "status": "FAIL", "summary": f"❌ 실패(종료 코드 {proc.returncode}): {last}"}
+    return {"name": script, "status": "SUCCESS", "summary": f"✅ {last}"}
+
+
 async def run_crawlers(specific_target=None):
     print(f"🚀 {'Manual request:' if specific_target else 'Routine'} crawler started at {datetime.now()}", flush=True)
     db = Database()
@@ -123,6 +142,13 @@ async def run_crawlers(specific_target=None):
                     publish_line = "• 자동 공개: " + await publish_verified(today.isoformat(), (today + timedelta(days=60)).isoformat(), False)
                 except Exception as e:
                     publish_line = f"• 자동 공개 실패: {e}"
+
+            # 인스타그램(하루 한 번, 오전 루틴): 새 게시물 → raw_posts REVIEW(주간 검토로만 공개), 계정 재채점·탐색.
+            # 이 PC의 로그인 프로필(collector/.cache/ig_profile)이 필요하고 오래 걸리므로 별도 프로세스로 돌리고,
+            # 실패하거나 시간을 넘겨도 루틴은 계속한다. INSTAGRAM_DAILY=off 면 건너뛴다.
+            if os.getenv("INSTAGRAM_DAILY", "on").lower() != "off" and datetime.now(timezone(timedelta(hours=9))).hour < 12:
+                for script in ("collect_instagram.py", "discover_instagram.py"):
+                    results.append(await run_tool(script, timeout_min=90))
 
             # 전체 종료 알림: 처리·실패·건너뜀을 숫자로 남긴다
             failed = [r for r in results if r['status'] != 'SUCCESS']
