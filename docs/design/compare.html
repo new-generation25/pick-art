@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pica 디자인 비교</title>
+<style>
+  body { margin: 0; font-family: "Malgun Gothic", sans-serif; background: #f5f6f3; color: #1f2a36; }
+  header { padding: 16px; position: sticky; top: 0; background: #fff; border-bottom: 1px solid #dde2e5; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  h1 { font-size: 18px; margin: 0 12px 0 0; }
+  button { border: 1px solid #dde2e5; background: #fff; border-radius: 999px; padding: 6px 14px; font: inherit; cursor: pointer; }
+  button[aria-pressed="true"] { background: #1f2a36; color: #fff; border-color: #1f2a36; }
+  main { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px; align-items: start; }
+  figure { margin: 0; }
+  figcaption { font-weight: 700; margin-bottom: 8px; }
+  img { width: 100%; height: auto; border: 1px solid #dde2e5; background: #fff; }
+  @media (max-width: 700px) { main { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>변경 전 / 변경 후</h1>
+  <button data-k="home_mobile375" aria-pressed="true">홈 · 모바일 375</button>
+  <button data-k="home_desktop1440">홈 · 데스크톱 1440</button>
+  <button data-k="detail_mobile375">상세 · 모바일 375</button>
+  <button data-k="detail_desktop1440">상세 · 데스크톱 1440</button>
+  <button data-k="home_ended_mobile375">김해 + 종료 포함 · 모바일</button>
+</header>
+<main>
+  <figure><figcaption>변경 전</figcaption><img id="b" alt="변경 전"></figure>
+  <figure><figcaption>변경 후</figcaption><img id="a" alt="변경 후"></figure>
+</main>
+<script>
+  const show = k => { b.src = `before_${k}.png`; a.src = `after_${k}.png`;
+    document.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x.dataset.k === k)); };
+  document.querySelectorAll('button').forEach(x => x.onclick = () => show(x.dataset.k));
+  show('home_mobile375');
+</script>
+</body>
+</html>
