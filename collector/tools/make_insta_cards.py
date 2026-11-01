@@ -14,7 +14,7 @@ Playwright(Chromium)로 HTML 을 렌더링해 PNG 를 찍고, Graph API 발행�
 
 facts JSON 키(모두 선택): hook, kicker, title, date_label, time, venue, address, price,
   audience, what[], how[], contact, notice, cover_note, source_name, source_url, poster_credit,
-  hashtags[](본 캡션용, 5개 이하), hashtags_pool[](예비), caption_lead
+  hashtags[](본 캡션용, 5개 이하), hashtags_pool[](예비), caption_lead, mentions[](주관 측 @계정)
 """
 import argparse
 import base64
@@ -81,7 +81,7 @@ def build_facts(ev: dict, facts: dict) -> dict:
         "poster_credit": "",
         "hashtags": [f"#{region}가볼만한곳", f"#경남{cat}", f"#{region}{cat}", "#경남문화예술", "#픽아트"],
         "hashtags_pool": [],
-        "caption_lead": "",
+        "caption_lead": "", "mentions": [],
     }
     f.update({k: v for k, v in facts.items() if v not in (None, "")})
     if not f["poster_credit"]:
@@ -124,11 +124,11 @@ body { background: #888; }
 .pad { position: absolute; left: 72px; right: 72px; }
 
 /* 1. 표지 */
-.cover .poster { position: absolute; right: -12px; top: 232px; transform: rotate(3deg);
+.cover .poster { position: absolute; right: -12px; top: 56px; transform: rotate(3deg);
   border: 4px solid %(ink)s; box-shadow: 14px 14px 0 %(blue)s; background: #fff; }
-.cover .poster img { display: block; height: 910px; width: auto; max-width: 780px; object-fit: contain; }
+.cover .poster img { display: block; height: 1000px; width: auto; max-width: 800px; object-fit: contain; }
 .cover .hook { position: absolute; left: 72px; top: 250px; width: 420px; font-size: 76px; line-height: 1.08; }
-.cover .chips { position: absolute; left: 72px; top: 150px; display: flex; gap: 14px; }
+.cover .chips { position: absolute; left: 72px; top: 150px; display: flex; gap: 14px; z-index: 3; }
 .cover .sticker { position: absolute; right: 70px; top: 960px; z-index: 3; transform: rotate(-5deg); background: %(pink)s; border: 4px solid %(ink)s; padding: 12px 22px; font-size: 32px; font-weight: 900; }
 .cover .titlebox { position: absolute; left: 0; right: 0; bottom: 96px; padding: 24px 72px; }
 .cover .titlebox .t { font-size: 44px; font-weight: 900; line-height: 1.22; }
@@ -181,7 +181,7 @@ def slides_html(f: dict, poster: str, handle: str) -> list:
 
     # 1. 표지: 훅 + 포스터 + 제목 띠
     out.append(f"""
-<div class="slide cover">{top(1)}
+<div class="slide cover"><div class="top">{brand}</div>
   <div class="chips"><span class="chip pink">오늘 {esc(f['date_label'])}</span><span class="chip">{esc(f['kicker'])}</span></div>
   {f'<div class="poster"><img src="{poster}"></div>' if poster else ''}
   {f'<div class="sticker">{esc(f["cover_note"])}</div>' if f["cover_note"] else ''}
@@ -260,6 +260,8 @@ def caption_text(f: dict, handle: str) -> str:
         lines += ["", f"⚠️ {f['notice']}"]
     if f["how"]:
         lines += ["", "✔️ 가는 법·예약"] + [f"- {html.unescape(_strip(x))}" for x in f["how"]]
+    if f["mentions"]:
+        lines += ["", "🏷 " + " ".join(m if m.startswith("@") else f"@{m}" for m in f["mentions"])]
     lines += ["", "🔖 저장해 두고, 같이 갈 사람에게 보내 주세요.",
               f"출처: {f['source_name']} {f['source_url']}".strip(),
               "방문 전 공식 안내에서 변경 사항을 꼭 확인하세요.", "", " ".join(tags)]
