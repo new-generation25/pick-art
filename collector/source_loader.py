@@ -5,8 +5,7 @@ from urllib.parse import urlparse
 
 SOURCES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sources")
 REQUIRED = {
-    "": ["slug", "name", "match", "region", "venue", "boards", "list", "expect"],
-    "list": ["rows", "title", "period"],
+    "": ["slug", "name", "match", "region", "venue", "boards", "expect"],
     "expect": ["min_rows"],
 }
 
@@ -24,7 +23,17 @@ def _validate(d: dict, path: str):
     for b in d["boards"]:
         if "url" not in b or "category" not in b:
             raise SourceDefinitionError(f"{os.path.basename(path)}: boards 항목에 url/category 없음")
-        if "link_template" not in b and "link" not in d["list"]:
+        if b.get("api"):
+            if "link_template" not in b:
+                raise SourceDefinitionError(f"{os.path.basename(path)}: api 게시판에 link_template 없음")
+            continue
+        lst = b.get("list") or d.get("list")
+        if not lst:
+            raise SourceDefinitionError(f"{os.path.basename(path)}: list(목록 선택자) 없음")
+        for k in ("rows", "title", "period"):
+            if k not in lst:
+                raise SourceDefinitionError(f"{os.path.basename(path)}: list.{k} 없음")
+        if "link_template" not in b and "link" not in lst:
             raise SourceDefinitionError(f"{os.path.basename(path)}: 링크 규칙(link_template 또는 list.link) 없음")
 
 

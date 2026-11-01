@@ -8,7 +8,7 @@ import html
 import json
 from urllib.parse import urljoin
 from ai_extractor import AIExtractor
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from source_loader import find_for_url
 from rule_extractor import parse_period
@@ -65,7 +65,6 @@ class PublicScraper:
 
     async def _scrape_definition(self, session, d, target_name):
         """collector/sources/<slug>.json 정의를 그대로 실행한다. 사이트별 분기 없음."""
-        lst = d["list"]
         new = dup = fail = updated = 0
         found = 0
         expired = []
@@ -81,7 +80,10 @@ class PublicScraper:
                 title = it["title"]
                 period = it["period"]
                 link = it["link"]
-                source_id = link.rstrip("/").split("/")[-1]
+                # 정의가 id 를 주면 그것을, 아니면 링크 끝부분을 쓴다 (같은 출처 안에서 유일하면 된다)
+                lst = board.get("list") or d.get("list") or {}
+                source_id = str(it.get("id") or "") if (board.get("api") or lst.get("id") or lst.get("id_regex")) else ""
+                source_id = source_id or link.rstrip("/").split("/")[-1]
                 if not title or not source_id:
                     fail += 1
                     continue
@@ -148,10 +150,18 @@ class PublicScraper:
         return {"name": target_name, "status": status,
                 "summary": f"{mark} 수집 완료: 발견 {found}건 (신규 {new}, 중복 {dup}, 실패 {fail}{extra}){warn}"}
 
+    async def _fetch_text(self, session, url, d, board, headers=None):
+        """정의의 encoding(예: euc-kr)을 따른다. 없으면 응답 헤더, 그다음 utf-8."""
+        async with session.get(url, headers=headers or {}, timeout=aiohttp.ClientTimeout(total=30)) as r:
+            raw = await r.read()
+            enc = board.get("encoding") or d.get("encoding") or r.charset or "utf-8"
+        return raw.decode(enc, errors="replace")
+
     async def _list_items(self, session, d, board):
-        """게시판 하나의 항목을 [{title, period, link, image}]로 만든다.
-        board.api 가 있으면 월별 JSON(이번 달부터 months_ahead 개월), 없으면 목록 HTML."""
+        """게시판 하나의 항목을 [{id, title, period, link, image, venue}]로 만든다.
+        board.api 가 있으면 JSON(월별 또는 기간 조회), 없으면 목록 HTML. 게시판마다 list 를 따로 둘 수 있다."""
         items = []
+        now = datetime.now()
 
         def fill(template, values):
             return re.sub(r"\{([\w-]+)\}", lambda m: str(values.get(m.group(1)) or ""), template)
@@ -161,48 +171,98 @@ class PublicScraper:
             return re.sub(r"\s+", " ", re.sub(r"^\[[^\]]*\]\s*", "", t)).strip()
 
         if board.get("api"):
-            f = d["api_fields"]
-            now = datetime.now()
+            f = {**d.get("api_fields", {}), **board.get("api_fields", {})}
             seen = set()
+
+            def take(rows, year):
+                for row in rows:
+                    rid = str(row.get(f["id"]))
+                    if rid in seen:
+                        continue
+                    seen.add(rid)
+                    if f.get("period"):
+                        period_text = str(row.get(f["period"]) or "")
+                    else:
+                        start, end = str(row.get(f["start"]) or ""), str(row.get(f["end"]) or "")
+                        period_text = f"{start} ~ {end}" if end and end != start else start
+                    img = f.get("image_template")
+                    items.append({
+                        "id": rid,
+                        "title": clean(row.get(f["title"])),
+                        "period": parse_period(period_text, year),
+                        "link": fill(board["link_template"], row),
+                        "image": fill(img, row) if img and row.get(f.get("image_key", "fileKey")) else "",
+                        "venue": clean(str(row.get(f["venue"]) or "")) if f.get("venue") else "",
+                    })
+
+            def rows_of(data):
+                for key in (f.get("rows") or "").split("."):
+                    if key:
+                        data = data.get(key, []) if isinstance(data, dict) else []
+                return data if isinstance(data, list) else []
+
+            if board.get("api_mode") == "range":
+                # 기간 조회 API: 오늘부터 range_days 일 뒤까지. 페이지가 page_size 미만이면 멈춘다
+                frm = now.date()
+                to = frm + timedelta(days=d.get("range_days", 62))
+                for page in range(1, f.get("max_pages", 10) + 1):
+                    url = fill(board["api"], {"from": frm.isoformat(), "to": to.isoformat(),
+                                              "from_compact": frm.strftime("%Y%m%d"), "to_compact": to.strftime("%Y%m%d"), "page": page})
+                    rows = rows_of(json.loads(await self._fetch_text(session, url, d, board)))
+                    take(rows, now.year)
+                    if "{page}" not in board["api"] or len(rows) < f.get("page_size", 20):
+                        break
+                return items
+
             for k in range(d.get("months_ahead", 0) + 1):
                 y, m = now.year + (now.month - 1 + k) // 12, (now.month - 1 + k) % 12 + 1
                 page = 1
                 while True:
                     url = fill(board["api"], {"year": y, "month": m, "page": page})
-                    async with session.get(url, headers={"X-Requested-With": "XMLHttpRequest"}, timeout=aiohttp.ClientTimeout(total=20)) as r:
-                        data = json.loads(await r.text())
-                    for row in data:
-                        rid = str(row.get(f["id"]))
-                        if rid in seen:
-                            continue
-                        seen.add(rid)
-                        start, end = row.get(f["start"]) or "", row.get(f["end"]) or ""
-                        items.append({
-                            "title": clean(row.get(f["title"])),
-                            "period": parse_period(f"{start} ~ {end}" if end and end != start else start, y),
-                            "link": fill(board["link_template"], row),
-                            "image": fill(f["image_template"], row) if row.get("fileKey") else "",
-                        })
+                    data = rows_of(json.loads(await self._fetch_text(session, url, d, board, {"X-Requested-With": "XMLHttpRequest"})))
+                    take(data, y)
                     if len(data) < f.get("page_size", 20):
                         break
                     page += 1
             return items
 
-        lst = d["list"]
-        async with session.get(board["url"], timeout=aiohttp.ClientTimeout(total=20)) as r:
-            soup = BeautifulSoup(await r.text(), "html.parser")
+        lst = board.get("list") or d["list"]
+        soup = BeautifulSoup(await self._fetch_text(session, board["url"], d, board), "html.parser")
         for row in soup.select(lst["rows"]):
             rid = _pick(row, lst["id"]) if lst.get("id") else row.get(lst.get("id_attr", "data-idx"))
             values = {**row.attrs, "idx": rid}
+            if lst.get("link_regex"):
+                # onclick="goView('123')" 처럼 링크가 스크립트 안에 있을 때: 첫 그룹을 {m} 으로 쓴다
+                m = re.search(lst["link_regex"], str(row))
+                if not m:
+                    continue
+                values["m"] = m.group(1)
             link = fill(board["link_template"], values) if board.get("link_template") else urljoin(board["url"], _pick(row, lst["link"]))
+            if lst.get("id_regex"):
+                m = re.search(lst["id_regex"], link)
+                rid = m.group(1) if m else rid
             image = _pick(row, lst.get("image"))
             items.append({
+                "id": rid,
                 "title": clean(_pick(row, lst["title"])),
-                "period": parse_period(_pick(row, lst["period"]), datetime.now().year),
+                "period": parse_period(_pick(row, lst["period"]), now.year),
                 "link": link,
                 "image": urljoin(board["url"], image) if image else "",
                 "venue": _pick(row, lst.get("venue")),
             })
+        if lst.get("dedupe"):
+            # 회차마다 한 줄인 목록: 같은 id 는 하나로 합치고 기간을 첫 회~마지막 회로 넓힌다
+            merged = {}
+            for it in items:
+                k = it["id"] or it["link"]
+                if k in merged:
+                    p, q = merged[k]["period"], it["period"]
+                    if q["parsed"] and p["parsed"]:
+                        p["start"], p["end"] = min(p["start"], q["start"]), max(p["end"], q["end"])
+                        p["raw"] = f"{p['start']} ~ {p['end']}"
+                else:
+                    merged[k] = it
+            items = list(merged.values())
         return items
 
     async def _scrape_generic(self, session, target_url, target_name):
