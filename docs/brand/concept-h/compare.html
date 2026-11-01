@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>까치 우편 시안 3종</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gaegu:wght@700&family=Gothic+A1:wght@400;600;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* 레이아웃: 시안 3개를 같은 순서(로고·프로필·표지·우표첩·도장)로 세로 띠에 놓고, 넓은 화면에선 표지·우표첩을 나란히. 끝에 비교와 추천 */
+:root {
+  --bg: #EFEBE2; --card: #FAF8F3; --ink: #1C1C1C; --soft: #67655E; --line: #1C1C1C;
+  --display: "Black Han Sans", "Gothic A1", sans-serif;
+  --body: "Gothic A1", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  --hand: "Gaegu", "Gothic A1", sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.65; word-break: keep-all; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 24px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2 { text-wrap: balance; }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(32px, 5.5vw, 52px); line-height: 1.15; margin: 4px 0 10px; }
+.lead { max-width: 70ch; margin: 0; }
+.meta { font-family: var(--mono); font-size: 13px; color: var(--soft); }
+.jump { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.jump a { border: 1.5px solid var(--line); background: var(--card); color: var(--ink); text-decoration: none; padding: 3px 12px; font-weight: 600; font-size: 14px; }
+.jump a:hover, .jump a:focus-visible { background: var(--ink); color: var(--card); outline: none; }
+
+section.c { margin-top: 44px; border-top: 2px solid var(--line); padding-top: 16px; scroll-margin-top: 12px; }
+.head { display: grid; grid-template-columns: auto 1fr; gap: 2px 16px; align-items: baseline; }
+.num { font-family: var(--display); font-size: 52px; line-height: 1; }
+.head h2 { font-family: var(--display); font-weight: 400; font-size: 28px; margin: 0; line-height: 1.2; }
+.head p { grid-column: 2; margin: 0; max-width: 72ch; }
+.chips { grid-column: 2; display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 6px; font-size: 12px; font-family: var(--mono); color: var(--soft); }
+.chips span { display: inline-flex; align-items: center; gap: 5px; }
+.chips i { width: 16px; height: 16px; border: 1px solid var(--line); display: inline-block; }
+
+.board { display: grid; gap: 14px; margin-top: 16px; grid-template-columns: 1fr; }
+@media (min-width: 900px) { .board { grid-template-columns: 1.05fr .8fr 1fr .62fr; align-items: start; } }
+.board > * { min-width: 0; }
+figure { margin: 0; }
+figcaption { font-size: 12.5px; color: var(--soft); margin-top: 6px; }
+.frame { position: relative; border: 1.5px solid var(--line); overflow: hidden; container-type: inline-size; background: var(--card); }
+.frame img { display: block; width: 100%; height: auto; }
+.ov { position: absolute; transform: translate(-50%, -50%); text-align: center; line-height: 1.05; pointer-events: none; white-space: nowrap; }
+.stack { display: grid; gap: 14px; }
+.avatar { display: grid; place-items: center; background: var(--card); border: 1.5px solid var(--line); padding: 14px; }
+.avatar img { width: min(180px, 100%); aspect-ratio: 1; border-radius: 50%; object-fit: cover; display: block; }
+.stamps { background: var(--card); border: 1.5px solid var(--line); padding: 10px; }
+.stamps img { display: block; width: 100%; height: auto; }
+.labels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px 6px; font-size: 12px; text-align: center; margin-top: 4px; }
+.judge { background: var(--card); border: 1.5px solid var(--line); padding: 12px 14px; font-size: 14px; margin-top: 14px; display: grid; gap: 8px 22px; }
+@media (min-width: 760px) { .judge { grid-template-columns: repeat(3, 1fr); } }
+.judge b { display: block; margin-bottom: 2px; }
+.judge ul { margin: 0; padding-left: 18px; }
+
+.compare { margin-top: 48px; border-top: 2px solid var(--line); padding-top: 16px; }
+.compare h2, .pick h2 { font-family: var(--display); font-weight: 400; font-size: 26px; margin: 0 0 12px; }
+.tw { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 14px; background: var(--card); }
+th, td { border: 1.5px solid var(--line); padding: 7px 10px; text-align: left; vertical-align: top; }
+thead th { background: var(--bg); }
+.lv { display: inline-flex; gap: 3px; margin-right: 6px; vertical-align: -1px; }
+.lv b { width: 10px; height: 10px; border: 1.5px solid var(--ink); display: inline-block; }
+.lv b.on { background: var(--ink); }
+.pick { margin-top: 32px; background: var(--card); border: 2px solid var(--line); padding: 16px 18px; }
+.pick p { margin: 0 0 8px; max-width: 74ch; }
+.pick p:last-child { margin: 0; }
+.note { margin-top: 24px; font-size: 13px; color: var(--soft); max-width: 80ch; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="meta">H안(까치 우편 + 도장 수집) · 디자인 시안 · 2026-11-01</div>
+  <h1>까치 우편 시안 3종</h1>
+  <p class="lead">같은 콘셉트를 세 가지 손맛으로 풀었다. 시안마다 로고, 인스타 프로필, 인스타 표지(4:5), 우표첩 화면, 도장 6종이 한 벌이다. 이미지는 운영자 계정의 ChatGPT(로고·도장, 투명 배경)와 Gemini(프로필·표지·우표첩)로 만들었고, 한글과 <span style="font-family:var(--mono)">pica</span> 글자는 모두 이 페이지에서 HTML로 얹었다.</p>
+  <nav class="jump" aria-label="시안 바로가기"><a href="#v1">① 빈티지 우체국</a><a href="#v2">② 미니멀 여권 스탬프</a><a href="#v3">③ 손그림 스크랩북</a><a href="#cmp">비교·추천</a></nav>
+
+  <!-- ① -->
+  <section class="c" id="v1">
+    <div class="head">
+      <div class="num">①</div>
+      <h2>빈티지 우체국 · 고무 도장</h2>
+      <p>오래된 우체국 창구에서 찍던 고무 도장. 잉크가 고르지 않게 묻은 소인과 활판 인쇄 질감이 정체성이다. 실물 도장을 찍어 스캔하면 AI 없이도 같은 느낌이 난다.</p>
+      <div class="chips"><span><i style="background:#D33A2C"></i>우체통 빨강 #D33A2C</span><span><i style="background:#4F6272"></i>청회색 #4F6272</span><span><i style="background:#F6EFDF"></i>편지 크림 #F6EFDF</span><span><i style="background:#1C1C1C"></i>먹 #1C1C1C</span></div>
+    </div>
+    <div class="board">
+      <div class="stack">
+        <figure>
+          <div class="frame" style="background:#F6EFDF">
+            <img src="h1_logo.png" alt="빨강 우표 속 엽서를 문 까치와 청회색 소인">
+            <span class="ov" style="left:65%;top:22%;font-family:var(--display);font-size:6.4cqw;color:#4F6272;transform:translate(-50%,-50%) rotate(-10deg)">pica</span>
+          </div>
+          <figcaption>로고 · 우표 속 까치 + 소인 워드마크 (ChatGPT)</figcaption>
+        </figure>
+        <figure><div class="avatar"><img src="h1_profile.jpg" alt="빨강 바탕 크림 우표 속 까치 프로필"></div><figcaption>프로필 · 원형으로 잘린 모습 (Gemini)</figcaption></figure>
+      </div>
+      <figure>
+        <div class="frame">
+          <img src="h1_cover.jpg" alt="회색 포스터 자리 위로 소인이 찍히고 까치 집배원이 날아드는 표지">
+          <span class="ov" style="left:50%;top:11%;font-family:var(--display);font-size:9.5cqw;color:#1C1C1C">이번 주, 어디 가지?</span>
+          <span class="ov" style="left:55%;top:36%;font-family:var(--display);font-size:6.2cqw;color:#4F6272;transform:translate(-50%,-50%) rotate(-10deg)">11.08 토</span>
+        </div>
+        <figcaption>인스타 표지 4:5 · 회색 사각형 = 공식 포스터 자리 (Gemini)</figcaption>
+      </figure>
+      <figure>
+        <div class="frame">
+          <img src="h1_album.jpg" alt="격자 칸에 도장이 찍힌 우표첩 화면">
+          <span class="ov" style="left:50%;top:2.4%;font-size:4.6cqw;font-weight:800;color:#1C1C1C">내 우표첩 · 2026.11</span>
+          <span class="ov" style="left:50%;top:14.8%;font-family:var(--display);font-size:5.4cqw;color:#4F6272;transform:translate(-50%,-50%) rotate(-8deg)">11월 소인</span>
+        </div>
+        <figcaption>우표첩 화면 (Gemini)</figcaption>
+      </figure>
+      <div class="stamps">
+        <img src="h1_stamps.png" alt="도장 6종">
+        <div class="labels"><span>배달</span><span>관람</span><span>수선</span><span>답장</span><span>현장 소인</span><span>기념 우표</span></div>
+        <figcaption>도장 6종 (ChatGPT, 투명 배경)</figcaption>
+      </div>
+    </div>
+    <div class="judge">
+      <div><b>좋은 점</b><ul><li>H안 문서의 색·소인 규칙과 그대로 맞는다.</li><li>실물 고무 도장으로 재현하기 가장 쉽다. AI로 안 보이게 만들기 유리하다.</li></ul></div>
+      <div><b>걸리는 점</b><ul><li>복고 우편 이미지는 흔하다. 소인 하나에 집중하지 않으면 기념품 가게 느낌이 난다.</li><li>잉크 번짐은 작은 화면(앱 도장 칸)에서 지저분해 보일 수 있다.</li></ul></div>
+      <div><b>어울리는 곳</b><ul><li>인스타 카드뉴스·표지, 실물 엽서, 연말 우표첩 굿즈</li></ul></div>
+    </div>
+  </section>
+
+  <!-- ② -->
+  <section class="c" id="v2">
+    <div class="head">
+      <div class="num">②</div>
+      <h2>미니멀 우표 · 여권 스탬프</h2>
+      <p>요즘 우표와 여권 입국 도장을 단정한 벡터로. 질감 없이 선과 도형만 쓰고, 도장은 여권처럼 모양(사각·팔각·삼각·원)으로 구분한다. 앱 화면에 가장 잘 맞는다.</p>
+      <div class="chips"><span><i style="background:#E23B2E"></i>신호 빨강 #E23B2E</span><span><i style="background:#1E7F86"></i>도장 청록 #1E7F86</span><span><i style="background:#F5F4F0"></i>종이 흰색 #F5F4F0</span><span><i style="background:#111111"></i>먹 #111111</span></div>
+    </div>
+    <div class="board">
+      <div class="stack">
+        <figure>
+          <div class="frame" style="background:#F5F4F0">
+            <img src="h2_logo.png" alt="빨강 우표 속 기하학 까치와 청록 여권 도장">
+            <span class="ov" style="left:76%;top:42%;font-family:var(--mono);font-weight:600;font-size:6.4cqw;color:#1E7F86;letter-spacing:.06em;transform:translate(-50%,-50%) rotate(-8deg)">pica</span>
+          </div>
+          <figcaption>로고 · 우표 + 여권 도장 워드마크 (ChatGPT)</figcaption>
+        </figure>
+        <figure><div class="avatar"><img src="h2_profile.jpg" alt="빨강 바탕 흰 우표 속 기하학 까치 프로필"></div><figcaption>프로필 (Gemini)</figcaption></figure>
+      </div>
+      <figure>
+        <div class="frame">
+          <img src="h2_cover.jpg" alt="회색 포스터 자리와 청록 여권 도장, 빨강 우표가 있는 표지">
+          <span class="ov" style="left:8%;top:10%;transform:none;text-align:left;font-family:var(--display);font-size:9.5cqw;color:#111">이번 주,<br>어디 가지?</span>
+          <span class="ov" style="left:73%;top:36%;font-family:var(--mono);font-weight:600;font-size:5cqw;color:#1E7F86;transform:translate(-50%,-50%) rotate(-8deg)">11.08 SAT</span>
+        </div>
+        <figcaption>인스타 표지 4:5 (Gemini)</figcaption>
+      </figure>
+      <figure>
+        <div class="frame">
+          <img src="h2_album.jpg" alt="여권 면처럼 도장이 찍힌 수집 화면">
+          <span class="ov" style="left:50%;top:6.3%;font-size:4.4cqw;font-weight:800;color:#111">내 여권 · 2026.11 · 등기</span>
+        </div>
+        <figcaption>우표첩(여권) 화면 · 위 칸 줄 = 올해 소인 찍힌 달 (Gemini)</figcaption>
+      </figure>
+      <div class="stamps">
+        <img src="h2_stamps.png" alt="도장 6종">
+        <div class="labels"><span>배달</span><span>관람</span><span>수선</span><span>답장</span><span>현장 소인</span><span>기념 우표</span></div>
+        <figcaption>도장 6종 · 모양으로 종류 구분 (ChatGPT)</figcaption>
+      </div>
+    </div>
+    <div class="judge">
+      <div><b>좋은 점</b><ul><li>작은 크기에서도 또렷하다. 앱 도장 칸·알림 아이콘에 그대로 쓸 수 있다.</li><li>도장 종류를 색이 아닌 모양으로 구분해 색약 사용자에게도 읽힌다.</li></ul></div>
+      <div><b>걸리는 점</b><ul><li>깔끔한 만큼 사람 손맛이 적다. "AI로 보이지 않게" 원칙과는 거리가 있다.</li><li>여권 도장은 해외여행을 떠올리게 해 "동네"와 조금 어긋난다.</li></ul></div>
+      <div><b>어울리는 곳</b><ul><li>앱 우표첩·세트 진행률·알림, 사이트 헤더 아이콘</li></ul></div>
+    </div>
+  </section>
+
+  <!-- ③ -->
+  <section class="c" id="v3">
+    <div class="head">
+      <div class="num">③</div>
+      <h2>손그림 엽서 · 수집 스크랩북</h2>
+      <p>색연필과 수채로 그린 엽서를 크라프트지 스크랩북에 마스킹테이프로 붙인다. 셋 중 가장 따뜻하고 "사람이 모은" 느낌이 강하다.</p>
+      <div class="chips"><span><i style="background:#E9DCC3"></i>크라프트 #E9DCC3</span><span><i style="background:#C8553D"></i>바랜 빨강 #C8553D</span><span><i style="background:#8AA07A"></i>세이지 #8AA07A</span><span><i style="background:#7FA7C9"></i>하늘 #7FA7C9</span><span><i style="background:#3A3A3A"></i>연필 #3A3A3A</span></div>
+    </div>
+    <div class="board">
+      <div class="stack">
+        <figure>
+          <div class="frame" style="background:#E9DCC3">
+            <img src="h3_logo.png" alt="손그림 우표 속 까치와 빨강 소인">
+            <span class="ov" style="left:69%;top:35%;font-family:var(--hand);font-size:9cqw;color:#C8553D;transform:translate(-50%,-50%) rotate(-8deg)">pica</span>
+          </div>
+          <figcaption>로고 · 손그림 우표 + 손글씨 소인 (ChatGPT)</figcaption>
+        </figure>
+        <figure><div class="avatar"><img src="h3_profile.jpg" alt="크라프트지 위 손그림 우표 속 까치 프로필"></div><figcaption>프로필 (Gemini)</figcaption></figure>
+      </div>
+      <figure>
+        <div class="frame">
+          <img src="h3_cover.jpg" alt="테이프로 붙인 회색 포스터 자리와 손그림 까치 집배원 표지">
+          <span class="ov" style="left:50%;top:9%;font-family:var(--hand);font-size:11cqw;color:#3A3A3A">이번 주, 어디 가지?</span>
+          <span class="ov" style="left:51%;top:30.5%;font-family:var(--hand);font-size:6.6cqw;color:#C8553D;transform:translate(-50%,-50%) rotate(-10deg)">11.08 토</span>
+        </div>
+        <figcaption>인스타 표지 4:5 · 손글씨는 예시 글꼴, 실제는 운영자 손글씨 (Gemini)</figcaption>
+      </figure>
+      <figure>
+        <div class="frame">
+          <img src="h3_album.jpg" alt="크라프트지 스크랩북에 도장과 우표가 붙은 화면">
+          <span class="ov" style="left:47%;top:9.3%;font-family:var(--hand);font-size:6cqw;color:#3A3A3A">11월의 우표첩</span>
+          <span class="ov" style="left:47%;top:21.5%;font-family:var(--hand);font-size:5.4cqw;color:#C8553D;transform:translate(-50%,-50%) rotate(-8deg)">11월 소인</span>
+        </div>
+        <figcaption>우표첩(스크랩북) 화면 (Gemini)</figcaption>
+      </figure>
+      <div class="stamps">
+        <img src="h3_stamps.png" alt="도장 6종">
+        <div class="labels"><span>배달</span><span>관람</span><span>수선</span><span>답장</span><span>현장 소인</span><span>기념 우표</span></div>
+        <figcaption>도장 6종 (ChatGPT)</figcaption>
+      </div>
+    </div>
+    <div class="judge">
+      <div><b>좋은 점</b><ul><li>모으는 재미와 정이 가장 크게 느껴진다. 회원이 자랑하고 싶은 화면이다.</li><li>작은 무대·동네 행사와 정서가 맞는다.</li></ul></div>
+      <div><b>걸리는 점</b><ul><li>AI가 그린 손그림은 오히려 AI 티가 나기 쉽다. 채택하면 사람 일러스트레이터가 다시 그려야 한다.</li><li>장마다 그림체를 맞추기 어렵고, 작은 크기에서 연필 선이 흐려진다.</li></ul></div>
+      <div><b>어울리는 곳</b><ul><li>월간 결산·세트 완성 축하·운영 일지, 연말 실물 굿즈</li></ul></div>
+    </div>
+  </section>
+
+  <section class="compare" id="cmp">
+    <h2>비교</h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th scope="col">기준</th><th scope="col">① 빈티지 우체국</th><th scope="col">② 미니멀 여권</th><th scope="col">③ 손그림 스크랩북</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">모으는 재미</th><td><span class="lv"><b class="on"></b><b class="on"></b><b></b></span>칸에 찍히는 맛</td><td><span class="lv"><b class="on"></b><b class="on"></b><b></b></span>여권 채우기</td><td><span class="lv"><b class="on"></b><b class="on"></b><b class="on"></b></span>붙이고 꾸미기</td></tr>
+          <tr><th scope="row">앱 작은 화면</th><td><span class="lv"><b class="on"></b><b class="on"></b><b></b></span>번짐 조절 필요</td><td><span class="lv"><b class="on"></b><b class="on"></b><b class="on"></b></span>가장 또렷</td><td><span class="lv"><b class="on"></b><b></b><b></b></span>연필 선 흐림</td></tr>
+          <tr><th scope="row">AI로 안 보이게</th><td><span class="lv"><b class="on"></b><b class="on"></b><b class="on"></b></span>실물 도장 스캔</td><td><span class="lv"><b class="on"></b><b></b><b></b></span>매끈한 벡터</td><td><span class="lv"><b class="on"></b><b class="on"></b><b></b></span>사람이 다시 그리면</td></tr>
+          <tr><th scope="row">만들고 유지하기</th><td><span class="lv"><b class="on"></b><b class="on"></b><b></b></span>도장 2개 제작</td><td><span class="lv"><b class="on"></b><b class="on"></b><b class="on"></b></span>벡터 세트 한 번</td><td><span class="lv"><b class="on"></b><b></b><b></b></span>일러스트 계속 필요</td></tr>
+          <tr><th scope="row">H안 문서와 맞음</th><td>색·소인 규칙 그대로</td><td>색을 바꿈(청록 추가)</td><td>색을 바꿈(크라프트·세이지)</td></tr>
+          <tr><th scope="row">흔함</th><td>복고 우편은 흔한 편</td><td>여권 스탬프 UI는 여행 앱과 겹침</td><td>다꾸(다이어리 꾸미기) 감성과 겹침</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="pick">
+    <h2>추천: ① 빈티지 우체국을 기본으로, 앱 칸만 ②처럼</h2>
+    <p>①은 H안 문서의 색과 소인 규칙을 그대로 쓰고, 실물 고무 도장으로 같은 질감을 낼 수 있어 "AI로 보이지 않게" 원칙에 가장 잘 맞는다. SNS·엽서·굿즈는 ①로 간다.</p>
+    <p>앱의 우표첩 칸·세트 진행률·알림 아이콘은 작게 보이므로 ②처럼 선을 정리한다. 같은 도장을 번짐 없는 단정한 판으로 한 벌 더 만들면 된다. ③은 월간 결산과 연말 굿즈 같은 특별한 자리에만 사람이 그린 그림으로 쓴다.</p>
+  </section>
+
+  <p class="note">모든 이미지는 AI로 만든 시안이다(로고·도장 1254~1536px, 나머지 1024px). Gemini 이미지의 ✦ 워터마크는 지웠으나 ① 표지는 우표 속 까치 다리 부근에 약한 번짐이 남았다. 눈에 보이지 않는 AI 표식은 남아 있다. 확정한 시안은 사람이 벡터로 다시 그리고, 한글은 지금처럼 이미지 밖에서 얹는다. 날짜·행사는 예시다.</p>
+</div>
+</body>
+</html>
