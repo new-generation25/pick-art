@@ -7,7 +7,7 @@
  *    - 예정 묶음: 시작일 순
  *    - 상시·장기: 끝나는 날이 가까운 순
  *    - 끝난 행사: 최근에 끝난 순
- * 3) 날짜가 같으면 포스터가 있는 행사를 앞에 둔다
+ * 3) 포스터가 없는 행사는 묶음 안에서 포스터 있는 행사들 뒤로 보낸다(그 안에서도 날짜 규칙 순)
  * 4) 같은 출처가 3건 넘게 연달아 나오지 않게 섞는다
  */
 
@@ -78,11 +78,10 @@ export function orderFeed<T extends FeedRow>(rows: T[], today: string): { key: S
     const buckets = new Map<SectionKey, T[]>(ORDER.map(k => [k, []]));
     rows.forEach(r => buckets.get(sectionOf(r, today))!.push(r));
     return ORDER.map(key => {
-        const items = buckets.get(key)!.slice().sort((a, b) => {
-            const d = dateKey(a, key).localeCompare(dateKey(b, key));
-            if (d) return d;
-            return Number(!a.poster_image_url) - Number(!b.poster_image_url);
-        });
-        return { key, items: diversify(items) };
+        const sorted = buckets.get(key)!.slice().sort((a, b) => dateKey(a, key).localeCompare(dateKey(b, key)));
+        // 섞기는 포스터 있는 무리와 없는 무리 안에서 따로 한다 (없는 행사가 앞으로 당겨 오지 않게)
+        const withPoster = diversify(sorted.filter(r => r.poster_image_url));
+        const noPoster = diversify(sorted.filter(r => !r.poster_image_url));
+        return { key, items: [...withPoster, ...noPoster] };
     }).filter(s => s.items.length > 0);
 }
