@@ -1,0 +1,22 @@
+{
+  "slug": "jinju_events",
+  "name": "진주시 우리 지역 행사·축제",
+  "_comment": "진주시청이 모아 올리는 지역 행사 목록. 분류(공연/전시/행사/체험)·기간·장소가 목록에 있다",
+  "verified_at": "2026-11-01",
+  "match": ["jinju.go.kr/00130/00139/00140"],
+  "region": "진주",
+  "venue": "",
+  "boards": [{"url": "https://www.jinju.go.kr/00130/00139/00140.web", "category": "행사"}],
+  "list": {
+    "rows": "li.li1",
+    "link": "a.a1@href",
+    "id_regex": "sno=([0-9]+)",
+    "title": "strong.t1",
+    "category": "span.t3:nth-of-type(1)",
+    "category_map": {"공연": "공연", "전시": "전시", "축제": "축제"},
+    "period": "span.t3:nth-of-type(2)",
+    "venue": "span.t3:nth-of-type(3)",
+    "image": "img@src"
+  },
+  "expect": {"min_rows": 1, "required": ["title", "link", "period"]}
+}

@@ -88,7 +88,7 @@ class PublicScraper:
                     fail += 1
                     continue
                 suggestion = {
-                    "category": board["category"],
+                    "category": it.get("category") or board["category"],
                     "region": d["region"],
                     "venue": f"{d['venue']} {it['venue']}".strip() if it.get("venue") and d["venue"] not in it["venue"] else (it.get("venue") or d["venue"]),
                     "date_start": period["start"],
@@ -193,6 +193,8 @@ class PublicScraper:
                         "link": fill(board["link_template"], row),
                         "image": fill(img, row) if img and row.get(f.get("image_key", "fileKey")) else "",
                         "venue": clean(str(row.get(f["venue"]) or "")) if f.get("venue") else "",
+                        # 한 API에 공연·전시가 섞여 있으면 category 필드 값으로 나눈다 (category_map: {"전시": "전시"} 처럼 포함 문자열 → 분류)
+                        "category": next((v for k, v in (f.get("category_map") or {}).items() if k in str(row.get(f.get("category"), ""))), None),
                     })
 
             def rows_of(data):
@@ -248,7 +250,9 @@ class PublicScraper:
                 "period": parse_period(_pick(row, lst["period"]), now.year),
                 "link": link,
                 "image": urljoin(board["url"], image) if image else "",
-                "venue": _pick(row, lst.get("venue")),
+                # "장소 : 남가람박물관" 처럼 앞에 붙은 이름표는 뗀다
+                "venue": re.sub(r"^[^:]{1,6}:\s*", "", _pick(row, lst.get("venue"))),
+                "category": next((v for k, v in (lst.get("category_map") or {}).items() if k in _pick(row, lst.get("category"))), None),
             })
         if lst.get("dedupe"):
             # 회차마다 한 줄인 목록: 같은 id 는 하나로 합치고 기간을 첫 회~마지막 회로 넓힌다

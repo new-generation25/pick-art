@@ -1,0 +1,44 @@
+{
+  "slug": "cwcf",
+  "name": "창원문화재단",
+  "_comment": "성산아트홀·3·15아트센터·진해문화센터 등. 목록은 JS가 공연 get_artlist.asp, 전시 get_artlist4.asp(JSON, EUC-KR)로 채운다",
+  "verified_at": "2026-11-01",
+  "match": [
+    "cwcf.or.kr"
+  ],
+  "region": "창원",
+  "venue": "창원문화재단",
+  "encoding": "cp949",
+  "boards": [
+    {
+      "url": "https://www.cwcf.or.kr/art_info/art_info_list.asp",
+      "category": "공연",
+      "api_mode": "range",
+      "api": "https://www.cwcf.or.kr/art_info/get_artlist.asp?page={page}&place_idx=&sword=",
+      "link_template": "https://www.cwcf.or.kr/art_info/art_info_view.asp?p_idx={IDX}"
+    },
+    {
+      "url": "https://www.cwcf.or.kr/art_info/art_info_list_2.asp",
+      "category": "전시",
+      "api_mode": "range",
+      "api": "https://www.cwcf.or.kr/art_info/get_artlist4.asp?page={page}&place_idx=&sword=",
+      "link_template": "https://www.cwcf.or.kr/art_info/art_info_view.asp?p_idx={IDX}"
+    }
+  ],
+  "api_fields": {
+    "id": "IDX",
+    "title": "SUBJECT",
+    "period": "date_txt",
+    "venue": "HALL_NAME",
+    "page_size": 8,
+    "max_pages": 30
+  },
+  "expect": {
+    "min_rows": 1,
+    "required": [
+      "title",
+      "link",
+      "period"
+    ]
+  }
+}

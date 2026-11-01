@@ -1,0 +1,23 @@
+{
+  "slug": "changnyeong_art",
+  "name": "창녕문화예술회관",
+  "_comment": "art.cng.go.kr 은 이 주소로 넘어온다",
+  "verified_at": "2026-11-01",
+  "match": ["cng.go.kr/art"],
+  "region": "창녕",
+  "venue": "창녕문화예술회관",
+  "boards": [
+    {"url": "https://www.cng.go.kr/art/02818/02824.web", "category": "공연"},
+    {"url": "https://www.cng.go.kr/art/02818/02825.web", "category": "전시"}
+  ],
+  "list": {
+    "rows": "li.li1",
+    "link": "strong.t1 a@href",
+    "id_regex": "schCode=([0-9]+)",
+    "title": "strong.t1",
+    "period": ".di.time .dd",
+    "venue": ".di.place .dd",
+    "image": "img@src"
+  },
+  "expect": {"min_rows": 1, "required": ["title", "link", "period"]}
+}

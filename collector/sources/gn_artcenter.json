@@ -1,0 +1,28 @@
+{
+  "slug": "gn_artcenter",
+  "name": "경상남도문화예술회관",
+  "_comment": "목록 화면은 Vue가 그린다. 화면이 부르는 기간 조회 JSON(/concerts.do)을 직접 쓴다. CONCERT_VARIETY=true 면 전시",
+  "verified_at": "2026-11-01",
+  "match": ["artcenter.gyeongnam.go.kr"],
+  "region": "진주",
+  "venue": "경상남도문화예술회관",
+  "range_days": 62,
+  "boards": [
+    {
+      "url": "https://artcenter.gyeongnam.go.kr/concert/concertScheduleList.md",
+      "category": "공연",
+      "api_mode": "range",
+      "api": "https://artcenter.gyeongnam.go.kr/concerts.do?START={from}&END={to}",
+      "link_template": "https://artcenter.gyeongnam.go.kr/concert/concertView.do?CONCERT_ID={CONCERT_ID}"
+    },
+    {
+      "url": "https://artcenter.gyeongnam.go.kr/concert/concertDisplayList.md",
+      "category": "전시",
+      "api_mode": "range",
+      "api": "https://artcenter.gyeongnam.go.kr/concerts.do?START={from}&END={to}&CONCERT_VARIETY=true",
+      "link_template": "https://artcenter.gyeongnam.go.kr/concert/concertView.do?CONCERT_ID={CONCERT_ID}"
+    }
+  ],
+  "api_fields": {"id": "CONCERT_ID", "title": "CONCERT_NM", "start": "CONCERT_SDATE", "end": "CONCERT_EDATE", "venue": "HALL_NAME", "page_size": 100000},
+  "expect": {"min_rows": 1, "required": ["title", "link", "period"]}
+}
