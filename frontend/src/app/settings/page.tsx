@@ -6,6 +6,7 @@ import { User, Mail, Bell, Shield, Save } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { GN_REGIONS } from "@/lib/regions";
+import { CATEGORIES } from "@/lib/categories";
 
 export default function SettingsPage() {
     const router = useRouter();
@@ -26,7 +27,7 @@ export default function SettingsPage() {
     const [isWelcome, setIsWelcome] = useState(false);
 
     const regions = [...GN_REGIONS, "기타"];
-    const categories = ["전시", "공연", "축제", "전통문화", "체험/교육"];
+    const categories = CATEGORIES; // 피드 분야와 같은 목록 (예전 '전통문화'·'체험/교육'은 피드 분야와 맞지 않았다)
 
     useEffect(() => {
         checkAuth();

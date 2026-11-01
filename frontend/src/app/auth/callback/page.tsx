@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase";
 
 // 구글·카카오 로그인 후 돌아오는 곳.
 // supabase-js가 주소의 토큰으로 세션을 만든다(detectSessionInUrl).
-// 프로필(닉네임)이 없는 첫 방문이면 설정 화면으로 보내 닉네임을 직접 정하게 한다 —
+// 프로필(닉네임)이 없는 첫 방문이면 가입 화면(/welcome: 지역 → 관심 분야 → 닉네임)으로 보낸다 —
 // 구글·카카오의 실명이 그대로 공개되지 않도록 (봉황메모리즈와 같은 원칙).
 export default function AuthCallbackPage() {
     const router = useRouter();
@@ -33,7 +33,7 @@ export default function AuthCallbackPage() {
                 .eq("id", session.user.id)
                 .maybeSingle();
 
-            router.replace(profile?.nickname ? "/" : "/settings?welcome=1");
+            router.replace(profile?.nickname ? "/" : "/welcome");
         };
         finish();
     }, [router]);
