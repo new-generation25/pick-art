@@ -24,14 +24,17 @@ interface SourceItem {
     reason?: string;
     created_at: string;
     schedule?: string;
-    role?: string | null;          // official: 주최·기관 공식 계정, informant: 행사 정보를 올리는 인플루언서·시민
+    role?: string | null;          // official 기관 · group 단체 · artist 예술인 · informant 인플루언서 · dormant 휴면
     score?: number | null;         // 인스타그램 계정 채점(100점)
     score_detail?: string | null;  // 채점 근거
 }
 
 const ROLE_LABEL: Record<string, { label: string; color: string }> = {
     official: { label: "공식", color: "blue" },
+    group: { label: "단체", color: "teal" },
+    artist: { label: "예술인", color: "grape" },
     informant: { label: "정보제공", color: "orange" },
+    dormant: { label: "휴면", color: "gray" },
 };
 
 export default function SourcesPage() {

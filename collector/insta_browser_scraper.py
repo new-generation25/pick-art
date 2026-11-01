@@ -139,7 +139,7 @@ async def collect_account(page, db, account, published, seen, max_age_days=21, d
         for m in set(MENTION.findall(cap or "")):  # 리포스트 출처·협업 계정은 관련 계정 후보가 된다
             if m.lower() != handle.lower():
                 cands = seen.setdefault("_mentions", {})
-                cands[m] = cands.get(m, 0) + 1
+                cands[m] = cands.get(m, 0) + (2 if role in ("official", "group") else 1)  # 기관·단체가 언급한 계정 우선
         if not cap or NOT_EVENT.search(cap[:200]):
             continue
         url = f"https://www.instagram.com/p/{code}/"
@@ -182,7 +182,13 @@ GN = re.compile(r"경남|창원|마산|진해|진주|통영|사천|김해|밀양
 EV = re.compile(r"축제|공연|전시|행사|페스티벌|음악회|콘서트|문화제|마켓|체험|야행|클래스|버스킹")
 DT = re.compile(r"📅|🗓|일시|기간|\d{1,2}\s*[./월]\s*\d{1,2}\s*(일|\.|\(|~)")
 AD = re.compile(r"협찬|광고|제작지원|#ad\b")
-ORG = re.compile(r"공식|재단|문화원|문화회관|예술회관|아트센터|미술관|박물관|축제|조직위|시청|군청|도청|구청|센터|협회|도서관|극장|창작소")
+# 새 계정 탐색 대상(사용자 지정): 지자체·문화예술 공공기관·박물관·미술관·재단, 협회·예술단체·문화단체, 예술단체 대표·실무자 개인
+OFFICIAL = re.compile(r"시청|군청|도청|구청|읍사무소|행정복지센터|재단|문화원|문화회관|예술회관|아트센터|문화의전당|미술관|박물관|"
+                      r"기념관|도서관|문화센터|청소년센터|조직위|축제|진흥원|문화도시")
+GROUP = re.compile(r"협회|예총|연합회|예술단|극단|무용단|합창단|오케스트라|앙상블|국악단|국악원|풍물|농악|밴드|보존회|"
+                   r"갤러리|소극장|창작소|레지던시|문화공간|복합문화|협동조합|공방|컴퍼니|프로젝트|문화단체|예술단체|동아리")
+ARTIST = re.compile(r"대표|감독|연출|단장|단원|기획자|문화기획|큐레이터|작가|배우|무용가|안무|연주자|피아니스트|바이올리니스트|"
+                    r"첼리스트|소리꾼|가수|싱어송라이터|뮤지션|화가|도예가|공예가|사진가|예술가|아티스트|강사")
 
 
 def _followers(s):
@@ -226,13 +232,18 @@ async def score_profile(page, handle):
     recent = bool(newest) and (date.today() - date.fromisoformat(newest)).days <= 35
     lines = [ln for ln in htext.split("\n") if ln.strip()]
     name = lines[1] if len(lines) > 1 else handle
-    is_org = bool(ORG.search(htext[:300]))
+    bio = htext[:400]
+    kind = "official" if OFFICIAL.search(bio) else "group" if GROUP.search(bio) else "artist" if ARTIST.search(bio) else None
     score = round(max(gn / n * 40 + min(ev, 12) / 12 * 40 + (10 if fol >= 10000 else 5 if fol >= 1000 else 0)
                       + (10 if recent else 0) - min(ad / n * 40, 40), 0))
+    # 기관은 경남 비중을 엄격히, 단체·개인은 활동 지역 글이 섞이므로 느슨하게. 셋 다 행사 게시물 2개 이상, 5주 내 활동
+    need_gn = .5 if kind == "official" else .3
+    passed = kind is not None and gn / n >= need_gn and ev >= 2 and ad / n <= .25 and recent
+    # 기존 정보제공(인플루언서) 계정의 유지 판정에만 쓴다. 새 인플루언서는 탐색 대상이 아니다
     passed_inf = gn / n >= .5 and ev >= 5 and ad / n <= .25 and recent
-    passed_org = is_org and gn / n >= .5 and ev >= 3 and recent
-    detail = (f"최근 {len(caps)}개 중 경남 {gn}·날짜+행사 {ev}·광고 {ad}, 팔로워 {fol:,}, "
+    detail = (f"{ {'official': '기관', 'group': '단체', 'artist': '예술인'}.get(kind, '분류 안 됨') } · "
+              f"최근 {len(caps)}개 중 경남 {gn}·날짜+행사 {ev}·광고 {ad}, 팔로워 {fol:,}, "
               f"최근게시 {newest or '?'} ({date.today().isoformat()} 채점)")
-    return {"handle": handle, "name": name[:40], "score": score, "detail": detail, "is_org": is_org,
-            "role": "official" if passed_org else "informant" if passed_inf else None,
+    return {"handle": handle, "name": name[:40], "score": score, "detail": detail, "kind": kind,
+            "role": kind if passed else None, "informant_ok": passed_inf,
             "gn": gn, "ev": ev, "ad": ad, "n": len(caps), "followers": fol, "recent": recent}

@@ -2,11 +2,14 @@
 
 사용: python tools/discover_instagram.py [--dry-run] [--max-new=15] [--max-rescore=10]
 - 유지: whitelist 인스타그램 계정 중 채점한 지 오래된 것부터 max-rescore 개를 다시 채점해 score·score_detail 을 갱신한다.
-  정보제공(informant) 계정이 두 번 연속 기준 미달이면 role='dormant' 로 바꿔 수집에서 뺀다(지우지 않는다).
-- 찾기: 후보 = (1) 수집 중 캡션에 나온 @계정(리포스트 출처·협업) (2) 그날 차례인 경남 해시태그 4개의 게시물 작성자.
+  인플루언서(informant)·단체(group)·예술인(artist)이 두 번 연속 기준 미달이면 role='dormant' 로 바꿔 수집에서 뺀다
+  (지우지 않는다). 기관(official)은 휴면시키지 않는다.
+- 찾기(대상: 지자체·문화예술 공공기관·박물관·미술관·재단 / 협회·예술단체·문화단체 / 예술단체 대표·실무자 개인):
+  후보 = (1) 수집 중 캡션에 나온 @계정(기관·단체가 언급하면 가중치 2) (2) 그날 차례인 예술 해시태그 4개의 게시물 작성자.
   whitelist 에 없고 최근 30일 안에 떨어진 적 없는 후보를 많이 나온 순으로 max-new 개 채점한다.
-  기관 이름(재단·회관·미술관·축제·시군청 등)이 보이고 경남 행사를 올리면 official,
-  정보제공 기준(경남 ≥50%, 날짜+행사 ≥5/24, 광고 ≤25%, 5주 내 게시)을 넘으면 informant 로 whitelist 에 넣는다.
+  프로필 이름·소개로 official / group / artist 를 가르고, 경남 비중(기관 ≥50%, 단체·개인 ≥30%),
+  날짜+행사 게시물 ≥2/24, 광고 ≤25%, 5주 내 게시를 넘으면 그 역할로 whitelist 에 넣는다.
+  셋 어디에도 해당하지 않는 계정(맛집·여행 인플루언서 등)은 넣지 않는다.
 - 팔로우는 하지 않는다(짧은 시간에 많이 하면 계정이 제한된다). 로그인 세션은 collect_instagram.py --login 으로 만든다.
 """
 import asyncio
@@ -27,9 +30,11 @@ from insta_browser_scraper import UA, load_seen, save_seen, score_profile  # noq
 from collect_instagram import PROFILE_DIR, arg, logged_in  # noqa: E402
 
 STATE = os.path.join(".cache", "insta_discover.json")
-TAGS = ["김해축제", "창원축제", "경남축제", "진주축제", "양산축제", "거제축제", "통영축제", "밀양축제", "사천축제",
-        "김해행사", "창원행사", "경남행사", "김해공연", "창원공연", "경남공연", "김해전시", "창원전시", "김해아이랑",
-        "창원아이랑", "진주가볼만한곳", "김해플리마켓", "창원플리마켓", "경남버스킹", "김해버스킹"]
+# 탐색 대상: 지자체·문화예술 기관·박물관·미술관·재단, 협회·예술단체·문화단체, 예술단체 대표·실무자 (예술 쪽 해시태그)
+TAGS = ["경남연극", "김해연극", "창원연극", "진주연극", "통영연극", "김해공연", "창원공연", "진주공연", "경남공연",
+        "김해전시", "창원전시", "진주전시", "경남미술", "경남국악", "김해국악", "경남무용", "창원무용", "경남음악",
+        "경남버스킹", "김해버스킹", "창원버스킹", "경남예술", "김해예술", "경남문화예술", "경남작가", "김해작가",
+        "경남합창단", "창원오케스트라", "경남갤러리", "김해갤러리", "창원갤러리", "경남공예", "김해공방"]
 SKIP_HANDLES = {"p", "reel", "explore", "accounts", "stories"}
 
 
@@ -83,7 +88,10 @@ async def main(dry):
                 continue
             w = known[h]
             upd = {"score": r["score"], "score_detail": r["detail"]}
-            if w.get("role") == "informant" and r["role"] != "informant":
+            role = w.get("role")
+            # 기관(official)은 휴면시키지 않는다. 인플루언서는 기존 정보제공 기준, 단체·예술인은 탐색 기준으로 본다
+            failed = (role == "informant" and not r["informant_ok"]) or (role in ("group", "artist") and not r["role"])
+            if failed:
                 st["fails"][h] = st["fails"].get(h, 0) + 1
                 if st["fails"][h] >= 2:
                     upd["role"] = "dormant"
