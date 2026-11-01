@@ -13,7 +13,7 @@ Playwright(Chromium)로 HTML 을 렌더링해 PNG 를 찍고, Graph API 발행�
   python tools/make_insta_cards.py --today 2026-11-01      (오늘 열리는 후보만 출력)
 
 facts JSON 키(모두 선택): hook, kicker, title, date_label, time, venue, address, price,
-  audience, what[], how[], contact, notice, cover_note, poster(로컬 경로·URL, DB 포스터 대신), source_name, source_url, poster_credit,
+  audience, what[], how[], contact, notice, cover_note, chip(표지 분홍 칩, 기본 "오늘 날짜"), poster(로컬 경로·URL, DB 포스터 대신), source_name, source_url, poster_credit,
   hashtags[](본 캡션용, 5개 이하), hashtags_pool[](예비), caption_lead, mentions[](주관 측 @계정)
 """
 import argparse
@@ -87,6 +87,8 @@ def build_facts(ev: dict, facts: dict) -> dict:
         "caption_lead": "", "mentions": [],
     }
     f.update({k: v for k, v in facts.items() if v not in (None, "")})
+    if not f.get("chip"):
+        f["chip"] = f"오늘 {f['date_label']}"
     if not f["poster_credit"]:
         f["poster_credit"] = f"포스터 출처: {f['source_name']}" if f["source_name"] else ""
     f["region"], f["category"] = region, cat
@@ -185,7 +187,7 @@ def slides_html(f: dict, poster: str, handle: str) -> list:
     # 1. 표지: 훅 + 포스터 + 제목 띠
     out.append(f"""
 <div class="slide cover"><div class="top">{brand}</div>
-  <div class="chips"><span class="chip pink">오늘 {esc(f['date_label'])}</span><span class="chip">{esc(f['kicker'])}</span></div>
+  <div class="chips"><span class="chip pink">{esc(f['chip'])}</span><span class="chip">{esc(f['kicker'])}</span></div>
   {f'<div class="poster"><img src="{poster}"></div>' if poster else ''}
   {f'<div class="sticker">{esc(f["cover_note"])}</div>' if f["cover_note"] else ''}
   <div class="hook disp print">{esc(f['hook'])}</div>
