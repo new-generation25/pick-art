@@ -1,10 +1,13 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Checkbox } from "@mantine/core";
 import { Calendar } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { GN_REGIONS } from "@/lib/regions";
 
-const REGIONS = ["전체", "창원", "김해", "진주", "통영", "거제", "양산", "밀양", "사천", "함안", "고성", "합천", "거창", "함양", "창녕", "의령"];
+const REGIONS = ["전체", ...GN_REGIONS];
 const CATEGORIES = ["전체", "공연", "전시", "축제", "행사"];
 const DATE_FILTERS = [
     { label: "전체", value: "all" },
@@ -28,10 +31,37 @@ export function FilterBar() {
     const currentCategory = searchParams.get("category") || "전체";
     const currentDate = searchParams.get("date") || "all";
     const showEnded = searchParams.get("ended") === "1";
+    const [myRegion, setMyRegion] = useState<string | null>(null);
+
+    // 설정의 "내 지역 자동 적용"이 켜진 로그인 사용자: 주소에 지역이 없으면 거주 지역을 건다.
+    // 사용자가 '전체'를 고르면 주소에 region=전체 가 남아 다시 걸지 않는다.
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.user) return;
+            const { data: profile } = await supabase
+                .from("profiles")
+                .select("region, auto_region")
+                .eq("id", session.user.id)
+                .single();
+            if (cancelled || !profile || profile.auto_region === false || !GN_REGIONS.includes(profile.region)) return;
+            setMyRegion(profile.region);
+            if (!searchParams.get("region")) {
+                const params = new URLSearchParams(searchParams.toString());
+                params.set("region", profile.region);
+                router.replace(`/?${params.toString()}`);
+            }
+        })();
+        return () => { cancelled = true; };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const updateFilters = (key: string, value: string) => {
         const params = new URLSearchParams(searchParams.toString());
-        if (value === "전체" || value === "all") {
+        if (key === "region" && value === "전체" && myRegion) {
+            params.set(key, value); // 자동 적용 사용자가 고른 '전체'는 주소에 남긴다
+        } else if (value === "전체" || value === "all") {
             params.delete(key);
         } else {
             params.set(key, value);
@@ -83,6 +113,12 @@ export function FilterBar() {
                     </button>
                 ))}
             </Row>
+
+            {myRegion && currentRegion === myRegion && (
+                <p className="pl-0 text-[13px] text-ink-soft md:pl-[56px]">
+                    내 지역(<b className="text-ink">{myRegion}</b>)을 자동으로 적용했습니다. 설정에서 끌 수 있습니다.
+                </p>
+            )}
 
             {/* 끝난 행사: 기본은 숨김. 켜면 종료 1개월 이내 행사가 "종료" 표시와 함께 맨 뒤에 붙는다 */}
             <div className="pl-0 pt-1 md:pl-[56px]">

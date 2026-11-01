@@ -5,6 +5,7 @@ import { Header } from "@/components/ui/Header";
 import { User, Mail, Bell, Shield, Save } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+import { GN_REGIONS } from "@/lib/regions";
 
 export default function SettingsPage() {
     const router = useRouter();
@@ -20,10 +21,11 @@ export default function SettingsPage() {
     const [interests, setInterests] = useState<string[]>([]);
     const [emailNotifications, setEmailNotifications] = useState(true);
     const [newEventNotifications, setNewEventNotifications] = useState(true);
+    const [autoRegion, setAutoRegion] = useState(true);
     // 구글·카카오 첫 로그인(/auth/callback → ?welcome=1): 저장하면 바로 홈으로 보낸다
     const [isWelcome, setIsWelcome] = useState(false);
 
-    const regions = ["창원", "김해", "진주", "통영", "거제", "양산", "밀양", "함안", "기타"];
+    const regions = [...GN_REGIONS, "기타"];
     const categories = ["전시", "공연", "축제", "전통문화", "체험/교육"];
 
     useEffect(() => {
@@ -56,6 +58,7 @@ export default function SettingsPage() {
             setInterests(profile.interests || []);
             setEmailNotifications(profile.email_notifications ?? true);
             setNewEventNotifications(profile.new_event_notifications ?? true);
+            setAutoRegion(profile.auto_region ?? true);
         } else {
             // 프로필이 없으면(구글·카카오 첫 로그인 포함) 실명·이메일 대신 자동 이름을 제안한다
             setNickname(`픽아트회원${session.user.id.slice(0, 4)}`);
@@ -82,6 +85,7 @@ export default function SettingsPage() {
                     interests: interests,
                     email_notifications: emailNotifications,
                     new_event_notifications: newEventNotifications,
+                    auto_region: autoRegion,
                     updated_at: new Date().toISOString()
                 }, { onConflict: 'id' });
 
@@ -192,6 +196,18 @@ export default function SettingsPage() {
                                         <option key={r} value={r}>{r}</option>
                                     ))}
                                 </select>
+                                <label className="mt-3 flex items-start gap-2 text-sm text-neutral-700">
+                                    <input
+                                        type="checkbox"
+                                        checked={autoRegion}
+                                        onChange={(e) => setAutoRegion(e.target.checked)}
+                                        className="mt-0.5 h-4 w-4"
+                                    />
+                                    <span>
+                                        <b>내 지역 자동 적용</b>
+                                        <span className="block text-xs text-neutral-500">홈에 들어오면 거주 지역 행사만 먼저 보여 줍니다. 홈의 지역 필터에서 언제든 다른 지역이나 전체로 바꿀 수 있습니다.</span>
+                                    </span>
+                                </label>
                             </div>
 
                             <div>
