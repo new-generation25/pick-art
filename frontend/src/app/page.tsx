@@ -1,11 +1,11 @@
 import { getPublishedEvents } from "@/lib/supabase";
-import { EventList } from "@/components/ui/EventList";
+import { FeedSections } from "@/components/ui/FeedSections";
 import { FilterBar } from "@/components/ui/FilterBar";
 import { Search } from "lucide-react";
 import { Container, Title, Text, TextInput, Button, SimpleGrid, Group, Box, Alert, Stack } from "@mantine/core";
 
 import { formatPeriod, todayKST } from "@/lib/utils";
-import { orderFeed, SECTION_LABELS } from "@/lib/feedOrder";
+import { orderFeed } from "@/lib/feedOrder";
 
 interface HomeProps {
   searchParams: Promise<{
@@ -98,22 +98,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
       {/* 행사 목록 */}
       <Container size="xl" py={{ base: 20, sm: 40 }}>
-        {sections.length === 0 ? (
-          <EventList initialEvents={[]} filters={filters} />
-        ) : (
-          sections.map(s => (
-            <section key={s.key} className="mb-12 last:mb-0" aria-labelledby={`sec-${s.key}`}>
-              <div className="mb-4 flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b-2 border-line pb-2">
-                <h2 id={`sec-${s.key}`} className="pica-display text-[24px] leading-none text-ink sm:text-[28px]">
-                  {SECTION_LABELS[s.key].title}
-                </h2>
-                <span className="text-[14px] font-bold text-ink">{s.cards.length}건</span>
-                <span className="text-[13px] text-ink-soft">{SECTION_LABELS[s.key].note}</span>
-              </div>
-              <EventList initialEvents={s.cards} filters={filters} showEndNote={false} />
-            </section>
-          ))
-        )}
+        <FeedSections sections={sections} filters={filters} />
       </Container>
 
       {/* 소식 받기: 뉴스레터 + 키워드 알림 */}
