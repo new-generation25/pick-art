@@ -14,14 +14,6 @@ interface EventProps {
     isEnded?: boolean;
 }
 
-// 분야별 색. 목록에 없는 분야는 먹색
-const CATEGORY_COLOR: Record<string, string> = {
-    공연: "var(--color-cat-show)",
-    전시: "var(--color-cat-exhibit)",
-    축제: "var(--color-cat-festival)",
-    행사: "var(--color-cat-event)",
-};
-
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
 /**
@@ -53,21 +45,19 @@ function readPeriod(date: string, isEnded?: boolean) {
 }
 
 export function EventCard({ event, priority = false, disableNavigation = false }: { event: EventProps; priority?: boolean; disableNavigation?: boolean }) {
-    const color = CATEGORY_COLOR[event.category] ?? "var(--color-ink)";
     const period = readPeriod(event.date, event.isEnded);
 
     const CardContent = (
         <article
             className={[
-                "group relative h-full overflow-hidden rounded-2xl border bg-white transition-colors",
+                "pica-box group relative h-full overflow-hidden transition-colors",
                 "flex flex-row sm:flex-col",
-                event.isEnded ? "border-line/70" : "border-line",
-                disableNavigation ? "" : "hover:border-ink-soft",
+                disableNavigation ? "" : "hover:bg-paper",
             ].join(" ")}
             style={{ cursor: disableNavigation ? "pointer" : undefined }}
         >
             {/* 포스터: 모바일은 왼쪽 작은 썸네일, 넓은 화면은 위쪽 3:4 */}
-            <div className="relative w-[92px] shrink-0 self-stretch bg-paper sm:w-full sm:self-auto">
+            <div className="relative w-[92px] shrink-0 self-stretch bg-paper sm:w-full sm:self-auto sm:border-b-[length:var(--pk-border)] sm:border-line">
                 <div className="relative h-full min-h-[124px] w-full sm:aspect-[3/4] sm:h-auto">
                     <ImageWithFallback
                         src={event.imageUrl || `https://picsum.photos/seed/${event.id}/400/600`}
@@ -80,30 +70,23 @@ export function EventCard({ event, priority = false, disableNavigation = false }
                     />
                 </div>
                 {event.isEnded && (
-                    <span className="absolute left-2 top-2 rounded-md bg-ink px-2 py-0.5 text-[12px] font-bold text-white">
+                    <span className="absolute left-2 top-2 bg-ink px-2 py-0.5 text-[12px] font-bold text-paper">
                         종료
                     </span>
                 )}
             </div>
 
-            {/* 날짜 표 + 정보 */}
+            {/* 날짜 칸 + 정보 */}
             <div className="flex min-w-0 flex-1 flex-row">
                 <div
-                    className={[
-                        "pica-stub flex w-[74px] shrink-0 flex-col items-center justify-center px-1 py-3 text-center",
-                        period?.tone === "ended" ? "text-ink-soft" : "text-ink",
-                    ].join(" ")}
+                    className="pica-stub flex w-[78px] shrink-0 flex-col items-center justify-center px-1 py-3 text-center sm:border-l-0"
+                    data-tone={period?.tone}
                     aria-label={event.date}
                 >
                     {period ? (
                         <>
-                            <span
-                                className="text-[11px] font-semibold leading-none"
-                                style={{ color: period.tone === "ongoing" ? "var(--color-sea)" : undefined }}
-                            >
-                                {period.top}
-                            </span>
-                            <span className="mt-1.5 text-[22px] font-extrabold leading-none tracking-[-0.03em]">{period.big}</span>
+                            <span className="text-[11px] font-semibold leading-none text-ink-soft">{period.top}</span>
+                            <span className="pica-stub-num mt-1.5 text-[24px] leading-none">{period.big}</span>
                             <span className="mt-1.5 text-[11px] font-medium leading-tight text-ink-soft">{period.bottom}</span>
                         </>
                     ) : (
@@ -112,13 +95,12 @@ export function EventCard({ event, priority = false, disableNavigation = false }
                 </div>
 
                 <div className="flex min-w-0 flex-1 flex-col gap-2 px-3.5 py-3">
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] font-semibold">
-                        <span className="inline-flex items-center gap-1.5" style={{ color }}>
-                            <span className="h-2 w-2 rounded-full" style={{ background: color }} aria-hidden />
+                    <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="pica-cat" data-cat={event.category} data-ended={event.isEnded ? "true" : undefined}>
                             {event.category}
                         </span>
                         {event.isFree && (
-                            <span className="rounded border border-sea/40 px-1.5 text-sea">무료</span>
+                            <span className="pica-cat border-ink text-ink" style={{ borderColor: "currentColor" }}>무료</span>
                         )}
                     </div>
                     <h3
@@ -145,7 +127,7 @@ export function EventCard({ event, priority = false, disableNavigation = false }
     return (
         <Link
             href={`/events/${event.id}`}
-            className="block h-full rounded-2xl"
+            className="block h-full"
             style={{
                 textDecoration: 'none',
                 color: 'inherit',

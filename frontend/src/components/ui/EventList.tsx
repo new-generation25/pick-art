@@ -216,13 +216,13 @@ export function EventList({ initialEvents, filters = {}, limit, isSelectMode = f
 
             {/* Empty State */}
             {events.length === 0 && !loading && (
-                <Paper py={48} px="md" radius="lg" withBorder style={{ borderStyle: 'dashed', borderColor: 'var(--color-line)', backgroundColor: 'white' }}>
+                <Paper py={48} px="md" radius={0} withBorder style={{ borderStyle: 'dashed', borderWidth: 1.5, borderColor: 'var(--pk-line)', backgroundColor: 'var(--pk-card)' }}>
                     <Stack align="center" gap="xs">
                         <ThemeIcon size={48} radius="xl" color="gray" variant="light">
                             <AlertCircle style={{ width: rem(24), height: rem(24) }} />
                         </ThemeIcon>
-                        <Text c="var(--color-ink)" size="lg" fw={700} ta="center">조건에 맞는 행사가 없습니다</Text>
-                        <Text c="var(--color-ink-soft)" size="sm" ta="center">지역이나 기간을 &lsquo;전체&rsquo;로 바꾸거나, 종료된 행사도 보기를 켜 보세요.</Text>
+                        <Text c="var(--pk-ink)" size="lg" fw={700} ta="center">조건에 맞는 행사가 없습니다</Text>
+                        <Text c="var(--pk-ink-soft)" size="sm" ta="center">지역이나 기간을 &lsquo;전체&rsquo;로 바꾸거나, 종료된 행사도 보기를 켜 보세요.</Text>
                     </Stack>
                 </Paper>
             )}
@@ -232,12 +232,12 @@ export function EventList({ initialEvents, filters = {}, limit, isSelectMode = f
                 <div ref={observerTarget} style={{ padding: '2rem 0', display: 'flex', justifyContent: 'center' }}>
                     {loading && (
                         <Stack align="center" gap="xs">
-                            <Loader color="teal" type="dots" />
-                            <Text size="sm" fw={600} c="var(--color-ink-soft)">행사를 불러오는 중</Text>
+                            <Loader color="var(--pk-accent)" type="dots" />
+                            <Text size="sm" fw={600} c="var(--pk-ink-soft)">행사를 불러오는 중</Text>
                         </Stack>
                     )}
                     {!hasMore && events.length > 0 && !limit && (
-                        <Text c="var(--color-ink-soft)" fw={500} size="sm">
+                        <Text c="var(--pk-ink-soft)" fw={500} size="sm">
                             {events.length}개 행사를 모두 보여 드렸습니다
                         </Text>
                     )}

@@ -47,6 +47,33 @@
 - Mantine 8 변경 내역 — https://mantine.dev/changelog/8-0-0/ (8.x 그대로 사용. CSS 변수 `--mantine-font-family`를 범위 안에서 덮어쓰는 방식으로 관리자 화면과 분리)
 - Tailwind CSS 4 `@theme` 토큰 — 프로젝트에 이미 있는 Tailwind 4로 `bg-sea`, `text-ink` 같은 유틸리티를 만들었다.
 
+## 2차: 리소 인쇄 테마 적용 (같은 날 추가)
+
+1차 개편은 배치만 바뀌고 색 인상이 그대로라는 의견을 받아 테마 시안 3종을 만들었고([모형](theme_options_3.png), [시안 페이지 원본](pica-themes.html)), 사용자가 **C. 리소 인쇄 공연 전단**을 골랐다. 요청대로 포스터 위 망점(체크무늬)은 넣지 않았다.
+
+- 신문지 바탕 `#ECEDE6`, 형광 분홍 `#FF4FA3`, 리소 파랑 `#2350D8`, 먹 `#1A1A1A`.
+- 제목·날짜 숫자는 Black Han Sans(Google Fonts, OFL)에 분홍이 살짝 어긋나게 겹친 그림자를 준다.
+- 카드·칩·입력창은 모서리 없이 1.5px 먹선을 두르고, 날짜 칸 양옆은 점선 절취선이다.
+- 분야 꼬리표: 공연 분홍, 전시 파랑, 축제 먹, 행사 먹선 테두리. 선택된 칩은 분홍.
+- 소식 받기 띠는 리소 파랑, 바로가기 버튼은 파랑, 공유 버튼(`ShareButton.tsx`)도 같은 각진 모양으로 맞췄다.
+- 화면: `riso_home_mobile375.png`, `riso_home_desktop1440.png`, `riso_detail_mobile375.png`, `riso_detail_desktop1440.png`.
+
+### 나머지 테마 값 저장
+
+`frontend/src/app/globals.css`의 테마 묶음에 세 테마 값이 모두 들어 있다. 쓰는 테마는 `components/MainLayout.tsx`의 `data-pica-theme` 한 곳에서 고른다.
+
+| 값 | 테마 | 상태 |
+|---|---|---|
+| `riso` | C. 리소 인쇄 공연 전단 | 사용 중 |
+| `lantern` | A. 남강 유등 밤 | 값만 저장. 제목 글꼴 Hahmlet은 `layout.tsx`에 아직 불러오지 않음 |
+| `mural` | B. 동피랑 벽화 골목 | 값만 저장. 제목 글꼴 Jua는 `layout.tsx`에 아직 불러오지 않음 |
+
+`lantern`·`mural`로 바꾸면 색·모서리·선·그림자·분야 색은 바로 따라 바뀌지만, 화면으로 확인하지는 않았다. 특히 `lantern`은 어두운 바탕이라 Mantine 입력창·체크박스 색을 따로 맞춰야 할 수 있다.
+
+### 알아 둘 점(2차)
+
+- 관리자 수신함의 선택 모드 빨간 테두리는 둥근 모서리(16px)로 그려지므로, 각진 리소 카드 위에서는 모서리가 살짝 어긋나 보인다. 관리자 화면은 이번 범위 밖이라 그대로 두었다.
+
 ## 되돌리기
 
 ```bash

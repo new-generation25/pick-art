@@ -62,12 +62,12 @@ export default async function Home({ searchParams }: HomeProps) {
       )}
 
       {/* 머리말: 오늘 날짜, 결과 수, 검색, 필터 */}
-      <Box component="section" bg="white" style={{ borderBottom: '1px solid var(--color-line)' }}>
+      <Box component="section" bg="var(--pk-paper)" style={{ borderBottom: '2px solid var(--pk-line)' }}>
         <Container size="xl" pt={{ base: 28, sm: 48 }} pb={{ base: 20, sm: 32 }}>
           <div className="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-14">
             <div>
-              <p className="text-[14px] font-semibold text-sea">{todayMonth}월 {todayDay}일 기준</p>
-              <h1 className="mt-2 text-[30px] font-extrabold leading-[1.2] tracking-[-0.03em] text-ink sm:text-[44px]">
+              <p className="text-[14px] font-bold text-accent">{todayMonth}월 {todayDay}일 기준</p>
+              <h1 className="pica-display mt-2 text-[34px] leading-[1.15] text-ink sm:text-[52px]">
                 경남에서 열리는<br />공연·전시·축제
               </h1>
               <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
@@ -81,9 +81,9 @@ export default async function Home({ searchParams }: HomeProps) {
                   placeholder="행사 이름으로 찾기"
                   aria-label="행사 이름으로 찾기"
                   size="md"
-                  radius="md"
+                  radius={0}
                   leftSection={<Search size={18} />}
-                  styles={{ input: { borderColor: 'var(--color-line)', backgroundColor: 'var(--color-paper)' } }}
+                  styles={{ input: { borderColor: 'var(--pk-line)', borderWidth: 1.5, backgroundColor: 'var(--pk-card)' } }}
                 />
               </form>
             </div>
@@ -100,11 +100,11 @@ export default async function Home({ searchParams }: HomeProps) {
       </Container>
 
       {/* 소식 받기: 뉴스레터 + 키워드 알림 */}
-      <Box component="section" bg="var(--color-sea-deep)" c="white" mt={40}>
+      <Box component="section" bg="var(--pk-band)" c="var(--pk-on-band)" mt={40}>
         <Container size="xl" py={{ base: 40, sm: 64 }}>
           <SimpleGrid cols={{ base: 1, md: 2 }} spacing={{ base: 40, md: 64 }}>
             <Box>
-              <Title order={2} fz={{ base: 22, sm: 26 }} fw={800} mb={8} style={{ letterSpacing: '-0.02em' }}>
+              <Title order={2} fz={{ base: 22, sm: 26 }} className="pica-display" mb={8}>
                 매주 한 번, 경남 문화예술 소식
               </Title>
               <Text fz="sm" c="rgba(255,255,255,0.75)" mb="lg">새로 올라온 공연과 전시를 정리해 메일로 보내 드립니다.</Text>
@@ -117,11 +117,11 @@ export default async function Home({ searchParams }: HomeProps) {
                     aria-label="이메일 주소"
                     required
                     size="md"
-                    radius="md"
+                    radius={0}
                     flex={1}
                     styles={darkInput}
                   />
-                  <Button type="submit" size="md" radius="md" color="yellow.5" c="var(--color-ink)" fw={700}>
+                  <Button type="submit" size="md" radius={0} color="var(--pk-mark)" c="var(--pk-on-mark)" fw={700}>
                     구독하기
                   </Button>
                 </Group>
@@ -129,7 +129,7 @@ export default async function Home({ searchParams }: HomeProps) {
             </Box>
 
             <Box>
-              <Title order={2} fz={{ base: 22, sm: 26 }} fw={800} mb={8} style={{ letterSpacing: '-0.02em' }}>
+              <Title order={2} fz={{ base: 22, sm: 26 }} className="pica-display" mb={8}>
                 원하는 키워드가 올라오면 알림
               </Title>
               <Text fz="sm" c="rgba(255,255,255,0.75)" mb="lg">예: 창원, 무료, 국악. 키워드에 맞는 행사가 등록되면 바로 메일을 보냅니다.</Text>
@@ -142,7 +142,7 @@ export default async function Home({ searchParams }: HomeProps) {
                     aria-label="알림 받을 이메일 주소"
                     required
                     size="md"
-                    radius="md"
+                    radius={0}
                     styles={darkInput}
                   />
                   <Group gap="xs" align="flex-start">
@@ -152,11 +152,11 @@ export default async function Home({ searchParams }: HomeProps) {
                       aria-label="키워드"
                       required
                       size="md"
-                      radius="md"
+                      radius={0}
                       flex={1}
                       styles={darkInput}
                     />
-                    <Button type="submit" size="md" radius="md" variant="white" color="dark" fw={700}>
+                    <Button type="submit" size="md" radius={0} variant="white" color="dark" fw={700}>
                       알림 신청
                     </Button>
                   </Group>
@@ -168,11 +168,11 @@ export default async function Home({ searchParams }: HomeProps) {
       </Box>
 
       {/* Footer */}
-      <Box component="footer" py={32} bg="white" style={{ borderTop: '1px solid var(--color-line)' }}>
+      <Box component="footer" py={32} bg="var(--pk-paper)" style={{ borderTop: '2px solid var(--pk-line)' }}>
         <Container size="xl">
           <Group justify="space-between" gap="xs">
-            <Text fz="sm" fw={700} c="var(--color-ink)">pica · 경남 문화예술 안내</Text>
-            <Text fz="xs" c="var(--color-ink-soft)">&copy; 2024 pickart (pica). All rights reserved.</Text>
+            <Text fz="sm" fw={700} c="var(--pk-ink)">pica · 경남 문화예술 안내</Text>
+            <Text fz="xs" c="var(--pk-ink-soft)">&copy; 2024 pickart (pica). All rights reserved.</Text>
           </Group>
         </Container>
       </Box>

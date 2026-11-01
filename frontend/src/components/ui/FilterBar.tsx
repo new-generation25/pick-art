@@ -13,14 +13,6 @@ const DATE_FILTERS = [
     { label: "이번 달", value: "month" }
 ];
 
-// 분야 칩 앞의 점 색 (EventCard 와 같은 색)
-const CATEGORY_DOT: Record<string, string> = {
-    공연: "var(--color-cat-show)",
-    전시: "var(--color-cat-exhibit)",
-    축제: "var(--color-cat-festival)",
-    행사: "var(--color-cat-event)",
-};
-
 const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
     <div className="grid grid-cols-[40px_minmax(0,1fr)] items-center gap-2 md:grid-cols-[48px_minmax(0,1fr)] md:items-start">
         <span className="text-[13px] font-semibold text-ink-soft md:pt-2">{label}</span>
@@ -87,9 +79,6 @@ export function FilterBar() {
                         aria-pressed={currentCategory === category}
                         onClick={() => updateFilters("category", category)}
                     >
-                        {CATEGORY_DOT[category] && (
-                            <span className="h-2 w-2 rounded-full" style={{ background: CATEGORY_DOT[category] }} aria-hidden />
-                        )}
                         {category}
                     </button>
                 ))}
@@ -103,7 +92,8 @@ export function FilterBar() {
                     label="종료된 행사도 보기 (종료 1개월 이내)"
                     color="dark"
                     size="sm"
-                    styles={{ label: { color: 'var(--color-ink-soft)', fontWeight: 500 } }}
+                    radius={0}
+                    styles={{ label: { color: 'var(--pk-ink-soft)', fontWeight: 500 }, input: { borderColor: 'var(--pk-line)', borderWidth: 1.5 } }}
                 />
             </div>
         </div>

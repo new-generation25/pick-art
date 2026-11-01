@@ -9,14 +9,6 @@ import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { EventCard } from "@/components/ui/EventCard";
 
-// 분야별 색 (EventCard 와 같은 색)
-const CATEGORY_COLOR: Record<string, string> = {
-    공연: "var(--color-cat-show)",
-    전시: "var(--color-cat-exhibit)",
-    축제: "var(--color-cat-festival)",
-    행사: "var(--color-cat-event)",
-};
-
 interface EventPageProps {
     params: Promise<{
         id: string;
@@ -55,7 +47,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
         return (
             <div className="min-h-screen flex flex-col pt-20 items-center justify-center text-neutral-500">
                 <p>행사 정보를 불러올 수 없거나 존재하지 않는 행사입니다.</p>
-                <Link href="/" className="mt-4 font-semibold text-sea hover:underline">행사 목록으로 가기</Link>
+                <Link href="/" className="mt-4 font-semibold text-accent hover:underline">행사 목록으로 가기</Link>
             </div>
         );
     }
@@ -76,7 +68,6 @@ export default async function EventDetailPage({ params }: EventPageProps) {
         }));
 
     const isEnded = !!event.event_date_end && event.event_date_end < todayKST();
-    const categoryColor = CATEGORY_COLOR[event.category] ?? "var(--color-ink)";
     const facts: { icon: typeof Calendar; label: string; value: string }[] = [
         { icon: Calendar, label: "기간", value: formatPeriod(event.event_date_start, event.event_date_end) },
         { icon: MapPin, label: "장소", value: event.venue || "정보 없음" },
@@ -100,7 +91,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                     {/* 포스터 + 바로가기 */}
                     <div>
                         <div className="lg:sticky lg:top-24">
-                            <div className="relative mx-auto aspect-[3/4] w-full max-w-[400px] overflow-hidden rounded-2xl border border-line bg-white">
+                            <div className="pica-box relative mx-auto aspect-[3/4] w-full max-w-[400px] overflow-hidden">
                                 <Image
                                     src={event.poster_image_url || "/images/placeholder.webp"}
                                     alt={event.title}
@@ -117,7 +108,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                                     href={event.original_url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-sea px-5 text-[15px] font-bold text-white transition-colors hover:bg-sea-deep"
+                                    className="inline-flex h-12 flex-1 items-center justify-center gap-2 border-[1.5px] border-ink bg-accent px-5 text-[15px] font-bold text-on-accent transition-colors hover:bg-ink"
                                 >
                                     <ExternalLink className="h-4 w-4" aria-hidden />
                                     원본 안내 페이지 열기
@@ -130,25 +121,22 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                     {/* 행사 정보 */}
                     <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2 text-[14px] font-semibold">
-                            <span className="inline-flex items-center gap-1.5" style={{ color: categoryColor }}>
-                                <span className="h-2 w-2 rounded-full" style={{ background: categoryColor }} aria-hidden />
-                                {event.category}
-                            </span>
+                            <span className="pica-cat" data-cat={event.category}>{event.category}</span>
                             <span className="text-ink-soft">{event.region}</span>
                             {event.is_free && (
-                                <span className="rounded border border-sea/40 px-1.5 text-[13px] text-sea">무료</span>
+                                <span className="pica-cat text-ink" style={{ borderColor: "currentColor" }}>무료</span>
                             )}
                             {isEnded && (
-                                <span className="rounded-md bg-ink px-2 py-0.5 text-[13px] font-bold text-white">종료</span>
+                                <span className="bg-ink px-2 py-0.5 text-[13px] font-bold text-paper">종료</span>
                             )}
                         </div>
 
-                        <h1 className="mt-3 text-[28px] font-extrabold leading-[1.25] tracking-[-0.03em] text-ink sm:text-[40px]">
+                        <h1 className="pica-display mt-3 text-[30px] leading-[1.2] text-ink sm:text-[44px]">
                             {event.title}
                         </h1>
 
                         {/* 기간, 장소, 관람료, 출처 */}
-                        <dl className="mt-6 divide-y divide-line rounded-2xl border border-line bg-white">
+                        <dl className="pica-box mt-6 divide-y divide-line">
                             {facts.map(({ icon: Icon, label, value }) => (
                                 <div key={label} className="grid grid-cols-[88px_minmax(0,1fr)] items-start gap-3 px-4 py-3.5 sm:grid-cols-[110px_minmax(0,1fr)] sm:px-5">
                                     <dt className="flex items-center gap-2 text-[14px] font-semibold text-ink-soft">
@@ -157,8 +145,8 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                                     </dt>
                                     <dd
                                         className={[
-                                            "text-ink",
-                                            label === "기간" ? "text-[18px] font-extrabold tabular-nums tracking-[-0.01em]" : "text-[15px] font-semibold",
+                                            "min-w-0",
+                                            label === "기간" ? "pica-display text-[22px] text-accent tabular-nums" : "text-[15px] font-semibold text-ink",
                                         ].join(" ")}
                                     >
                                         {value}
@@ -169,13 +157,13 @@ export default async function EventDetailPage({ params }: EventPageProps) {
 
                         {/* 상세 안내 */}
                         <section className="mt-10">
-                            <h2 className="text-[20px] font-extrabold text-ink">상세 안내</h2>
+                            <h2 className="pica-display text-[24px] text-ink">상세 안내</h2>
                             <div className="mt-3 max-w-[68ch] whitespace-pre-wrap text-[16px] leading-[1.85] text-ink sm:text-[17px]">
                                 {event.description || "상세 안내가 없습니다. 원본 안내 페이지에서 확인해 주세요."}
                             </div>
                         </section>
 
-                        <p className="mt-10 flex gap-2.5 rounded-xl bg-sea-tint px-4 py-3.5 text-[14px] leading-relaxed text-sea-deep">
+                        <p className="mt-10 flex gap-2.5 border-[1.5px] border-dashed border-line px-4 py-3.5 text-[14px] leading-relaxed text-ink">
                             <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
                             <span>
                                 수집한 정보를 정리한 것이라 주최 측 사정으로 바뀔 수 있습니다. 일정과 예매는{" "}
@@ -187,8 +175,8 @@ export default async function EventDetailPage({ params }: EventPageProps) {
 
                 {/* Suggestions Section */}
                 {suggestions.length > 0 && (
-                    <section className="mt-16 border-t border-line pt-10">
-                        <h2 className="text-[22px] font-extrabold tracking-[-0.02em] text-ink">같은 분야의 다른 행사</h2>
+                    <section className="mt-16 border-t-2 border-line pt-10">
+                        <h2 className="pica-display text-[26px] text-ink">같은 분야의 다른 행사</h2>
                         <p className="mt-1 text-[14px] text-ink-soft">경남에서 열리는 {event.category} 행사를 더 골랐습니다.</p>
                         <div className="mt-6 grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
                             {suggestions.map((suggestion) => (

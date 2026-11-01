@@ -38,15 +38,13 @@ export function Header() {
     };
 
     return (
-        <Box h={60} style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, backgroundColor: 'rgba(255, 255, 255, 0.92)', backdropFilter: 'blur(10px)', borderBottom: '1px solid var(--color-line)' }}>
+        <Box h={60} style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, backgroundColor: 'var(--pk-paper)', borderBottom: '2px solid var(--pk-line)' }}>
             <Container size="xl" h="100%">
                 <Group h="100%" justify="space-between">
                     <Link href="/" style={{ textDecoration: 'none' }} aria-label="pica 홈">
                         <Group gap={10} align="center">
-                            {/* 유등 하나: 진주 남강 유등에서 가져온 표시 */}
-                            <Box style={{ width: 14, height: 18, background: 'var(--color-lantern)', borderRadius: '7px 7px 4px 4px', boxShadow: 'inset 0 -4px 0 rgba(0,0,0,0.12)' }} />
-                            <Text fz={22} fw={800} c="var(--color-ink)" style={{ letterSpacing: '-0.02em', lineHeight: 1 }}>pica</Text>
-                            <Text fz={13} fw={500} c="var(--color-ink-soft)" visibleFrom="xs" style={{ lineHeight: 1 }}>경남 문화예술 안내</Text>
+                            <Text className="pica-display" fz={26} c="var(--pk-accent)" style={{ lineHeight: 1 }}>pica</Text>
+                            <Text fz={13} fw={600} c="var(--pk-ink-soft)" visibleFrom="xs" style={{ lineHeight: 1 }}>경남 문화예술 안내</Text>
                         </Group>
                     </Link>
 
@@ -60,7 +58,7 @@ export function Header() {
                                 <Menu.Target>
                                     <UnstyledButton>
                                         <Group gap={8}>
-                                            <Avatar color="teal" radius="xl" size="sm">{nickname.charAt(0).toUpperCase()}</Avatar>
+                                            <Avatar color="pink" radius={0} size="sm">{nickname.charAt(0).toUpperCase()}</Avatar>
                                             <ChevronDown size={14} color="gray" />
                                         </Group>
                                     </UnstyledButton>
@@ -78,7 +76,7 @@ export function Header() {
                                 </Menu.Dropdown>
                             </Menu>
                         ) : (
-                            <Button component={Link} href="/login" radius="xl" color="dark" variant="outline" size="sm">로그인</Button>
+                            <Button component={Link} href="/login" radius={0} color="dark" variant="outline" size="sm" styles={{ root: { borderWidth: 1.5 } }}>로그인</Button>
                         )}
                     </Group>
                 </Group>
