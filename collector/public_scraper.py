@@ -82,7 +82,7 @@ class PublicScraper:
                 link = it["link"]
                 # 정의가 id 를 주면 그것을, 아니면 링크 끝부분을 쓴다 (같은 출처 안에서 유일하면 된다)
                 lst = board.get("list") or d.get("list") or {}
-                source_id = str(it.get("id") or "") if (board.get("api") or lst.get("id") or lst.get("id_regex")) else ""
+                source_id = str(it.get("id") or "") if (board.get("api") or lst.get("id") or lst.get("id_regex") or lst.get("id_from_title")) else ""
                 source_id = source_id or link.rstrip("/").split("/")[-1]
                 if not title or not source_id:
                     fail += 1
@@ -147,7 +147,8 @@ class PublicScraper:
         if expired and not found:
             return {"name": target_name, "status": "FAIL",
                     "summary": f"❌ 정의 만료 의심: {d['slug']} 목록 선택자가 0건 ({', '.join(expired)})"}
-        status = "SUCCESS" if new or dup else "FAIL"
+        # 목록이 비어도 정의가 허용(min_rows 0)했으면 실패가 아니다 (예: 아직 이달 일정이 안 올라온 달력)
+        status = "SUCCESS" if new or dup or (found == 0 and not expired) else "FAIL"
         mark = "❌" if status == "FAIL" else ("⚠️" if fail or expired else "✅")
         extra = f", 날짜보완 {updated}" if updated else ""
         warn = f" / 정의 만료 의심 게시판 {len(expired)}" if expired else ""
@@ -236,9 +237,36 @@ class PublicScraper:
 
         lst = board.get("list") or d["list"]
         frm = now.date()
-        page_url = fill(board["url"], {"from": frm.isoformat(), "to": (frm + timedelta(days=d.get("range_days", 62))).isoformat()})
-        soup = BeautifulSoup(await self._fetch_text(session, page_url, d, board), "html.parser")
-        for row in soup.select(lst["rows"]):
+        pages = []
+        for k in range(d.get("months_ahead", 0) + 1):
+            y, m = now.year + (now.month - 1 + k) // 12, (now.month - 1 + k) % 12 + 1
+            url = fill(board["url"], {"from": frm.isoformat(), "to": (frm + timedelta(days=d.get("range_days", 62))).isoformat(),
+                                      "ym": f"{y}-{m:02d}"})
+            if url not in pages:
+                pages.append(url)
+        if lst.get("follow"):
+            # 달력형: 월 화면에서 일정이 있는 날의 링크를 따라가 그 날의 목록을 읽는다
+            followed = []
+            for url in pages:
+                month = BeautifulSoup(await self._fetch_text(session, url, d, board), "html.parser")
+                for a in month.select(lst["follow"]):
+                    nxt = urljoin(url, (a.get("href") or "").split("#")[0])
+                    if nxt not in followed:
+                        followed.append(nxt)
+            pages = followed
+        rows = []
+        for page_url in pages:
+            soup = BeautifulSoup(await self._fetch_text(session, page_url, d, board), "html.parser")
+            rows += [(page_url, r) for r in soup.select(lst["rows"])]
+            if lst.get("follow"):
+                await asyncio.sleep(0.3)
+        # 행정·체육 일정이 섞인 목록: include 에 맞는 제목만 남기고, 그중 exclude 에 맞는 것은 뺀다
+        include = re.compile(lst["include"]) if lst.get("include") else None
+        exclude = re.compile(lst["exclude"]) if lst.get("exclude") else None
+        for page_url, row in rows:
+            row_title = _pick(row, lst["title"])
+            if (include and not include.search(row_title)) or (exclude and exclude.search(row_title)):
+                continue
             rid = _pick(row, lst["id"]) if lst.get("id") else row.get(lst.get("id_attr", "data-idx"))
             values = {**row.attrs, "idx": rid}
             if lst.get("link_regex"):
@@ -247,7 +275,12 @@ class PublicScraper:
                 if not m:
                     continue
                 values["m"] = m.group(1)
-            link = fill(board["link_template"], values) if board.get("link_template") else urljoin(page_url, _pick(row, lst["link"]))
+            if board.get("link_template"):
+                link = fill(board["link_template"], values)
+            elif lst.get("link"):
+                link = urljoin(page_url, _pick(row, lst["link"]))
+            else:
+                link = page_url  # 항목마다 상세 주소가 없는 목록(달력의 그날 화면)
             if lst.get("id_regex"):
                 m = re.search(lst["id_regex"], link)
                 rid = m.group(1) if m else rid
@@ -262,6 +295,10 @@ class PublicScraper:
                 "venue": re.sub(r"^([^:]{1,6}:|(공연|전시)?장소)\s*", "", _pick(row, lst.get("venue"))),
                 "category": next((v for k, v in (lst.get("category_map") or {}).items() if k in _pick(row, lst.get("category"))), None),
             })
+        if lst.get("id_from_title"):
+            # 상세 주소가 없어 링크가 여러 항목에 겹친다: 제목+시작일로 id 를 만든다
+            for it in items:
+                it["id"] = re.sub(r"[^0-9A-Za-z가-힣]", "", f"{it['period']['start']}{it['title']}")[:80]
         if lst.get("dedupe"):
             # 회차마다 한 줄인 목록: 같은 id 는 하나로 합치고 기간을 첫 회~마지막 회로 넓힌다
             merged = {}

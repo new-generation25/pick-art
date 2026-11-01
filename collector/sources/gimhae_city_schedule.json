@@ -1,0 +1,58 @@
+{
+  "slug": "gimhae_city_schedule",
+  "name": "김해시 행사일정",
+  "_comment": "김해시청 달력. 일정이 있는 날의 링크(selday)를 따라가 읽는다. 행정·체육 일정이 대부분이라 문화행사 키워드(include)가 있는 제목만 남긴다. 항목별 상세 주소가 없어 그날 화면을 링크로 쓴다",
+  "verified_at": "2026-11-01",
+  "match": [
+    "gimhae.go.kr/03360/00023/05583"
+  ],
+  "region": "김해",
+  "venue": "",
+  "months_ahead": 1,
+  "boards": [
+    {
+      "url": "https://www.gimhae.go.kr/03360/00023/05583.web?smonth={ym}",
+      "category": "행사"
+    }
+  ],
+  "list": {
+    "follow": ".timetable1 table td a",
+    "rows": ".schedule1list1 li.li1",
+    "title": "strong.t1",
+    "period": "span.t2wrap:nth-of-type(1) .t2",
+    "venue": "span.t2wrap:nth-of-type(3) .t2",
+    "id_from_title": true,
+    "category": "strong.t1",
+    "category_map": {
+      "축제": "축제",
+      "페스타": "축제",
+      "페스티벌": "축제",
+      "야행": "축제",
+      "문화제": "축제",
+      "예술제": "축제",
+      "음악회": "공연",
+      "콘서트": "공연",
+      "가요제": "공연",
+      "공연": "공연",
+      "오광대": "공연",
+      "국악": "공연",
+      "연주회": "공연",
+      "뮤지컬": "공연",
+      "연극": "공연",
+      "전시": "전시",
+      "展": "전시",
+      "사진전": "전시",
+      "미술": "전시"
+    },
+    "exclude": "보고회|심의회|추진|회의|간담회",
+    "include": "축제|페스타|페스티벌|음악회|콘서트|가요제|공연|전시|展|오광대|야행|문화제|버스킹|국악|연주회|뮤지컬|연극|영화제|미술|사진전|문화의 ?날|예술제"
+  },
+  "expect": {
+    "min_rows": 0,
+    "required": [
+      "title",
+      "link",
+      "period"
+    ]
+  }
+}

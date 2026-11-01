@@ -33,7 +33,7 @@ def _validate(d: dict, path: str):
         for k in ("rows", "title", "period"):
             if k not in lst:
                 raise SourceDefinitionError(f"{os.path.basename(path)}: list.{k} 없음")
-        if "link_template" not in b and "link" not in lst:
+        if "link_template" not in b and "link" not in lst and not lst.get("follow"):
             raise SourceDefinitionError(f"{os.path.basename(path)}: 링크 규칙(link_template 또는 list.link) 없음")
 
 
