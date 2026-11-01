@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>까치 우편 우표첩</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gothic+A1:wght@400;600;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* 레이아웃: 엽서 한 장처럼 크림 바탕 위에 절마다 "엽서 칸"을 쌓는다. 빨강은 우표·세트 완성에만 */
+:root {
+  --cream: #F6EFDF; --paper: #FBF7EC; --slate: #4F6272; --ink: #1C1C1C; --red: #D33A2C; --line: #1C1C1C;
+  --soft: #6B6A63;
+  --display: "Black Han Sans", "Gothic A1", sans-serif;
+  --body: "Pretendard Variable", Pretendard, "Gothic A1", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.65; word-break: keep-all; }
+.wrap { max-width: 1100px; margin: 0 auto; padding-block: 24px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { text-wrap: balance; }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(34px, 6vw, 58px); line-height: 1.12; margin: 0; }
+h2 { font-family: var(--display); font-weight: 400; font-size: 26px; margin: 0 0 12px; display: flex; align-items: baseline; gap: 10px; }
+h2 .no { font-family: var(--mono); font-size: 13px; color: var(--slate); }
+h3 { font-size: 15px; margin: 14px 0 6px; }
+p { margin: 0 0 8px; max-width: 68ch; }
+.mono { font-family: var(--mono); }
+.soft { color: var(--soft); }
+section { margin-top: 40px; border-top: 2px solid var(--line); padding-top: 16px; }
+.grid { display: grid; gap: 14px; }
+.grid > * { min-width: 0; }
+@media (min-width: 760px) { .g2 { grid-template-columns: 1fr 1fr; } .g3 { grid-template-columns: repeat(3, 1fr); } .g4 { grid-template-columns: repeat(4, 1fr); } }
+.card { background: var(--paper); border: 1.5px solid var(--line); padding: 14px 16px; min-width: 0; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { border: 1.5px solid var(--line); padding: 7px 9px; text-align: left; vertical-align: top; }
+th { background: var(--cream); }
+.tw { overflow-x: auto; }
+.tw table { min-width: 480px; }
+ul { margin: 0; padding-left: 18px; }
+
+/* 우표: 톱니 테두리는 radial-gradient 마스크 */
+/* 톱니: 우표 면 위에 바탕색(--behind) 반원을 네 변에 찍는다 */
+.stamp { --s: 9px; --face: var(--red); --behind: var(--paper); display: inline-grid; place-items: center; padding: calc(var(--s) * 1.6);
+  background:
+    radial-gradient(circle, var(--behind) calc(var(--s) * .5), transparent calc(var(--s) * .5 + .5px)) 0 calc(var(--s) * -.5) / var(--s) var(--s) repeat-x,
+    radial-gradient(circle, var(--behind) calc(var(--s) * .5), transparent calc(var(--s) * .5 + .5px)) 0 calc(100% + var(--s) * .5) / var(--s) var(--s) repeat-x,
+    radial-gradient(circle, var(--behind) calc(var(--s) * .5), transparent calc(var(--s) * .5 + .5px)) calc(var(--s) * -.5) 0 / var(--s) var(--s) repeat-y,
+    radial-gradient(circle, var(--behind) calc(var(--s) * .5), transparent calc(var(--s) * .5 + .5px)) calc(100% + var(--s) * .5) 0 / var(--s) var(--s) repeat-y,
+    var(--face); }
+.hero-art .stamp { --behind: var(--cream); }
+.stamp.cream { --face: var(--cream); box-shadow: inset 0 0 0 1.5px var(--ink); }
+.stamp svg, .stamp img { display: block; }
+
+/* 머리 */
+.hero { display: grid; gap: 20px; align-items: center; }
+@media (min-width: 820px) { .hero { grid-template-columns: 1.3fr 1fr; } }
+.hero .lead { font-size: 17px; margin-top: 12px; }
+.hero-art { position: relative; height: 280px; }
+.hero-art .stamp { position: absolute; left: 8%; top: 18px; }
+.hero-art .pm { position: absolute; right: 6%; top: 70px; transform: rotate(-11deg); }
+.kicker { font-family: var(--mono); font-size: 13px; color: var(--slate); }
+
+/* 요약 */
+.sum { display: grid; gap: 10px; }
+@media (min-width: 760px) { .sum { grid-template-columns: repeat(5, 1fr); } }
+.sum div { background: var(--paper); border: 1.5px solid var(--line); padding: 12px; font-size: 14px; }
+.sum b { display: block; font-size: 15px; margin-bottom: 2px; }
+
+/* 색 */
+.chips { display: grid; gap: 10px; grid-template-columns: repeat(2, 1fr); }
+@media (min-width: 760px) { .chips { grid-template-columns: repeat(4, 1fr); } }
+.chip { border: 1.5px solid var(--line); background: var(--paper); }
+.chip .sw { height: 74px; border-bottom: 1.5px solid var(--line); }
+.chip .m { padding: 8px 10px; font-size: 13px; }
+.ratio { display: flex; height: 30px; border: 1.5px solid var(--line); margin-top: 12px; font-size: 12px; font-weight: 700; }
+.ratio span { display: flex; align-items: center; padding: 0 8px; white-space: nowrap; overflow: hidden; }
+
+/* 우표첩 */
+.album { background: var(--paper); border: 1.5px solid var(--line); padding: 16px; }
+.album-top { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; justify-content: space-between; border-bottom: 1.5px dashed var(--slate); padding-bottom: 12px; margin-bottom: 12px; }
+.album-top .who { display: flex; gap: 12px; align-items: center; }
+.album-top .stat { font-size: 13px; display: flex; flex-wrap: wrap; gap: 4px 14px; font-variant-numeric: tabular-nums; }
+.slots { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.slot { aspect-ratio: 1; border: 1.5px dashed var(--slate); display: grid; place-items: center; position: relative; }
+.slot.filled { border-style: solid; border-color: transparent; }
+.slot small { position: absolute; bottom: 2px; left: 0; right: 0; text-align: center; font-size: 10.5px; font-family: var(--mono); color: var(--slate); }
+.month { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 13px; margin-top: 10px; color: var(--slate); }
+.sets { display: grid; gap: 10px; margin-top: 14px; }
+.set { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; font-size: 14px; }
+.dots { display: flex; gap: 5px; }
+.dots i { width: 18px; height: 18px; border-radius: 50%; border: 1.5px dashed var(--slate); display: inline-block; }
+.dots i.on { background: var(--slate); border-style: solid; }
+.dots i.last { border-color: var(--red); }
+
+/* 도장 표 */
+.stamp-ic { width: 46px; height: 46px; display: grid; place-items: center; }
+
+/* 행사 상세 모형 */
+.mock { background: var(--paper); border: 1.5px solid var(--line); padding: 14px; font-size: 14px; }
+.mock dl { margin: 0; display: grid; grid-template-columns: auto 1fr; border: 1.5px solid var(--line); }
+.mock dt, .mock dd { margin: 0; padding: 6px 10px; border-bottom: 1.5px solid var(--line); }
+.mock dt { font-weight: 700; border-right: 1.5px solid var(--line); }
+.mock dl > :nth-last-child(-n+2) { border-bottom: 0; }
+.thisstamp { margin-top: 12px; border: 1.5px dashed var(--slate); padding: 12px; display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; }
+
+/* 알림 */
+.noti { display: grid; gap: 8px; }
+.noti div { background: var(--paper); border: 1.5px solid var(--line); padding: 9px 12px; display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center; font-size: 14px; }
+.noti .t { font-family: var(--mono); font-size: 12px; color: var(--slate); }
+
+/* SNS 모형 */
+.sns { display: grid; gap: 14px; align-items: start; }
+@media (min-width: 820px) { .sns { grid-template-columns: repeat(3, 1fr); } }
+.post { aspect-ratio: 4 / 5; max-width: 100%; border: 1.5px solid var(--line); background: var(--paper); position: relative; overflow: hidden; container-type: inline-size; }
+.post .poster { position: absolute; left: 7cqw; top: 9cqw; width: 52cqw; aspect-ratio: 3/4; background: repeating-linear-gradient(45deg, #DCD5C4 0 6px, #E6DFCE 6px 12px); border: .4cqw solid var(--ink); display: grid; place-items: center; font-size: 3.4cqw; color: var(--soft); }
+.post .pm { position: absolute; right: 4cqw; top: 6cqw; width: 44cqw; transform: rotate(-11deg); }
+.post .bottom { position: absolute; left: 7cqw; right: 7cqw; bottom: 6cqw; font-size: 4.2cqw; font-weight: 600; line-height: 1.45; }
+.post .title { font-family: var(--display); font-weight: 400; font-size: 7cqw; line-height: 1.15; margin-bottom: 2cqw; }
+.back { padding: 7cqw; display: grid; gap: 3cqw; height: 100%; align-content: start; font-size: 4cqw; }
+.back .row { display: grid; grid-template-columns: 22cqw 1fr; border-bottom: .4cqw dashed var(--slate); padding-bottom: 2cqw; }
+.back .lab { font-family: var(--mono); color: var(--slate); font-size: 3.2cqw; }
+.back .hand { font-family: "Gaegu", var(--body); font-size: 5cqw; }
+.env { padding: 7cqw; height: 100%; display: grid; align-content: start; gap: 2cqw; }
+.env .flap { height: 22cqw; border: .4cqw solid var(--ink); background: linear-gradient(to bottom right, transparent 49.6%, var(--ink) 49.6% 50.4%, transparent 50.4%), linear-gradient(to bottom left, transparent 49.6%, var(--ink) 49.6% 50.4%, transparent 50.4%); position: relative; }
+.env .list { font-family: var(--mono); font-size: 3.4cqw; display: grid; gap: 1.4cqw; margin-top: 3cqw; }
+.env .list span { display: grid; grid-template-columns: 13cqw 13cqw 1fr; border-bottom: .3cqw dotted var(--slate); }
+.cap { font-size: 12.5px; color: var(--soft); margin-top: 6px; }
+.hooks { counter-reset: h; display: grid; gap: 6px; padding: 0; margin: 0; list-style: none; }
+@media (min-width: 760px) { .hooks { grid-template-columns: 1fr 1fr; } }
+.hooks li { counter-increment: h; background: var(--paper); border: 1.5px solid var(--line); padding: 6px 10px; font-weight: 600; }
+.hooks li::before { content: counter(h, decimal-leading-zero) "  "; font-family: var(--mono); color: var(--slate); font-weight: 500; }
+
+.phase { display: grid; gap: 10px; }
+@media (min-width: 760px) { .phase { grid-template-columns: repeat(3, 1fr); } }
+.phase .card b { font-family: var(--display); font-weight: 400; font-size: 20px; display: block; }
+.decide li { margin: 3px 0; }
+footer { margin-top: 44px; border-top: 2px solid var(--line); padding-top: 10px; font-size: 13px; color: var(--soft); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- 까치 옆모습(왼쪽을 봄) -->
+    <symbol id="magpie" viewBox="0 0 100 80">
+      <path d="M58 70 L54 79 M64 70 L62 79" stroke="#1C1C1C" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M8 28 L22 24 C26 14 36 10 46 14 C56 18 60 28 62 36 L98 62 L94 66 L62 54 C58 64 48 70 38 68 C26 66 20 56 22 44 L22 32 Z" fill="#1C1C1C"/>
+      <path d="M30 44 C34 58 46 62 54 56 C50 50 40 44 30 44 Z" fill="#FBF7EC"/>
+      <path d="M44 30 C52 30 58 36 60 42 L48 40 Z" fill="#FBF7EC"/>
+      <circle cx="30" cy="22" r="2.2" fill="#FBF7EC"/>
+    </symbol>
+    <!-- 소인 -->
+    <symbol id="postmark" viewBox="0 0 220 120">
+      <g fill="none" stroke="#4F6272" stroke-opacity=".85">
+        <circle cx="60" cy="60" r="54" stroke-width="5"/>
+        <circle cx="60" cy="60" r="40" stroke-width="2.4"/>
+        <path d="M118 42 q12 -8 24 0 t24 0 t24 0 t24 0" stroke-width="4"/>
+        <path d="M118 60 q12 -8 24 0 t24 0 t24 0 t24 0" stroke-width="4"/>
+        <path d="M118 78 q12 -8 24 0 t24 0 t24 0 t24 0" stroke-width="4"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <div class="hero">
+    <div>
+      <div class="kicker">H안 확장 · 까치 우편 + 도장 수집 · 2026-11-01</div>
+      <h1>까치가 소식을 배달하고,<br>다녀오면 도장이 쌓인다</h1>
+      <p class="lead">소식 한 건은 엽서 한 장, 엽서 모서리의 소인은 확인한 날짜다. 회원이 제보·후기·현장 방문을 하면 그 기록이 우표첩에 도장으로 쌓인다. 도장은 이미 주는 포인트를 눈에 보이게 모아 둔 것이라 비용이 늘지 않는다.</p>
+      <p class="soft" style="font-size:13px">까치 그림은 A안 시안(<code>assets/pica_symbol.png</code>)을 임시로 넣었다. H안으로 가면 티켓을 크림 엽서로 바꿔 다시 그린다. 본문: <code>docs/brand/CONCEPT_H_magpie_post.md</code> · 숫자는 포인트 제도(<code>docs/PLAN_community_2026-11.md</code>) 그대로</p>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <div class="stamp" style="--s:10px;padding:18px"><img src="assets/pica_symbol.png" alt="" width="150" height="120" style="object-fit:contain"></div>
+      <div class="pm" style="position:absolute">
+        <svg width="250" height="136" viewBox="0 0 220 120"><use href="#postmark"/><text x="60" y="58" text-anchor="middle" font-family="Black Han Sans, sans-serif" font-size="22" fill="#4F6272">pica</text><text x="60" y="80" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" font-weight="600" fill="#4F6272">11.08</text></svg>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <h2><span class="no">00</span>요약</h2>
+    <div class="sum">
+      <div><b>배달</b>확인한 소식만 엽서로. 소인 = 확인 날짜</div>
+      <div><b>도장</b>활동마다 도장. 포인트 원장의 얼굴</div>
+      <div><b>세트</b>채우면 희귀 우표. 기존 미션 예산 안</div>
+      <div><b>이번 달 소인</b>찍힌 달만 혜택. 안 찍혀도 잃는 것 없음</div>
+      <div><b>레벨</b>엽서 → 우표 → 등기 → 집배원 → 우체국장</div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="no">01</span>스토리와 캐릭터</h2>
+    <div class="grid g2">
+      <div class="card">
+        <p>동네마다 매주 공연과 전시가 열린다. 작은 단체가 몇 달 준비한 공연일수록 포스터 한 장으로 끝나기 쉽다. 그래서 까치가 배달을 시작했다. 확인한 소식만 엽서에 담고, 확인한 날짜를 소인으로 찍는다. 받은 사람이 다녀오면 도장이 하나 더 찍힌다.</p>
+        <p class="soft" style="font-size:13px">"까치가 울면 반가운 소식이 온다" + Pica(까치의 학명 속 이름)</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">까치 집배원 "피카"</h3>
+        <ul>
+          <li><b>성격</b> 부지런하고 꼼꼼하다. 확인 안 된 소식은 가방에 넣지 않는다. 작은 무대를 좋아한다.</li>
+          <li><b>말투</b> "오늘 도착한 소식 세 통이에요." "이 엽서는 11월 1일에 확인했어요."</li>
+          <li><b>하지 말 것</b> 긴 수다, 과한 귀여움, 재촉, 문장마다 우편 말장난, 실제 우체국 상징 흉내, 우표·소인에 '경남'.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="no">02</span>시각 체계</h2>
+    <div class="chips">
+      <div class="chip"><div class="sw" style="background:#F6EFDF"></div><div class="m"><b>편지 크림</b> <span class="mono">#F6EFDF</span><br>바탕 · 60%</div></div>
+      <div class="chip"><div class="sw" style="background:#4F6272"></div><div class="m"><b>청회색</b> <span class="mono">#4F6272</span><br>소인·보조 글자 · 18%</div></div>
+      <div class="chip"><div class="sw" style="background:#1C1C1C"></div><div class="m"><b>먹</b> <span class="mono">#1C1C1C</span><br>본문·까치 · 12%</div></div>
+      <div class="chip"><div class="sw" style="background:#D33A2C"></div><div class="m"><b>우체통 빨강</b> <span class="mono">#D33A2C</span><br>우표·세트 완성 · 10%</div></div>
+    </div>
+    <div class="ratio" aria-label="면적 비율">
+      <span style="flex:60;background:#F6EFDF">크림 60</span><span style="flex:18;background:#4F6272;color:#F6EFDF">청회 18</span><span style="flex:12;background:#1C1C1C;color:#F6EFDF">먹 12</span><span style="flex:10;background:#D33A2C;color:#fff">빨강</span>
+    </div>
+    <p style="margin-top:10px;font-size:14px">명암비: 먹/크림 14.9 · 청회색/크림 5.5 · 흰/빨강 4.8 · 빨강/크림 4.2 · 빨강/청회색 1.3 → <b>빨강 글자는 24px 이상 굵은 제목에만</b>, 빨강과 청회색은 맞붙이지 않는다, 오류 표시에 빨강을 쓰지 않는다.</p>
+
+    <div class="grid g4" style="margin-top:14px">
+      <div class="card" style="display:grid;place-items:center;gap:8px"><div class="stamp" style="--s:7px"><img src="assets/pica_symbol.png" alt="" width="86" height="70" style="object-fit:contain"></div><b>우표형</b><span class="soft" style="font-size:13px">프로필·파비콘</span></div>
+      <div class="card" style="display:grid;place-items:center;gap:8px"><svg width="170" height="92" viewBox="0 0 220 120" style="transform:rotate(-10deg)"><use href="#postmark"/><text x="60" y="58" text-anchor="middle" font-family="Black Han Sans, sans-serif" font-size="22" fill="#4F6272">pica</text><text x="60" y="80" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" font-weight="600" fill="#4F6272">11.08</text></svg><b>소인형</b><span class="soft" style="font-size:13px">날짜 = 그 게시물의 확인일</span></div>
+      <div class="card" style="display:grid;place-items:center;gap:8px"><div style="position:relative;height:96px;width:170px"><div class="stamp" style="--s:6px;position:absolute;left:0;top:6px"><img src="assets/pica_symbol.png" alt="" width="70" height="58" style="object-fit:contain"></div><svg width="130" height="72" viewBox="0 0 220 120" style="position:absolute;left:52px;top:4px;transform:rotate(-10deg)"><use href="#postmark"/><text x="60" y="66" text-anchor="middle" font-family="Black Han Sans, sans-serif" font-size="24" fill="#4F6272">pica</text></svg></div><b>가로형</b><span class="soft" style="font-size:13px">소인이 우표 모서리를 덮는다</span></div>
+      <div class="card" style="display:grid;place-items:center;gap:8px"><div class="stamp cream" style="--s:7px;outline:0"><img src="assets/pica_symbol.png" alt="" width="86" height="70" style="object-fit:contain;filter:grayscale(1) contrast(1.2)"></div><b>단색형</b><span class="soft" style="font-size:13px">흑백 인쇄·협찬 표기</span></div>
+    </div>
+    <div class="tw" style="margin-top:14px">
+      <table>
+        <tr><th>요소</th><th>규칙</th></tr>
+        <tr><td>우표 톱니</td><td>반원 톱니, 지름 = 짧은 변의 6%, 네 변 같은 간격</td></tr>
+        <tr><td>소인</td><td>두 겹 원(3px·1.5px), 기울기 -8°~-14°, 잉크 70~90%로 고르지 않게, 한 화면에 하나만 크게</td></tr>
+        <tr><td>엽서 4:5</td><td>앞면 = 공식 포스터 + 소인 / 뒷면 = 받는 곳(장소)·우표 칸(요금)·소인(날짜)</td></tr>
+        <tr><td>봉투</td><td>주간 "이번 주 배달 목록"에만</td></tr>
+        <tr><td>항공우편 줄무늬</td><td>마감 임박·변경 알림에만</td></tr>
+        <tr><td>하지 않는 것</td><td>얼룩·커피 자국 같은 과한 복고, 금박, 그라데이션, 3D 우체통</td></tr>
+      </table>
+    </div>
+    <p class="soft" style="font-size:13px;margin-top:8px">글꼴: 제목·날짜 Black Han Sans · 본문 Pretendard · 우편번호·배달 번호 IBM Plex Mono · 손글씨는 글꼴 대신 운영자 글씨 스캔.</p>
+  </section>
+
+  <section>
+    <h2><span class="no">03</span>도장 수집 체계</h2>
+    <div class="grid g2">
+      <div>
+        <div class="tw">
+          <table>
+            <tr><th>활동</th><th>도장</th><th>포인트(기존)</th></tr>
+            <tr><td>제보 승인</td><td><b>배달 도장</b> 빨강 사각</td><td>300P (+100 +100)</td></tr>
+            <tr><td>관람 후기</td><td><b>관람 도장</b> 청회색 원</td><td>100P / 사진 200P</td></tr>
+            <tr><td>현장 인증</td><td><b>현장 소인</b> 행사 날짜·시군이 둘레에</td><td>+100P</td></tr>
+            <tr><td>정정 제보 승인</td><td><b>수선 도장</b> 먹 사각</td><td>100P</td></tr>
+            <tr><td>댓글 3개</td><td><b>답장 도장</b> (하루 1개)</td><td>10P×3</td></tr>
+            <tr><td>단계 미션</td><td><b>기념 우표</b></td><td>+200 ~ +1,200P</td></tr>
+          </table>
+        </div>
+        <h3>세트 (보상은 단계 미션 예산·월 상한 안에서, 계정당 1회)</h3>
+        <div class="tw">
+          <table>
+            <tr><th>세트</th><th>조건</th><th>보상</th></tr>
+            <tr><td>첫걸음</td><td>첫 후기 + 첫 댓글 3개 + 첫 현장 소인</td><td>첫 배달 우표 + 200P</td></tr>
+            <tr><td>네 가지 무대</td><td>공연·전시·축제·행사 현장 소인 각 1</td><td>네 무대 우표 + 300P</td></tr>
+            <tr><td><b>작은 무대 응원</b></td><td>중소 단체 행사 현장 소인 5</td><td>작은 무대 우표 + 500P, 배지</td></tr>
+            <tr><td>우리 동네 세 곳</td><td>서로 다른 시군 3곳</td><td>세 동네 우표 + 300P</td></tr>
+            <tr><td>동네 멀리 가기</td><td>서로 다른 시군 7곳</td><td>먼 길 우표 + 700P</td></tr>
+            <tr><td>사계절</td><td>네 계절 각 현장 소인 1+</td><td>사계절 우표 + 1,000P, 연말 실물 엽서</td></tr>
+            <tr><td>한정 소인</td><td>축제 기간에만(주최 협력)</td><td>희소성 자체</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="album" aria-label="내 우표첩 화면 예시">
+        <div class="album-top">
+          <div class="who"><div class="stamp" style="--s:5px;padding:6px"><img src="assets/pica_symbol.png" alt="" width="44" height="36" style="object-fit:contain"></div><div><b>닉네임</b> · 등기<br><span class="soft" style="font-size:13px">예시 화면</span></div></div>
+          <div class="stat"><span>이번 달 소인 <b>● 찍힘</b></span><span>올해 <b>7/12</b>달</span><span>4,320P</span><span>정확도 96%</span></div>
+        </div>
+        <div class="mono" style="font-size:13px;margin-bottom:8px">2026.11</div>
+        <div class="slots">
+          <div class="slot filled"><svg viewBox="0 0 220 120" width="100%" style="transform:rotate(-12deg)"><use href="#postmark"/></svg><small>현장</small></div>
+          <div class="slot filled" style="background:#4F6272;border-radius:50%"><small style="color:#F6EFDF">관람</small></div>
+          <div class="slot filled" style="background:#D33A2C"><small style="color:#fff">배달</small></div>
+          <div class="slot filled"><div style="width:60%;aspect-ratio:1;border-radius:50%;border:3px solid #4F6272"></div><small>답장</small></div>
+          <div class="slot filled" style="background:#1C1C1C"><small style="color:#F6EFDF">수선</small></div>
+          <div class="slot filled"><svg viewBox="0 0 220 120" width="100%" style="transform:rotate(-6deg)"><use href="#postmark"/></svg><small>현장</small></div>
+          <div class="slot filled" style="background:#4F6272;border-radius:50%"><small style="color:#F6EFDF">관람</small></div>
+          <div class="slot"></div><div class="slot"></div><div class="slot"></div>
+        </div>
+        <div class="month"><span>◀ 10월</span><span>12월 ▶</span></div>
+        <div class="sets">
+          <div class="set"><span>작은 무대 응원</span><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i class="last"></i></span></div>
+          <div class="set"><span>네 가지 무대</span><span class="dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></div>
+          <div class="set"><span>우리 동네 세 곳</span><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid g3" style="margin-top:14px">
+      <div class="card"><h3 style="margin-top:0">이번 달 소인 = 활동 자격</h3><p style="font-size:14px">제보 1건 승인 · 후기 1건 · 댓글 3개 중 하나면 그달 페이지 맨 위에 찍힌다. 찍힌 달만 레벨 권한·추첨·포인트 전환. 스트릭(연속 기록)은 없다. "올해 7/12달"처럼 누적만 센다.</p></div>
+      <div class="card"><h3 style="margin-top:0">레벨 = 우편 단계 (이름만)</h3><p style="font-size:14px">관객→<b>엽서</b> · 단골→<b>우표</b> · 리포터→<b>등기</b>(정확도 90%+) · 큐레이터→<b>집배원</b> · 앰배서더→<b>우체국장</b>. 조건·권한은 지금 제도 그대로.</p></div>
+      <div class="card"><h3 style="margin-top:0">포인트 연결</h3><p style="font-size:14px">1P = 1원 상당, <b>3,000P</b>부터 전환, 월 <b>30,000P</b> 한도(현재 문서 값. 요청엔 5,000P). 자격: 우표 레벨 + 이번 달 소인 + 정확도 70%. 도장과 포인트는 화면에서 따로 보여 준다.</p></div>
+    </div>
+
+    <h3>현장 인증</h3>
+    <div class="tw">
+      <table>
+        <tr><th>방식</th><th>어떻게</th><th>신뢰</th></tr>
+        <tr><td>공연장 스티커 QR</td><td>매표소에 행사별 QR. 행사 날짜에만 유효, 찍으면 확인 → [소인 받기]</td><td>높음 (단체 협조)</td></tr>
+        <tr><td>티켓·팔찌 사진</td><td>행사명·날짜가 보이게 촬영 → 운영진 확인. <b>처음엔 이것으로 시작</b></td><td>중간</td></tr>
+        <tr><td>시간대 + 시군</td><td>행사 앞뒤 2시간 안에 시군만 확인, 좌표 저장 안 함</td><td>보조</td></tr>
+        <tr><td>주최 측 확인</td><td>단체 계정이 참석 명단에서 확인</td><td>높음</td></tr>
+      </table>
+    </div>
+    <h3>남용 막기</h3>
+    <p style="font-size:14px">현장 소인 1행사 1개·하루 최대 3개 · 답장 도장 하루 1개 · 세트 보상 1회, 도장 양도 없음 · 새 계정 7일은 확인 후 소인 · 같은 기기 다른 계정 QR은 검토 대기 · 티켓 사진 촬영일 대조 + 주 10% 무작위 재검토 · 허위면 <b>말소 소인</b>(가로줄 두 개) + 포인트 회수 · 상시 세트는 6개로 고정.</p>
+  </section>
+
+  <section>
+    <h2><span class="no">04</span>앱 화면 적용 (설계만)</h2>
+    <div class="grid g2">
+      <div class="mock" aria-label="행사 상세 화면 예시">
+        <dl>
+          <dt>기간</dt><dd class="mono">11.08 토 15:00</dd>
+          <dt>장소</dt><dd>김해 ○○ 소극장</dd>
+          <dt>관람료</dt><dd>무료</dd>
+        </dl>
+        <div class="thisstamp">
+          <svg width="96" height="54" viewBox="0 0 220 120" style="transform:rotate(-10deg)"><use href="#postmark"/><text x="60" y="56" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="15" font-weight="600" fill="#4F6272">11.08</text><text x="60" y="76" text-anchor="middle" font-family="Gothic A1, sans-serif" font-size="13" font-weight="800" fill="#4F6272">김해</text></svg>
+          <div><b>이 행사 도장</b><br><span style="font-size:13px">티켓 사진을 올리면 현장 소인이 찍혀요 · 37명이 받았어요<br>작은 무대 응원 세트에 들어가요 (3/5)</span></div>
+        </div>
+        <p class="cap">기간·장소 아래에 놓는다. 받았으면 소인이 진하게, 아직이면 점선.</p>
+      </div>
+      <div>
+        <div class="noti">
+          <div><span class="t">승인</span>보내 주신 소식이 배달됐어요. 배달 도장 +300P</div>
+          <div><span class="t">현장</span>11월 8일 김해 공연 현장 소인이 찍혔어요</div>
+          <div><span class="t">세트</span>작은 무대 응원 우표까지 한 칸 남았어요</div>
+          <div><span class="t">완성</span>작은 무대 우표를 받았어요. 우표첩에 붙여 뒀어요</div>
+          <div><span class="t">월 1회</span>이번 달 소인은 댓글 3개나 후기 1건이면 찍혀요</div>
+          <div><span class="t">말소</span>신고가 확인돼 이 도장은 말소 소인으로 바뀌었어요. 100P가 회수됐어요</div>
+        </div>
+        <p class="cap">재촉·죄책감 문구 금지. "놓치면", "사라져요" 쓰지 않는다.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="no">05</span>SNS 적용</h2>
+    <div class="sns">
+      <div>
+        <div class="post" role="img" aria-label="엽서형 카드뉴스 앞면 예시">
+          <div class="poster">공식 포스터</div>
+          <svg class="pm" viewBox="0 0 220 120"><use href="#postmark"/><text x="60" y="56" text-anchor="middle" font-family="Black Han Sans, sans-serif" font-size="24" fill="#4F6272">11.08</text><text x="60" y="78" text-anchor="middle" font-family="Gothic A1, sans-serif" font-weight="800" font-size="14" fill="#4F6272">토</text></svg>
+          <div class="bottom"><div class="title">토요일 3시<br>무료 국악 공연</div>정보: 공식 출처 기관명</div>
+        </div>
+        <p class="cap">엽서 앞면 · 소인 날짜 표지. 가장 큰 요소는 소인 속 날짜.</p>
+      </div>
+      <div>
+        <div class="post" role="img" aria-label="엽서형 카드뉴스 뒷면 예시">
+          <div class="back">
+            <div class="row"><span class="lab">받는 곳</span><span>김해 ○○ 소극장</span></div>
+            <div class="row"><span class="lab">우표 값</span><span>무료 · 선착순 300석</span></div>
+            <div class="row"><span class="lab">소인</span><span class="mono">11.08 토 15:00</span></div>
+            <div class="row"><span class="lab">한 줄</span><span>아이와 가도 1시간이면 끝나요 <span class="soft">(운영자 손글씨 자리)</span></span></div>
+            <div style="display:flex;justify-content:flex-end"><div class="stamp" style="--s:4px;padding:6px"><img src="assets/pica_symbol.png" alt="" width="54" height="44" style="object-fit:contain"></div></div>
+          </div>
+        </div>
+        <p class="cap">엽서 뒷면 · 정보는 주소 칸 형식으로.</p>
+      </div>
+      <div>
+        <div class="post" role="img" aria-label="이번 주 배달 목록 예시">
+          <div class="env">
+            <div class="flap"></div>
+            <div style="font-family:var(--display);font-size:7cqw;line-height:1.15">이번 주 배달 목록</div>
+            <div class="list">
+              <span><b>No.045</b><b>11.03</b>창원 · 무료 전시</span>
+              <span><b>No.046</b><b>11.05</b>진주 · 소극장 연극</span>
+              <span><b>No.047</b><b>11.07</b>김해 · 야외 음악회</span>
+              <span><b>No.048</b><b>11.08</b>김해 · 국악 공연</span>
+              <span><b>No.049</b><b>11.09</b>통영 · 공방 체험</span>
+            </div>
+          </div>
+        </div>
+        <p class="cap">월요일 · 배달 번호는 주차별로 이어진다. 행사명은 예시.</p>
+      </div>
+    </div>
+    <div class="grid g2" style="margin-top:14px">
+      <div class="card"><h3 style="margin-top:0">릴스 오프닝 1.5초</h3><p style="font-size:14px">실물 빨간 우체통(또는 종이 공작) 문이 열리고 엽서가 떨어짐 → 소인 쾅 → 날짜. 실물로 촬영한다.</p>
+      <h3>회원 도장 자랑 (스토리 9:16)</h3><p style="font-size:14px">그 회원의 이번 달 우표첩 페이지 + 닉네임 + "11월 소인 ✓" + pica 소인. 위치·실명 없음. 운영 계정이 리포스트.</p></div>
+      <div><ol class="hooks">
+        <li>이번 주 문화 소식이 도착했어요</li><li>오늘 도착한 엽서 세 통</li><li>이 엽서, 일요일이 마지막 배달이에요</li><li>소인 날짜 11.08, 무료 공연</li><li>작은 무대 우표까지 한 칸 남았다면</li><li>이번 주 배달 목록 No.045</li><li>그날 거기 있었다는 도장</li><li>김해로 가는 엽서 두 통</li><li>받는 곳: 동네 작은 극장</li><li>우표첩 11월 페이지, 다 채운 사람?</li>
+      </ol></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="no">06</span>AI로 보이지 않게</h2>
+    <div class="grid g3">
+      <div class="card"><b>실물 도장 두 개</b><br>pica 소인 + 회전식 날짜 도장. 게시물마다 종이에 찍어 촬영·스캔. 번짐과 기울기가 매번 다르다.</div>
+      <div class="card"><b>운영자 손글씨</b><br>시군 이름·"받는 곳"·한 줄 평을 직접 써서 스캔해 재사용. 손글씨 글꼴은 쓰지 않는다.</div>
+      <div class="card"><b>실물 엽서·톱니 가위·우체통</b><br>월간 결산은 인쇄한 엽서 사진, 우표 테두리는 톱니 가위로 오린 종이, 릴스 오프닝은 실물 촬영.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="no">07</span>시안 이미지 프롬프트</h2>
+    <p style="font-size:14px">이미지 안에 글자를 넣지 않는다(한글·영문·숫자 모두). pica·날짜·시군 이름은 나중에 벡터로 얹는다. 대상: 로고(우표형·소인형), 까치 집배원 캐릭터 3포즈, 도장 세트 6종, 우표첩 한 페이지, 프로필, 인스타 표지. 문장 전체는 본문 7절에 있다.</p>
+    <div class="card mono" style="font-size:12.5px;overflow-x:auto">Flat print illustration, slight rubber-stamp ink wear, limited palette: cream #F6EFDF, slate blue #4F6272, ink black #1C1C1C, postbox red #D33A2C. No text, no letters, no numbers, no logos, no watermark, no gradient, no 3D.</div>
+  </section>
+
+  <section>
+    <h2><span class="no">08</span>단계별 도입과 위험</h2>
+    <div class="phase">
+      <div class="card"><b>지금 바로</b>실물 도장 주문, 손글씨 스캔, 엽서형 카드뉴스·소인 표지·배달 목록, 이달의 우표(수동). 사이트 색은 그대로.</div>
+      <div class="card"><b>커뮤니티 1단계</b><code>point_ledger</code>에 도장 종류 한 칸 → 내 우표첩, 이번 달 소인, 첫걸음·네 가지 무대 세트, 현장 인증은 티켓 사진 + 운영진 확인.</div>
+      <div class="card"><b>이후</b>협력 단체 QR 현장 소인 시범, 작은 무대·시군·사계절 세트, 축제 한정 소인, 연말 실물 엽서·우표첩, 사이트 <code>post</code> 테마.</div>
+    </div>
+    <div class="tw" style="margin-top:12px">
+      <table>
+        <tr><th>위험</th><th>대응</th></tr>
+        <tr><td>수집 피로·강박</td><td>상시 세트 6개 고정, 스트릭 없음, 재촉 알림 금지</td></tr>
+        <tr><td>도장 인플레</td><td>답장 도장 하루 1개, 현장 소인 1행사 1개, 한정 소인 희소</td></tr>
+        <tr><td>현장 인증 부정</td><td>QR 날짜 한정, 사진 촬영일 대조, 무작위 재검토, 말소 소인</td></tr>
+        <tr><td>위치 개인정보</td><td>시군만 확인·저장, 좌표 저장 안 함, 공유 이미지에 위치 없음</td></tr>
+        <tr><td>복고 우편 클리셰·우체국 상징 혼동</td><td>색 4개, 소인 하나로 정체성, 실제 우정 마크·빨간 제비 흉내 금지</td></tr>
+        <tr><td>사이트 리소 테마와 충돌</td><td>1단계까지는 SNS·우표첩에만 H 색. 사이트 전환은 운영자 결정</td></tr>
+      </table>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <b>정해 주실 것</b>
+      <ol class="decide" style="margin:6px 0 0;padding-left:20px">
+        <li>레벨 이름을 우편 단계로 바꿀지</li>
+        <li>사이트 색까지 H로 옮길지, SNS·우표첩에만 쓸지</li>
+        <li>현장 인증을 티켓 사진 + 운영진 확인으로 시작해도 되는지</li>
+        <li>실물 도장 두 개(소인·회전 날짜) 제작</li>
+      </ol>
+    </div>
+  </section>
+
+  <footer>pica · 가까운 공연·전시·축제 · H안 확장 시안 · 화면 모형과 행사명은 예시</footer>
+</div>
+</body>
+</html>
