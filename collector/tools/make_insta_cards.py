@@ -124,7 +124,7 @@ body { background: #888; }
 .pad { position: absolute; left: 72px; right: 72px; }
 
 /* 1. 표지 */
-.cover .poster { position: absolute; right: -12px; top: 56px; transform: rotate(3deg);
+.cover .poster { position: absolute; right: -12px; top: 104px; transform: rotate(3deg);
   border: 4px solid %(ink)s; box-shadow: 14px 14px 0 %(blue)s; background: #fff; }
 .cover .poster img { display: block; height: 1000px; width: auto; max-width: 800px; object-fit: contain; }
 .cover .hook { position: absolute; left: 72px; top: 250px; width: 420px; font-size: 76px; line-height: 1.08; }
