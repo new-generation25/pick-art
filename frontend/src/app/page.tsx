@@ -1,5 +1,6 @@
 import { getPublishedEvents } from "@/lib/supabase";
 import { FeedSections } from "@/components/ui/FeedSections";
+import { INSTAGRAM_URL, InstagramIcon } from "@/components/ui/InstagramLink";
 import { FilterBar } from "@/components/ui/FilterBar";
 import { Search } from "lucide-react";
 import { Container, Title, Text, TextInput, Button, SimpleGrid, Group, Box, Alert, Stack } from "@mantine/core";
@@ -173,7 +174,12 @@ export default async function Home({ searchParams }: HomeProps) {
       <Box component="footer" py={32} bg="var(--pk-paper)" style={{ borderTop: '2px solid var(--pk-line)' }}>
         <Container size="xl">
           <Group justify="space-between" gap="xs">
-            <Text fz="sm" fw={700} c="var(--pk-ink)">pica · 경남 문화예술 안내</Text>
+            <Group gap="md">
+              <Text fz="sm" fw={700} c="var(--pk-ink)">pica · 경남 문화예술 안내</Text>
+              <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-[14px] font-bold text-ink underline-offset-4 hover:underline">
+                <InstagramIcon size={16} /> 인스타그램 @picka.news
+              </a>
+            </Group>
             <Text fz="xs" c="var(--pk-ink-soft)">&copy; 2024 pickart (pica). All rights reserved.</Text>
           </Group>
         </Container>

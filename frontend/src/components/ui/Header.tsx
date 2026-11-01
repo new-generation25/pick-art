@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { Group, Button, Menu, Avatar, Text, UnstyledButton, Box, Container, ActionIcon } from "@mantine/core";
+import { INSTAGRAM_URL, InstagramIcon } from "./InstagramLink";
 
 export function Header() {
     const router = useRouter();
@@ -49,6 +50,9 @@ export function Header() {
                     </Link>
 
                     <Group>
+                        <ActionIcon component="a" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" variant="subtle" color="gray" radius="xl" size="lg" aria-label="pica 인스타그램 (새 창)" title="인스타그램 @picka.news">
+                            <InstagramIcon size={20} />
+                        </ActionIcon>
                         <ActionIcon variant="subtle" color="gray" radius="xl" size="lg" aria-label="검색">
                             <Search size={20} />
                         </ActionIcon>
