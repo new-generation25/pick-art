@@ -13,7 +13,7 @@ import json
 import os
 import re
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 import aiohttp
 
@@ -40,12 +40,18 @@ def rank(row) -> int:
 async def main(date_from, date_to, dry):
     db = Database()
     rows = db.supabase.table("raw_posts").select("*").in_("status", ["COLLECTED", "PENDING"]).execute().data
-    cands, skipped = [], {"날짜없음/형식오류": 0, "기간밖": 0}
+    cands, skipped = [], {"날짜없음/형식오류": 0, "기간밖": 0, "기간지남": 0}
+    # 오늘(한국 시간) 이전에 끝난 수집분은 '기간 지남'(EXPIRED)으로 돌려 인박스 검토 대기에서 뺀다.
+    # 지우지 않으므로 같은 글을 다시 수집하지 않고 중복 판정에도 쓰인다. date_from 이 아니라 오늘 기준이다.
+    today = datetime.now(timezone(timedelta(hours=9))).date().isoformat()
+    expired_ids = []
     for r in rows:
         a = (r.get("content") or {}).get("ai_suggestion") or {}
         s, e = a.get("date_start", ""), a.get("date_end", "")
         if not (ISO.match(s or "") and ISO.match(e or "")):
             skipped["날짜없음/형식오류"] += 1; continue
+        if e < today:
+            skipped["기간지남"] += 1; expired_ids.append(r["id"]); continue
         if s > date_to or e < date_from:
             skipped["기간밖"] += 1; continue
         cands.append(r)
@@ -53,6 +59,10 @@ async def main(date_from, date_to, dry):
     # 이미 공개된 행사와 같은 것(제목+시작일)은 다시 공개하지 않는다 (정기 실행 때 다른 출처에서 같은 행사가 들어와도)
     published = {(norm(e["title"]), e["event_date_start"]) for e in
                  db.supabase.table("events").select("title,event_date_start").execute().data}
+
+    if expired_ids and not dry:
+        for i in range(0, len(expired_ids), 100):
+            db.supabase.table("raw_posts").update({"status": "EXPIRED"}).in_("id", expired_ids[i:i + 100]).execute()
 
     groups = {}
     for r in cands:

@@ -15,8 +15,13 @@ async def check_link(session: aiohttp.ClientSession, url: str) -> tuple:
     if not url or not url.startswith("http"):
         return False, None, url
     try:
-        async with session.get(url, headers=LINK_HEADERS, timeout=aiohttp.ClientTimeout(total=20), allow_redirects=True) as r:
-            return r.status < 400, r.status, str(r.url)
+        for attempt in range(2):
+            async with session.get(url, headers=LINK_HEADERS, timeout=aiohttp.ClientTimeout(total=20), allow_redirects=True) as r:
+                status, final = r.status, str(r.url)
+            # 첫 접속에 세션 쿠키를 주며 주소 뒤 값을 떨어뜨리는 사이트(거창문화재단 등): 쿠키를 받은 뒤 한 번 더 연다
+            if status < 400 or final == url or attempt == 1:
+                return status < 400, status, final
+        return False, status, final
     except Exception as e:
         return False, type(e).__name__, url
 
