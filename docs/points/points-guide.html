@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pica 포인트 안내</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
+<style>
+  /* 사이트 리소 테마(frontend/src/app/globals.css 의 riso 값)와 같은 색 */
+  :root {
+    --pk-paper: #ecede6;
+    --pk-card: #f7f7f2;
+    --pk-ink: #1a1a1a;
+    --pk-ink-soft: #55554f;
+    --pk-line: #1a1a1a;
+    --pk-accent: #2350d8;
+    --pk-mark: #ff4fa3;
+    --pk-yellow: #ffe14d;
+    --pk-print: 3px 2px 0 rgba(255, 79, 163, 0.85);
+    --pk-font-display: "Black Han Sans", "Pretendard Variable", Pretendard, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--pk-paper);
+    color: var(--pk-ink);
+    font-family: "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 16px 64px; }
+
+  header.top { border-bottom: 2px solid var(--pk-line); background: var(--pk-paper); }
+  header.top .wrap { padding-top: 14px; padding-bottom: 14px; display: flex; align-items: baseline; gap: 10px; }
+  .logo { font-family: var(--pk-font-display); font-size: 26px; color: var(--pk-accent); line-height: 1; }
+  .logo-sub { font-size: 13px; font-weight: 600; color: var(--pk-ink-soft); }
+
+  .hero { padding: 36px 0 8px; }
+  .kicker { font-size: 14px; font-weight: 700; color: var(--pk-accent); margin: 0; }
+  h1, h2 { font-family: var(--pk-font-display); font-weight: 400; letter-spacing: -0.01em; }
+  h1 { font-size: 36px; line-height: 1.2; margin: 8px 0 12px; text-shadow: var(--pk-print); }
+  .lead { color: var(--pk-ink-soft); margin: 0; }
+
+  section { margin-top: 44px; }
+  h2 { font-size: 26px; line-height: 1.25; margin: 0 0 14px; display: flex; align-items: center; gap: 10px; }
+  h2 .no {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 34px; height: 34px; padding: 0 6px;
+    background: var(--pk-mark); color: var(--pk-ink); font-size: 18px;
+    border: 1.5px solid var(--pk-line);
+  }
+  h3 { font-size: 17px; margin: 22px 0 6px; }
+  p { margin: 0 0 10px; }
+  ul { margin: 0 0 10px; padding-left: 20px; }
+  li { margin: 4px 0; }
+  strong { font-weight: 800; }
+  .soft { color: var(--pk-ink-soft); font-size: 14px; }
+
+  .card {
+    background: var(--pk-card);
+    border: 1.5px solid var(--pk-line);
+    padding: 16px 18px;
+  }
+
+  /* 한눈 요약 */
+  .summary { display: grid; gap: 10px; grid-template-columns: 1fr; }
+  .summary .card { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: start; }
+  .summary .big {
+    font-family: var(--pk-font-display); font-size: 24px; line-height: 1; color: var(--pk-accent);
+    padding-top: 3px;
+  }
+  .summary b { display: block; font-size: 16px; }
+  .summary span { color: var(--pk-ink-soft); font-size: 14px; line-height: 1.6; }
+  @media (min-width: 640px) {
+    .summary { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* 표: 휴대폰에서는 줄마다 카드로 */
+  table { width: 100%; border-collapse: collapse; background: var(--pk-card); border: 1.5px solid var(--pk-line); font-size: 15px; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid rgba(26,26,26,0.25); }
+  thead th { background: var(--pk-ink); color: var(--pk-paper); font-weight: 700; font-size: 14px; border-bottom: 0; }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.pt { font-weight: 800; color: var(--pk-accent); white-space: nowrap; }
+  @media (max-width: 600px) {
+    table, thead, tbody, tr, th, td { display: block; }
+    table { border: 0; background: none; }
+    thead { display: none; }
+    tr { background: var(--pk-card); border: 1.5px solid var(--pk-line); margin-bottom: 10px; padding: 8px 0; }
+    td { border: 0; padding: 4px 14px; display: grid; grid-template-columns: 76px 1fr; gap: 8px; }
+    td::before { content: attr(data-label); font-size: 13px; font-weight: 700; color: var(--pk-ink-soft); padding-top: 1px; }
+    td:first-child { font-weight: 800; font-size: 16px; }
+  }
+
+  .note {
+    border-left: 6px solid var(--pk-accent);
+    background: var(--pk-card);
+    padding: 12px 16px;
+    margin: 14px 0 0;
+    font-size: 15px;
+  }
+
+  /* 레벨 사다리 */
+  .levels { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .levels li { margin: 0; display: grid; grid-template-columns: 56px 1fr; border: 1.5px solid var(--pk-line); background: var(--pk-card); }
+  .levels .lv {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-family: var(--pk-font-display); font-size: 26px; line-height: 1;
+    border-right: 1.5px solid var(--pk-line); background: var(--pk-paper);
+  }
+  .levels .lv small { font-family: inherit; font-size: 11px; margin-top: 4px; color: var(--pk-ink-soft); }
+  .levels li:nth-child(3) .lv { background: var(--pk-yellow); }
+  .levels li:nth-child(4) .lv { background: var(--pk-mark); }
+  .levels li:nth-child(5) .lv { background: var(--pk-accent); color: #fff; }
+  .levels li:nth-child(5) .lv small { color: #fff; }
+  .levels .body { padding: 12px 14px; }
+  .levels .name { font-weight: 800; font-size: 17px; }
+  .levels .cond { font-size: 14px; color: var(--pk-ink-soft); margin: 2px 0 6px; }
+  .levels .can { font-size: 15px; }
+
+  /* 활동 자격 */
+  .three { display: grid; gap: 10px; grid-template-columns: 1fr; margin: 12px 0; }
+  .three .card { text-align: center; padding: 14px 10px; }
+  .three .card b { display: block; font-family: var(--pk-font-display); font-weight: 400; font-size: 22px; color: var(--pk-accent); }
+  .or { text-align: center; font-weight: 800; color: var(--pk-ink-soft); font-size: 14px; }
+  @media (min-width: 560px) {
+    .three { grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center; }
+  }
+  .split { display: grid; gap: 10px; grid-template-columns: 1fr; }
+  @media (min-width: 560px) { .split { grid-template-columns: 1fr 1fr; } }
+  .split .card h3 { margin-top: 0; }
+  .tag { display: inline-block; font-size: 12px; font-weight: 800; padding: 1px 8px; border: 1.5px solid var(--pk-line); margin-bottom: 6px; }
+  .tag.on { background: var(--pk-accent); color: #fff; border-color: var(--pk-accent); }
+  .tag.off { background: var(--pk-paper); }
+
+  /* 전환 */
+  .facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+  .facts div { background: var(--pk-ink); color: var(--pk-paper); padding: 12px 8px; text-align: center; }
+  .facts b { display: block; font-family: var(--pk-font-display); font-weight: 400; font-size: 22px; line-height: 1.15; color: var(--pk-yellow); }
+  .facts span { font-size: 12px; }
+  ol.steps { counter-reset: s; list-style: none; padding: 0; margin: 0; }
+  ol.steps li { counter-increment: s; position: relative; padding: 0 0 12px 40px; margin: 0; }
+  ol.steps li::before {
+    content: counter(s); position: absolute; left: 0; top: 0;
+    width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+    background: var(--pk-accent); color: #fff; font-weight: 800; font-size: 14px;
+  }
+
+  /* FAQ */
+  details { background: var(--pk-card); border: 1.5px solid var(--pk-line); margin-bottom: 8px; }
+  summary { cursor: pointer; padding: 12px 16px; font-weight: 700; list-style: none; position: relative; padding-right: 40px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; position: absolute; right: 16px; top: 10px; font-size: 20px; font-weight: 800; color: var(--pk-accent); }
+  details[open] summary::after { content: "−"; }
+  details > div { padding: 0 16px 14px; color: var(--pk-ink); }
+
+  /* 매력 */
+  .why { background: var(--pk-accent); color: #fff; margin-top: 48px; padding: 32px 0 36px; border-top: 2px solid var(--pk-line); border-bottom: 2px solid var(--pk-line); }
+  .why h2 { color: #fff; text-shadow: var(--pk-print); }
+  .why h2 .no { background: var(--pk-yellow); }
+  .why .intro { opacity: 0.9; }
+  .why-list { display: grid; gap: 12px; grid-template-columns: 1fr; margin-top: 16px; }
+  @media (min-width: 640px) { .why-list { grid-template-columns: 1fr 1fr; } }
+  .why-item { background: var(--pk-card); color: var(--pk-ink); border: 1.5px solid var(--pk-line); padding: 16px 18px; box-shadow: 4px 4px 0 var(--pk-mark); }
+  .why-item b { display: block; font-size: 17px; margin-bottom: 4px; }
+  .why-item p { margin: 0; font-size: 15px; }
+  .why-item .vs { margin-top: 8px; font-size: 13px; color: var(--pk-ink-soft); border-top: 1px dotted var(--pk-line); padding-top: 8px; }
+
+  .memo { margin-top: 40px; font-size: 13px; color: var(--pk-ink-soft); border: 1.5px dashed var(--pk-ink-soft); padding: 12px 14px; }
+  .memo b { color: var(--pk-ink); }
+  .memo ul { margin: 6px 0 0; padding-left: 18px; }
+
+  footer { margin-top: 28px; font-size: 13px; color: var(--pk-ink-soft); }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <span class="logo">pica</span>
+    <span class="logo-sub">경남 문화예술 안내</span>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="hero">
+    <p class="kicker">회원 안내 · 포인트와 레벨</p>
+    <h1>알려 주고, 다녀오고,<br>포인트로 다시 보러 가기</h1>
+    <p class="lead">pica는 경남에서 열리는 공연·전시·축제를 모아 보여 줍니다. 회원이 행사 정보를 알려 주고, 다녀온 후기를 남기면 포인트가 쌓입니다. 쌓인 포인트로 레벨이 오르고, 상품권·지역화폐·공연 티켓으로 바꿀 수 있습니다.</p>
+  </div>
+
+  <!-- 한눈 요약 -->
+  <section aria-labelledby="s-summary">
+    <h2 id="s-summary"><span class="no">한눈</span>요약</h2>
+    <div class="summary">
+      <div class="card"><div class="big">+P</div><div><b>활동하면 쌓입니다</b><span>행사 제보, 관람 후기, 정보 정정, 댓글. 방문이나 출석만으로는 쌓이지 않습니다.</span></div></div>
+      <div class="card"><div class="big">Lv</div><div><b>레벨은 내려가지 않습니다</b><span>관객 → 단골 → 리포터 → 큐레이터 → 지역 앰배서더. 한 번 오른 레벨은 그대로입니다.</span></div></div>
+      <div class="card"><div class="big">월</div><div><b>매달 한 가지만 하면 혜택이 이어집니다</b><span>제보 1건 승인, 후기 1건, 댓글 3개 중 하나면 그달의 "활동 회원"입니다.</span></div></div>
+      <div class="card"><div class="big">₩</div><div><b>1P = 1원 상당으로 바꿉니다</b><span>5,000P부터 상품권·지역화폐·공연 티켓으로 전환합니다. 한 달에 30,000P까지입니다.</span></div></div>
+    </div>
+  </section>
+
+  <!-- 적립 -->
+  <section aria-labelledby="s-earn">
+    <h2 id="s-earn"><span class="no">1</span>포인트 쌓는 방법</h2>
+    <table>
+      <thead><tr><th>활동</th><th>포인트</th><th>조건</th><th>하루 한도</th></tr></thead>
+      <tbody>
+        <tr><td data-label="활동">행사 정보 제보</td><td class="pt" data-label="포인트">30P</td><td data-label="조건">운영진이 승인하면 지급. 공식 링크를 붙이면 +10P, 포스터를 붙이면 +10P</td><td data-label="하루 한도">5건</td></tr>
+        <tr><td data-label="활동">관람 후기</td><td class="pt" data-label="포인트">글 10P<br>사진 20P</td><td data-label="조건">행사 하나에 한 번. 티켓·현장 사진으로 다녀온 것을 인증하면 +10P</td><td data-label="하루 한도">5건</td></tr>
+        <tr><td data-label="활동">정보 정정 제보</td><td class="pt" data-label="포인트">10P</td><td data-label="조건">날짜·장소·링크가 틀린 것을 알려 주고 승인되면 지급</td><td data-label="하루 한도">5건</td></tr>
+        <tr><td data-label="활동">댓글</td><td class="pt" data-label="포인트">2P</td><td data-label="조건">10자 이상</td><td data-label="하루 한도">10개</td></tr>
+        <tr><td data-label="활동">받은 "도움돼요"</td><td class="pt" data-label="포인트">1P</td><td data-label="조건">내 제보·후기에 다른 회원이 누른 것</td><td data-label="하루 한도">한 달 100P</td></tr>
+        <tr><td data-label="활동">출석·방문</td><td class="pt" data-label="포인트">0P</td><td data-label="조건">들어오기만 해서는 쌓이지 않습니다</td><td data-label="하루 한도">-</td></tr>
+      </tbody>
+    </table>
+
+    <h3>단계 미션 보너스</h3>
+    <ul>
+      <li>첫 제보가 승인되면 <strong>+20P</strong></li>
+      <li>후기 5건·10건·20건을 채우면 각각 <strong>+30P · +60P · +120P</strong></li>
+    </ul>
+
+    <div class="note">
+      <strong>포인트는 확인된 뒤 들어옵니다.</strong> 제보와 정정은 운영진이 승인한 뒤에, 후기와 댓글은 올린 뒤 24시간 동안 신고가 없으면 확정됩니다. 신고로 삭제된 글의 포인트는 회수됩니다.
+    </div>
+  </section>
+
+  <!-- 레벨 -->
+  <section aria-labelledby="s-level">
+    <h2 id="s-level"><span class="no">2</span>레벨과 혜택</h2>
+    <p>누적 포인트와 활동으로 오릅니다. <strong>한 번 오른 레벨은 내려가지 않습니다.</strong> 1~4단계는 조건을 채우면 자동으로 오르고, 5단계만 운영진이 선정합니다.</p>
+    <ol class="levels">
+      <li><div class="lv">1<small>Lv</small></div><div class="body"><div class="name">관객</div><div class="cond">가입하면 바로</div><div class="can">보기, 찜, 댓글, 후기, 제보(운영진 확인 후 공개)</div></div></li>
+      <li><div class="lv">2<small>Lv</small></div><div class="body"><div class="name">단골</div><div class="cond">누적 100P + 활동한 달 2개월</div><div class="can">사진 댓글, 후기 상단 노출 우선, <strong>포인트 전환 가능</strong></div></div></li>
+      <li><div class="lv">3<small>Lv</small></div><div class="body"><div class="name">리포터</div><div class="cond">누적 300P + 제보 승인 5건 + 정확도 90% 이상</div><div class="can"><strong>제보가 바로 공개</strong>(운영진이 나중에 확인), 리포터 배지</div></div></li>
+      <li><div class="lv">4<small>Lv</small></div><div class="body"><div class="name">큐레이터</div><div class="cond">누적 1,000P + 후기 20건 + 최근 3개월 신고 0건</div><div class="can">추천 목록 직접 만들기, 홈 화면 "큐레이터 픽"에 소개</div></div></li>
+      <li><div class="lv">5<small>Lv</small></div><div class="body"><div class="name">지역 앰배서더</div><div class="cond">운영진 선정 (시군별 1~3명)</div><div class="can">기관 초대권·프레스 기회, 인스타그램 @picka.news 콘텐츠 협업, 지역 운영 참여</div></div></li>
+    </ol>
+  </section>
+
+  <!-- 활동 자격 -->
+  <section aria-labelledby="s-active">
+    <h2 id="s-active"><span class="no">3</span>매달 활동 회원</h2>
+    <p>레벨 혜택은 그달에 활동한 회원에게 드립니다. 아래 셋 중 <strong>하나만</strong> 하면 됩니다.</p>
+    <div class="three">
+      <div class="card"><b>제보 1건</b>승인</div>
+      <div class="or">또는</div>
+      <div class="card"><b>후기 1건</b>작성</div>
+      <div class="or">또는</div>
+      <div class="card"><b>댓글 3개</b>이상</div>
+    </div>
+    <div class="split">
+      <div class="card">
+        <span class="tag on">활동한 달</span>
+        <h3>쓸 수 있는 것</h3>
+        <ul>
+          <li>내 레벨의 권한 (리포터 즉시 공개, 큐레이션 등)</li>
+          <li>이달의 리포터 후보, 초대권 추첨 응모</li>
+          <li>포인트 전환 신청</li>
+          <li>프로필의 "이번 달 활동" 표시</li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="tag off">쉬어 간 달</span>
+        <h3>그대로인 것</h3>
+        <ul>
+          <li>레벨과 쌓은 포인트는 <strong>그대로</strong> 남습니다</li>
+          <li>그달에는 위의 혜택만 쉽니다</li>
+          <li>활동 한 건을 채우면 <strong>그날 바로</strong> 돌아옵니다</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 전환 -->
+  <section aria-labelledby="s-use">
+    <h2 id="s-use"><span class="no">4</span>포인트 쓰는 방법</h2>
+    <div class="facts">
+      <div><b>1P=1원</b><span>상당</span></div>
+      <div><b>5,000P</b><span>부터 전환</span></div>
+      <div><b>30,000P</b><span>한 달 한도</span></div>
+    </div>
+
+    <h3>무엇으로 바꾸나요</h3>
+    <p>모바일 상품권, 지역화폐(예: 김해사랑상품권), 공연 티켓으로 드립니다. 계좌로 현금을 보내 드리지는 않습니다.</p>
+
+    <h3>누가 바꿀 수 있나요</h3>
+    <ul>
+      <li>레벨 2(단골) 이상</li>
+      <li>그달의 활동 회원</li>
+      <li>정보 정확도 70% 이상</li>
+    </ul>
+
+    <h3>순서</h3>
+    <ol class="steps">
+      <li>내 활동 화면에서 바꿀 포인트와 받을 방법을 골라 신청합니다.</li>
+      <li>운영진이 적립 내역을 확인합니다. 부정한 적립이 없는지 봅니다.</li>
+      <li>매달 한 번 모아서 지급합니다. 지급 내역은 내 포인트 기록에 남습니다.</li>
+    </ol>
+    <p class="soft">pica가 한 달에 지급하는 전체 금액에는 상한이 있습니다. 상한에 닿으면 남은 신청은 다음 달에 지급합니다.</p>
+  </section>
+
+  <!-- 정확도·신고 -->
+  <section aria-labelledby="s-trust">
+    <h2 id="s-trust"><span class="no">5</span>정확도와 신고</h2>
+    <h3>정보 정확도</h3>
+    <p>내가 올린 정보가 얼마나 맞았는지를 %로 보여 줍니다. 제보가 승인된 비율, 정정 제보로 바뀐 비율, 신고 처리 결과로 계산합니다. 포인트와 따로 매기므로 포인트가 많아도 틀린 정보가 많으면 정확도가 낮아집니다.</p>
+    <ul>
+      <li>처음 5건까지는 숫자 대신 <strong>"새 리포터"</strong>로 표시합니다.</li>
+      <li><strong>90% 미만</strong>이면 리포터의 즉시 공개 권한이 멈춥니다.</li>
+      <li><strong>70% 미만</strong>이면 제보가 다시 운영진 확인을 거쳐 공개되고, 포인트 전환도 할 수 없습니다.</li>
+    </ul>
+
+    <h3>지역 인증</h3>
+    <p>휴대폰 위치로 사는 시군을 한 번 인증하면 "김해 주민" 같은 배지가 붙습니다. 그 지역 행사의 후기와 제보에 "주민" 표시가 함께 나옵니다. 저장하는 것은 시군 이름뿐이고 위치 좌표는 남기지 않습니다. 6개월마다 다시 인증합니다.</p>
+
+    <h3>지켜 주세요</h3>
+    <ul>
+      <li>같은 행사에 후기는 한 번만 쓸 수 있습니다. 활동마다 하루 한도가 있습니다.</li>
+      <li>신고가 3건 모인 글은 자동으로 숨겨지고 운영진이 확인합니다.</li>
+      <li>틀린 정보를 되풀이해 올리면 정확도와 권한이 낮아집니다.</li>
+      <li>가입 후 7일 동안은 하루 제보 1건까지 올릴 수 있습니다.</li>
+      <li>포스터는 공식 홍보물의 출처를 밝혀 주세요. 남이 찍은 사진은 올리지 않습니다.</li>
+    </ul>
+  </section>
+
+  <!-- FAQ -->
+  <section aria-labelledby="s-faq">
+    <h2 id="s-faq"><span class="no">?</span>자주 묻는 질문</h2>
+    <details><summary>한두 달 바빠서 못 들어오면 레벨이 떨어지나요?</summary><div>아니요. 레벨과 포인트는 그대로입니다. 그달의 혜택(레벨 권한, 추첨 응모, 포인트 전환)만 쉬고, 다시 활동 한 건을 하면 그날 돌아옵니다.</div></details>
+    <details><summary>매일 들어오면 포인트를 받나요?</summary><div>아니요. 방문이나 출석에는 포인트를 드리지 않습니다. 다른 회원에게 도움이 되는 활동(제보, 후기, 정정, 댓글)에만 드립니다.</div></details>
+    <details><summary>후기를 쓰려면 티켓을 사야 하나요?</summary><div>아니요. 무료 전시나 축제 후기도 똑같이 쌓입니다. 티켓이나 현장 사진으로 다녀온 것을 인증하면 +10P를 더 드립니다.</div></details>
+    <details><summary>pica에 있는 행사 정보가 틀렸어요.</summary><div>날짜·장소·링크가 틀려 있다면 "정보 정정 제보"로 알려 주세요. 승인되면 10P를 드립니다.</div></details>
+    <details><summary>포인트가 바로 안 들어와요.</summary><div>제보와 정정은 운영진 승인 뒤에, 후기와 댓글은 올리고 24시간이 지나 신고가 없으면 확정됩니다.</div></details>
+    <details><summary>포인트를 현금으로 받을 수 있나요?</summary><div>계좌 이체는 하지 않습니다. 모바일 상품권, 지역화폐, 공연 티켓으로 드립니다.</div></details>
+    <details><summary>받은 상품권에 세금이 붙나요?</summary><div>받는 금액에 따라 기타소득으로 처리되어 세금이 미리 떼일 수 있습니다. 기준이 정해지면 전환 화면에서 안내합니다.</div></details>
+  </section>
+</main>
+
+<!-- 매력 -->
+<section class="why" aria-labelledby="s-why">
+  <div class="wrap" style="padding-bottom:0">
+    <h2 id="s-why"><span class="no">★</span>이 포인트 제도가 좋은 점</h2>
+    <p class="intro">다른 서비스의 포인트·등급과 나란히 놓고 보면 차이가 보입니다.</p>
+    <div class="why-list">
+      <div class="why-item">
+        <b>사지 않아도 쌓입니다</b>
+        <p>무료 전시를 보고 온 후기, 동네 축제 소식 하나도 포인트가 됩니다. 행사를 알리고 다녀온 경험 자체가 적립 대상입니다.</p>
+        <p class="vs">쇼핑 구매평 적립은 물건을 사야 쓸 수 있습니다.</p>
+      </div>
+      <div class="why-item">
+        <b>쉬어도 잃지 않습니다</b>
+        <p>바쁜 달에는 혜택만 잠시 쉬고, 레벨과 포인트는 그대로 남습니다. 댓글 3개면 그날 바로 돌아옵니다.</p>
+        <p class="vs">활동이 없으면 등급을 내리는 커뮤니티도 있습니다.</p>
+      </div>
+      <div class="why-item">
+        <b>포인트가 다시 문화생활이 됩니다</b>
+        <p>1P를 1원 상당으로 쳐서 공연 티켓이나 지역화폐로 바꿉니다. 알린 행사, 다녀온 공연이 다음 공연 표가 되고, 지역화폐라면 그 돈이 경남 안에서 쓰입니다.</p>
+        <p class="vs">카페 등급은 권한만 바뀌고 쓸 수 있는 보상이 없는 경우가 많습니다.</p>
+      </div>
+      <div class="why-item">
+        <b>돈보다 큰 기회가 있습니다</b>
+        <p>이달의 리포터로 홈과 인스타그램 @picka.news에 소개되고, 초대권 추첨에 응모하고, 앰배서더는 기관 초대권과 프레스 기회를 받습니다.</p>
+        <p class="vs">포인트만 주는 제도는 적립 이상의 의미가 남지 않습니다.</p>
+      </div>
+      <div class="why-item">
+        <b>내 정보가 믿을 만하다는 것이 숫자로 남습니다</b>
+        <p>정보 정확도와 주민 배지는 포인트로 살 수 없습니다. 오래 정확한 정보를 올린 사람이 더 많은 권한을 갖습니다.</p>
+        <p class="vs">포인트만 쌓는 구조에서는 많이 올린 사람과 정확히 올린 사람이 구분되지 않습니다.</p>
+      </div>
+      <div class="why-item">
+        <b>모두가 쓰는 정보를 함께 만듭니다</b>
+        <p>포스터 한 장, 날짜 하나 고친 정정 제보가 다른 관객이 헛걸음하지 않게 합니다. 리포터가 되면 내가 알린 행사가 바로 공개됩니다.</p>
+        <p class="vs">자동 수집만으로는 작은 공연과 동네 행사를 다 담지 못합니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap" style="padding-bottom:40px">
+  <div class="memo">
+    <b>운영자 메모</b> — 이 문서는 2026-11-01 결정 사항(<code>docs/PLAN_community_2026-11.md</code>)을 회원용 안내로 옮긴 것입니다. 제보·후기·댓글·포인트 기능은 아직 만들지 않았습니다.
+    <ul>
+      <li>아직 정하지 않은 것: 월 지급 총액 상한, 지급 수단(상품권·지역화폐·티켓) 확정, 포인트 유효기간. 법률(선불전자지급수단)·세무(기타소득) 확인 필요.</li>
+      <li>적립표 기준으로 매우 활발한 회원(한 달 제보 4건·사진 후기 4건·댓글 20개·도움돼요 30회)이 약 390P/월입니다. 5,000P 첫 전환까지 1년 가까이 걸리므로 문턱이나 적립값을 다시 볼 필요가 있습니다.</li>
+    </ul>
+  </div>
+  <footer>pica · 경남 문화예술 안내</footer>
+</div>
+
+</body>
+</html>
