@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import atexit
 import asyncio
@@ -7,6 +8,7 @@ from database import Database
 from insta_scraper import InstaScraper
 from public_scraper import PublicScraper
 from kopis_scraper import KopisScraper
+from naver_blog_scraper import scrape_blog
 from fb_scraper_service import FacebookScraper
 from notifier import TelegramNotifier
 from ai_extractor import AIExtractor
@@ -57,6 +59,9 @@ def reclaim_running(db, older_than=None, reason="시간 초과"):
         print(f"♻️ [Reclaim] {log['target_name']} (log {log['id']}) RUNNING → FAIL: {reason}", flush=True)
     return len(stale)
 
+BLOG_REGIONS = "창원 진주 통영 사천 김해 밀양 거제 양산 의령 함안 창녕 고성 남해 하동 산청 함양 거창 합천".split()
+
+
 async def run_crawlers(specific_target=None):
     print(f"🚀 {'Manual request:' if specific_target else 'Routine'} crawler started at {datetime.now()}", flush=True)
     db = Database()
@@ -73,6 +78,7 @@ async def run_crawlers(specific_target=None):
                 target_type = 'website'
                 if 'instagram.com' in value: target_type = 'instagram'
                 elif 'facebook.com' in value: target_type = 'facebook'
+                elif item.get('type') == 'naver_blog' or 'blog.naver.com' in value: target_type = 'naver_blog'
                 configs.append({
                     'target_type': target_type,
                     'value': item['value'],
@@ -91,9 +97,21 @@ async def run_crawlers(specific_target=None):
             results = await public.scrape([c for c in configs if c['target_type'] == 'website'])
             # KOPIS(공연 API)는 화이트리스트와 무관하게 정기 크롤마다 돈다
             results.append(await KopisScraper(db).scrape())
+            # 지자체 공식 블로그(RSS + 본문의 📅/📍 블록, AI 없음). 발행은 아래 자동 공개가 맡는다
+            for c in configs:
+                if c['target_type'] != 'naver_blog':
+                    continue
+                try:
+                    blog_id = re.search(r"blog\.naver\.com/([\w-]+)", c['value']).group(1)
+                    region = next((r for r in BLOG_REGIONS if r in c['name']), "경남")
+                    res = await scrape_blog(blog_id, region, c['name'], db)
+                    results.append({"name": c['name'], "status": "SUCCESS",
+                                    "summary": f"✅ 블로그 행사 {len(res['found'])}건 (신규 {res['new']}, 중복 {res['dup']})"})
+                except Exception as e:
+                    results.append({"name": c['name'], "status": "FAIL", "summary": f"❌ 블로그 수집 실패: {e}"})
             skipped = {}
             for c in configs:
-                if c['target_type'] != 'website':
+                if c['target_type'] not in ('website', 'naver_blog'):
                     skipped[c['target_type']] = skipped.get(c['target_type'], 0) + 1
 
             # 검증(날짜·열리는 링크·중복)을 통과한 것만 오늘~60일 뒤 범위에서 공개한다. AUTO_PUBLISH=off 면 인박스 검토로 남긴다
@@ -108,7 +126,8 @@ async def run_crawlers(specific_target=None):
 
             # 전체 종료 알림: 처리·실패·건너뜀을 숫자로 남긴다
             failed = [r for r in results if r['status'] != 'SUCCESS']
-            lines = [f"{'⚠️' if failed else '✅'} 정기 크롤링 완료 — 출처 {len(results)}곳 처리 (웹사이트 {len(results) - 1} + KOPIS, 실패 {len(failed)})"]
+            n_blog = sum(1 for c in configs if c['target_type'] == 'naver_blog')
+            lines = [f"{'⚠️' if failed else '✅'} 정기 크롤링 완료 — 출처 {len(results)}곳 처리 (웹사이트 {len(results) - 1 - n_blog} + KOPIS + 블로그 {n_blog}, 실패 {len(failed)})"]
             lines += [f"• {r['name']}: {r['summary']}" for r in results]
             for t, n in skipped.items():
                 lines.append(f"• {t} {n}곳 건너뜀 (미구현)")
