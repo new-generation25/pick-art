@@ -57,3 +57,31 @@ python tools/make_insta_reel.py week ... --sample 1.5,4,8,12
 - 반주는 단순한 합성음이다. 음악 품질을 높이려면 라이선스가 명시된 음원을 따로 골라야 한다.
 - 한마디(`reel_punch`)·날짜 글자는 사람이 facts 에 써 넣었다. 자동화하려면 LLM 이 쓰고 사람이 검수하는 단계가 필요하다.
 - 포스터가 세로로 아주 긴 경우(배너형) 화면에서 작게 보인다 — 일반 비율 포스터를 facts `poster` 로 지정하는 것이 낫다.
+
+## 2차 — "포스터 내용 그대로"에서 "가고 싶게"로 (story 모드)
+
+지적: 영상이 포스터에 적힌 것 그대로라 볼 이유가 없다 → 프로그램을 조사하고 작년 현장을 보여 줄 것.
+
+**벤치마킹에서 가져온 것**
+- 축제 프로모는 첫 3초 콜드 오픈 → 분위기(B-roll) → 정보 타이포 → 한 가지 행동 유도. 정보 글자가 없으면
+  "예쁜 B-roll" 일 뿐이고, 사람 얼굴·현장 열기가 드론 전경보다 낫다.
+  ([fixr 2026](https://blog.fixr.co/festival-event-marketing-2026-what-will-sell-tickets),
+  [Event Planner Expo](https://www.theeventplannerexpo.com/?p=22340), [Ticket Fairy](https://www.ticketfairy.com/blog/festival-marketing-on-tiktok-reels-short-form-video-strategies-to-ignite-buzz-and-ticket-sales.md))
+- 지자체 숏폼(충주·양산 등)이 먹힌 건 "정보"보다 "볼거리·재미"가 먼저였기 때문이라는 보도.
+  ([서울신문](https://go.seoul.co.kr/news/newsView.php?id=20240722021004), [전북일보](https://jjan.kr/article/20250613580079))
+- 그래서 구성: **사회적 증거(작년 5만 8천 명) → 올해 바뀐 점(장유로) → 가서 할 거 4가지(가격·시간) → 먹거리 → 꿀팁 → 저장·태그**.
+
+**자료와 권리**
+- 작년 방문객 5만 7,800여 명: [쿠키뉴스 2025-11-10](https://www.kukinews.com/article/view/kuk202511100052).
+- 올해 프로그램·가격: 축제 누리집 [행사안내](http://festival.buncheong.co.kr/00001/00010/00037.web)
+  (물레체험 5,000원, 천인의 분청 무료 선착순 1,000명, 가족도자기만들기대회 11.8 10:30 사전접수, 공개 경매 11.8 16:00, 부녀회 음식부스 추어탕·소고기국밥).
+- 작년 현장 사진: [한국관광콘텐츠랩](https://api.visitkorea.or.kr/) "김해분청도자기축제" — **공공누리 제3유형**
+  (출처 표시·상업 이용 가능·**변경 금지**). 그래서 사진은 자르기·흐림·글자 얹기 없이 원본 비율 그대로 화면에 넣고
+  (통째로 미끄러져 들어오는 이동만), 글자는 사진 바깥 위쪽에, 출처는 사진 아래에 둔다.
+- 작년 영상: 공식 채널(김해문화관광재단·김해시TV) 영상은 모두 유튜브 표준 라이선스라 **쓰지 않았다.**
+  쓰려면 주최 측 허락이 필요하다.
+
+**생성기**: `story` 모드 — facts 의 `reel_script`(장면 목록: beats·solid·big·photo·head·hsub·phcap·poster·chip·hit)대로 컷을 만든다.
+```
+python tools/make_insta_reel.py story <facts.json> --out <폴더> --slug <이름>
+```

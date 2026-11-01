@@ -63,6 +63,13 @@ body { font-family: 'Pretendard Variable', sans-serif; word-break: keep-all; let
   padding: 28px 72px; display: none; }
 #band .t { font-size: 58px; font-weight: 900; line-height: 1.18; }
 #band .s { font-size: 40px; font-weight: 700; margin-top: 10px; }
+.ph { position: absolute; left: 70px; width: 940px; display: none; border: 6px solid #fff; box-shadow: 16px 16px 0 #ff4fa3; }
+#head { position: absolute; left: 60px; right: 60px; top: 290px; height: 280px; display: none; flex-direction: column;
+  justify-content: flex-end; font-family: 'Black Han Sans', sans-serif; color: #fff; line-height: 1.05;
+  text-shadow: 7px 6px 0 #ff4fa3; }
+#head small { display: block; font-family: 'Pretendard Variable'; font-weight: 800; font-size: 40px; text-shadow: none;
+  color: #fff; margin-top: 14px; }
+#phcap { position: absolute; left: 40px; right: 40px; font-size: 26px; font-weight: 700; color: rgba(255,255,255,.85); display: none; }
 #cap { position: absolute; left: 72px; right: 72px; top: 1236px; font-size: 26px; color: rgba(255,255,255,.8); display: none; }
 #wipe { position: absolute; top: -200px; bottom: -200px; width: 1400px; left: -1600px; transform: skewX(-12deg); }
 #prog { position: absolute; left: 72px; right: 72px; top: 282px; display: flex; gap: 10px; }
@@ -112,6 +119,18 @@ function render(t) {
   show($('band'), !!c.band);
   if (c.band) { $('band').innerHTML = '<div class="t">' + c.band + '</div><div class="s">' + (c.sub || '') + '</div>';
     $('band').style.transform = 'translateX(' + (-1080 * (1 - out3(clamp(dt / 0.25)))) + 'px)'; }
+  const phs = [...document.querySelectorAll('.ph')];
+  phs.forEach((p, i) => show(p, c.ph === i));
+  if (has(c.ph)) {
+    const p = phs[c.ph], h = p.offsetHeight, top = 1230 - h;
+    const x = 1080 * (1 - out3(clamp(dt / 0.22))) * (c.from || 1);
+    p.style.top = top + 'px'; p.style.transform = 'translate(' + x + 'px,' + (-14 * u) + 'px) rotate(' + (c.prot || 0) + 'deg)';
+    $('phcap').style.top = (top + h + 18) + 'px';
+  }
+  show($('phcap'), has(c.ph)); if (has(c.ph)) $('phcap').textContent = c.phcap || '';
+  const hd = $('head'); hd.style.display = c.head ? 'flex' : 'none';
+  if (c.head) { hd.innerHTML = '<div style="font-size:' + (c.hsize || 110) + 'px">' + c.head + '</div>' + (c.hsub ? '<small>' + c.hsub + '</small>' : '');
+    hd.style.transform = 'scale(' + (1.25 - 0.25 * back(clamp(dt / 0.16))) + ')'; hd.style.transformOrigin = '0%% 100%%'; }
   show($('cap'), !!c.cap); if (c.cap) $('cap').textContent = c.cap;
   // 색면 와이프 — 컷 시작 0.32초 동안 화면을 쓸고 지나간다
   const w = $('wipe');
@@ -276,8 +295,47 @@ def single_cuts(f):
     return cuts, hits, round(t, 3), 0
 
 
-def page(posters, cuts, hits, T, nseg):
+def story_cuts(f, base_dir):
+    """facts["reel_script"] 대본대로 컷을 만든다. 장면 키:
+      beats       박 수(0.5초 단위)
+      solid       "pink"|"blue"|"ink"|"paper" 색면 + big
+      big         가운데 큰 글자(<br> 줄바꿈)        photo  사진 경로(원본 그대로, 자르지 않음)
+      head/hsub   사진·포스터 위쪽 큰 글자/작은 글자   phcap  사진 아래 출처
+      poster      true 면 행사 포스터                 chip   왼쪽 위 분홍 칩
+      shake       글자 흔들림                          hit    이 컷 시작에 히트음
+    """
+    cols = {"pink": (R["pink"], "#1a1a1a"), "blue": (R["blue"], "#fff"), "ink": ("#1a1a1a", "#fff"), "paper": (R["paper"], "#1a1a1a")}
+    cuts, hits, photos, t = [], [0.0], [], 0.0
+    for i, sc in enumerate(f["reel_script"]):
+        d = sc.get("beats", 1) * B
+        c = dict(s=t, e=t + d, chip=sc.get("chip"), shake=sc.get("shake", False), brot=sc.get("rot", 0))
+        if sc.get("solid"):
+            bg, ink = cols[sc["solid"]]
+            c.update(solid=bg, ink=ink)
+        else:
+            c.update(bg=0)
+        if sc.get("big"):
+            c.update(big=sc["big"], size=sc.get("size") or _bigsize(sc["big"]), y=sc.get("y", 760))
+        if sc.get("photo"):
+            pth = os.path.join(base_dir, sc["photo"]) if not os.path.isabs(sc["photo"]) else sc["photo"]
+            photos.append(mic.poster_data_uri(pth))
+            c.update(ph=len(photos) - 1, phcap=sc.get("phcap", ""), **{"from": (-1 if i % 2 else 1)}, prot=(-1.5 if i % 2 else 1.5))
+        if sc.get("poster"):
+            c.update(pst=0, z0=1.5, z1=0.95, zs=t, zd=0.35, rot=-2)
+        if sc.get("head"):
+            c.update(head=sc["head"], hsub=sc.get("hsub"), hsize=sc.get("hsize") or min(104, _bigsize(sc["head"])))
+        if sc.get("cap"):
+            c["cap"] = sc["cap"]
+        if sc.get("hit") or i == 0:
+            hits.append(t)
+        cuts.append(c)
+        t += d
+    return cuts, hits, round(t, 3), 0, photos
+
+
+def page(posters, cuts, hits, T, nseg, photos=()):
     imgs = "".join(f'<img class="bg" src="{p}">' for p in posters)
+    phs = "".join(f'<img class="ph" src="{p}">' for p in photos)
     pst = ""
     for p in posters:
         w, h = _poster_size(_ratio(p))
@@ -287,6 +345,7 @@ def page(posters, cuts, hits, T, nseg):
     prog = "<i><b></b></i>" * nseg
     return f"""<!doctype html><html lang="ko"><head><meta charset="utf-8"><style>{CSS}</style></head>
 <body><div id="stage">{imgs}<div id="solid"></div><div id="dots"></div>{pst}
+{phs}<div id="phcap"></div><div id="head"></div>
 <div id="num"></div><div id="numlab"></div><div id="big"></div><div id="chip"></div><div id="band"></div><div id="cap"></div>
 <div id="prog">{prog}</div><div id="brand">픽아트 <b>pica</b></div><div id="wipe"></div></div>
 <script>{js}</script></body></html>"""
@@ -313,7 +372,7 @@ def bake(html_path, T, mp4, sample=None):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("mode", choices=["single", "week"])
+    ap.add_argument("mode", choices=["single", "week", "story"])
     ap.add_argument("facts", nargs="+")
     ap.add_argument("--out", required=True)
     ap.add_argument("--slug", required=True)
@@ -325,13 +384,17 @@ def main():
     os.makedirs(a.out, exist_ok=True)
     loaded = [load(p) for p in a.facts]
     fs, posters = [x[0] for x in loaded], [x[1] for x in loaded]
+    photos = []
     if a.mode == "single":
         cuts, hits, T, nseg = single_cuts(fs[0])
+        posters = posters[:1]
+    elif a.mode == "story":
+        cuts, hits, T, nseg, photos = story_cuts(fs[0], os.path.dirname(os.path.abspath(a.facts[0])))
         posters = posters[:1]
     else:
         cuts, hits, T, nseg = week_cuts(fs, a.region, a.range)
     hp = os.path.join(a.out, a.slug + ".html")
-    open(hp, "w", encoding="utf-8").write(page(posters, cuts, hits, T, nseg))
+    open(hp, "w", encoding="utf-8").write(page(posters, cuts, hits, T, nseg, photos))
     print(hp, f"{T}s")
     if a.html_only:
         return
