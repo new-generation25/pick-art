@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import { Container, Title, Text, TextInput, Button, SimpleGrid, Group, Box, Alert, Stack } from "@mantine/core";
 
 import { formatPeriod, todayKST } from "@/lib/utils";
+import { orderFeed, SECTION_LABELS } from "@/lib/feedOrder";
 
 interface HomeProps {
   searchParams: Promise<{
@@ -32,8 +33,8 @@ export default async function Home({ searchParams }: HomeProps) {
 
   const today = todayKST();
 
-  // Transform DB data to match EventCard props
-  const formattedDbEvents = dbEvents.map(event => ({
+  // DB 행을 EventCard 모양으로
+  const toCard = (event: any) => ({
     id: event.id,
     title: event.title,
     category: event.category,
@@ -42,10 +43,11 @@ export default async function Home({ searchParams }: HomeProps) {
     imageUrl: event.poster_image_url,
     isFree: event.is_free,
     isEnded: !!event.event_date_end && event.event_date_end < today,
-  }));
+  });
 
-  // 예전에는 DB가 비면 2024년 예시 카드를 보여 줬다. 이제는 실제 결과만 보여 준다(없으면 빈 상태 안내)
-  const allEvents = formattedDbEvents;
+  // 날짜 묶음(오늘·이번 주·다음 주·그 이후·상시·장기·최근 끝난 행사)과 묶음 안의 순서
+  const sections = orderFeed(dbEvents, today).map(s => ({ ...s, cards: s.items.map(toCard) }));
+  const allEvents = dbEvents;
 
   // 머리말에 쓰는 오늘 날짜와 결과 수 (표시용)
   const [, todayMonth, todayDay] = today.split("-").map(Number);
@@ -72,7 +74,7 @@ export default async function Home({ searchParams }: HomeProps) {
               </h1>
               <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
                 {hasFilter ? "조건에 맞는 행사" : "지금 볼 수 있는 행사"}{" "}
-                <strong className="font-bold text-ink">{allEvents.length}건</strong>을 날짜순으로 모았습니다.
+                <strong className="font-bold text-ink">{allEvents.length}건</strong>을 날짜별로 묶었습니다.
               </p>
               <form action="/" method="GET" className="mt-5" role="search">
                 <TextInput
@@ -96,7 +98,22 @@ export default async function Home({ searchParams }: HomeProps) {
 
       {/* 행사 목록 */}
       <Container size="xl" py={{ base: 20, sm: 40 }}>
-        <EventList initialEvents={allEvents} filters={filters} />
+        {sections.length === 0 ? (
+          <EventList initialEvents={[]} filters={filters} />
+        ) : (
+          sections.map(s => (
+            <section key={s.key} className="mb-12 last:mb-0" aria-labelledby={`sec-${s.key}`}>
+              <div className="mb-4 flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b-2 border-line pb-2">
+                <h2 id={`sec-${s.key}`} className="pica-display text-[24px] leading-none text-ink sm:text-[28px]">
+                  {SECTION_LABELS[s.key].title}
+                </h2>
+                <span className="text-[14px] font-bold text-ink">{s.cards.length}건</span>
+                <span className="text-[13px] text-ink-soft">{SECTION_LABELS[s.key].note}</span>
+              </div>
+              <EventList initialEvents={s.cards} filters={filters} showEndNote={false} />
+            </section>
+          ))
+        )}
       </Container>
 
       {/* 소식 받기: 뉴스레터 + 키워드 알림 */}

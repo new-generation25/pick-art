@@ -26,9 +26,10 @@ interface EventListProps {
     isSelectMode?: boolean;
     selectedIds?: string[];
     onSelect?: (id: string) => void;
+    showEndNote?: boolean; // 홈처럼 여러 묶음으로 나눠 보여 줄 때는 끈다
 }
 
-export function EventList({ initialEvents, filters = {}, limit, isSelectMode = false, selectedIds = [], onSelect }: EventListProps) {
+export function EventList({ initialEvents, filters = {}, limit, isSelectMode = false, selectedIds = [], onSelect, showEndNote = true }: EventListProps) {
     // initialEvents 를 받으면(빈 배열 포함) 서버가 필터를 적용한 전체 목록이다 → 다시 불러오거나 이어 붙이지 않는다.
     // 예전에는 빈 배열이면 필터를 무시한 전체 목록을 다시 불러왔고, 목록이 있어도 무한 스크롤이 같은 행사를 또 붙였다.
     const serverProvided = initialEvents !== undefined;
@@ -236,7 +237,7 @@ export function EventList({ initialEvents, filters = {}, limit, isSelectMode = f
                             <Text size="sm" fw={600} c="var(--pk-ink-soft)">행사를 불러오는 중</Text>
                         </Stack>
                     )}
-                    {!hasMore && events.length > 0 && !limit && (
+                    {showEndNote && !hasMore && events.length > 0 && !limit && (
                         <Text c="var(--pk-ink-soft)" fw={500} size="sm">
                             {events.length}개 행사를 모두 보여 드렸습니다
                         </Text>

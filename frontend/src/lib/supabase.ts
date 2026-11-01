@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { todayKST, monthsAgoKST } from './utils';
+import { addDays } from './feedOrder';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -28,51 +29,26 @@ export async function getPublishedEvents(filters?: { region?: string; category?:
         query = query.ilike('title', `%${filters.search}%`);
     }
 
-    // Date filtering
+    // 기간 필터: 한국 날짜 기준. 예전에는 toISOString(UTC)이라 자정~오전 9시에 '오늘'이 어제로 잡혔다.
+    // [오늘, 마지막 날] 안에 하루라도 걸치는 행사(끝나는 날 ≥ 오늘, 시작일 ≤ 마지막 날)
     if (filters?.date) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        let startDate: Date | null = null;
-        let endDate: Date | null = null;
-
-        if (filters.date === 'today') {
-            startDate = new Date(today);
-            endDate = new Date(today);
-            endDate.setDate(endDate.getDate() + 1);
-        } else if (filters.date === 'week') {
-            startDate = new Date(today);
-            endDate = new Date(today);
-            endDate.setDate(endDate.getDate() + 7);
-        } else if (filters.date === 'month') {
-            startDate = new Date(today);
-            endDate = new Date(today);
-            endDate.setMonth(endDate.getMonth() + 1);
-        }
-
-        if (startDate && endDate) {
-            const startDateStr = startDate.toISOString().split('T')[0];
-            const endDateStr = endDate.toISOString().split('T')[0];
-
-            // Filter events where event_date_start or event_date_end is within the range
-            query = query.or(`event_date_start.gte.${startDateStr},event_date_end.gte.${startDateStr}`)
-                         .lte('event_date_start', endDateStr);
+        const last = filters.date === 'today' ? today
+            : filters.date === 'week' ? addDays(today, 7)
+            : filters.date === 'month' ? addDays(today, 30)
+            : null;
+        if (last) {
+            query = query.gte('event_date_end', today).lte('event_date_start', last);
         }
     }
 
-    const { data, error } = await query
-        .order('event_date_start', { ascending: true })
-        .order('event_date_end', { ascending: true });
+    const { data, error } = await query.order('event_date_start', { ascending: true });
 
     if (error) {
         console.error('Error fetching events:', error);
         return [];
     }
-    // 진행 중·예정 행사를 먼저(시작일순), 끝난 행사는 뒤에(최근에 끝난 순)
-    const ongoing = data.filter(e => e.event_date_end >= today);
-    const ended = data.filter(e => e.event_date_end < today)
-        .sort((a, b) => (b.event_date_end || '').localeCompare(a.event_date_end || ''));
-    return [...ongoing, ...ended];
+    // 노출 순서(묶음·정렬·섞기)는 lib/feedOrder.ts 의 orderFeed 가 정한다
+    return data;
 }
 
 export async function getEventById(id: string) {
