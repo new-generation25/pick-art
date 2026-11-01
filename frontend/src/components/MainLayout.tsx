@@ -19,6 +19,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
         <AppShell
             header={{ height: 60 }}
             padding={0} // 패딩을 0으로 설정하여 디자인 제어권 확보 (Tailwind나 내부 컨테이너로 처리)
+            className="pica-public"
         >
             <AppShell.Header>
                 <Header />

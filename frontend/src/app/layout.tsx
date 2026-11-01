@@ -31,6 +31,11 @@ export default function RootLayout({
     <html lang="ko" suppressHydrationWarning>
       <head>
         <ColorSchemeScript />
+        {/* Pretendard (OFL) — 공개 화면 본문 글꼴. 쓰이는 글자 묶음만 내려받는 dynamic subset */}
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+        />
       </head>
       <body className={cn(
         "min-h-screen bg-neutral-50 font-sans antialiased text-neutral-900",

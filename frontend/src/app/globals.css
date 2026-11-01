@@ -12,6 +12,22 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* 공개 화면 디자인 토큰 (2026-11 리디자인). 남해 쪽빛 + 진주 유등 노랑, 분야별 색 4가지 */
+@theme {
+  --color-ink: #1f2a36;
+  --color-ink-soft: #5b6672;
+  --color-paper: #f5f6f3;
+  --color-line: #dde2e5;
+  --color-sea: #0b6b74;
+  --color-sea-deep: #08525a;
+  --color-sea-tint: #e3f0f0;
+  --color-lantern: #f0b429;
+  --color-cat-show: #b8325a;
+  --color-cat-exhibit: #0b6b74;
+  --color-cat-festival: #b36d00;
+  --color-cat-event: #4a55c9;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -23,4 +39,69 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* 공개 화면 전체(관리자 화면 제외)에 Pretendard 적용. Mantine 컴포넌트도 이 변수를 읽는다 */
+.pica-public {
+  --mantine-font-family: "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  --mantine-color-body: var(--color-paper);
+  font-family: var(--mantine-font-family);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  word-break: keep-all;
+  min-height: 100vh;
+}
+
+.pica-public :focus-visible {
+  outline: 2px solid var(--color-sea);
+  outline-offset: 2px;
+}
+
+/* 필터 칩 줄: 모바일에서는 가로로 밀어 보고, 넓은 화면에서는 줄바꿈 */
+.pica-chiprow {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+  padding: 2px 16px 2px 2px;
+  mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+}
+.pica-chiprow::-webkit-scrollbar { display: none; }
+@media (min-width: 768px) {
+  .pica-chiprow { flex-wrap: wrap; overflow: visible; mask-image: none; padding-right: 0; }
+}
+
+.pica-chip {
+  flex: none;
+  scroll-snap-align: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--color-line);
+  background: #fff;
+  color: var(--color-ink);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color .15s, border-color .15s, color .15s;
+}
+.pica-chip:hover { border-color: var(--color-ink-soft); }
+.pica-chip[aria-pressed="true"] {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: #fff;
+}
+
+/* 행사 카드의 날짜 표: 표 끝을 뜯는 점선 */
+.pica-stub {
+  border-right: 1.5px dashed var(--color-line);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pica-public * { transition: none !important; }
 }

@@ -154,7 +154,7 @@ export function EventList({ initialEvents, filters = {}, limit, isSelectMode = f
 
     return (
         <Stack gap="xl">
-            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3, xl: 4 }} spacing="lg">
+            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3, xl: 4 }} spacing={{ base: 10, sm: 'lg' }} verticalSpacing={{ base: 10, sm: 'xl' }}>
                 {events.map((event, idx) => (
                     <Box
                         key={event.id + idx}
@@ -216,12 +216,13 @@ export function EventList({ initialEvents, filters = {}, limit, isSelectMode = f
 
             {/* Empty State */}
             {events.length === 0 && !loading && (
-                <Paper py={60} radius="xl" withBorder style={{ borderStyle: 'dashed', backgroundColor: 'var(--mantine-color-gray-0)' }}>
-                    <Stack align="center" gap="md">
-                        <ThemeIcon size={64} radius="md" color="gray" variant="light">
-                            <AlertCircle style={{ width: rem(32), height: rem(32) }} />
+                <Paper py={48} px="md" radius="lg" withBorder style={{ borderStyle: 'dashed', borderColor: 'var(--color-line)', backgroundColor: 'white' }}>
+                    <Stack align="center" gap="xs">
+                        <ThemeIcon size={48} radius="xl" color="gray" variant="light">
+                            <AlertCircle style={{ width: rem(24), height: rem(24) }} />
                         </ThemeIcon>
-                        <Text c="dimmed" size="lg" fw={700}>찾으시는 조건의 행사가 없습니다.</Text>
+                        <Text c="var(--color-ink)" size="lg" fw={700} ta="center">조건에 맞는 행사가 없습니다</Text>
+                        <Text c="var(--color-ink-soft)" size="sm" ta="center">지역이나 기간을 &lsquo;전체&rsquo;로 바꾸거나, 종료된 행사도 보기를 켜 보세요.</Text>
                     </Stack>
                 </Paper>
             )}
@@ -231,13 +232,13 @@ export function EventList({ initialEvents, filters = {}, limit, isSelectMode = f
                 <div ref={observerTarget} style={{ padding: '2rem 0', display: 'flex', justifyContent: 'center' }}>
                     {loading && (
                         <Stack align="center" gap="xs">
-                            <Loader color="indigo" type="dots" />
-                            <Text size="sm" fw={700} c="indigo" tt="uppercase" style={{ letterSpacing: '0.1em' }}>데이터를 불러오는 중...</Text>
+                            <Loader color="teal" type="dots" />
+                            <Text size="sm" fw={600} c="var(--color-ink-soft)">행사를 불러오는 중</Text>
                         </Stack>
                     )}
                     {!hasMore && events.length > 0 && !limit && (
-                        <Text c="dimmed" fw={700} tt="uppercase" bg="gray.1" px="lg" py="xs" style={{ borderRadius: 999, letterSpacing: '0.1em' }} size="xs">
-                            모든 행사를 불러왔습니다
+                        <Text c="var(--color-ink-soft)" fw={500} size="sm">
+                            {events.length}개 행사를 모두 보여 드렸습니다
                         </Text>
                     )}
                 </div>
