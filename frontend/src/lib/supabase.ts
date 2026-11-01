@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { todayKST, monthsAgoKST } from './utils';
 import { addDays } from './feedOrder';
+import { HIDDEN_CATEGORIES } from './categories';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -16,6 +17,11 @@ export async function getPublishedEvents(filters?: { region?: string; category?:
         .select('*')
         .eq('status', 'PUBLISHED')
         .gte('event_date_end', filters?.ended === '1' ? monthsAgoKST(1) : today);
+
+    // 숨김 분야(예: 관광)는 공개 피드에 내보내지 않는다
+    for (const c of HIDDEN_CATEGORIES) {
+        query = query.neq('category', c);
+    }
 
     if (filters?.region && filters.region !== '전체') {
         query = query.eq('region', filters.region);

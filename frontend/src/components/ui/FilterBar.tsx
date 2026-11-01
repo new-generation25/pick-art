@@ -6,9 +6,10 @@ import { Checkbox } from "@mantine/core";
 import { Calendar } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { GN_REGIONS } from "@/lib/regions";
+import { CATEGORIES as FEED_CATEGORIES } from "@/lib/categories";
 
 const REGIONS = ["전체", ...GN_REGIONS];
-const CATEGORIES = ["전체", "공연", "전시", "축제", "행사"];
+const CATEGORIES = ["전체", ...FEED_CATEGORIES];
 const DATE_FILTERS = [
     { label: "전체", value: "all" },
     { label: "오늘", value: "today" },
