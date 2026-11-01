@@ -1,0 +1,231 @@
+<title>pica 테마 시안 3종</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@500;800&family=Jua&family=Gowun+Dodum&family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
+<style>
+/* 레이아웃: 시안마다 한 띠(설명 왼쪽, 휴대폰 화면 오른쪽), 마지막에 비교표 */
+:root {
+  --bg: #f4f5f2; --fg: #1f2a36; --soft: #5b6672; --line: #d9dee1; --panel: #ffffff;
+  --font-ui: "IBM Plex Sans KR", "Malgun Gothic", sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #15191e; --fg: #e8ebee; --soft: #9aa5b0; --line: #2c333b; --panel: #1c2128; color-scheme: dark } }
+:root[data-theme="dark"] { --bg: #15191e; --fg: #e8ebee; --soft: #9aa5b0; --line: #2c333b; --panel: #1c2128; color-scheme: dark }
+
+body { background: var(--bg); color: var(--fg); font-family: var(--font-ui); font-size: 15px; line-height: 1.6; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 64px; }
+h1 { font-size: 30px; line-height: 1.25; margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
+.lede { color: var(--soft); max-width: 62ch; margin: 10px 0 0; }
+.theme { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 40px; padding-block: 40px; border-top: 1px solid var(--line); margin-top: 40px; align-items: start; }
+.theme h2 { font-size: 24px; margin: 0; letter-spacing: -0.02em; }
+.theme .tag { color: var(--soft); margin: 4px 0 16px; }
+.theme p { max-width: 60ch; margin: 0 0 12px; }
+.theme dl { display: grid; grid-template-columns: 84px minmax(0,1fr); gap: 8px 14px; margin: 18px 0 0; }
+.theme dt { color: var(--soft); font-weight: 600; }
+.theme dd { margin: 0; }
+.sw { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.sw span { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.sw i { width: 22px; height: 22px; border-radius: 6px; border: 1px solid rgba(0,0,0,.12); display: inline-block; }
+@media (max-width: 820px) { .theme { grid-template-columns: minmax(0,1fr); } .phone { margin: 0 auto; } }
+
+/* 휴대폰 화면 틀 (시안 자체는 각 테마 색으로 고정) */
+.phone { width: 340px; max-width: 100%; border-radius: 28px; overflow: hidden; border: 6px solid #2a2f36; box-shadow: 0 18px 40px -20px rgba(0,0,0,.45); }
+.scr { padding: 14px 14px 18px; }
+.bar { display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px; }
+.chips { display: flex; gap: 6px; overflow: hidden; margin: 12px 0 14px; }
+.chip { flex: none; padding: 5px 12px; border-radius: 999px; font-size: 12.5px; }
+.card { display: grid; grid-template-columns: 78px 66px minmax(0,1fr); min-height: 112px; margin-top: 10px; overflow: hidden; }
+.poster { position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 6px; font-size: 11px; line-height: 1.2; }
+.stub { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-variant-numeric: tabular-nums; }
+.stub small { font-size: 10.5px; line-height: 1.1; }
+.stub b { font-size: 21px; line-height: 1.1; margin: 3px 0; }
+.info { padding: 10px 10px 10px 12px; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.info .t { font-size: 14.5px; line-height: 1.3; }
+.info .m { font-size: 11.5px; margin-top: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* A. 남강 유등 밤 */
+.a { background: #141b33; color: #f3eee4; font-family: "IBM Plex Sans KR", sans-serif; }
+.a .logo { font-family: "Hahmlet", serif; font-weight: 800; font-size: 20px; color: #ffe9c2; display: flex; align-items: center; gap: 8px; }
+.a .logo::before { content: ""; width: 12px; height: 16px; border-radius: 6px 6px 3px 3px; background: radial-gradient(circle at 50% 40%, #ffe9c2, #f5a623 60%, #e0533d); box-shadow: 0 0 12px 3px rgba(245,166,35,.55); }
+.a .bar { border-bottom: 1px solid rgba(255,233,194,.12); }
+.a .hl { font-family: "Hahmlet", serif; font-weight: 800; font-size: 25px; line-height: 1.25; margin: 14px 0 4px; letter-spacing: -0.02em; }
+.a .sub { font-size: 12.5px; color: #b9b3c8; }
+.a .river { height: 10px; margin-top: 12px; background: repeating-linear-gradient(90deg, rgba(245,166,35,.55) 0 18px, transparent 18px 30px); mask-image: linear-gradient(#000, transparent); opacity: .7; }
+.a .chip { border: 1px solid rgba(255,233,194,.25); color: #e8dfcf; }
+.a .chip.on { background: #f5a623; color: #141b33; border-color: #f5a623; font-weight: 700; }
+.a .card { background: #1e2747; border-radius: 14px; }
+.a .stub b { color: #ffd27a; text-shadow: 0 0 14px rgba(245,166,35,.6); font-family: "Hahmlet", serif; }
+.a .stub small { color: #b9b3c8; }
+.a .stub { background: radial-gradient(circle at 50% 50%, rgba(245,166,35,.16), transparent 70%); }
+.a .info .t { font-weight: 700; }
+.a .info .cat { font-size: 11.5px; color: #ffb36b; }
+.a .info .m { color: #9d98b0; }
+.a .end { filter: grayscale(1) brightness(.75); }
+.a .badge { position: absolute; top: 6px; left: 6px; background: #f3eee4; color: #141b33; font-weight: 700; font-size: 10.5px; padding: 1px 6px; border-radius: 4px; }
+
+/* B. 동피랑 벽화 골목 */
+.b { background: #eef6fa; color: #263238; font-family: "Gowun Dodum", sans-serif; }
+.b .logo { font-family: "Jua", sans-serif; font-size: 22px; display: flex; gap: 2px; }
+.b .logo span:nth-child(1){color:#3e9bdb} .b .logo span:nth-child(2){color:#f26d7d} .b .logo span:nth-child(3){color:#f0a500} .b .logo span:nth-child(4){color:#2fae88}
+.b .hl { font-family: "Jua", sans-serif; font-size: 27px; line-height: 1.2; margin: 14px 0 4px; }
+.b .sub { font-size: 12.5px; color: #55656e; }
+.b .chip { background: #fff; border: 2px solid #263238; font-family: "Jua", sans-serif; font-size: 13px; }
+.b .chip.on { background: #263238; color: #fff; }
+.b .chip.c1 { background: #f26d7d; border-color: #f26d7d; color: #fff; }
+.b .chip.c2 { background: #3e9bdb; border-color: #3e9bdb; color: #fff; }
+.b .chip.c3 { background: #ffc83d; border-color: #ffc83d; }
+.b .card { background: #fff; border-radius: 18px; border: 2px solid #263238; box-shadow: 4px 4px 0 #263238; }
+.b .card + .card { margin-top: 14px; }
+.b .stub { margin: 10px 4px; border-radius: 12px; transform: rotate(-3deg); color: #fff; }
+.b .stub b { font-family: "Jua", sans-serif; font-size: 23px; }
+.b .info .t { font-family: "Jua", sans-serif; font-size: 15.5px; font-weight: 400; }
+.b .info .cat { font-size: 12px; font-weight: 700; }
+.b .info .m { color: #55656e; }
+.b .end { filter: grayscale(1); opacity: .7; }
+.b .badge { position: absolute; top: 6px; left: 6px; background: #263238; color: #fff; font-family: "Jua", sans-serif; font-size: 11px; padding: 1px 7px; border-radius: 999px; }
+
+/* C. 리소 인쇄 공연 전단 */
+.c { background: #ecede6; color: #1a1a1a; font-family: "IBM Plex Sans KR", sans-serif; }
+.c .logo { font-family: "Black Han Sans", sans-serif; font-size: 24px; color: #2350d8; text-shadow: 2px 1px 0 #ff4fa3; }
+.c .bar { border-bottom: 2px solid #1a1a1a; }
+.c .hl { font-family: "Black Han Sans", sans-serif; font-size: 31px; line-height: 1.1; margin: 14px 0 6px; color: #1a1a1a; text-shadow: 3px 2px 0 rgba(255,79,163,.85); }
+.c .sub { font-size: 12.5px; }
+.c .chip { border: 1.5px solid #1a1a1a; border-radius: 0; font-weight: 600; }
+.c .chip.on { background: #ff4fa3; border-color: #ff4fa3; color: #1a1a1a; }
+.c .card { background: #f7f7f2; border: 1.5px solid #1a1a1a; border-radius: 0; position: relative; }
+.c .poster::after { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(35,80,216,.35) 1px, transparent 1.4px); background-size: 4px 4px; mix-blend-mode: multiply; }
+.c .stub { border-left: 2px dotted #1a1a1a; border-right: 2px dotted #1a1a1a; }
+.c .stub b { font-family: "Black Han Sans", sans-serif; font-size: 24px; color: #2350d8; mix-blend-mode: multiply; text-shadow: 1.5px 1px 0 rgba(255,79,163,.9); }
+.c .info .t { font-weight: 700; }
+.c .info .c2 { font-size: 11.5px; font-weight: 700; color: #2350d8; }
+.c .info .m { color: #444; }
+.c .end { filter: grayscale(1) contrast(.9); }
+.c .badge { position: absolute; top: 6px; left: 6px; background: #1a1a1a; color: #ecede6; font-weight: 700; font-size: 10.5px; padding: 1px 6px; z-index: 1; }
+
+/* 포스터 자리 (실제 포스터 대신 색면) */
+.p1 { background: linear-gradient(160deg, #3b1d6e, #a0142c); color: #fff; font-weight: 700; }
+.p2 { background: radial-gradient(circle at 60% 70%, #3a6ea5, #0c0f1c 70%); color: #dfe8f5; font-weight: 700; }
+.p3 { background: linear-gradient(135deg, #ff7a1a 0 50%, #f4f0e8 50%); color: #1a1a1a; font-weight: 700; }
+
+/* 비교표 */
+.cmp { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 36px; }
+.cmp h2 { font-size: 22px; margin: 0 0 14px; }
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 640px; background: var(--panel); }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+th { color: var(--soft); font-weight: 600; white-space: nowrap; }
+.pick { margin-top: 20px; max-width: 70ch; }
+.pick strong { font-weight: 700; }
+</style>
+
+<div class="wrap">
+  <h1>pica 테마 시안 3종</h1>
+  <p class="lede">지금 배치(날짜 표가 있는 가로 카드, 칩 필터)는 그대로 두고 색, 글꼴, 핵심 장식만 바꾼 시안입니다. 오른쪽 휴대폰 화면은 모양을 보여 주기 위한 모형입니다. 카드 내용은 예시이고(두 번째는 종료 표시, 세 번째는 축제 색 예시), 포스터 자리는 색면으로 대신했습니다.</p>
+
+  <!-- A -->
+  <section class="theme" id="lantern">
+    <div>
+      <h2>A. 남강 유등 밤</h2>
+      <p class="tag">진주 남강 유등축제의 밤 강물과 등불</p>
+      <p>짙은 밤 남색 바탕에 등불색 하나로 날짜를 밝힙니다. 날짜 숫자가 등처럼 은은하게 빛나고, 헤더 아래에는 강물에 비친 등불 줄이 지나갑니다. 어두운 바탕이라 알록달록한 포스터가 가장 또렷하게 떠오릅니다.</p>
+      <dl>
+        <dt>핵심 장식</dt><dd>빛나는 날짜 숫자, 유등 모양 로고, 강물 반사 줄</dd>
+        <dt>글꼴</dt><dd>제목 함렛(Hahmlet, 명조 계열), 본문 IBM Plex Sans KR</dd>
+        <dt>색</dt><dd><div class="sw">
+          <span><i style="background:#141b33"></i>밤강 #141B33</span>
+          <span><i style="background:#1e2747"></i>물결 #1E2747</span>
+          <span><i style="background:#f5a623"></i>등불 #F5A623</span>
+          <span><i style="background:#e0533d"></i>붉은 등 #E0533D</span>
+          <span><i style="background:#f3eee4"></i>한지빛 #F3EEE4</span>
+        </div></dd>
+        <dt>잘 맞는 곳</dt><dd>축제·공연 중심, 저녁에 휴대폰으로 보는 사람, 경남다운 인상</dd>
+      </dl>
+    </div>
+    <div class="phone"><div class="scr a">
+      <div class="bar"><span class="logo">pica</span><span style="font-size:12px;color:#b9b3c8">로그인</span></div>
+      <div class="hl">경남에서 열리는<br>공연·전시·축제</div>
+      <div class="sub">11월 1일 기준, 지금 볼 수 있는 행사 452건</div>
+      <div class="river"></div>
+      <div class="chips"><span class="chip on">전체</span><span class="chip">창원</span><span class="chip">김해</span><span class="chip">진주</span><span class="chip">통영</span></div>
+      <div class="card"><div class="poster p1">사천 세계<br>아트서커스</div><div class="stub"><small>진행 중</small><b>11.30</b><small>월요일까지</small></div><div class="info"><span class="cat">● 공연</span><span class="t">세계아트쇼, 사천서커스</span><span class="m">사천세계아트서커스</span></div></div>
+      <div class="card"><div class="poster p2 end"><span class="badge">종료</span>CARBON CLOCK</div><div class="stub"><small>2026</small><b style="color:#9d98b0;text-shadow:none">10.29</b><small>끝난 날</small></div><div class="info"><span class="cat" style="color:#9d98b0">● 전시</span><span class="t" style="color:#9d98b0">카본 클럭 Carbon Clock</span><span class="m">클레이아크김해미술관</span></div></div>
+      <div class="card"><div class="poster p3">글자감각</div><div class="stub"><small>2026</small><b>11.14</b><small>토요일</small></div><div class="info"><span class="cat">● 축제</span><span class="t">유등 만들기 체험</span><span class="m">진주 남강 둔치</span></div></div>
+    </div></div>
+  </section>
+
+  <!-- B -->
+  <section class="theme" id="mural">
+    <div>
+      <h2>B. 동피랑 벽화 골목</h2>
+      <p class="tag">통영 동피랑 마을의 칠한 벽과 손글씨 간판</p>
+      <p>밝은 하늘색 바탕에 분야마다 벽 색 하나씩(공연 분홍, 전시 하늘, 축제 노랑, 행사 민트)을 칠합니다. 카드는 굵은 외곽선과 그림자로 손으로 그린 간판처럼 보이고, 날짜 표는 살짝 기울어진 색 딱지입니다. 가족·어린이 행사가 많을 때 잘 어울립니다.</p>
+      <dl>
+        <dt>핵심 장식</dt><dd>분야별 색 날짜 딱지(기울임), 굵은 외곽선 카드, 네 색 로고</dd>
+        <dt>글꼴</dt><dd>제목 주아(Jua), 본문 고운돋움(Gowun Dodum)</dd>
+        <dt>색</dt><dd><div class="sw">
+          <span><i style="background:#eef6fa"></i>하늘벽 #EEF6FA</span>
+          <span><i style="background:#f26d7d"></i>공연 #F26D7D</span>
+          <span><i style="background:#3e9bdb"></i>전시 #3E9BDB</span>
+          <span><i style="background:#ffc83d"></i>축제 #FFC83D</span>
+          <span><i style="background:#5cc9a7"></i>행사 #5CC9A7</span>
+          <span><i style="background:#263238"></i>먹선 #263238</span>
+        </div></dd>
+        <dt>잘 맞는 곳</dt><dd>가족·어린이 공연, 체험 행사, 친근한 동네 안내 느낌</dd>
+      </dl>
+    </div>
+    <div class="phone"><div class="scr b">
+      <div class="bar"><span class="logo"><span>p</span><span>i</span><span>c</span><span>a</span></span><span style="font-size:12px">로그인</span></div>
+      <div class="hl">이번 달 경남,<br>어디 가 볼까요?</div>
+      <div class="sub">11월 1일 기준, 지금 볼 수 있는 행사 452건</div>
+      <div class="chips"><span class="chip on">전체</span><span class="chip c1">공연</span><span class="chip c2">전시</span><span class="chip c3">축제</span></div>
+      <div class="card"><div class="poster p1">사천 세계<br>아트서커스</div><div class="stub" style="background:#f26d7d"><small>진행 중</small><b>11.30</b><small>월요일까지</small></div><div class="info"><span class="cat" style="color:#d94a5c">공연</span><span class="t">세계아트쇼, 사천서커스</span><span class="m">사천세계아트서커스</span></div></div>
+      <div class="card"><div class="poster p2 end"><span class="badge">종료</span>CARBON CLOCK</div><div class="stub" style="background:#a9b4ba"><small>2026</small><b>10.29</b><small>끝난 날</small></div><div class="info"><span class="cat" style="color:#7a8a93">전시</span><span class="t" style="color:#7a8a93">카본 클럭 Carbon Clock</span><span class="m">클레이아크김해미술관</span></div></div>
+      <div class="card"><div class="poster p3">글자감각</div><div class="stub" style="background:#ffc83d;color:#263238"><small>2026</small><b>11.14</b><small>토요일</small></div><div class="info"><span class="cat" style="color:#b47f00">축제</span><span class="t">유등 만들기 체험</span><span class="m">진주 남강 둔치</span></div></div>
+    </div></div>
+  </section>
+
+  <!-- C -->
+  <section class="theme" id="riso">
+    <div>
+      <h2>C. 리소 인쇄 공연 전단</h2>
+      <p class="tag">소극장 앞에 붙는 두 도 인쇄 전단과 입장권</p>
+      <p>회녹색 신문지 바탕에 형광 분홍과 파랑 두 잉크만 씁니다. 제목과 날짜 숫자는 두 잉크가 살짝 어긋나게 겹쳐 찍힌 모양이고, 포스터에는 망점이 깔립니다. 카드는 모서리 없는 입장권이고 날짜 칸 양옆은 절취선입니다. 전시·공연을 찾아다니는 20~30대 관객에게 맞춘 시안입니다.</p>
+      <dl>
+        <dt>핵심 장식</dt><dd>어긋나게 찍힌 제목, 파란 도장 날짜, 포스터 망점, 절취선</dd>
+        <dt>글꼴</dt><dd>제목 검은고딕(Black Han Sans), 본문 IBM Plex Sans KR</dd>
+        <dt>색</dt><dd><div class="sw">
+          <span><i style="background:#ecede6"></i>신문지 #ECEDE6</span>
+          <span><i style="background:#ff4fa3"></i>형광 분홍 #FF4FA3</span>
+          <span><i style="background:#2350d8"></i>리소 파랑 #2350D8</span>
+          <span><i style="background:#1a1a1a"></i>먹 #1A1A1A</span>
+        </div></dd>
+        <dt>잘 맞는 곳</dt><dd>공연·전시 중심, 인스타그램 공유, 독립 예술 공간 느낌</dd>
+      </dl>
+    </div>
+    <div class="phone"><div class="scr c">
+      <div class="bar"><span class="logo">pica</span><span style="font-size:12px;font-weight:600">로그인</span></div>
+      <div class="hl">경남 공연·전시<br>이번 달 판</div>
+      <div class="sub">11월 1일 기준, 지금 볼 수 있는 행사 452건</div>
+      <div class="chips"><span class="chip on">전체</span><span class="chip">오늘</span><span class="chip">이번 주</span><span class="chip">이번 달</span></div>
+      <div class="card"><div class="poster p1">사천 세계<br>아트서커스</div><div class="stub"><small>진행 중</small><b>11.30</b><small>월요일까지</small></div><div class="info"><span class="c2">공연</span><span class="t">세계아트쇼, 사천서커스</span><span class="m">사천세계아트서커스</span></div></div>
+      <div class="card"><div class="poster p2 end"><span class="badge">종료</span>CARBON CLOCK</div><div class="stub"><small>2026</small><b style="color:#888;text-shadow:none">10.29</b><small>끝난 날</small></div><div class="info"><span class="c2" style="color:#888">전시</span><span class="t" style="color:#777">카본 클럭 Carbon Clock</span><span class="m">클레이아크김해미술관</span></div></div>
+      <div class="card"><div class="poster p3">글자감각</div><div class="stub"><small>2026</small><b>11.14</b><small>토요일</small></div><div class="info"><span class="c2">축제</span><span class="t">유등 만들기 체험</span><span class="m">진주 남강 둔치</span></div></div>
+    </div></div>
+  </section>
+
+  <section class="cmp">
+    <h2>세 시안 비교</h2>
+    <div class="tbl"><table>
+      <thead><tr><th></th><th>A. 남강 유등 밤</th><th>B. 동피랑 벽화 골목</th><th>C. 리소 인쇄 전단</th></tr></thead>
+      <tbody>
+        <tr><th>첫인상</th><td>차분하고 고급스러움, 밤 축제</td><td>밝고 친근함, 동네 나들이</td><td>힙하고 거친 인쇄물, 예술 현장</td></tr>
+        <tr><th>포스터와의 관계</th><td>어두운 바탕이라 포스터가 가장 돋보임</td><td>바탕 색이 많아 화려한 포스터와 부딪칠 수 있음</td><td>망점·두 잉크가 포스터 색을 일부 덮음</td></tr>
+        <tr><th>경남다움</th><td>진주 유등이라는 대표 이미지가 분명</td><td>통영 동피랑에서 왔지만 다른 벽화마을과 겹침</td><td>지역색보다 장르(공연·전시)색</td></tr>
+        <tr><th>읽기 쉬움</th><td>밝은 글자/어두운 바탕 대비 충분, 긴 설명은 상세 화면만 밝게 두는 편이 좋음</td><td>가장 쉬움, 다만 주아는 긴 제목에서 무거워짐</td><td>어긋난 그림자는 제목·날짜에만, 본문은 평범하게 둬야 함</td></tr>
+        <tr><th>바꿀 범위</th><td>색 토큰 + 제목 글꼴 + 날짜 표 빛 효과</td><td>색 토큰 + 글꼴 2개 + 카드 외곽선·딱지</td><td>색 토큰 + 제목 글꼴 + 망점·겹침 효과</td></tr>
+      </tbody>
+    </table></div>
+    <p class="pick"><strong>추천은 A. 남강 유등 밤입니다.</strong> 경남 문화예술 안내라는 정체성이 가장 분명하고, 피드에서 주인공인 포스터를 가장 잘 살립니다. 가족 행사 비중이 크면 B, 공연·전시 관객층을 노리면 C가 낫습니다.</p>
+  </section>
+</div>

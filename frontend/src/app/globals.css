@@ -12,6 +12,22 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* 공개 화면 디자인 토큰. 실제 값은 아래 테마 묶음(.pica-public[data-pica-theme=...])이 정한다.
+   유틸리티(bg-ink, text-accent 등)는 이 변수를 읽으므로 테마를 바꾸면 화면 전체 색이 같이 바뀐다 */
+@theme inline {
+  --color-ink: var(--pk-ink);
+  --color-ink-soft: var(--pk-ink-soft);
+  --color-paper: var(--pk-paper);
+  --color-card: var(--pk-card);
+  --color-line: var(--pk-line);
+  --color-accent: var(--pk-accent);
+  --color-on-accent: var(--pk-on-accent);
+  --color-mark: var(--pk-mark);
+  --color-on-mark: var(--pk-on-mark);
+  --color-band: var(--pk-band);
+  --color-on-band: var(--pk-on-band);
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -23,4 +39,203 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ── 테마 묶음 ──────────────────────────────────────────────
+   쓰는 테마는 MainLayout 의 data-pica-theme 값 하나로 고른다: riso(현재) / lantern / mural.
+   lantern·mural 은 2026-11-01 시안 값을 저장해 둔 것이다. 제목 글꼴(Hahmlet, Jua)은
+   layout.tsx 에 아직 불러오지 않았으므로 쓸 때 Google Fonts <link> 를 함께 바꾼다.
+   시안 모형: docs/design/theme_options_3.png, docs/design/pica-themes.html */
+
+/* C. 리소 인쇄 공연 전단: 신문지 바탕에 형광 분홍 + 리소 파랑 두 잉크, 각진 입장권 */
+.pica-public,
+.pica-public[data-pica-theme="riso"] {
+  --pk-paper: #ecede6;
+  --pk-card: #f7f7f2;
+  --pk-ink: #1a1a1a;
+  --pk-ink-soft: #55554f;
+  --pk-line: #1a1a1a;
+  --pk-accent: #2350d8;
+  --pk-on-accent: #ffffff;
+  --pk-mark: #ff4fa3;
+  --pk-on-mark: #1a1a1a;
+  --pk-band: #2350d8;
+  --pk-on-band: #ffffff;
+  --pk-cat-show-bg: #ff4fa3;      --pk-cat-show-fg: #1a1a1a;
+  --pk-cat-exhibit-bg: #2350d8;   --pk-cat-exhibit-fg: #ffffff;
+  --pk-cat-festival-bg: #1a1a1a;  --pk-cat-festival-fg: #ecede6;
+  --pk-cat-event-bg: transparent; --pk-cat-event-fg: #1a1a1a;
+  --pk-radius: 0px;
+  --pk-chip-radius: 0px;
+  --pk-border: 1.5px;
+  --pk-card-shadow: none;
+  --pk-stub-edge: 2px dotted #1a1a1a;
+  /* 두 잉크가 살짝 어긋나게 찍힌 모양 */
+  --pk-print: 3px 2px 0 rgba(255, 79, 163, 0.85);
+  --pk-print-sm: 1.5px 1px 0 rgba(255, 79, 163, 0.9);
+  --pk-font-display: "Black Han Sans", "Pretendard Variable", Pretendard, sans-serif;
+  --pk-display-weight: 400;
+}
+
+/* A. 남강 유등 밤: 밤 남색 바탕, 등불색 날짜가 은은하게 빛남 (값만 저장, 미사용) */
+.pica-public[data-pica-theme="lantern"] {
+  --pk-paper: #141b33;
+  --pk-card: #1e2747;
+  --pk-ink: #f3eee4;
+  --pk-ink-soft: #b9b3c8;
+  --pk-line: #39426a;
+  --pk-accent: #f5a623;
+  --pk-on-accent: #141b33;
+  --pk-mark: #f5a623;
+  --pk-on-mark: #141b33;
+  --pk-band: #0e1428;
+  --pk-on-band: #f3eee4;
+  --pk-cat-show-bg: transparent;     --pk-cat-show-fg: #ff8a7a;
+  --pk-cat-exhibit-bg: transparent;  --pk-cat-exhibit-fg: #8fd0ff;
+  --pk-cat-festival-bg: transparent; --pk-cat-festival-fg: #ffb36b;
+  --pk-cat-event-bg: transparent;    --pk-cat-event-fg: #c7b8ff;
+  --pk-radius: 14px;
+  --pk-chip-radius: 999px;
+  --pk-border: 1px;
+  --pk-card-shadow: none;
+  --pk-stub-edge: 1px dashed #39426a;
+  --pk-print: none;
+  --pk-print-sm: 0 0 14px rgba(245, 166, 35, 0.6);
+  --pk-font-display: "Hahmlet", "Pretendard Variable", Pretendard, serif;
+  --pk-display-weight: 800;
+}
+
+/* B. 동피랑 벽화 골목: 하늘벽 바탕, 분야마다 벽 색, 굵은 외곽선 간판 (값만 저장, 미사용) */
+.pica-public[data-pica-theme="mural"] {
+  --pk-paper: #eef6fa;
+  --pk-card: #ffffff;
+  --pk-ink: #263238;
+  --pk-ink-soft: #55656e;
+  --pk-line: #263238;
+  --pk-accent: #263238;
+  --pk-on-accent: #ffffff;
+  --pk-mark: #263238;
+  --pk-on-mark: #ffffff;
+  --pk-band: #3e9bdb;
+  --pk-on-band: #ffffff;
+  --pk-cat-show-bg: #f26d7d;     --pk-cat-show-fg: #ffffff;
+  --pk-cat-exhibit-bg: #3e9bdb;  --pk-cat-exhibit-fg: #ffffff;
+  --pk-cat-festival-bg: #ffc83d; --pk-cat-festival-fg: #263238;
+  --pk-cat-event-bg: #5cc9a7;    --pk-cat-event-fg: #263238;
+  --pk-radius: 18px;
+  --pk-chip-radius: 999px;
+  --pk-border: 2px;
+  --pk-card-shadow: 4px 4px 0 #263238;
+  --pk-stub-edge: 2px dashed #263238;
+  --pk-print: none;
+  --pk-print-sm: none;
+  --pk-font-display: "Jua", "Pretendard Variable", Pretendard, sans-serif;
+  --pk-display-weight: 400;
+}
+
+/* 공개 화면 전체(관리자 화면 제외)에 적용. Mantine 컴포넌트도 이 변수를 읽는다 */
+.pica-public {
+  --mantine-font-family: "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  --mantine-color-body: var(--pk-paper);
+  font-family: var(--mantine-font-family);
+  background: var(--pk-paper);
+  color: var(--pk-ink);
+  word-break: keep-all;
+  min-height: 100vh;
+}
+
+.pica-public :focus-visible {
+  outline: 2px solid var(--pk-accent);
+  outline-offset: 2px;
+}
+
+/* 제목 글꼴 + 잉크 어긋남 */
+.pica-display {
+  font-family: var(--pk-font-display);
+  font-weight: var(--pk-display-weight);
+  letter-spacing: -0.01em;
+  text-shadow: var(--pk-print);
+}
+
+/* 카드·상자: 테마의 모서리, 선 두께, 그림자 */
+.pica-box {
+  background: var(--pk-card);
+  border: var(--pk-border) solid var(--pk-line);
+  border-radius: var(--pk-radius);
+  box-shadow: var(--pk-card-shadow);
+}
+
+/* 분야 꼬리표 */
+.pica-cat {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.6;
+  border: 1.5px solid transparent;
+  border-radius: calc(var(--pk-chip-radius) / 8);
+}
+.pica-cat[data-cat="공연"] { background: var(--pk-cat-show-bg); color: var(--pk-cat-show-fg); }
+.pica-cat[data-cat="전시"] { background: var(--pk-cat-exhibit-bg); color: var(--pk-cat-exhibit-fg); }
+.pica-cat[data-cat="축제"] { background: var(--pk-cat-festival-bg); color: var(--pk-cat-festival-fg); }
+.pica-cat[data-cat="행사"] { background: var(--pk-cat-event-bg); color: var(--pk-cat-event-fg); border-color: currentColor; }
+.pica-cat[data-ended="true"] { background: transparent; color: var(--pk-ink-soft); border-color: var(--pk-ink-soft); }
+
+/* 필터 칩 줄: 모바일에서는 가로로 밀어 보고, 넓은 화면에서는 줄바꿈 */
+.pica-chiprow {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+  padding: 2px 16px 2px 2px;
+  mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+}
+.pica-chiprow::-webkit-scrollbar { display: none; }
+@media (min-width: 768px) {
+  .pica-chiprow { flex-wrap: wrap; overflow: visible; mask-image: none; padding-right: 0; }
+}
+
+.pica-chip {
+  flex: none;
+  scroll-snap-align: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: var(--pk-chip-radius);
+  border: var(--pk-border) solid var(--pk-line);
+  background: var(--pk-card);
+  color: var(--pk-ink);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color .15s, border-color .15s, color .15s;
+}
+.pica-chip:hover { background: var(--pk-paper); }
+.pica-chip[aria-pressed="true"] {
+  background: var(--pk-mark);
+  border-color: var(--pk-mark);
+  color: var(--pk-on-mark);
+  font-weight: 700;
+}
+
+/* 행사 카드의 날짜 칸: 양옆이 입장권 절취선 */
+.pica-stub {
+  border-left: var(--pk-stub-edge);
+  border-right: var(--pk-stub-edge);
+  font-variant-numeric: tabular-nums;
+}
+.pica-stub-num {
+  font-family: var(--pk-font-display);
+  font-weight: var(--pk-display-weight);
+  color: var(--pk-accent);
+  text-shadow: var(--pk-print-sm);
+}
+.pica-stub[data-tone="ended"] .pica-stub-num { color: var(--pk-ink-soft); text-shadow: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pica-public * { transition: none !important; }
 }

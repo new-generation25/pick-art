@@ -57,7 +57,7 @@ export function ShareButton({ title }: { title: string }) {
     return (
         <button
             onClick={handleShare}
-            className="w-14 h-14 shrink-0 inline-flex items-center justify-center bg-white text-neutral-600 rounded-2xl hover:text-indigo-600 transition-all shadow-md active:scale-95 ring-1 ring-neutral-200 group relative"
+            className="w-12 h-12 shrink-0 inline-flex items-center justify-center bg-card text-ink border-[1.5px] border-ink hover:bg-mark transition-colors group relative"
             style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
         >
             {copied ? <Check className="w-6 h-6 text-green-500" /> : <Share2 className="w-6 h-6" />}

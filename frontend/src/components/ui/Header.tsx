@@ -38,20 +38,18 @@ export function Header() {
     };
 
     return (
-        <Box h={70} style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, backgroundColor: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #f1f3f5' }}>
-            <Container size="lg" h="100%">
+        <Box h={60} style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, backgroundColor: 'var(--pk-paper)', borderBottom: '2px solid var(--pk-line)' }}>
+            <Container size="xl" h="100%">
                 <Group h="100%" justify="space-between">
-                    <Link href="/" style={{ textDecoration: 'none' }}>
-                        <Group gap={8}>
-                            <Box style={{ width: 34, height: 34, background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <span style={{ color: 'white', fontWeight: 900 }}>P</span>
-                            </Box>
-                            <Text size="xl" fw={900} c="dark">pica</Text>
+                    <Link href="/" style={{ textDecoration: 'none' }} aria-label="pica 홈">
+                        <Group gap={10} align="center">
+                            <Text className="pica-display" fz={26} c="var(--pk-accent)" style={{ lineHeight: 1 }}>pica</Text>
+                            <Text fz={13} fw={600} c="var(--pk-ink-soft)" visibleFrom="xs" style={{ lineHeight: 1 }}>경남 문화예술 안내</Text>
                         </Group>
                     </Link>
 
                     <Group>
-                        <ActionIcon variant="subtle" color="gray" radius="xl" size="lg">
+                        <ActionIcon variant="subtle" color="gray" radius="xl" size="lg" aria-label="검색">
                             <Search size={20} />
                         </ActionIcon>
 
@@ -60,7 +58,7 @@ export function Header() {
                                 <Menu.Target>
                                     <UnstyledButton>
                                         <Group gap={8}>
-                                            <Avatar color="indigo" radius="xl" size="sm">{nickname.charAt(0).toUpperCase()}</Avatar>
+                                            <Avatar color="pink" radius={0} size="sm">{nickname.charAt(0).toUpperCase()}</Avatar>
                                             <ChevronDown size={14} color="gray" />
                                         </Group>
                                     </UnstyledButton>
@@ -78,7 +76,7 @@ export function Header() {
                                 </Menu.Dropdown>
                             </Menu>
                         ) : (
-                            <Button component={Link} href="/login" radius="xl" color="indigo">로그인</Button>
+                            <Button component={Link} href="/login" radius={0} color="dark" variant="outline" size="sm" styles={{ root: { borderWidth: 1.5 } }}>로그인</Button>
                         )}
                     </Group>
                 </Group>
