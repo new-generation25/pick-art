@@ -1,18 +1,20 @@
 import { createClient } from '@supabase/supabase-js';
-import { todayKST } from './utils';
+import { todayKST, monthsAgoKST } from './utils';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-export async function getPublishedEvents(filters?: { region?: string; category?: string; search?: string; date?: string }) {
-    // 끝난 행사는 빼고, 가까운 날짜부터 보여 준다
+export async function getPublishedEvents(filters?: { region?: string; category?: string; search?: string; date?: string; ended?: string }) {
+    // 기본은 끝나지 않은 행사만. ended=1 이면 종료 1개월 이내 행사도 맨 뒤에 붙인다.
+    // 종료 1개월이 지난 행사는 공개 피드에 나오지 않는다 (3개월이 지나면 관리자 저장공간 화면에서 삭제 후보가 된다)
+    const today = todayKST();
     let query = supabase
         .from('events')
         .select('*')
         .eq('status', 'PUBLISHED')
-        .gte('event_date_end', todayKST());
+        .gte('event_date_end', filters?.ended === '1' ? monthsAgoKST(1) : today);
 
     if (filters?.region && filters.region !== '전체') {
         query = query.eq('region', filters.region);
@@ -66,7 +68,11 @@ export async function getPublishedEvents(filters?: { region?: string; category?:
         console.error('Error fetching events:', error);
         return [];
     }
-    return data;
+    // 진행 중·예정 행사를 먼저(시작일순), 끝난 행사는 뒤에(최근에 끝난 순)
+    const ongoing = data.filter(e => e.event_date_end >= today);
+    const ended = data.filter(e => e.event_date_end < today)
+        .sort((a, b) => (b.event_date_end || '').localeCompare(a.event_date_end || ''));
+    return [...ongoing, ...ended];
 }
 
 export async function getEventById(id: string) {

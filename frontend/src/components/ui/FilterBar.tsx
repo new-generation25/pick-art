@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { Group, Button } from "@mantine/core";
+import { Group, Button, Checkbox } from "@mantine/core";
 import { Calendar } from "lucide-react";
 
 const REGIONS = ["전체", "창원", "김해", "진주", "통영", "거제", "양산", "밀양", "사천", "함안", "고성", "합천", "거창", "함양", "창녕", "의령"];
@@ -20,6 +20,7 @@ export function FilterBar() {
     const currentRegion = searchParams.get("region") || "전체";
     const currentCategory = searchParams.get("category") || "전체";
     const currentDate = searchParams.get("date") || "all";
+    const showEnded = searchParams.get("ended") === "1";
 
     const updateFilters = (key: string, value: string) => {
         const params = new URLSearchParams(searchParams.toString());
@@ -81,6 +82,15 @@ export function FilterBar() {
                     </Button>
                 ))}
             </Group>
+
+            {/* 끝난 행사: 기본은 숨김. 켜면 종료 1개월 이내 행사가 "종료" 표시와 함께 맨 뒤에 붙는다 */}
+            <Checkbox
+                checked={showEnded}
+                onChange={(e) => updateFilters("ended", e.currentTarget.checked ? "1" : "all")}
+                label="종료된 행사도 보기 (종료 1개월 이내)"
+                color="gray"
+                size="sm"
+            />
         </div>
     );
 }

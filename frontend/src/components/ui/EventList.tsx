@@ -15,6 +15,7 @@ interface Event {
     location: string;
     imageUrl: string;
     isFree: boolean;
+    isEnded?: boolean;
 }
 
 interface EventListProps {

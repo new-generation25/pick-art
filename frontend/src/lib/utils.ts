@@ -18,3 +18,10 @@ export function formatPeriod(start?: string | null, end?: string | null): string
 export function todayKST(): string {
     return new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
 }
+
+/** n개월 전 날짜 'YYYY-MM-DD' (한국 시간) */
+export function monthsAgoKST(n: number): string {
+    const d = new Date(Date.now() + 9 * 3600 * 1000);
+    d.setUTCMonth(d.getUTCMonth() - n);
+    return d.toISOString().slice(0, 10);
+}

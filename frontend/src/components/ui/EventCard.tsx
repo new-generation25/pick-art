@@ -11,6 +11,7 @@ interface EventProps {
     location: string;
     imageUrl: string;
     isFree?: boolean;
+    isEnded?: boolean;
 }
 
 export function EventCard({ event, priority = false, disableNavigation = false }: { event: EventProps; priority?: boolean; disableNavigation?: boolean }) {
@@ -21,7 +22,7 @@ export function EventCard({ event, priority = false, disableNavigation = false }
                 radius="lg"
                 withBorder
                 className={disableNavigation ? "" : "transition-all duration-300 hover:shadow-xl hover:-translate-y-2"}
-                style={{ height: '100%', cursor: disableNavigation ? 'pointer' : 'default' }}
+                style={{ height: '100%', cursor: disableNavigation ? 'pointer' : 'default', opacity: event.isEnded ? 0.6 : 1 }}
             >
                 {/* 카드 상단 이미지 영역 (기존 Card.Section 역할 대체) */}
                 <div style={{ margin: rem(-16), marginBottom: rem(16), position: 'relative', overflow: 'hidden', borderTopLeftRadius: 'inherit', borderTopRightRadius: 'inherit' }}>
@@ -38,6 +39,11 @@ export function EventCard({ event, priority = false, disableNavigation = false }
                             <Badge color="indigo" variant="filled" size="sm" radius="sm">
                                 {event.category}
                             </Badge>
+                            {event.isEnded && (
+                                <Badge color="dark" variant="filled" size="sm" radius="sm">
+                                    종료
+                                </Badge>
+                            )}
                             {event.isFree && (
                                 <Badge color="teal" variant="filled" size="sm" radius="sm">
                                     무료

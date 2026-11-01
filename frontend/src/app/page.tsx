@@ -4,7 +4,7 @@ import { FilterBar } from "@/components/ui/FilterBar";
 import { Search, Mail, Bell } from "lucide-react";
 import { Container, Title, Text, TextInput, Button, SimpleGrid, Paper, ThemeIcon, Group, Box, rem, Alert, Stack } from "@mantine/core";
 
-import { formatPeriod } from "@/lib/utils";
+import { formatPeriod, todayKST } from "@/lib/utils";
 
 interface HomeProps {
   searchParams: Promise<{
@@ -12,6 +12,7 @@ interface HomeProps {
     category?: string;
     q?: string;
     date?: string;
+    ended?: string;
     subscribed?: string;
   }>;
 }
@@ -22,11 +23,14 @@ export default async function Home({ searchParams }: HomeProps) {
     region: resolvedParams.region,
     category: resolvedParams.category,
     search: resolvedParams.q,
-    date: resolvedParams.date
+    date: resolvedParams.date,
+    ended: resolvedParams.ended
   };
 
   const dbEvents = await getPublishedEvents(filters);
   const isSubscribed = resolvedParams.subscribed === "true";
+
+  const today = todayKST();
 
   // Transform DB data to match EventCard props
   const formattedDbEvents = dbEvents.map(event => ({
@@ -37,6 +41,7 @@ export default async function Home({ searchParams }: HomeProps) {
     location: event.venue || event.region,
     imageUrl: event.poster_image_url,
     isFree: event.is_free,
+    isEnded: !!event.event_date_end && event.event_date_end < today,
   }));
 
   // 예전에는 DB가 비면 2024년 예시 카드를 보여 줬다. 이제는 실제 결과만 보여 준다(없으면 빈 상태 안내)
