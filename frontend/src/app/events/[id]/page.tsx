@@ -55,14 +55,8 @@ export default async function EventDetailPage({ params }: EventPageProps) {
     const { id } = await params;
     const event = await getEventById(id);
 
-    if (!event) {
-        return (
-            <div className="min-h-screen flex flex-col pt-20 items-center justify-center text-neutral-500">
-                <p>행사 정보를 불러올 수 없거나 존재하지 않는 행사입니다.</p>
-                <Link href="/" className="mt-4 font-semibold text-accent hover:underline">행사 목록으로 가기</Link>
-            </div>
-        );
-    }
+    // 없는 행사·비공개 행사(RLS로 익명 조회 결과 없음) 모두 404
+    if (!event) notFound();
 
     // Related Events (Same category or region, excluding current)
     const allRelated = await getPublishedEvents({ category: event.category });
