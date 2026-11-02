@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap">
+<style>
+  html,body{margin:0;width:1200px;height:630px;overflow:hidden}
+  body{background:#F6EFDF;color:#1C1C1C;font-family:Pretendard,sans-serif;position:relative}
+  .frame{position:absolute;inset:36px;border:3px solid #1C1C1C}
+  .stamp{position:absolute;right:96px;top:88px;width:250px;height:300px;background:#D33A2C;
+    outline:10px dotted #F6EFDF;outline-offset:-4px;box-shadow:0 0 0 3px #1C1C1C}
+  .stamp .inner{position:absolute;inset:26px;border:3px solid #F6EFDF;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;color:#F6EFDF;font-family:'Black Han Sans';}
+  .stamp .p{font-size:88px;line-height:1;white-space:nowrap}
+  .stamp .k{font-family:Pretendard;font-weight:800;font-size:20px;letter-spacing:3px;margin-top:14px}
+  .mark{position:absolute;right:290px;top:300px;width:190px;height:190px;border:4px solid #4F6272;border-radius:50%;
+    color:#4F6272;display:flex;align-items:center;justify-content:center;transform:rotate(-12deg);
+    font-weight:800;font-size:22px;text-align:center;line-height:1.35;opacity:.92}
+  .mark::before,.mark::after{content:"";position:absolute;right:-100px;width:110px;height:0;border-top:4px solid #4F6272}
+  .mark::before{top:70px}.mark::after{top:110px}
+  .word{position:absolute;left:100px;top:110px;font-family:'Black Han Sans';font-size:210px;line-height:1;letter-spacing:-2px}
+  .tag{position:absolute;left:106px;top:350px;font-weight:600;font-size:52px;letter-spacing:-1px}
+  .sub{position:absolute;left:106px;top:430px;font-weight:500;font-size:28px;color:#4F6272}
+  .url{position:absolute;left:106px;bottom:84px;font-weight:700;font-size:26px;letter-spacing:.5px}
+  .route{position:absolute;left:106px;bottom:70px;width:560px;border-top:4px dashed #D33A2C;transform:translateY(-44px)}
+</style></head>
+<body>
+  <div class="frame"></div>
+  <div class="word">pica</div>
+  <div class="tag">가까운 공연·전시·축제</div>
+  <div class="sub">공식 출처로 확인해 날짜순으로 전해 드려요</div>
+  <div class="route"></div>
+  <div class="url">pick-art.vercel.app</div>
+  <div class="stamp"><div class="inner"><div class="p">피카</div><div class="k">pica post</div></div></div>
+  <div class="mark">이번 주<br>어디 가지?</div>
+</body></html>

@@ -8,6 +8,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { EventCard } from "@/components/ui/EventCard";
+import { DEFAULT_OG_IMAGE } from "@/lib/site";
 
 interface EventPageProps {
     params: Promise<{
@@ -19,22 +20,33 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
     const { id } = await params;
     const event = await getEventById(id);
 
-    if (!event) return { title: "행사를 찾을 수 없습니다" };
+    if (!event) return { title: "찾을 수 없는 페이지 | 피카 pica", robots: { index: false } };
+
+    const where = [event.venue, event.region].filter(Boolean).join(", ");
+    const description = event.description?.trim().slice(0, 160)
+        || `${formatPeriod(event.event_date_start, event.event_date_end)}${where ? ` · ${where}` : ""}`;
+    const url = `/events/${event.id}`;
+    // 포스터가 없으면 기본 공유 이미지
+    const images = event.poster_image_url ? [event.poster_image_url] : [DEFAULT_OG_IMAGE.url];
 
     return {
-        title: `${event.title} | 픽아트 pica`,
-        description: event.description?.slice(0, 160) || "가까운 곳의 공연·전시·축제 소식을 피카(pica)에서 확인하세요.",
+        title: `${event.title} | 피카 pica`,
+        description,
+        alternates: { canonical: url },
         openGraph: {
             title: event.title,
-            description: event.description?.slice(0, 160),
-            images: [event.poster_image_url],
+            description,
+            url,
             type: "article",
+            siteName: "피카 pica",
+            locale: "ko_KR",
+            images,
         },
         twitter: {
             card: "summary_large_image",
             title: event.title,
-            description: event.description?.slice(0, 160),
-            images: [event.poster_image_url],
+            description,
+            images,
         }
     };
 }

@@ -4,13 +4,32 @@ import "@mantine/core/styles.css";
 import "./globals.css";
 import { ColorSchemeScript, MantineProvider, createTheme } from "@mantine/core";
 import { cn } from "@/lib/utils";
+import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from "@/lib/site";
 
 const inter = Inter({ subsets: ["latin"] });
 
+const DESCRIPTION = "이번 주 가까운 곳에서 열리는 공연·전시·축제를 공식 출처로 확인해 날짜순으로 알려 드립니다. 피카(pica)는 픽아트의 준말입니다.";
+
 export const metadata: Metadata = {
-  metadataBase: new URL("http://localhost:3000"),
+  metadataBase: new URL(SITE_URL),
   title: "피카 pica | 가까운 공연·전시·축제",
-  description: "이번 주 가까운 곳에서 열리는 공연·전시·축제를 공식 출처로 확인해 날짜순으로 알려 드립니다. 피카(pica)는 픽아트의 준말입니다.",
+  description: DESCRIPTION,
+  alternates: { canonical: "/" },
+  openGraph: {
+    siteName: SITE_NAME,
+    locale: "ko_KR",
+    type: "website",
+    url: "/",
+    title: "피카 pica | 가까운 공연·전시·축제",
+    description: DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "피카 pica | 가까운 공연·전시·축제",
+    description: DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE.url],
+  },
 };
 
 const theme = createTheme({

@@ -8,3 +8,6 @@ export const SITE_URL = (
 ).replace(/\/$/, "");
 
 export const SITE_NAME = "피카 pica";
+
+/** 기본 공유 이미지 (public/og-default.png, 1200×630). 행사 포스터가 없을 때도 쓴다 */
+export const DEFAULT_OG_IMAGE = { url: "/og-default.png", width: 1200, height: 630, alt: "피카 pica — 가까운 공연·전시·축제" };

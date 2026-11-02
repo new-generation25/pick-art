@@ -31,7 +31,7 @@
 **Independent Test**: quickstart Q5~Q7
 
 - [ ] T010 [US2] Set `metadataBase` from `SITE_URL` and default `openGraph`/`twitter` (site name 피카 pica, locale ko_KR) in `frontend/src/app/layout.tsx`
-- [ ] T011 [P] [US2] Create default share image `frontend/src/app/opengraph-image.png` (1200×630, brand guide colors/wordmark, no '경남', no AI image) rendered from HTML
+- [ ] T011 [P] [US2] Create default share image `frontend/public/og-default.png` (1200×630, brand guide colors/wordmark, no '경남', no AI image) rendered from `docs/brand/og-default.html`; referenced explicitly (`DEFAULT_OG_IMAGE`) because a file-based `app/opengraph-image.png` could take priority over event posters
 - [ ] T012 [US2] Update `generateMetadata` in `frontend/src/app/events/[id]/page.tsx`: title "{행사} | 피카 pica", description fallback from 기간·장소, image = poster or default, `alternates.canonical`
 - [ ] T013 [P] [US2] Create `frontend/src/app/robots.ts` per contracts/routes.md (Disallow /admin, /api, /settings, /welcome, /auth; Sitemap line)
 - [ ] T014 [P] [US2] Create `frontend/src/app/sitemap.ts`: home + PUBLISHED events with `event_date_end >= today(KST)`, lastModified = published_at, `revalidate = 3600`
