@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { GN_REGIONS } from "@/lib/regions";
 import { CATEGORIES } from "@/lib/categories";
+import { LegalLinks } from "@/components/ui/LegalLinks";
 
 // 구글·카카오 첫 로그인 직후의 가입 화면(3단계): 지역 → 관심 분야 → 닉네임.
 // 지역과 관심 분야는 홈의 자동 지역 적용과 노출 순서에 쓰이므로 고르지 않으면 다음으로 넘어가지 않는다.
@@ -115,6 +116,7 @@ export default function WelcomePage() {
                         aria-label="닉네임"
                         className="mt-5 w-full border-[1.5px] border-line bg-card px-4 py-3 text-[16px] font-medium text-ink outline-none"
                     />
+                    <div className="mt-5"><LegalLinks /></div>
                 </section>
             )}
 

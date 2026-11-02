@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getPublishedEvents } from "@/lib/supabase";
 import { FeedSections } from "@/components/ui/FeedSections";
 import { FilterBar } from "@/components/ui/FilterBar";
@@ -117,6 +118,10 @@ export default async function Home({ searchParams }: HomeProps) {
                   </Button>
                 </Group>
               </form>
+              <Text fz="xs" c="rgba(255,255,255,0.65)" mt={8}>
+                입력한 이메일은 소식 발송에만 쓰고, 언제든 그만 받을 수 있어요.{" "}
+                <Link href="/privacy" style={{ color: "inherit", textDecoration: "underline" }}>개인정보처리방침</Link>
+              </Text>
             </Box>
 
             <Box>
@@ -153,6 +158,10 @@ export default async function Home({ searchParams }: HomeProps) {
                   </Group>
                 </Stack>
               </form>
+              <Text fz="xs" c="rgba(255,255,255,0.65)" mt={8}>
+                입력한 이메일은 소식 발송에만 쓰고, 언제든 그만 받을 수 있어요.{" "}
+                <Link href="/privacy" style={{ color: "inherit", textDecoration: "underline" }}>개인정보처리방침</Link>
+              </Text>
             </Box>
           </SimpleGrid>
         </Container>

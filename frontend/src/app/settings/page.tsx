@@ -172,7 +172,7 @@ export default function SettingsPage() {
 
                             <div>
                                 <label className="block text-sm font-bold text-neutral-700 mb-2">
-                                    전화번호
+                                    전화번호 (선택)
                                 </label>
                                 <input
                                     type="tel"
@@ -181,6 +181,7 @@ export default function SettingsPage() {
                                     className="w-full px-4 py-3 bg-neutral-50 border-2 border-neutral-200 rounded-xl focus:border-indigo-400 focus:outline-none font-medium"
                                     placeholder="010-1234-5678"
                                 />
+                                <p className="text-xs text-neutral-500 mt-1">비워 둬도 모든 기능을 쓸 수 있습니다</p>
                             </div>
 
                             <div>

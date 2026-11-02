@@ -7,6 +7,7 @@ import { Lock, Mail, AlertCircle, User, UserPlus } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { SocialLoginButtons } from "@/components/ui/SocialLoginButtons";
+import { LegalLinks } from "@/components/ui/LegalLinks";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -101,6 +102,7 @@ export default function LoginPage() {
                         <div className="h-px flex-1 bg-neutral-200" />또는<div className="h-px flex-1 bg-neutral-200" />
                     </div>
                     <SocialLoginButtons />
+                    <div className="mt-4"><LegalLinks /></div>
 
                     <div className="mt-8 text-center text-sm font-medium">
                         <p className="text-neutral-400">
