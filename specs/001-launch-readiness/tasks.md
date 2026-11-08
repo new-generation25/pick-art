@@ -58,7 +58,7 @@
 
 - [X] T021 Run `npx tsc --noEmit` in `frontend/` (Q12) and fix errors
 - [X] T022 Check brand copy: grep public pages for `경남` brand usage (Q11) and fix
-- [ ] T023 Run quickstart Q1~Q11 on local (3000), record results in `specs/001-launch-readiness/quickstart.md` 결과 절
+- [X] T023 (2026-11-08: ran on branch preview deploy instead of local) Run quickstart Q1~Q11 on local (3000), record results in `specs/001-launch-readiness/quickstart.md` 결과 절
 - [ ] T024 After deploy, run quickstart on `https://pick-art.vercel.app` and record results
 
 ## Dependencies & Execution Order

@@ -22,3 +22,24 @@
 | Q10 | 전화번호 | 설정 화면 | '선택' 표시 |
 | Q11 | '경남' | 공개 화면 HTML에서 `경남` 검색 | 브랜드 문구 0건(시군·행사 내용 제외) (SC-006) |
 | Q12 | 타입 검사 | `npx tsc --noEmit` (frontend) | 오류 0 |
+
+## 결과
+
+### 2026-11-08 — 브랜치 미리보기 (revive/2026-10 @ 1661165)
+
+로컬 서버 대신 Vercel 미리보기 배포(`pick-jmo6h4sns-new-generation25s-projects.vercel.app`, Vercel 로그인 보호)에서 확인했다. 미리보기도 프로덕션 빌드라 `SITE_URL`은 `https://pick-art.vercel.app`이다.
+
+| # | 결과 | 측정값 |
+|---|---|---|
+| Q1 | 통과 | /terms 200, /privacy 200 |
+| Q2 | 통과 | R1 항목·보호책임자·위탁 3곳 빠짐 0 |
+| Q3 | 통과 | 홈(꼬리말)·로그인·가입 3단계 HTML에 `/privacy` 있음 |
+| Q4 | 통과 | 로그인 동의 문구 있음, 홈 소식 받기 폼 2곳에 안내 문구 |
+| Q5 | 통과 | 홈 og:url `https://pick-art.vercel.app`, og:image `/og-default.png` 절대 주소. 상세 3건: 제목 "{행사} \| 피카 pica", og:url 사이트 주소 기준, og:image 포스터 |
+| Q6 | 통과 | Disallow /admin /api /settings /welcome /auth, Sitemap 줄 |
+| Q7 | 통과 | sitemap `/events/` 389 = REST 조회(PUBLISHED, 종료일 ≥ 오늘) 389 |
+| Q8 | 통과 | 없는 경로·없는 UUID·형식 틀린 ID 모두 404 + 브랜드 화면 |
+| Q9 | 통과 | /signup → /login, 로그인 화면에 이메일·비밀번호 입력 없음 |
+| Q10 | 통과(코드) | 설정 화면은 로그인해야 그려져 HTML에는 없음. 배포된 `app/settings/page-*.js`에 "전화번호 (선택)" 있음 |
+| Q11 | 통과 | 홈·로그인·가입·약관·방침·404 본문에 '경남' 0건 |
+| Q12 | 통과 | `npx tsc --noEmit` 오류 0 |
