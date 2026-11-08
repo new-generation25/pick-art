@@ -52,14 +52,14 @@
 
 - [X] T018 [US4] Remove email/password form from `frontend/src/app/login/page.tsx` (keep SocialLoginButtons, copy: "구글로 계속하기 — 카카오는 곧 추가됩니다" only if brand guide tone allows); depends on T001
 - [X] T019 [US4] Replace `frontend/src/app/signup/page.tsx` with a redirect to `/login`; depends on T001
-- [ ] T020 [US4] Ask the user for deploy approval, then fast-forward `main` to `revive/2026-10`, push, wait for Vercel Ready
+- [X] T020 (2026-11-08: user approved; main fast-forwarded to c76e638, Vercel Ready) [US4] Ask the user for deploy approval, then fast-forward `main` to `revive/2026-10`, push, wait for Vercel Ready
 
 ## Phase 7: Polish & Cross-Cutting
 
 - [X] T021 Run `npx tsc --noEmit` in `frontend/` (Q12) and fix errors
 - [X] T022 Check brand copy: grep public pages for `경남` brand usage (Q11) and fix
 - [X] T023 (2026-11-08: ran on branch preview deploy instead of local) Run quickstart Q1~Q11 on local (3000), record results in `specs/001-launch-readiness/quickstart.md` 결과 절
-- [ ] T024 After deploy, run quickstart on `https://pick-art.vercel.app` and record results
+- [X] T024 After deploy, run quickstart on `https://pick-art.vercel.app` and record results
 
 ## Dependencies & Execution Order
 
