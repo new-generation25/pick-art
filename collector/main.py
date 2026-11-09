@@ -279,4 +279,8 @@ async def main():
         await asyncio.sleep(10)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    # --once: 정기 수집을 한 번 돌리고 끝낸다 (Windows 작업 스케줄러가 08:20·15:00에 run_once.ps1로 부른다)
+    if "--once" in sys.argv:
+        asyncio.run(run_crawlers())
+    else:
+        asyncio.run(main())

@@ -48,6 +48,7 @@ ENV/
 **/*secret*
 **/*credential*
 collector/*.log
+collector/logs/
 collector/*.txt
 
 # IDE
