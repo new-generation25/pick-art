@@ -91,6 +91,8 @@ def build_facts(ev: dict, facts: dict) -> dict:
         "caption_lead": "", "mentions": [],
     }
     f.update({k: v for k, v in facts.items() if v not in (None, "")})
+    # "-" 는 DB 기본값을 지우고 칸을 뺀다 (공식 안내에 없는 값을 DB 추정으로 채우지 않게)
+    f.update({k: "" for k, v in facts.items() if v == "-"})
     if not f.get("chip"):
         f["chip"] = f"오늘 {f['date_label']}"
     if not f["poster_credit"]:
