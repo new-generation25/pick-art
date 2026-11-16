@@ -1,0 +1,57 @@
+{
+  "slug": "busan_dureraum",
+  "name": "영화의전당",
+  "_comment": "영화의전당(dureraum.org) 공연가이드 기간별검색(rbsIdx=40)과 전시·행사일정(rbsIdx=375). 서버 렌더 HTML이고 sPeriod=4(오늘부터 1년)를 주면 지금 진행 중·예정인 것만 한 쪽에 다 나온다(쪽 넘김 없음). 제목은 a 안에 숨은 구분(기획/대관/전시/행사) 글자가 섞여 있어 버튼의 span.hidden에서 읽는다. 전시·행사 목록은 숨은 구분이 '행사'면 축제, '전시'면 전시로 나눈다. 매일 상영하는 영화(상영시간표·상영프로그램)와 GV·무대인사 공지는 넣지 않는다. 상시 안내 글 '공연정보 제공 서비스 알림 신청하기'는 뺀다",
+  "verified_at": "2026-11-16",
+  "match": [
+    "dureraum.org"
+  ],
+  "region": "부산",
+  "venue": "영화의전당",
+  "boards": [
+    {
+      "url": "https://www.dureraum.org/bcc/ccontents/caleList.do?rbsIdx=40&sPeriod=4",
+      "category": "공연",
+      "list": {
+        "rows": "div.list > ul",
+        "title": "li.btns span.hidden",
+        "period": "li.title dt:-soup-contains('일자') + dd",
+        "venue": "li.title dt:-soup-contains('장소') + dd",
+        "link": "li.title a@href",
+        "image": "li.poster img@src",
+        "id_regex": "contentsCode=(\\d+)",
+        "exclude": "공연정보 제공 서비스"
+      }
+    },
+    {
+      "url": "https://www.dureraum.org/bcc/ccontents/caleList.do?rbsIdx=375&sPeriod=4",
+      "category": "전시",
+      "list": {
+        "rows": "div.list > ul",
+        "title": "li.btns span.hidden",
+        "period": "li.title dt:-soup-contains('일자') + dd",
+        "venue": "li.title dt:-soup-contains('장소') + dd",
+        "link": "li.title a@href",
+        "image": "li.poster img@src",
+        "id_regex": "contentsCode=(\\d+)",
+        "exclude": "공연정보 제공 서비스",
+        "category": "li.title h4.hidden",
+        "category_map": {
+          "행사": "축제",
+          "전시": "전시"
+        }
+      }
+    }
+  ],
+  "detail": {
+    "body": "div.view div.detail"
+  },
+  "expect": {
+    "min_rows": 1,
+    "required": [
+      "title",
+      "link",
+      "period"
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "slug": "busan_eulsukdo",
+  "name": "을숙도문화회관",
+  "_comment": "사하구 을숙도문화회관. 회관 홈페이지(saha.go.kr/eulsukdo)의 공연전시일정은 달력이 POST JSON(spclArtInfo/ajaxList.do)으로 채워지고 행마다 '일(days)' 숫자만 있어 기간을 만들 수 없다. 그래서 회관 홈페이지 '공연예매' 메뉴가 연결하는 공식 예매 사이트(esd.moonhwain.net:451, 문화인 예매 시스템)의 '진행중인 공연/전시' 목록을 읽는다. 443 포트(esd.moonhwain.net)는 인증서 호스트명이 맞지 않아 쓰지 않는다. 일시가 '11/20 (금) ~ 11/21 (토)'처럼 연도 없이 나와 올해 연도로 읽으므로, 연말에 이듬해 1월 공연이 올라오면 연도가 한 해 앞서 잡힐 수 있다. 예매 사이트에 올라온 공연(주로 기획공연)만 잡히고 대관공연은 빠진다. 목록의 장소 칸은 '을숙도문화회관' 뒤에 탭이 잔뜩 붙어 나와(공백 정리 없음) venue 선택자를 두지 않고 회관 이름만 쓴다",
+  "verified_at": "2026-11-16",
+  "match": [
+    "esd.moonhwain.net"
+  ],
+  "region": "부산",
+  "venue": "을숙도문화회관",
+  "boards": [
+    {
+      "url": "https://esd.moonhwain.net:451/rsvc/rsv_pm_list.html?b_id=esd&pfmIng=1",
+      "category": "공연"
+    }
+  ],
+  "list": {
+    "rows": "ul.list li.i",
+    "title": "dt",
+    "period": "dd:nth-of-type(3)",
+    "link": ".plist_img a@href",
+    "id_regex": "p_idx=([0-9]+)",
+    "image": ".plist_img img@src",
+    "category": "dd:nth-of-type(2)",
+    "category_map": {
+      "전시": "전시"
+    }
+  },
+  "detail": {
+    "body": ".main_box4_con"
+  },
+  "expect": {
+    "min_rows": 1,
+    "required": [
+      "title",
+      "link",
+      "period"
+    ]
+  }
+}

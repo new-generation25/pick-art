@@ -1,0 +1,124 @@
+{
+  "slug": "busan_bscc",
+  "name": "부산문화회관·부산시민회관",
+  "_comment": "(재)부산문화회관 한 사이트에 부산문화회관(/01_perfor)과 부산시민회관(/citizen/01_perfor)이 같이 있다. 공연·전시 '프로그램' 목록(서버 렌더 HTML, 한 쪽 6건, 오늘 이후 날짜순)을 읽는다. 쪽 넘김 기능이 없어 page=1~8을 게시판으로 나눠 적었다(공연은 약 한 달치, 매일 돌면 뒤쪽이 차례로 들어온다. 전시는 건수가 적어 1쪽). 공연장이 섞여 있어 venue는 비우고 항목마다 '공연장/전시장'을 읽는다. 상세 주소의 page 값은 바뀌므로 no= 번호로 링크·id를 만든다. 달력 화면(공연일정)은 ajax/setCalendar.php가 그리고 날짜가 '일' 숫자뿐이라 쓰지 않는다. 대관 일정 자리표시('공연준비', '…정기공연 준비')는 뺀다",
+  "verified_at": "2026-11-16",
+  "match": [
+    "bscc.or.kr"
+  ],
+  "region": "부산",
+  "venue": "",
+  "boards": [
+    {
+      "url": "https://www.bscc.or.kr/01_perfor/?mcode=0401010200&mode=1&page=1",
+      "category": "공연",
+      "link_template": "https://www.bscc.or.kr/01_perfor/?mcode=0401010200&mode=2&no={m}"
+    },
+    {
+      "url": "https://www.bscc.or.kr/01_perfor/?mcode=0401010200&mode=1&page=2",
+      "category": "공연",
+      "link_template": "https://www.bscc.or.kr/01_perfor/?mcode=0401010200&mode=2&no={m}"
+    },
+    {
+      "url": "https://www.bscc.or.kr/01_perfor/?mcode=0401010200&mode=1&page=3",
+      "category": "공연",
+      "link_template": "https://www.bscc.or.kr/01_perfor/?mcode=0401010200&mode=2&no={m}"
+    },
+    {
+      "url": "https://www.bscc.or.kr/01_perfor/?mcode=0401010200&mode=1&page=4",
+      "category": "공연",
+      "link_template": "https://www.bscc.or.kr/01_perfor/?mcode=0401010200&mode=2&no={m}"
+    },
+    {
+      "url": "https://www.bscc.or.kr/01_perfor/?mcode=0401010200&mode=1&page=5",
+      "category": "공연",
+      "link_template": "https://www.bscc.or.kr/01_perfor/?mcode=0401010200&mode=2&no={m}"
+    },
+    {
+      "url": "https://www.bscc.or.kr/01_perfor/?mcode=0401010200&mode=1&page=6",
+      "category": "공연",
+      "link_template": "https://www.bscc.or.kr/01_perfor/?mcode=0401010200&mode=2&no={m}"
+    },
+    {
+      "url": "https://www.bscc.or.kr/01_perfor/?mcode=0401010200&mode=1&page=7",
+      "category": "공연",
+      "link_template": "https://www.bscc.or.kr/01_perfor/?mcode=0401010200&mode=2&no={m}"
+    },
+    {
+      "url": "https://www.bscc.or.kr/01_perfor/?mcode=0401010200&mode=1&page=8",
+      "category": "공연",
+      "link_template": "https://www.bscc.or.kr/01_perfor/?mcode=0401010200&mode=2&no={m}"
+    },
+    {
+      "url": "https://www.bscc.or.kr/01_perfor/?mcode=0401010400&mode=1&page=1",
+      "category": "전시",
+      "link_template": "https://www.bscc.or.kr/01_perfor/?mcode=0401010400&mode=2&no={m}"
+    },
+    {
+      "url": "https://www.bscc.or.kr/citizen/01_perfor/?mcode=1001010200&mode=1&page=1",
+      "category": "공연",
+      "link_template": "https://www.bscc.or.kr/citizen/01_perfor/?mcode=1001010200&mode=2&no={m}"
+    },
+    {
+      "url": "https://www.bscc.or.kr/citizen/01_perfor/?mcode=1001010200&mode=1&page=2",
+      "category": "공연",
+      "link_template": "https://www.bscc.or.kr/citizen/01_perfor/?mcode=1001010200&mode=2&no={m}"
+    },
+    {
+      "url": "https://www.bscc.or.kr/citizen/01_perfor/?mcode=1001010200&mode=1&page=3",
+      "category": "공연",
+      "link_template": "https://www.bscc.or.kr/citizen/01_perfor/?mcode=1001010200&mode=2&no={m}"
+    },
+    {
+      "url": "https://www.bscc.or.kr/citizen/01_perfor/?mcode=1001010200&mode=1&page=4",
+      "category": "공연",
+      "link_template": "https://www.bscc.or.kr/citizen/01_perfor/?mcode=1001010200&mode=2&no={m}"
+    },
+    {
+      "url": "https://www.bscc.or.kr/citizen/01_perfor/?mcode=1001010200&mode=1&page=5",
+      "category": "공연",
+      "link_template": "https://www.bscc.or.kr/citizen/01_perfor/?mcode=1001010200&mode=2&no={m}"
+    },
+    {
+      "url": "https://www.bscc.or.kr/citizen/01_perfor/?mcode=1001010200&mode=1&page=6",
+      "category": "공연",
+      "link_template": "https://www.bscc.or.kr/citizen/01_perfor/?mcode=1001010200&mode=2&no={m}"
+    },
+    {
+      "url": "https://www.bscc.or.kr/citizen/01_perfor/?mcode=1001010200&mode=1&page=7",
+      "category": "공연",
+      "link_template": "https://www.bscc.or.kr/citizen/01_perfor/?mcode=1001010200&mode=2&no={m}"
+    },
+    {
+      "url": "https://www.bscc.or.kr/citizen/01_perfor/?mcode=1001010200&mode=1&page=8",
+      "category": "공연",
+      "link_template": "https://www.bscc.or.kr/citizen/01_perfor/?mcode=1001010200&mode=2&no={m}"
+    },
+    {
+      "url": "https://www.bscc.or.kr/citizen/01_perfor/?mcode=1001010400&mode=1&page=1",
+      "category": "전시",
+      "link_template": "https://www.bscc.or.kr/citizen/01_perfor/?mcode=1001010400&mode=2&no={m}"
+    }
+  ],
+  "list": {
+    "rows": "ul.event-list > li",
+    "title": ".caption h5",
+    "period": "dl.item-status dt:-soup-contains('일자') + dd",
+    "venue": "dl.item-status dt:-soup-contains('공연장', '전시장') + dd",
+    "image": ".link_img img:not([src*=noimg])@src",
+    "link_regex": "no=(\\d+)",
+    "id_regex": "no=(\\d+)",
+    "exclude": "공연\\s*준비\\s*$"
+  },
+  "detail": {
+    "body": ".boardview.bbs .articleArea"
+  },
+  "expect": {
+    "min_rows": 1,
+    "required": [
+      "title",
+      "link",
+      "period"
+    ]
+  }
+}

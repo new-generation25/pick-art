@@ -1,0 +1,49 @@
+{
+  "slug": "busan_visitbusan_festival",
+  "name": "비짓부산 축제·행사",
+  "_comment": "부산시청 누리집의 '부산 행사&축제' 바로가기가 여는 비짓부산(부산관광공사) 축제·행사 목록(schedule/list.do, BBS_0000009). 인자 없이 열면 이번 달 일정이 한 쪽 10여 건씩 나온다. 월 선택은 year=2026&month=11 처럼 연·월이 따로라 주소 틀({ym})로 다음 달을 만들 수 없어 이번 달만 읽고, 쪽 넘김(startPage)이 있어 1·2쪽을 게시판 두 개로 둔다. 달 초에는 2쪽이 비어 '정의 만료 의심 게시판 1' 경고가 날 수 있다(1쪽이 차 있으면 실패는 아니다). 제목으로 전시·공연을 가르고 나머지는 축제로 둔다. 게임 박람회·마라톤 같은 비예술 행사도 섞여 있다",
+  "verified_at": "2026-11-16",
+  "match": [
+    "visitbusan.net/schedule"
+  ],
+  "region": "부산",
+  "venue": "",
+  "boards": [
+    {
+      "url": "https://www.visitbusan.net/schedule/list.do?boardId=BBS_0000009&menuCd=DOM_000000204012000000",
+      "category": "축제"
+    },
+    {
+      "url": "https://www.visitbusan.net/schedule/list.do?boardId=BBS_0000009&menuCd=DOM_000000204012000000&startPage=2",
+      "category": "축제"
+    }
+  ],
+  "list": {
+    "rows": "#playlist li",
+    "title": "p.tit",
+    "period": "p.cont",
+    "link": "a@href",
+    "id_regex": "dataSid=([0-9]+)",
+    "image": ".imgwrap img@src",
+    "category": "p.tit",
+    "category_map": {
+      "전시": "전시",
+      "展": "전시",
+      "공연": "공연",
+      "콘서트": "공연",
+      "뮤직쇼": "공연",
+      "음악회": "공연"
+    }
+  },
+  "detail": {
+    "body": "#contents"
+  },
+  "expect": {
+    "min_rows": 1,
+    "required": [
+      "title",
+      "link",
+      "period"
+    ]
+  }
+}

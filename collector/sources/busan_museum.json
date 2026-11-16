@@ -1,0 +1,43 @@
+{
+  "slug": "busan_museum",
+  "name": "부산박물관",
+  "_comment": "사이트 개편 시 이 파일만 고친다. 파이썬은 건드리지 않는다. museum.busan.go.kr 은 시립박물관 4곳의 입구이고 부산박물관은 /busan/ 아래다(match 에 경로까지 넣어 복천·정관·동삼동과 섞이지 않게). 특별전시는 /busan/specmun/list?srchSttus=ING(진행)·YET(예정), 행은 .boardExhGallery li(빈 목록이면 '데이터가 없습니다.' li 하나라 :has(.title)로 거름). 상세 이동은 onclick=f_movePage(...,'1','469') POST 지만 GET /busan/specmun/view?bbsNo=1&dataNo=469 로도 같은 화면이 열려 그것을 링크로 쓴다. 교육·행사는 월간행사 달력(/busan/monthevent01) 아래쪽 '행사 일정' 목록(#eventcont li, 기간 '11-05 13:30 ~ 11-05 16:50' 연도 없음 → 올해로 채움)에서 읽는다. 주소에 연·월을 따로 넣어야 해서(srchYear·srchMonth) 이번 달만 읽는다. 달력에 같이 실리는 기획전·특별전은 위 특별전시 게시판과 겹쳐 exclude 로 뺀다. 프로그램 안내(bslecture01)는 '4~6월 / 9~11월' 처럼 날짜가 없어 쓰지 않았다",
+  "verified_at": "2026-11-16",
+  "match": ["museum.busan.go.kr/busan"],
+  "region": "부산",
+  "venue": "부산박물관",
+  "boards": [
+    {"url": "https://museum.busan.go.kr/busan/specmun/list?bbsNo=1&srchSttus=ING", "category": "전시",
+     "link_template": "https://museum.busan.go.kr/busan/specmun/view?bbsNo=1&dataNo={m}",
+     "list": {
+       "rows": ".boardExhGallery li:has(.title)",
+       "title": ".title",
+       "period": "dl.cont dd",
+       "venue": "dl.cont dd:nth-of-type(2)",
+       "link_regex": "f_movePage\\('[^']*',\\s*'\\d+',\\s*'(\\d+)'",
+       "id_regex": "dataNo=(\\d+)",
+       "image": ".egImg img@src"
+     }},
+    {"url": "https://museum.busan.go.kr/busan/specmun/list?bbsNo=1&srchSttus=YET", "category": "전시",
+     "link_template": "https://museum.busan.go.kr/busan/specmun/view?bbsNo=1&dataNo={m}",
+     "list": {
+       "rows": ".boardExhGallery li:has(.title)",
+       "title": ".title",
+       "period": "dl.cont dd",
+       "venue": "dl.cont dd:nth-of-type(2)",
+       "link_regex": "f_movePage\\('[^']*',\\s*'\\d+',\\s*'(\\d+)'",
+       "id_regex": "dataNo=(\\d+)",
+       "image": ".egImg img@src"
+     }},
+    {"url": "https://museum.busan.go.kr/busan/monthevent01", "category": "체험·교육",
+     "list": {
+       "rows": "#eventcont li:has(a)",
+       "title": ".cont a",
+       "period": ".locate",
+       "link": ".cont a@href",
+       "id_regex": "monthevent01/(\\d+)",
+       "exclude": "기획전|특별전"
+     }}
+  ],
+  "expect": {"min_rows": 0, "required": ["title", "link", "period"]}
+}

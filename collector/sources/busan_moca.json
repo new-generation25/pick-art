@@ -1,0 +1,44 @@
+{
+  "slug": "busan_moca",
+  "name": "부산현대미술관",
+  "_comment": "사이트 개편 시 이 파일만 고친다. 파이썬은 건드리지 않는다. moca.busan.go.kr 은 DNS가 없고 실제 주소는 www.busan.go.kr/moca (부산시청 도메인 하위) 라서 match 에 경로까지 넣어 다른 busan.go.kr 사이트와 섞이지 않게 한다. 현재전시·예정전시·교육·문화행사 모두 같은 게시판 틀(ul.thumbListType1 > li, 기간은 .date '2026. 12. 11.(금) ~ 2027. 3. 7.(일)'). 상세는 /moca/<게시판>/<글번호> — 예정→현재로 옮겨도 글번호(링크 끝)가 같아 중복 판정이 유지된다. 현재전시의 '~ 상설' 작품(수직정원 등)은 종료일이 없고 제목에 '상설'이 없어서, rows 선택자에서 기간에 '상설'이 든 줄을 :not(:has(...:-soup-contains)) 로 뺀다. 첫 쪽(6건)만 읽는다. 도슨트(education09)는 운영일정 공지라 넣지 않았다",
+  "verified_at": "2026-11-16",
+  "match": [
+    "busan.go.kr/moca"
+  ],
+  "region": "부산",
+  "venue": "부산현대미술관",
+  "list": {
+    "rows": "ul.thumbListType1 > li:not(:has(.date:-soup-contains('상설')))",
+    "title": ".tit",
+    "period": ".date",
+    "link": "a@href",
+    "image": ".thumb img@src"
+  },
+  "boards": [
+    {
+      "url": "https://www.busan.go.kr/moca/exhibition01",
+      "category": "전시"
+    },
+    {
+      "url": "https://www.busan.go.kr/moca/exhibition02",
+      "category": "전시"
+    },
+    {
+      "url": "https://www.busan.go.kr/moca/education05",
+      "category": "체험·교육"
+    },
+    {
+      "url": "https://www.busan.go.kr/moca/education08",
+      "category": "행사"
+    }
+  ],
+  "expect": {
+    "min_rows": 0,
+    "required": [
+      "title",
+      "link",
+      "period"
+    ]
+  }
+}

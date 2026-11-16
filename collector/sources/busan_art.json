@@ -1,0 +1,42 @@
+{
+  "slug": "busan_art",
+  "name": "부산시립미술관",
+  "_comment": "사이트 개편 시 이 파일만 고친다. 파이썬은 건드리지 않는다. 전시는 현재전시·예정전시 목록 HTML(.listTypeG li, 기간은 '2026-09-17 – 2027-02-14' 처럼 en dash). 예정전시가 없으면 안내 문구 li 하나만 있어 :has(.tit)로 거르고, 그래서 min_rows 는 0. 이우환 공간 상설전시(2023~2099)는 기간이 의미 없어 exclude로 뺀다. 교육/행사는 /lecetuxre2/list.nm 첫 쪽(최신순 9건)만 읽고, 상세 주소는 onclick 대신 attr-kval='programno=N' 에서 뽑아 view.nm?programno=N 으로 만든다(pagingParms 없이도 열림 확인)",
+  "verified_at": "2026-11-16",
+  "match": ["art.busan.go.kr"],
+  "region": "부산",
+  "venue": "부산시립미술관",
+  "boards": [
+    {"url": "https://art.busan.go.kr/tblTsite07Display/listNowClient.nm", "category": "전시",
+     "list": {
+       "rows": "#content .listTypeG li:has(.tit)",
+       "title": ".tit",
+       "period": ".date",
+       "link": ".tit a@href",
+       "id_regex": "id=(\\d+)",
+       "image": ".thumb_img img@src",
+       "exclude": "상설"
+     }},
+    {"url": "https://art.busan.go.kr/tblTsite07Display/listFutureClient.nm", "category": "전시",
+     "list": {
+       "rows": "#content .listTypeG li:has(.tit)",
+       "title": ".tit",
+       "period": ".date",
+       "link": ".tit a@href",
+       "id_regex": "id=(\\d+)",
+       "image": ".thumb_img img@src",
+       "exclude": "상설"
+     }},
+    {"url": "https://art.busan.go.kr/lecetuxre2/list.nm", "category": "체험·교육",
+     "link_template": "https://art.busan.go.kr/lecetuxre2/view.nm?programno={m}",
+     "list": {
+       "rows": "#content .listTypeC li:has(.tit)",
+       "title": ".tit",
+       "period": ".infor dl dd",
+       "link_regex": "programno=(\\d+)",
+       "id_regex": "programno=(\\d+)",
+       "image": ".thumb_img img@src"
+     }}
+  ],
+  "expect": {"min_rows": 0, "required": ["title", "link", "period"]}
+}
