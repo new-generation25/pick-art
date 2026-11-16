@@ -19,7 +19,9 @@ load_dotenv(".env.local")
 API_KEY = os.getenv("KOPIS_API_KEY")
 BASE = "http://www.kopis.or.kr/openApi/restful"
 KOPIS_VIEW = "https://www.kopis.or.kr/por/db/pblprfr/pblprfrView.do?menuId=MNU_00020&mt20Id={}"
-SIDO_CODE = os.getenv("KOPIS_SIDO_CODE", "48")          # 48 = 경상남도
+# 48 = 경상남도, 26 = 부산광역시. 쉼표로 여러 시도를 함께 수집한다
+SIDO_CODES = [c.strip() for c in os.getenv("KOPIS_SIDO_CODE", "48,26").split(",") if c.strip()]
+SIDO_NAMES = {"48": "경남", "26": "부산"}
 REGION_FILTER = [r for r in os.getenv("KOPIS_REGION_FILTER", "").split(",") if r]  # 비우면 경남 전체
 
 CITIES = ["창원", "김해", "진주", "양산", "거제", "통영", "사천", "밀양", "거창", "함안",
@@ -33,7 +35,10 @@ def to_iso(d: str) -> str:
     return f"{m.group(1)}-{int(m.group(2)):02d}-{int(m.group(3)):02d}" if m else ""
 
 
-def city_of(*texts) -> str:
+def city_of(*texts, sido="48") -> str:
+    # 부산은 시군 단위가 없어 지역을 '부산' 하나로 둔다
+    if sido == "26":
+        return "부산"
     for t in texts:
         for c in CITIES:
             if t and c in t:
@@ -97,17 +102,21 @@ class KopisScraper:
         failures = []
 
         async with aiohttp.ClientSession() as session:
-            items, page = [], 1
-            while True:
-                root = await self._xml(session, "pblprfr", stdate=start, eddate=end, cpage=page, rows=100, signgucode=SIDO_CODE)
-                dbs = root.findall("db") if root is not None else []
-                items += dbs
-                if len(dbs) < 100:
-                    break
-                page += 1
-            print(f"[KOPIS] {start}~{end} 경남 공연 {len(items)}건", flush=True)
+            items, counts = [], {}
+            for sido in SIDO_CODES:
+                page = 1
+                while True:
+                    root = await self._xml(session, "pblprfr", stdate=start, eddate=end, cpage=page, rows=100, signgucode=sido)
+                    dbs = root.findall("db") if root is not None else []
+                    items += [(sido, x) for x in dbs]
+                    counts[sido] = counts.get(sido, 0) + len(dbs)
+                    if len(dbs) < 100:
+                        break
+                    page += 1
+            area = " · ".join(f"{SIDO_NAMES.get(k, k)} {v}" for k, v in counts.items())
+            print(f"[KOPIS] {start}~{end} 공연 {area}건", flush=True)
 
-            for idx, it in enumerate(items, 1):
+            for idx, (sido, it) in enumerate(items, 1):
                 mt20id = it.findtext("mt20id")
                 title = it.findtext("prfnm")
                 try:
@@ -119,7 +128,7 @@ class KopisScraper:
                     if d is None:
                         fail += 1; failures.append(f"{title}: 상세 없음"); continue
                     fac = await self._facility(session, d.findtext("mt10id"))
-                    region = city_of(fac["adres"], d.findtext("fcltynm"), title)
+                    region = city_of(fac["adres"], d.findtext("fcltynm"), title, sido=sido)
                     if REGION_FILTER and region not in REGION_FILTER:
                         skipped_region += 1
                         continue
@@ -166,7 +175,7 @@ class KopisScraper:
 
         status = "SUCCESS" if (new or dup) else "FAIL"
         mark = "❌" if status == "FAIL" else ("⚠️" if fail else "✅")
-        summary = f"{mark} KOPIS 수집 완료: 경남 {len(items)}건 (신규 {new}, 중복 {dup}, 실패 {fail}, 지역제외 {skipped_region})"
+        summary = f"{mark} KOPIS 수집 완료: {area}건 (신규 {new}, 중복 {dup}, 실패 {fail}, 지역제외 {skipped_region})"
         print(f"[KOPIS] {summary}", flush=True)
         for f in failures[:20]:
             print(f"  - {f}", flush=True)
