@@ -5,6 +5,7 @@ import "./globals.css";
 import { ColorSchemeScript, MantineProvider, createTheme } from "@mantine/core";
 import { cn } from "@/lib/utils";
 import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from "@/lib/site";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -69,6 +70,8 @@ export default function RootLayout({
             {children}
           </MainLayout>
         </MantineProvider>
+        {/* Vercel Web Analytics — 방문 수와 유입 경로(utm 포함). 쿠키를 쓰지 않는다 */}
+        <Analytics />
       </body>
     </html>
   );
