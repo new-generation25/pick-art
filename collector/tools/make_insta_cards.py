@@ -274,6 +274,7 @@ def caption_text(f: dict, handle: str) -> str:
     if f["mentions"]:
         lines += ["", "🏷 " + " ".join(m if m.startswith("@") else f"@{m}" for m in f["mentions"])]
     lines += ["", "🔖 저장해 두고, 같이 갈 사람에게 보내 주세요.",
+              "👉 이번 주 다른 공연·전시는 프로필 링크(피카 사이트)에서 지역별로 볼 수 있어요.",
               f"출처: {f['source_name']} {f['source_url']}".strip(),
               "방문 전 공식 안내에서 변경 사항을 꼭 확인하세요.", "", " ".join(tags)]
     out = "\n".join(lines)
