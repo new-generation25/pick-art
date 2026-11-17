@@ -50,7 +50,7 @@
 
 게시물마다 아래를 처음부터 한다.
 
-1. `list_connected_browsers` → @picka.news가 로그인된 브라우저를 `select_browser`(2026-11-16 기준 "Browser 1", deviceId `03e1d81e-a112-4388-8679-3b38082b7a95`. 바뀌었으면 연결된 브라우저마다 확인).
+1. `list_connected_browsers` → @picka.news가 로그인된 브라우저를 `select_browser`(deviceId `03e1d81e-a112-4388-8679-3b38082b7a95`. 표시 이름은 Browser 1·Browser 2·pick 등으로 자주 바뀌므로 이름으로 고르지 않는다. 이 deviceId가 없으면 연결된 브라우저마다 확인).
 2. `tabs_context_mcp {createIfEmpty:true}` → `https://www.instagram.com/` 이동 → 페이지 링크 중 프로필 링크가 `/picka.news/`인지 확인. **아니면 멈춘다.**
 3. 왼쪽 「만들기」 → 「게시물」 → 파일 입력(find로 ref) → `file_upload`로 `jpeg_for_api/<slug>_01~05.jpg` 5장.
 4. 자르기: 대화상자 안 `svg[aria-label="자르기 선택"]` 버튼 → `4:5`. 화면을 찍어 포스터가 잘리지 않았는지 본다.
