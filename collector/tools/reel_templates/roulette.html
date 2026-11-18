@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=block">
+<style>
+:root{--cream:#F6EFDF;--red:#D33A2C;--ink:#1C1C1C;--slate:#4F6272}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--ink)}
+body{font-family:'Pretendard Variable',sans-serif;word-break:keep-all;letter-spacing:-.02em;color:var(--cream)}
+#stage{position:absolute;inset:0;overflow:hidden;background:var(--ink)}
+#dots{position:absolute;inset:0;background-image:radial-gradient(rgba(246,239,223,.07) 2px,transparent 2.2px);background-size:22px 22px}
+.layer{position:absolute;inset:0;display:none}
+.hook{position:absolute;left:40px;right:40px;top:640px;text-align:center;font-family:'Black Han Sans',sans-serif;font-size:160px;line-height:1.05;color:var(--cream)}
+.hook .r{color:var(--red)}
+/* machine */
+#machine{position:absolute;left:110px;top:250px;width:860px;height:1240px}
+#box{position:absolute;inset:0;background:var(--red);border-radius:60px 60px 30px 30px;box-shadow:inset -40px 0 0 rgba(0,0,0,.12)}
+#slotlab{position:absolute;left:0;right:0;top:34px;text-align:center;font-family:'Black Han Sans';font-size:66px;color:var(--cream)}
+#win{position:absolute;left:100px;top:140px;width:660px;height:900px;background:var(--ink);border:10px solid var(--ink);border-radius:14px;overflow:hidden}
+#strip{position:absolute;left:0;top:0;width:640px}
+#strip img{display:block;width:640px;height:880px;object-fit:cover}
+#glare{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,0) 22%,rgba(0,0,0,0) 78%,rgba(0,0,0,.55))}
+.bulb{position:absolute;width:26px;height:26px;border-radius:50%;background:var(--cream)}
+#foot{position:absolute;left:400px;top:1490px;width:280px;height:200px;background:#000}
+#count{position:absolute;left:0;right:0;top:1080px;text-align:center;font-size:52px;font-weight:900;color:var(--cream)}
+#stamp{position:absolute;left:250px;top:560px;width:560px;text-align:center;font-family:'Black Han Sans';font-size:150px;color:var(--red);
+  border:16px solid var(--red);border-radius:30px;background:rgba(246,239,223,.92);transform:rotate(-12deg);display:none}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+/* reveal */
+#bg{position:absolute;left:-100px;top:-100px;width:1280px;height:2120px;object-fit:cover;filter:blur(30px) brightness(.45) saturate(1.3)}
+#post{position:absolute;left:190px;top:300px;width:700px;border:10px solid var(--cream);box-shadow:22px 22px 0 var(--red);transform-origin:50% 50%}
+#post img{display:block;width:680px}
+#kick{position:absolute;left:72px;top:290px;background:var(--cream);color:var(--ink);font-weight:900;font-size:48px;padding:10px 26px}
+#big{position:absolute;left:60px;right:60px;top:760px;text-align:center;font-family:'Black Han Sans';line-height:1.05;color:var(--cream);text-shadow:10px 8px 0 var(--red)}
+#small{position:absolute;left:80px;right:80px;top:1080px;text-align:center;font-size:54px;font-weight:800;color:var(--cream)}
+#band{position:absolute;left:0;right:0;top:1150px;background:var(--red);color:var(--cream);text-align:center;font-weight:900;font-size:58px;padding:26px 40px;line-height:1.25}
+#cta .hook{font-size:150px;top:560px}
+#cta .sub{position:absolute;left:60px;right:60px;top:1000px;text-align:center;font-size:62px;font-weight:800}
+#end{background:var(--cream)}
+#end .logo{position:absolute;left:0;right:0;top:700px;text-align:center;font-family:'Black Han Sans';font-size:240px;color:var(--ink)}
+#end .logo span{color:var(--red)}
+#end .url{position:absolute;left:0;right:0;top:1010px;text-align:center;font-size:58px;font-weight:800;color:var(--slate)}
+#prog{position:absolute;left:0;top:0;height:12px;background:var(--red)}
+</style></head>
+<body><div id="stage">
+<div id="dots"></div>
+<div class="layer" id="L_hook"><div class="hook" id="hookText"></div></div>
+<div class="layer" id="L_mach">
+  <div id="machine">
+    <div id="box"></div>
+    <div id="slotlab">오늘의 공연·전시 룰렛</div>
+    <div id="win"><div id="strip"></div><div id="glare"></div></div>
+    <div id="count"></div>
+  </div>
+  <div id="foot"></div>
+  <div id="stamp">당첨!</div>
+</div>
+<div class="layer" id="L_rev">
+  <img id="bg"><div id="post"><img id="postImg"></div>
+  <div id="kick"></div><div id="big"></div><div id="small"></div><div id="band"></div>
+</div>
+<div class="layer" id="L_cta"><div id="cta"><div class="hook">다음 룰렛은<br><span class="r">내일</span> 🎰</div><div class="sub">저장하고 같이 갈 사람 태그 👇</div></div></div>
+<div class="layer" id="L_end"><div id="end" style="position:absolute;inset:0"><div class="logo">피카 <span>pica</span></div><div class="url">pick-art.vercel.app</div></div></div>
+<div id="flash"></div><div id="prog"></div>
+</div>
+<script>
+const ITEMS = [
+ {f:'p/02_부산한마당.jpg'},{f:'p/03_밀마루합창단.jpg'},{f:'p/04_정숙정도예전.jpg'},{f:'p/05_오프타임타임로그.jpg'},
+ {f:'p/06_기장심포니통영.jpg'},{f:'p/07_저승할망.jpg'},{f:'p/08_차이코프스키라흐마니노프.jpg'},{f:'p/09_꿈의오케스트라창원.jpg'}];
+const WIN = 5;  // 당첨 칸
+const W = {kick:'남해 · 어린이 음악극', title:'어린이 음악극 〈저승할망〉',
+  beats:[{big:'11.21<br>토요일',size:200},{big:'오후 2시<br>· 5시',size:190},{big:'2천원',size:300,small:'어른 2,000원 · 19세 이하 1,000원'},{big:'남해탈공연<br>박물관',size:160,small:'남해군 이동면'}]};
+const TOTAL = 15.0, BEAT = 0.5;
+const T_HOOK = 1.6, T_SPIN0 = 1.6, T_STOP = 6.4, T_REV = 7.0, T_CTA = 12.4, T_END = 13.9;
+const $ = id => document.getElementById(id);
+const CELL = 880, N = ITEMS.length, LOOPS = 4;
+// strip: 3 copies so we never run out
+const strip = $('strip');
+for (let k = 0; k < LOOPS + 2; k++) for (const it of ITEMS) { const im = new Image(); im.src = it.f; strip.appendChild(im); }
+$('bg').src = ITEMS[WIN].f; $('postImg').src = ITEMS[WIN].f;
+// bulbs around window
+const mach = $('machine');
+for (let i = 0; i < 14; i++) { const b = document.createElement('div'); b.className = 'bulb';
+  const side = i < 7; const y = 170 + (i % 7) * 140; b.style.left = (side ? 48 : 786) + 'px'; b.style.top = y + 'px'; mach.appendChild(b); }
+const bulbs = [...document.querySelectorAll('.bulb')];
+const D = LOOPS * N + WIN;            // 지나갈 칸 수
+const ease = x => 1 - Math.pow(1 - x, 4);
+const posAt = t => t <= T_SPIN0 ? 0 : t >= T_STOP ? D : D * ease((t - T_SPIN0) / (T_STOP - T_SPIN0));
+
+// ---------- audio (합성음, 외부 음원 없음) ----------
+let ac = null;
+function tone(at, f, d, g, type) { const o = ac.createOscillator(), v = ac.createGain(); o.type = type || 'sine'; o.frequency.setValueAtTime(f, at);
+  v.gain.setValueAtTime(g, at); v.gain.exponentialRampToValueAtTime(0.0001, at + d); o.connect(v).connect(ac.destination); o.start(at); o.stop(at + d + .02); }
+function kick(at, g) { const o = ac.createOscillator(), v = ac.createGain(); o.frequency.setValueAtTime(150, at); o.frequency.exponentialRampToValueAtTime(40, at + .18);
+  v.gain.setValueAtTime(g || .9, at); v.gain.exponentialRampToValueAtTime(.0001, at + .22); o.connect(v).connect(ac.destination); o.start(at); o.stop(at + .25); }
+function noise(at, d, g, hp) { const n = ac.createBuffer(1, ac.sampleRate * d, ac.sampleRate), ch = n.getChannelData(0); for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
+  const s = ac.createBufferSource(); s.buffer = n; const f = ac.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = hp || 6000; const v = ac.createGain();
+  v.gain.setValueAtTime(g, at); v.gain.exponentialRampToValueAtTime(.0001, at + d); s.connect(f).connect(v).connect(ac.destination); s.start(at); }
+function scheduleAudio() {
+  const c0 = ac.currentTime;
+  // hook slams
+  [0, .5, 1.0].forEach(t => { kick(c0 + t, 1); noise(c0 + t, .25, .35, 1500); });
+  // spin ticks: 칸이 넘어갈 때마다
+  let last = 0; for (let t = T_SPIN0; t < T_STOP; t += 1 / 240) { const p = Math.floor(posAt(t)); if (p > last) { last = p; tone(c0 + t, 1800, .03, .25, 'square'); } }
+  // spin bed: hats on 8ths
+  for (let t = T_SPIN0; t < T_STOP; t += .25) noise(c0 + t, .05, .12, 8000);
+  // ding + stamp
+  tone(c0 + T_STOP, 1320, 1.2, .5, 'triangle'); tone(c0 + T_STOP, 1980, .9, .25, 'sine'); kick(c0 + T_STOP + .08, 1); noise(c0 + T_STOP + .08, .3, .4, 800);
+  // reveal groove 120bpm
+  for (let t = T_REV; t < T_END; t += BEAT) { kick(c0 + t, .8); if (((t - T_REV) / BEAT) % 2 === 1) noise(c0 + t, .12, .3, 2500); noise(c0 + t + .25, .04, .12, 8000); }
+  const bass = [55, 55, 65.4, 49]; for (let i = 0, t = T_REV; t < T_END; t += 1, i++) tone(c0 + t, bass[i % 4], .9, .35, 'sawtooth');
+  // end chord
+  [523, 659, 784].forEach(f => tone(c0 + T_END, f, 1, .18, 'triangle'));
+}
+try { ac = new (window.AudioContext || window.webkitAudioContext)(); scheduleAudio(); } catch (e) {}
+
+// ---------- 화면 ----------
+const show = id => ['L_hook', 'L_mach', 'L_rev', 'L_cta', 'L_end'].forEach(x => $(x).style.display = x === id ? 'block' : 'none');
+const HOOK = ['오늘 뭐 볼지', '모르겠으면', '룰렛<br><span class="r">돌림</span> 🎰'];
+function slam(el, t0, t) { const k = Math.max(0, 1 - (t - t0) / .14); el.style.transform = `scale(${1 + k * 1.6}) rotate(${k * -4}deg)`; el.style.opacity = Math.min(1, (t - t0) / .06); }
+function shake(t0, t, amp) { const k = Math.max(0, 1 - (t - t0) / .35); const s = $('stage'); s.style.transform = k ? `translate(${Math.sin(t * 90) * amp * k}px,${Math.cos(t * 77) * amp * k}px)` : ''; }
+const start = performance.now();
+function frame() {
+  const t = (performance.now() - start) / 1000;
+  $('prog').style.width = (Math.min(1, t / TOTAL) * 1080) + 'px';
+  $('flash').style.opacity = 0; $('stage').style.transform = '';
+  if (t < T_HOOK) {
+    show('L_hook'); const i = Math.min(2, Math.floor(t / .55)); const h = $('hookText'); h.innerHTML = HOOK[i]; slam(h, i * .55, t); shake(i * .55, t, 18);
+  } else if (t < T_REV) {
+    show('L_mach');
+    const p = posAt(t); const y = (p % N) * CELL + N * CELL; // 두 번째 묶음부터 보여 위가 비지 않게
+    strip.style.transform = `translateY(${-y}px)`;
+    const m = $('machine'); const intro = Math.min(1, (t - T_SPIN0) / .3); m.style.transform = `translateY(${(1 - ease(intro)) * 900}px)`;
+    $('count').textContent = t < T_STOP ? '돌아가는 중…' : '';
+    const fast = t < T_STOP; bulbs.forEach((b, i) => b.style.opacity = fast ? ((Math.floor(t * 10) + i) % 2 ? 1 : .25) : ((Math.floor(t * 6)) % 2 ? 1 : .4));
+    const st = $('stamp');
+    if (t >= T_STOP) { st.style.display = 'block'; const k = Math.max(0, 1 - (t - T_STOP) / .16); st.style.transform = `rotate(-12deg) scale(${1 + k * 2})`; st.style.opacity = Math.min(1, (t - T_STOP) / .05);
+      $('flash').style.opacity = Math.max(0, .8 - (t - T_STOP) * 4); shake(T_STOP, t, 26); } else st.style.display = 'none';
+  } else if (t < T_CTA) {
+    show('L_rev'); const lt = t - T_REV; const post = $('post');
+    const big = $('big'), small = $('small'), band = $('band'), kickEl = $('kick');
+    if (lt < 1.0) { // 포스터 당겨짐 + 분야
+      post.style.display = 'block'; const k = ease(Math.min(1, lt / .35)); post.style.transform = `scale(${.6 + .4 * k}) rotate(${(1 - k) * 8}deg)`;
+      kickEl.style.display = 'block'; kickEl.textContent = W.kick; big.innerHTML = ''; small.textContent = ''; band.style.display = 'none';
+    } else {
+      post.style.display = 'none'; kickEl.style.display = 'block';
+      const bi = Math.min(W.beats.length - 1, Math.floor((lt - 1.0) / 1.0)); const b = W.beats[bi];
+      big.innerHTML = b.big; big.style.fontSize = b.size + 'px'; slam(big, 1.0 + bi * 1.0, lt); shake(1.0 + bi * 1.0, lt, 14);
+      small.textContent = b.small || ''; band.style.display = 'block'; band.textContent = W.title;
+    }
+  } else if (t < T_END) {
+    show('L_cta'); const h = document.querySelector('#cta .hook'); slam(h, 0, t - T_CTA);
+  } else { show('L_end'); const l = document.querySelector('#end .logo'); slam(l, 0, t - T_END); }
+  if (t < TOTAL + .2) requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script></body></html>
