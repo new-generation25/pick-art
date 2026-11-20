@@ -69,9 +69,9 @@ description: "Task list for 내 주변 행사 (거리순 보기)"
 **Goal**: 위치를 거부·실패해도 지역을 골라 그 중심 기준 거리순으로 본다.
 **Independent Test**: quickstart 3의 「거부」 「7초 지연」 경우.
 
-- [ ] T023 [P] [US2] `frontend/src/lib/areaCenters.ts`: 경남 18 + 부산 16 기준점(시청·구청·군청). 좌표는 네이버 지역 검색으로 구하고 출처 주석(T003 키 필요)
-- [ ] T024 [US2] `NearbyClient.tsx`: 거부·실패·6초 초과 시 지역 고르기로 전환(오류 화면 없음), 「○○ 중심 기준」, localStorage `pica.nearby.area` 저장·복원(try/catch), `area` 쿼리 지원
-- [ ] T025 [US2] 검증: 거부 → 「부산 수영구」 선택 → 기준 문구·정렬 확인, 새로고침 후 선택 유지, 7초 지연 시 6초에 전환
+- [x] T023 [P] [US2] `frontend/src/lib/areaCenters.ts`: 경남 18 + 부산 16 기준점(시청·구청·군청). 좌표는 네이버 지역 검색으로 구하고 출처 주석(T003 키 필요)
+- [x] T024 [US2] `NearbyClient.tsx`: 거부·실패·6초 초과 시 지역 고르기로 전환(오류 화면 없음), 「○○ 중심 기준」, localStorage `pica.nearby.area` 저장·복원(try/catch), `area` 쿼리 지원
+- [x] T025 (미리보기 81f7c1b: 거부 → 지역 고르기 표시, 「부산 수영구」 → 「부산 수영구 중심 기준」 410m부터, 새로 열어도 유지) [US2] 검증: 거부 → 「부산 수영구」 선택 → 기준 문구·정렬 확인, 새로고침 후 선택 유지, 7초 지연 시 6초에 전환
 
 ---
 
@@ -87,7 +87,7 @@ description: "Task list for 내 주변 행사 (거리순 보기)"
 
 ## Phase 6: 관리자 장소 확인 (FR-011)
 
-- [ ] T028 `frontend/src/app/admin/venues/page.tsx`: `pending` 우선 목록(이름·별칭·시군·연결 행사 수·후보), 후보 고르기·좌표 붙여넣기·찾을 수 없음·두 장소 합치기, `checked_by`·`checked_at` 기록. 관리자 메뉴에 링크
+- [x] T028 (코드·tsc·eslint 통과. 관리자 로그인으로 실제 저장은 T029에서 확인) `frontend/src/app/admin/venues/page.tsx`: `pending` 우선 목록(이름·별칭·시군·연결 행사 수·후보), 후보 고르기·좌표 붙여넣기·찾을 수 없음·두 장소 합치기, `checked_by`·`checked_at` 기록. 관리자 메뉴에 링크
 - [ ] T029 검증: `pending` 장소 1곳을 확정하면 `/nearby`에서 그 행사에 거리가 생김(plan 단계 F)
 
 ---
