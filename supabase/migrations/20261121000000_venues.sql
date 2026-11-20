@@ -40,7 +40,8 @@ CREATE OR REPLACE VIEW public.public_venues AS
     FROM public.venues
     WHERE geo_status = 'confirmed';
 
-REVOKE ALL ON public.public_venues FROM public;
+-- Supabase 기본 권한은 새 뷰에 anon·authenticated 쓰기까지 준다. 단순 뷰는 쓰기가 원본 표로 넘어가므로 읽기만 남긴다
+REVOKE ALL ON public.public_venues FROM public, anon, authenticated;
 GRANT SELECT ON public.public_venues TO anon, authenticated;
 
 COMMENT ON TABLE public.venues IS '내 주변 행사: 건물 단위 장소와 좌표 (specs/002-nearby-events)';
