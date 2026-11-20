@@ -1,7 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Container } from "@mantine/core";
 import { LocateFixed, Bus, Car } from "lucide-react";
@@ -11,6 +10,31 @@ import { detectPlatform, naverRouteLinks, type RouteMode } from "@/lib/naverMap"
 import { CATEGORIES } from "@/lib/categories";
 import { formatPeriod } from "@/lib/utils";
 import type { NearbyRow } from "@/lib/nearbyData";
+import { AREAS, findArea } from "@/lib/areaCenters";
+
+const AREA_KEY = "pica.nearby.area";
+
+function AreaSelect({ value, onChange }: { value: string; onChange: (key: string) => void }) {
+    return (
+        <label className="flex flex-wrap items-center gap-2 text-[15px] text-ink">
+            <span className="font-semibold">지역 고르기</span>
+            <select
+                className="pica-box px-3 py-2 text-[15px]"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                aria-label="거리 기준 지역"
+            >
+                <option value="">선택하세요</option>
+                <optgroup label="부산">
+                    {AREAS.filter(a => a.city === "부산").map(a => <option key={a.key} value={a.key}>{a.label}</option>)}
+                </optgroup>
+                <optgroup label="경남">
+                    {AREAS.filter(a => a.city !== "부산").map(a => <option key={a.key} value={a.key}>{a.label}</option>)}
+                </optgroup>
+            </select>
+        </label>
+    );
+}
 
 /**
  * 내 주변 행사 (specs/002-nearby-events, contracts/nearby-ui.md)
@@ -95,7 +119,31 @@ export function NearbyClient({ rows, today, appname }: { rows: NearbyRow[]; toda
     const category = sp.get("c") || "전체";
 
     const [geo, setGeo] = useState<GeoState>("idle");
-    const [origin, setOrigin] = useState<Origin | null>(null);
+    const [gpsOrigin, setGpsOrigin] = useState<Origin | null>(null);
+    const area = findArea(sp.get("area"));
+    // 위치 > 고른 지역(URL area). 지역은 시청·구청 좌표라 URL 에 이름만 둬도 방문자 위치가 드러나지 않는다
+    const origin = useMemo<Origin | null>(() => gpsOrigin
+        ?? (area ? { point: { lat: area.lat, lng: area.lng }, label: `${area.city === "부산" ? "부산 " + area.label : area.label} 중심 기준`, approx: false } : null),
+    [gpsOrigin, area]);
+
+    // 이 기기에서 전에 고른 지역이 있으면 다시 쓴다(FR-005, 기기 안에만 저장)
+    useEffect(() => {
+        if (sp.get("area")) return;
+        let saved: string | null = null;
+        try { saved = localStorage.getItem(AREA_KEY); } catch { /* 저장소를 못 쓰면 무시 */ }
+        if (saved && findArea(saved)) {
+            const params = new URLSearchParams(sp.toString());
+            params.set("area", saved);
+            router.replace(`/nearby?${params.toString()}`, { scroll: false });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const chooseArea = (key: string) => {
+        try { if (key) localStorage.setItem(AREA_KEY, key); else localStorage.removeItem(AREA_KEY); } catch { /* 무시 */ }
+        setGpsOrigin(null);
+        setParam("area", key, "");
+    };
 
     const setParam = (key: string, value: string, empty: string) => {
         const params = new URLSearchParams(sp.toString());
@@ -113,7 +161,7 @@ export function NearbyClient({ rows, today, appname }: { rows: NearbyRow[]; toda
             (pos) => {
                 if (done) return;
                 done = true; window.clearTimeout(guard);
-                setOrigin({
+                setGpsOrigin({
                     point: { lat: pos.coords.latitude, lng: pos.coords.longitude },
                     label: "내 위치 기준",
                     approx: pos.coords.accuracy > 1000,
@@ -157,14 +205,23 @@ export function NearbyClient({ rows, today, appname }: { rows: NearbyRow[]; toda
                     {(geo === "denied" || geo === "timeout" || geo === "unsupported") && (
                         <div className="pica-box p-4 text-[15px] text-ink">
                             {geo === "denied" ? "위치 사용이 꺼져 있어요." : geo === "timeout" ? "위치를 받지 못했어요." : "이 브라우저는 위치를 지원하지 않아요."}{" "}
-                            지역별로 보려면 <Link className="font-bold underline" href="/">전체 행사에서 지역을 고르세요</Link>.
+                            지역을 고르면 그 중심에서 가까운 순으로 보여 드려요.
                         </div>
                     )}
+                    <AreaSelect value="" onChange={chooseArea} />
                 </div>
             )}
 
             {origin && result && (
                 <>
+                    {!gpsOrigin && (
+                        <div className="mt-4 flex flex-wrap items-center gap-3">
+                            <AreaSelect value={area?.key || ""} onChange={chooseArea} />
+                            <button type="button" className="pica-chip" onClick={locate} disabled={geo === "asking"}>
+                                <LocateFixed size={14} aria-hidden /> {geo === "asking" ? "위치 확인 중…" : "내 위치로 바꾸기"}
+                            </button>
+                        </div>
+                    )}
                     <p className="mt-3 text-[15px] text-ink-soft">
                         <b className="text-ink">{origin.label}{origin.approx ? " · 약" : ""}</b> · 거리 표시 <b className="text-ink">{result.near.length}건</b>
                         {result.unknown.length > 0 && <> · 거리 확인 안 됨 {result.unknown.length}건</>}
