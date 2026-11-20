@@ -21,10 +21,10 @@ description: "Task list for 내 주변 행사 (거리순 보기)"
 **목적**: 계획의 미확인 3가지를 실제로 확인하고 research.md를 고친다. 결과에 따라 Phase 2 설계가 바뀔 수 있다.
 
 - [ ] T001 사용자에게 네이버 개발자센터 애플리케이션 등록·검색 API Client ID/Secret 발급을 안내(링크·누를 순서). 받은 값은 사용자가 `collector/.env`에 `NAVER_SEARCH_CLIENT_ID`, `NAVER_SEARCH_CLIENT_SECRET`로 넣는다(값을 출력·커밋하지 않음)
-- [ ] T002 [P] KOPIS `prfplc/{mt10id}` 응답 3건을 받아 위도·경도 칸 유무를 확인하고 research.md §1에 기록
+- [x] T002 (KOPIS가 요청을 막아 미확인 — research §1에 기록, 네이버만으로 진행) [P] KOPIS `prfplc/{mt10id}` 응답 3건을 받아 위도·경도 칸 유무를 확인하고 research.md §1에 기록
 - [ ] T003 네이버 지역 검색 API로 표본 5곳(예: 해운대문화회관, 어댑터씨어터, 진주성)을 검색해 응답 좌표 형식·결과 수를 확인하고, 개발자센터의 일일 한도를 확인해 research.md §1에 기록(T001 뒤)
-- [ ] T004 [P] 네이버지도 앱 스킴(`nmap://route/public`, `nmap://route/car`)의 파라미터와 좌표 기반 웹 길찾기 주소 형식을 문서·실제 주소로 확인해 research.md §6과 contracts/naver-map-link.md를 확정
-- [ ] T005 공개 행사 `venue` 200개 표기를 정규화 규칙 초안으로 묶어 실제 장소 수를 세고 research.md §0에 숫자 기록(DB 읽기만)
+- [x] T004 [P] 네이버지도 앱 스킴(`nmap://route/public`, `nmap://route/car`)의 파라미터와 좌표 기반 웹 길찾기 주소 형식을 문서·실제 주소로 확인해 research.md §6과 contracts/naver-map-link.md를 확정
+- [x] T005 공개 행사 `venue` 200개 표기를 정규화 규칙 초안으로 묶어 실제 장소 수를 세고 research.md §0에 숫자 기록(DB 읽기만)
 
 **Checkpoint**: research.md에 「확인 필요」가 남아 있지 않다.
 
@@ -32,17 +32,17 @@ description: "Task list for 내 주변 행사 (거리순 보기)"
 
 ## Phase 2: 기반 (Foundational — 모든 이야기에 필요)
 
-- [ ] T006 `supabase/migrations/20261121000000_venues.sql` 작성: `venues` 표(data-model.md), `events.venue_id` FK, 공개 뷰 `public_venues(id,name,region,lat,lng)`(confirmed만), RLS(익명 select는 뷰만, 쓰기는 admin·service), 인덱스 `(name, region)` unique
+- [x] T006 `supabase/migrations/20261121000000_venues.sql` 작성: `venues` 표(data-model.md), `events.venue_id` FK, 공개 뷰 `public_venues(id,name,region,lat,lng)`(confirmed만), RLS(익명 select는 뷰만, 쓰기는 admin·service), 인덱스 `(name, region)` unique
 - [ ] T007 사용자 승인 후 마이그레이션 적용. 익명 키로 `public_venues` select 성공, `venues.candidates` select 거부를 확인(plan 단계 B)
-- [ ] T008 [P] `collector/venue_norm.py`: 이름 정규화(`\xa0`·괄호·관 이름 제거), 네이버 응답 → WGS84 변환, 자동 확정 판정(research §2), 부산·경남 경계 상자
-- [ ] T009 [P] `collector/tests/test_venue_norm.py`: 실제 표기 30개 정규화 기대값, 확정·보류 판정 사례(동명 카페, 경남 밖 결과, 후보 2개 300m 이내/밖)
-- [ ] T010 `collector/tools/geocode_venues.py`: contracts/venue-geocode.md대로 `--backfill`·`--dry-run`·기본 모드, 보고 한 줄 출력(T008 뒤)
+- [x] T008 [P] `collector/venue_norm.py`: 이름 정규화(`\xa0`·괄호·관 이름 제거), 네이버 응답 → WGS84 변환, 자동 확정 판정(research §2), 부산·경남 경계 상자
+- [x] T009 [P] `collector/tests/test_venue_norm.py`: 실제 표기 30개 정규화 기대값, 확정·보류 판정 사례(동명 카페, 경남 밖 결과, 후보 2개 300m 이내/밖)
+- [x] T010 (키 없이 --dry-run까지 확인: 133곳·장소 없는 행사 15) `collector/tools/geocode_venues.py`: contracts/venue-geocode.md대로 `--backfill`·`--dry-run`·기본 모드, 보고 한 줄 출력(T008 뒤)
 - [ ] T011 `--backfill --dry-run` 실행 결과 검토 → 실제 `--backfill` 실행. 확정 비율 ≥ 80% 확인(SC-001). 표본 30곳 오차를 네이버지도와 대조해 `docs/REPORT_nearby_geocode.md`에 표로 기록(SC-002)
-- [ ] T012 `collector/main.py` 정기 루틴 끝에 `geocode_venues` 기본 모드 호출, 완료 알림에 보고 한 줄 추가
-- [ ] T013 [P] `frontend/src/lib/nearby.ts`: 하버사인 거리, 거리 표기(`850m`·`1.2km`·`약`), 정렬(거리 → 날짜), 기간·거리·분야 필터, 좌표 없는 행사 분리
-- [ ] T014 [P] `frontend/src/lib/naverMap.ts`: contracts/naver-map-link.md의 4경우(T004 확정 형식)
-- [ ] T015 [P] `frontend/src/lib/__tests__/nearby.test.mjs`: 알려진 거리 ±1%, 정렬·필터 사례, 링크 4경우 문자열 고정. `node --test` 통과
-- [ ] T016 `frontend/src/app/nearby/page.tsx`: 서버에서 기간(최대 2주) 안 `PUBLISHED` 행사 + `public_venues` 좌표 조회(기존 `getPublishedEvents` 규칙: 숨김 분야 제외). 위치 관련 파라미터 없음
+- [x] T012 `collector/main.py` 정기 루틴 끝에 `geocode_venues` 기본 모드 호출, 완료 알림에 보고 한 줄 추가
+- [x] T013 [P] `frontend/src/lib/nearby.ts`: 하버사인 거리, 거리 표기(`850m`·`1.2km`·`약`), 정렬(거리 → 날짜), 기간·거리·분야 필터, 좌표 없는 행사 분리
+- [x] T014 [P] `frontend/src/lib/naverMap.ts`: contracts/naver-map-link.md의 4경우(T004 확정 형식)
+- [x] T015 [P] `frontend/src/lib/__tests__/nearby.test.mjs`: 알려진 거리 ±1%, 정렬·필터 사례, 링크 4경우 문자열 고정. `node --test` 통과
+- [x] T016 `frontend/src/app/nearby/page.tsx`: 서버에서 기간(최대 2주) 안 `PUBLISHED` 행사 + `public_venues` 좌표 조회(기존 `getPublishedEvents` 규칙: 숨김 분야 제외). 위치 관련 파라미터 없음
 
 **Checkpoint**: 장소 좌표가 채워져 있고 순수 함수 테스트가 통과한다.
 
@@ -53,11 +53,11 @@ description: "Task list for 내 주변 행사 (거리순 보기)"
 **Goal**: 위치를 허용하면 이번 주 행사가 가까운 순으로, 거리·날짜와 함께 나온다.
 **Independent Test**: quickstart 3의 「허용」 경우.
 
-- [ ] T017 [US1] BRAND_GUIDE.md(5·12절 등 화면 규칙)를 읽고 목록 항목 디자인을 기존 `EventCard`·피드와 맞춤(날짜가 가장 큰 글자)
-- [ ] T018 [US1] `frontend/src/app/nearby/NearbyClient.tsx`: 「내 위치로 찾기」 버튼, 안내 한 줄, Geolocation 호출(timeout 6초, maximumAge 5분), 받는 중 표시, 정확도 1km 초과 시 「약」
-- [ ] T019 [US1] 같은 파일: 거리순 목록 렌더, 「거리 확인 안 됨」 묶음(시군 표시), 장소 없는 행사 제외, 결과 0건 안내와 「2주로 넓히기」 「거리 제한 풀기」, 50km 초과 시 「부산·경남 행사만 소개해요」
-- [ ] T020 [US1] 항목에 「대중교통 길찾기」 「자동차 길찾기」 버튼(`naverMap.ts`), 앱 미설치 시 1.5초 뒤 웹 전환
-- [ ] T021 [US1] `frontend/src/components/ui/FilterBar.tsx`(및 모바일 하단 내비)에 「내 주변」 진입 링크
+- [x] T017 [US1] BRAND_GUIDE.md(5·12절 등 화면 규칙)를 읽고 목록 항목 디자인을 기존 `EventCard`·피드와 맞춤(날짜가 가장 큰 글자)
+- [x] T018 [US1] `frontend/src/app/nearby/NearbyClient.tsx`: 「내 위치로 찾기」 버튼, 안내 한 줄, Geolocation 호출(timeout 6초, maximumAge 5분), 받는 중 표시, 정확도 1km 초과 시 「약」
+- [x] T019 [US1] 같은 파일: 거리순 목록 렌더, 「거리 확인 안 됨」 묶음(시군 표시), 장소 없는 행사 제외, 결과 0건 안내와 「2주로 넓히기」 「거리 제한 풀기」, 50km 초과 시 「부산·경남 행사만 소개해요」
+- [x] T020 [US1] 항목에 「대중교통 길찾기」 「자동차 길찾기」 버튼(`naverMap.ts`), 앱 미설치 시 1.5초 뒤 웹 전환
+- [x] T021 [US1] `frontend/src/components/ui/FilterBar.tsx`(및 모바일 하단 내비)에 「내 주변」 진입 링크
 - [ ] T022 [US1] 검증: `npx tsc --noEmit` 0, 내장 브라우저에서 geolocation 대체(광안리 좌표)로 거리 오름차순·「내 위치 기준」 확인, 네트워크 요청·URL에 좌표 0건(SC-005), 375px 가로 스크롤 없음, 스크린샷
 
 **Checkpoint**: US1만으로 배포 가능한 MVP.
@@ -80,7 +80,7 @@ description: "Task list for 내 주변 행사 (거리순 보기)"
 **Goal**: 3·10·30km, 오늘·주말·이번 주·2주, 분야로 목록을 좁힌다.
 **Independent Test**: 「3km · 이번 주말」 선택 시 조건에 맞는 행사만 남고 개수가 보인다.
 
-- [ ] T026 [US3] `NearbyClient.tsx`: 필터 칩(URL 쿼리 `r`·`p`·`c` 동기화, 좌표는 URL에 넣지 않음), 남은 개수 표시
+- [x] T026 [US3] `NearbyClient.tsx`: 필터 칩(URL 쿼리 `r`·`p`·`c` 동기화, 좌표는 URL에 넣지 않음), 남은 개수 표시
 - [ ] T027 [US3] 검증: 「3km」 「이번 주말」 조합으로 목록·개수 확인, URL 공유 시 같은 필터 복원
 
 ---
