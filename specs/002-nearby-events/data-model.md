@@ -11,8 +11,8 @@
 | address | text | 도로명 주소(확인된 것만) |
 | lat, lng | double precision, null 가능 | WGS84. `geo_status='confirmed'`일 때만 공개 화면이 쓴다 |
 | geo_status | text check in (`pending`,`confirmed`,`failed`) | 기본 `pending`. `failed` = 찾을 수 없음(온라인·장소 미정 포함) |
-| geo_source | text check in (`kopis`,`kakao`,`manual`) | 좌표 출처 |
-| candidates | jsonb | 자동 확정 못 한 경우 카카오 후보 최대 3개 `[{name,address,lat,lng}]` |
+| geo_source | text check in (`kopis`,`naver`,`manual`) | 좌표 출처 |
+| candidates | jsonb | 자동 확정 못 한 경우 네이버 지역 검색 후보 최대 3개 `[{name,address,lat,lng}]` |
 | checked_by | text | `auto` 또는 확인한 관리자 이메일 |
 | checked_at | timestamptz | |
 | created_at | timestamptz default now() | |

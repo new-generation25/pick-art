@@ -1,7 +1,7 @@
 # Quickstart: 내 주변 행사 검증
 
 ## 준비
-- `collector/.env`에 `KAKAO_REST_API_KEY`(사용자가 발급). 프런트에는 넣지 않는다.
+- `collector/.env`에 `NAVER_SEARCH_CLIENT_ID`·`NAVER_SEARCH_CLIENT_SECRET`(사용자가 발급). 프런트에는 넣지 않는다.
 - 마이그레이션 적용: `supabase db push` (venues 표, events.venue_id, public_venues 뷰, RLS).
 
 ## 1. 좌표 채우기

@@ -8,7 +8,7 @@
 ## 처리
 1. 장소 이름 정규화: 특수 공백(`\xa0`) → 공백, 괄호·대괄호 안 내용 제거, 끝의 관 이름(대극장·중극장·소극장·○○홀·전시실·제n전시장 등) 제거, 연속 공백 정리.
 2. `(정규화 이름, region)`으로 기존 `venues` 또는 `aliases`에서 찾고, 없으면 새 `venues` 행(`pending`).
-3. 좌표: KOPIS 출처면 시설 좌표 → 아니면 카카오 로컬 키워드 검색(`{정규화 이름} {region}`) → 주소가 있으면 주소 검색.
+3. 좌표: KOPIS 출처면 시설 좌표 → 아니면 네이버 지역 검색 API(`{정규화 이름} {region}`, 결과 최대 5개) → 결과가 없으면 주소로 다시 검색.
 4. research §2 자동 확정 규칙 통과 → `confirmed`, `geo_source`, `checked_by='auto'`. 아니면 `pending` + `candidates`.
 5. `events.venue_id` 연결.
 

@@ -4,7 +4,7 @@
 
 ## Summary
 
-공개 행사의 장소를 건물 단위 `venues`로 묶고 좌표(KOPIS → 카카오 로컬 → 운영자 확인)를 채운다. 사이트에 `/nearby` 화면을 더해, 방문자 위치(허용 시) 또는 고른 지역 중심에서의 **직선거리**를 브라우저 안에서 계산해 가까운 순으로 보여 준다. 위치는 서버·URL·분석 도구로 나가지 않는다. 각 행사에서 네이버지도 대중교통·자동차 길찾기로 넘긴다.
+공개 행사의 장소를 건물 단위 `venues`로 묶고 좌표(KOPIS → 네이버 지역 검색 → 운영자 확인)를 채운다. 사이트에 `/nearby` 화면을 더해, 방문자 위치(허용 시) 또는 고른 지역 중심에서의 **직선거리**를 브라우저 안에서 계산해 가까운 순으로 보여 준다. 위치는 서버·URL·분석 도구로 나가지 않는다. 각 행사에서 네이버지도 대중교통·자동차 길찾기로 넘긴다.
 
 ## Technical Context
 
@@ -15,7 +15,7 @@
 **Target Platform**: 휴대폰 브라우저 우선(iOS Safari·Android Chrome), PC 브라우저. Vercel(`icn1`)
 **Project Type**: 웹앱(frontend) + 로컬 수집기(collector)
 **Performance Goals**: 위치 허용 후 첫 목록 3초 안(SC-003). 기간 안 행사 ~700건 브라우저 정렬 < 50ms
-**Constraints**: 위치를 서버·URL에 남기지 않음, 비용 0(무료 한도), 카카오 키는 수집기에만, 개발 서버 1개·힙 2GB
+**Constraints**: 위치를 서버·URL에 남기지 않음, 비용 0(무료 한도), 네이버 검색 키는 수집기에만, 개발 서버 1개·힙 2GB
 **Scale/Scope**: 장소 약 100곳(추정, 200개 표기), 공개 행사 약 700건, 지역 기준점 34곳
 
 ## Constitution Check
@@ -24,7 +24,7 @@
 |---|---|---|
 | I 확인한 정보만 | 좌표는 자동 확정 규칙(research §2) 통과 또는 운영자 확인분만 공개. 미확인은 거리 표시 없이 「거리 확인 안 됨」 | 통과 |
 | II 작은 무대·브랜드 | 공공·소규모 구분 없이 같은 거리 기준. 날짜가 가장 큰 글자(FR-007). 화면 작업 전 BRAND_GUIDE 읽기를 tasks에 넣음 | 통과 |
-| III 보안·비밀값 | 카카오 키는 `collector/.env`만. `venues` RLS(익명 select, 관리자 쓰기), 공개 뷰로 `candidates` 숨김. 방문자 위치 서버 미전송 | 통과 |
+| III 보안·비밀값 | 네이버 검색 키(Client ID·Secret)는 `collector/.env`만. `venues` RLS(익명 select, 관리자 쓰기), 공개 뷰로 `candidates` 숨김. 방문자 위치 서버 미전송 | 통과 |
 | IV AI 최소 수집 | AI 사용 없음. 공식 API(KOPIS) → 검색 API → 사람 순. 정기 루틴에 숫자 보고 한 줄 | 통과 |
 | V 끝 조건 먼저 | quickstart의 4단계 확인(비율·오차·화면 세 경우·실기기)이 끝 조건 | 통과 |
 
@@ -75,7 +75,7 @@ frontend/src/
 
 | 단계 | 끝 조건(무엇으로 확인) |
 |---|---|
-| A. 확인 작업 | KOPIS `prfplc` 좌표 칸 유무, 카카오 무료 한도, 네이버 웹 길찾기 주소 형식을 실제로 확인해 research.md에 기록 |
+| A. 확인 작업 | KOPIS `prfplc` 좌표 칸 유무, 네이버 지역 검색 무료 한도·좌표 형식, 네이버 웹 길찾기 주소 형식을 실제로 확인해 research.md에 기록 |
 | B. DB | 마이그레이션 적용 후 익명 키로 `public_venues` select 성공·`venues.candidates` select 거부 |
 | C. 좌표 채우기 | quickstart 1: 확정 비율 ≥ 80%, 표본 30곳 오차 ≤ 300m |
 | D. 순수 함수 | quickstart 2 통과 |
@@ -84,7 +84,7 @@ frontend/src/
 | G. 실기기 | quickstart 4(사용자 확인) |
 
 ## 사용자가 할 일
-- 카카오 디벨로퍼스 REST API 키 발급 → `collector/.env`에 넣기(단계 A 전에 안내).
+- 네이버 개발자센터에서 애플리케이션 등록(검색 API) → Client ID·Secret 발급 → `collector/.env`에 넣기(단계 A 전에 안내).
 - 마이그레이션 적용·배포(`main` 병합)는 승인 후.
 - 단계 G 실기기 확인.
 
