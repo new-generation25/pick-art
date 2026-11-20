@@ -1,5 +1,7 @@
 # Contract: 네이버지도 길찾기 링크 (`frontend/src/lib/naverMap.ts`)
 
+화면에는 버튼 하나(「네이버지도 길찾기」)만 둔다. 화면은 `mode: "public"`으로 열고, 이동수단은 네이버지도 안에서 바꾼다(2026-11-21 운영자 결정). 함수는 `car`도 계속 지원한다.
+
 순수 함수. 입력 `{ name: string, lat?: number, lng?: number, mode: "public" | "car", isMobile: boolean, appname: string }` → 출력 `{ primary: string, fallback: string }`.
 
 | 경우 | primary | fallback |

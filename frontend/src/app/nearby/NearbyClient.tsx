@@ -3,10 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Container } from "@mantine/core";
-import { LocateFixed, Bus, Car } from "lucide-react";
+import { LocateFixed, Navigation } from "lucide-react";
 import { EventCard } from "@/components/ui/EventCard";
 import { buildNearby, formatDistance, type LatLng, type Period } from "@/lib/nearby";
-import { detectPlatform, naverRouteLinks, type RouteMode } from "@/lib/naverMap";
+import { detectPlatform, naverRouteLinks } from "@/lib/naverMap";
 import { CATEGORIES } from "@/lib/categories";
 import { formatPeriod } from "@/lib/utils";
 import type { NearbyRow } from "@/lib/nearbyData";
@@ -78,14 +78,15 @@ function toCard(e: NearbyRow) {
     };
 }
 
+// 길찾기 버튼 하나. 이동수단(대중교통·자동차·도보)은 네이버지도 길찾기 화면에서 고른다(2026-11-21 운영자 결정)
 function RouteButtons({ e, appname }: { e: NearbyRow; appname: string }) {
-    const open = (mode: RouteMode) => {
+    const open = () => {
         const links = naverRouteLinks({
             name: e.venue || e.title,
             region: e.region,
             lat: e.coords?.lat,
             lng: e.coords?.lng,
-            mode,
+            mode: "public",
             platform: detectPlatform(navigator.userAgent),
             appname,
         });
@@ -101,11 +102,8 @@ function RouteButtons({ e, appname }: { e: NearbyRow; appname: string }) {
     };
     return (
         <div className="flex gap-2">
-            <button type="button" className="pica-chip" onClick={() => open("public")}>
-                <Bus size={14} aria-hidden /> 대중교통 길찾기
-            </button>
-            <button type="button" className="pica-chip" onClick={() => open("car")}>
-                <Car size={14} aria-hidden /> 자동차 길찾기
+            <button type="button" className="pica-chip" onClick={open}>
+                <Navigation size={14} aria-hidden /> 네이버지도 길찾기
             </button>
         </div>
     );
