@@ -46,6 +46,16 @@ def main():
             rows.append({**base, "kind": "댓글",
                          "detail": f"[{e.get('form', '')}] {e.get('text', '')}", "link": e.get("post_url", ""),
                          "result": ("저장됨" if e.get("saved") else "저장 안 됨") + (f" · {e['note']}" if e.get("note") else "")})
+        elif e.get("type") == "like_back":
+            rows.append({**base, "kind": "답례",
+                         "detail": f"좋아요 답례 ({e.get('why', '')})", "link": e.get("post_url", ""), "result": "좋아요"})
+        elif e.get("type") == "reply":
+            rows.append({**base, "kind": "답례",
+                         "detail": f"대댓글: 「{e.get('their_text', '')}」 → {e.get('text', '')}", "link": e.get("post_url", ""),
+                         "result": "저장됨" if e.get("saved") else "저장 안 됨"})
+        elif e.get("type") == "comment_like":
+            rows.append({**base, "kind": "답례",
+                         "detail": f"댓글 좋아요: 「{e.get('their_text', '')}」", "link": e.get("post_url", ""), "result": "좋아요"})
     for d in load("dm.json"):
         status = {"sent": "보냄·답 없음", "yes": "허락", "no": "거절", "none": "7일 무응답"}.get(d.get("status"), d.get("status", ""))
         rows.append({"date": d["date"], "kind": "DM", "account": d["account"], "name": d.get("name", ""), "scale": "소규모",
@@ -57,7 +67,7 @@ def main():
     for r in rows:
         r.setdefault("name", "")
         r.setdefault("scale", "")
-    order = {"게시": 0, "팔로우": 1, "댓글": 2, "DM": 3, "반응": 4}
+    order = {"게시": 0, "팔로우": 1, "댓글": 2, "DM": 3, "반응": 4, "답례": 5}
     rows.sort(key=lambda r: (r["date"], order.get(r["kind"], 9)), reverse=False)
     for i, r in enumerate(rows, 1):
         r["id"] = f"{r['date']}-{i:04d}"
