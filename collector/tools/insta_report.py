@@ -57,8 +57,8 @@ def main():
             rows.append({**base, "kind": "답례",
                          "detail": f"댓글 좋아요: 「{e.get('their_text', '')}」", "link": e.get("post_url", ""), "result": "좋아요"})
     for d in load("dm.json"):
-        status = {"sent": "보냄·답 없음", "yes": "허락", "no": "거절", "none": "7일 무응답"}.get(d.get("status"), d.get("status", ""))
-        rows.append({"date": d["date"], "kind": "DM", "account": d["account"], "name": d.get("name", ""), "scale": "소규모",
+        status = {"sent": "보냄·답 없음", "yes": "허락", "no": "거절", "none": "7일 무응답", "posted": "허락·게시함"}.get(d.get("status"), d.get("status", ""))
+        rows.append({"date": d["date"], "kind": "허락요청" if d.get("channel") == "comment" else "DM", "account": d["account"], "name": d.get("name", ""), "scale": "소규모",
                      "detail": d.get("event", ""), "link": d.get("post_url", ""),
                      "result": status + (f" · 답: {d['reply']}" if d.get("reply") else "")})
     for f in load("feedback.json"):
@@ -67,7 +67,7 @@ def main():
     for r in rows:
         r.setdefault("name", "")
         r.setdefault("scale", "")
-    order = {"게시": 0, "팔로우": 1, "댓글": 2, "DM": 3, "반응": 4, "답례": 5}
+    order = {"게시": 0, "팔로우": 1, "댓글": 2, "DM": 3, "허락요청": 3, "반응": 4, "답례": 5}
     rows.sort(key=lambda r: (r["date"], order.get(r["kind"], 9)), reverse=False)
     for i, r in enumerate(rows, 1):
         r["id"] = f"{r['date']}-{i:04d}"
