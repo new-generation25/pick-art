@@ -94,7 +94,7 @@ description: "Task list for 내 주변 행사 (거리순 보기)"
 
 ## Phase 7: 마무리
 
-- [ ] T030 [P] `docs/`에 결과 보고(`docs/REPORT_nearby.md`): 확정 비율·오차 표본·화면 확인 결과·남은 문제
+- [x] T030 [P] `docs/`에 결과 보고(`docs/REPORT_nearby.md`): 확정 비율·오차 표본·화면 확인 결과·남은 문제
 - [ ] T031 사용자 실기기 확인 요청: 아이폰·안드로이드에서 대중교통·자동차 길찾기 각 1회(quickstart 4)
 - [ ] T032 사용자 승인 후 `main` 병합(배포) → 배포 주소에서 `/nearby` 확인
 
