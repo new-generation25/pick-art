@@ -84,7 +84,7 @@ frontend/src/
 | G. 실기기 | quickstart 4(사용자 확인) |
 
 ## 사용자가 할 일
-- 네이버 개발자센터에서 애플리케이션 등록(검색 API) → Client ID·Secret 발급 → `collector/.env`에 넣기(단계 A 전에 안내).
+- 네이버 클라우드 콘솔 NAVER API HUB에서 「지역 검색」 이용 신청 → Application 등록 → Client ID·Secret → `collector/.env`에 넣기(단계 A 전에 안내).
 - 마이그레이션 적용·배포(`main` 병합)는 승인 후.
 - 단계 G 실기기 확인.
 

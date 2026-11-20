@@ -14,7 +14,8 @@
 - **Decision**: ① KOPIS 공연시설 상세(`prfplc/{mt10id}`)의 위도·경도 → ② 네이버 지역 검색 API(장소명 검색) → ③ 운영자 수동 입력, 순서로 채운다. 좌표는 `venues` 표에 장소마다 한 번만 저장한다.
 - **Rationale**: 헌장 IV(공식 API 먼저, 비용 0). KOPIS는 이미 쓰는 공식 API이고 시설 단위라 같은 공연장이 반복돼도 한 번이면 된다. 길찾기를 네이버지도로 넘기므로(FR-013) 좌표도 같은 네이버 데이터에서 얻어 피카의 위치와 네이버지도가 잡는 위치를 맞춘다(2026-11-21 운영자 결정: 카카오 대신 네이버로 통일). 100곳 안팎 백필과 하루 수 건 신규는 무료 한도 안으로 예상한다.
 - **확인 결과(2026-11-21, T002·T003)**:
-  - 네이버 지역 검색: 공식 문서 기준 검색 API 하루 호출 한도 **25,000회**, `mapx`·`mapy`는 **WGS84 기준**(실제 값은 경위도 × 10⁷ 정수로 알려져 있음 — 키 발급 뒤 실제 응답으로 최종 확인, `naver_to_wgs84`가 한국 범위 밖 값은 거부). 133곳 백필과 하루 수 건 신규는 한도의 1% 미만.
+  - **(정정 2026-11-21)** 네이버 개발자센터의 신규 등록 목록에 「검색」이 없다(운영자 화면 확인). 지역 검색은 **NAVER API HUB**(네이버 클라우드 콘솔 console.ncloud.com/naver-api-hub)로 옮겨졌다 — 공식 문서 api.ncloud-docs.com/docs/naver-api-hub-search-local: `GET https://naverapihub.apigw.ntruss.com/search/v1/local?query=…&display=…&format=json`, 인증 헤더 `X-NCP-APIGW-API-KEY-ID`·`X-NCP-APIGW-API-KEY`(Application의 Client ID·Secret), `mapx`=경도·`mapy`=위도(WGS84). 「한시적 무료, 유료 전환 시 사전 공지」(가이드 개요), 무료 기간 월 호출 한도 API별 50,000건(가이드 FAQ). 133곳 백필은 한도의 0.3%.
+  - (옛 기록) 네이버 지역 검색: 개발자센터 문서 기준 검색 API 하루 호출 한도 **25,000회**, `mapx`·`mapy`는 **WGS84 기준**(실제 값은 경위도 × 10⁷ 정수로 알려져 있음 — 키 발급 뒤 실제 응답으로 최종 확인, `naver_to_wgs84`가 한국 범위 밖 값은 거부). 133곳 백필과 하루 수 건 신규는 한도의 1% 미만.
   - KOPIS `prfplc` 좌표: **확인 못 함** — 2026-11-21 새벽 이 PC의 요청이 KOPIS에서 「Request Blocked」(HTTP 400)로 막혔다(requests·aiohttp 모두). 좌표 칸이 확인되면 보조 출처로 붙이고, 그전에는 네이버 지역 검색만으로 진행한다.
 - **Alternatives**: 카카오 로컬(장소명 검색 품질 좋음, 키 하나 더 관리 — 운영자 결정으로 제외), 네이버 클라우드 Geocoding(주소만 받음, 지역 검색에서 주소가 나오면 보조로 검토), 구글 Geocoding(유료) — 채택 안 함.
 
@@ -56,7 +57,7 @@
 ## 7. 비밀값
 
 - 네이버 검색 키(Client ID·Secret)는 **수집기 쪽(`collector/.env`)에만** 둔다. 프런트·Vercel에는 넣지 않는다(헌장 III). 관리자 화면의 후보 선택은 수집기가 미리 저장한 `candidates`를 고르는 방식이라 프런트에 키가 필요 없다.
-- 사용자 할 일: 네이버 개발자센터(developers.naver.com)에서 애플리케이션 등록 후 검색 API Client ID·Secret 발급(내가 대신 할 수 없음 — 계정 로그인 필요). 정확한 메뉴는 그 시점에 확인해 안내한다.
+- 사용자 할 일: 네이버 클라우드 콘솔 NAVER API HUB에서 「지역 검색」 이용 신청 → Application 등록 → 인증정보(Client ID·Secret) 확인 → `collector/.env`에 넣기(내가 대신 할 수 없음 — 계정 로그인 필요). 정확한 메뉴는 그 시점에 확인해 안내한다.
 
 ## 8. 테스트 방법
 

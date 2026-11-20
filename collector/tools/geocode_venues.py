@@ -5,7 +5,7 @@
   python tools/geocode_venues.py --backfill             # 끝나지 않은 공개 행사 전부
   python tools/geocode_venues.py                        # venue_id 가 빈 공개 행사만 (정기 루틴)
 
-좌표 출처: 네이버 지역 검색 API(NAVER_SEARCH_CLIENT_ID·SECRET, collector/.env). 키 값은 출력하지 않는다.
+좌표 출처: 네이버 지역 검색(NAVER API HUB, Application의 Client ID·Secret → NAVER_SEARCH_CLIENT_ID·SECRET, collector/.env). 키 값은 출력하지 않는다.
 마지막 줄은 정기 루틴 알림에 붙는 보고 한 줄이다.
 """
 import argparse
@@ -29,13 +29,14 @@ from database import Database  # noqa: E402
 from venue_norm import decide, naver_to_wgs84, normalize_venue, strip_html  # noqa: E402
 
 KST = timezone(timedelta(hours=9))
-NAVER_URL = "https://openapi.naver.com/v1/search/local.json"
+# 네이버 지역 검색은 2026년 NAVER API HUB(네이버 클라우드 콘솔)로 옮겨졌다. 공식 문서: api.ncloud-docs.com/docs/naver-api-hub-search-local
+NAVER_URL = "https://naverapihub.apigw.ntruss.com/search/v1/local"
 
 
 def naver_search(query: str) -> list:
     cid, sec = os.getenv("NAVER_SEARCH_CLIENT_ID"), os.getenv("NAVER_SEARCH_CLIENT_SECRET")
-    r = requests.get(NAVER_URL, params={"query": query, "display": 5},
-                     headers={"X-Naver-Client-Id": cid, "X-Naver-Client-Secret": sec}, timeout=15)
+    r = requests.get(NAVER_URL, params={"query": query, "display": 5, "format": "json"},
+                     headers={"X-NCP-APIGW-API-KEY-ID": cid, "X-NCP-APIGW-API-KEY": sec}, timeout=15)
     r.raise_for_status()
     out = []
     for it in r.json().get("items", []):

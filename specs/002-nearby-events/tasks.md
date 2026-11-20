@@ -20,7 +20,7 @@ description: "Task list for 내 주변 행사 (거리순 보기)"
 
 **목적**: 계획의 미확인 3가지를 실제로 확인하고 research.md를 고친다. 결과에 따라 Phase 2 설계가 바뀔 수 있다.
 
-- [ ] T001 사용자에게 네이버 개발자센터 애플리케이션 등록·검색 API Client ID/Secret 발급을 안내(링크·누를 순서). 받은 값은 사용자가 `collector/.env`에 `NAVER_SEARCH_CLIENT_ID`, `NAVER_SEARCH_CLIENT_SECRET`로 넣는다(값을 출력·커밋하지 않음)
+- [ ] T001 사용자에게 NAVER API HUB(네이버 클라우드 콘솔)에서 「지역 검색」 이용 신청·Application 등록·Client ID/Secret 확인을 안내(링크·누를 순서). 개발자센터에는 검색 API 신규 등록이 없다(2026-11-21 확인). 받은 값은 사용자가 `collector/.env`에 `NAVER_SEARCH_CLIENT_ID`, `NAVER_SEARCH_CLIENT_SECRET`로 넣는다(값을 출력·커밋하지 않음)
 - [x] T002 (KOPIS가 요청을 막아 미확인 — research §1에 기록, 네이버만으로 진행) [P] KOPIS `prfplc/{mt10id}` 응답 3건을 받아 위도·경도 칸 유무를 확인하고 research.md §1에 기록
 - [ ] T003 네이버 지역 검색 API로 표본 5곳(예: 해운대문화회관, 어댑터씨어터, 진주성)을 검색해 응답 좌표 형식·결과 수를 확인하고, 개발자센터의 일일 한도를 확인해 research.md §1에 기록(T001 뒤)
 - [x] T004 [P] 네이버지도 앱 스킴(`nmap://route/public`, `nmap://route/car`)의 파라미터와 좌표 기반 웹 길찾기 주소 형식을 문서·실제 주소로 확인해 research.md §6과 contracts/naver-map-link.md를 확정
