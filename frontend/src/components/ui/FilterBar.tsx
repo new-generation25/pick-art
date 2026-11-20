@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Checkbox } from "@mantine/core";
-import { Calendar } from "lucide-react";
+import { Calendar, LocateFixed } from "lucide-react";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { GN_REGIONS } from "@/lib/regions";
 import { CATEGORIES as FEED_CATEGORIES } from "@/lib/categories";
@@ -72,6 +73,12 @@ export function FilterBar() {
 
     return (
         <div className="flex flex-col gap-2.5">
+            <div className="pl-0 md:pl-[56px]">
+                <Link href="/nearby" className="pica-chip" aria-pressed>
+                    <LocateFixed size={14} aria-hidden />
+                    내 주변 가까운 순으로 보기
+                </Link>
+            </div>
             <Row label="언제">
                 {DATE_FILTERS.map((filter) => (
                     <button
