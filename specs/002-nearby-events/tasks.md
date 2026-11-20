@@ -20,9 +20,9 @@ description: "Task list for 내 주변 행사 (거리순 보기)"
 
 **목적**: 계획의 미확인 3가지를 실제로 확인하고 research.md를 고친다. 결과에 따라 Phase 2 설계가 바뀔 수 있다.
 
-- [ ] T001 사용자에게 NAVER API HUB(네이버 클라우드 콘솔)에서 「지역 검색」 이용 신청·Application 등록·Client ID/Secret 확인을 안내(링크·누를 순서). 개발자센터에는 검색 API 신규 등록이 없다(2026-11-21 확인). 받은 값은 사용자가 `collector/.env`에 `NAVER_SEARCH_CLIENT_ID`, `NAVER_SEARCH_CLIENT_SECRET`로 넣는다(값을 출력·커밋하지 않음)
+- [x] T001 사용자에게 NAVER API HUB(네이버 클라우드 콘솔)에서 「지역 검색」 이용 신청·Application 등록·Client ID/Secret 확인을 안내(링크·누를 순서). 개발자센터에는 검색 API 신규 등록이 없다(2026-11-21 확인). 받은 값은 사용자가 `collector/.env`에 `NAVER_SEARCH_CLIENT_ID`, `NAVER_SEARCH_CLIENT_SECRET`로 넣는다(값을 출력·커밋하지 않음)
 - [x] T002 (KOPIS가 요청을 막아 미확인 — research §1에 기록, 네이버만으로 진행) [P] KOPIS `prfplc/{mt10id}` 응답 3건을 받아 위도·경도 칸 유무를 확인하고 research.md §1에 기록
-- [ ] T003 네이버 지역 검색 API로 표본 5곳(예: 해운대문화회관, 어댑터씨어터, 진주성)을 검색해 응답 좌표 형식·결과 수를 확인하고, 개발자센터의 일일 한도를 확인해 research.md §1에 기록(T001 뒤)
+- [x] T003 네이버 지역 검색 API로 표본 5곳(예: 해운대문화회관, 어댑터씨어터, 진주성)을 검색해 응답 좌표 형식·결과 수를 확인하고, 개발자센터의 일일 한도를 확인해 research.md §1에 기록(T001 뒤)
 - [x] T004 [P] 네이버지도 앱 스킴(`nmap://route/public`, `nmap://route/car`)의 파라미터와 좌표 기반 웹 길찾기 주소 형식을 문서·실제 주소로 확인해 research.md §6과 contracts/naver-map-link.md를 확정
 - [x] T005 공개 행사 `venue` 200개 표기를 정규화 규칙 초안으로 묶어 실제 장소 수를 세고 research.md §0에 숫자 기록(DB 읽기만)
 
@@ -33,11 +33,11 @@ description: "Task list for 내 주변 행사 (거리순 보기)"
 ## Phase 2: 기반 (Foundational — 모든 이야기에 필요)
 
 - [x] T006 `supabase/migrations/20261121000000_venues.sql` 작성: `venues` 표(data-model.md), `events.venue_id` FK, 공개 뷰 `public_venues(id,name,region,lat,lng)`(confirmed만), RLS(익명 select는 뷰만, 쓰기는 admin·service), 인덱스 `(name, region)` unique
-- [ ] T007 사용자 승인 후 마이그레이션 적용. 익명 키로 `public_venues` select 성공, `venues.candidates` select 거부를 확인(plan 단계 B)
+- [x] T007 사용자 승인 후 마이그레이션 적용. 익명 키로 `public_venues` select 성공, `venues.candidates` select 거부를 확인(plan 단계 B)
 - [x] T008 [P] `collector/venue_norm.py`: 이름 정규화(`\xa0`·괄호·관 이름 제거), 네이버 응답 → WGS84 변환, 자동 확정 판정(research §2), 부산·경남 경계 상자
 - [x] T009 [P] `collector/tests/test_venue_norm.py`: 실제 표기 30개 정규화 기대값, 확정·보류 판정 사례(동명 카페, 경남 밖 결과, 후보 2개 300m 이내/밖)
 - [x] T010 (키 없이 --dry-run까지 확인: 133곳·장소 없는 행사 15) `collector/tools/geocode_venues.py`: contracts/venue-geocode.md대로 `--backfill`·`--dry-run`·기본 모드, 보고 한 줄 출력(T008 뒤)
-- [ ] T011 `--backfill --dry-run` 실행 결과 검토 → 실제 `--backfill` 실행. 확정 비율 ≥ 80% 확인(SC-001). 표본 30곳 오차를 네이버지도와 대조해 `docs/REPORT_nearby_geocode.md`에 표로 기록(SC-002)
+- [x] T011 (2026-11-21: 장소 119곳 · 자동 확정 94 · 확인 대기 22 · 실패 3, 공개 행사 692건 중 624건(90%) 거리 표시 — 자동 확정 목록을 이름·주소로 전수 확인, 오매칭 2건 규칙 수정) `--backfill --dry-run` 실행 결과 검토 → 실제 `--backfill` 실행. 확정 비율 ≥ 80% 확인(SC-001). 표본 30곳 오차를 네이버지도와 대조해 `docs/REPORT_nearby_geocode.md`에 표로 기록(SC-002)
 - [x] T012 `collector/main.py` 정기 루틴 끝에 `geocode_venues` 기본 모드 호출, 완료 알림에 보고 한 줄 추가
 - [x] T013 [P] `frontend/src/lib/nearby.ts`: 하버사인 거리, 거리 표기(`850m`·`1.2km`·`약`), 정렬(거리 → 날짜), 기간·거리·분야 필터, 좌표 없는 행사 분리
 - [x] T014 [P] `frontend/src/lib/naverMap.ts`: contracts/naver-map-link.md의 4경우(T004 확정 형식)
