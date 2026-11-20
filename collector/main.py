@@ -150,6 +150,10 @@ async def run_crawlers(specific_target=None):
                 for script in ("collect_instagram.py", "discover_instagram.py"):
                     results.append(await run_tool(script, timeout_min=90))
 
+            # 내 주변 행사(specs/002): 새로 공개된 행사의 장소 좌표 채우기. 실패해도 루틴은 계속한다
+            geo = await run_tool("geocode_venues.py", timeout_min=20)
+            geo_line = f"• 장소 좌표: {geo['summary']}"
+
             # 전체 종료 알림: 처리·실패·건너뜀을 숫자로 남긴다
             failed = [r for r in results if r['status'] != 'SUCCESS']
             n_blog = sum(1 for c in configs if c['target_type'] == 'naver_blog')
@@ -158,6 +162,7 @@ async def run_crawlers(specific_target=None):
             for t, n in skipped.items():
                 lines.append(f"• {t} {n}곳 건너뜀 (미구현)")
             lines.append(publish_line)
+            lines.append(geo_line)
             lines.append(f"• AI 추출: {'켜짐' if AIExtractor().enabled else '꺼짐 (기본값 사용)'}")
             message = "\n".join(lines)
             print(message, flush=True)
