@@ -26,7 +26,7 @@ from dotenv import load_dotenv  # noqa: E402
 load_dotenv(".env.local")
 load_dotenv(".env")
 from database import Database  # noqa: E402
-from venue_norm import decide, naver_to_wgs84, normalize_venue, strip_html  # noqa: E402
+from venue_norm import decide, naver_to_wgs84, normalize_venue, search_queries, strip_html  # noqa: E402
 
 KST = timezone(timedelta(hours=9))
 # 네이버 지역 검색은 2026년 NAVER API HUB(네이버 클라우드 콘솔)로 옮겨졌다. 공식 문서: api.ncloud-docs.com/docs/naver-api-hub-search-local
@@ -109,14 +109,23 @@ def main():
                 status = "pending"
             else:
                 try:
-                    cands = naver_search(f"{name} {region or ''}".strip())
-                    time.sleep(a.sleep)
+                    cands, shortened = [], False
+                    qs = search_queries(name, region or "")
+                    for qi, q in enumerate(qs):
+                        cands = naver_search(q)
+                        time.sleep(a.sleep)
+                        if cands:
+                            shortened = qi > 0
+                            break
                 except Exception as ex:
                     stat["search_error"] += 1
                     print(f"  ! 검색 실패 {name}: {type(ex).__name__}")
                     cands = None
                 if cands is not None:
                     status, top = decide(name, region or "", cands)
+                    # 검색어를 줄여서 찾은 결과는 뗀 토막이 실제 장소일 수 있어(「…미술관 장유도서관」) 운영자 확인으로 돌린다
+                    if shortened and status == "confirmed":
+                        status, top = "pending", None
         stat[status or "pending"] += 1
         if a.dry_run:
             print(f"{status or 'pending':9} {region or '-':4} {name}  ← {len(g['aliases'])}표기·행사 {len(g['events'])}"

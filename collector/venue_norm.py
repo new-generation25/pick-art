@@ -8,7 +8,9 @@ import re
 # 끝에 붙는 관(공간) 이름 — 확실한 것
 _ROOM = re.compile(
     r"(?:대극장|중극장|소극장|대공연장|소공연장|공연장|"
-    r"제?\d+\s*전시(?:실|장|관)|전시(?:실|장|관)|다목적홀|챔버홀|\d+홀)"
+    r"제?[\d~·,+]*\s*전시(?:실|장|관)[\d·,+~]*(?:\+\d*전시관)?|전시(?:실|장|관)|기획전시실?|다목적홀|챔버홀|\d+홀|"
+    r"[A-Za-z]?\d+[Ff]|B\d+F?|지하\d*층?|[\d,]+층|전관|야외|실감영상실|\d+갤러리|원형전시관\d*|"
+    r"하늘연극장|루프씨어터)"
 )
 # 「○○홀」 토막 — 건물 이름으로 끝나지 않을 때만 관 이름으로 본다
 _HALL = re.compile(r"[가-힣A-Za-z0-9]{1,8}홀")
@@ -35,6 +37,7 @@ def normalize_venue(name: str) -> str:
     s = re.sub(r"\s+", " ", s).strip()
     s = re.sub(r"(\d)\s*·\s*(\d)", r"\1·\2", s)
     s = re.sub(r"(\d·\d+)\s+(아트홀)", r"\1\2", s)
+    s = re.sub(r"(?<=[가-힣A-Za-z])\d+층$", "", s)  # 「BNK부산갤러리2층」
     parts = s.split(" ")
     while len(parts) > 1 and len("".join(parts[:-1])) >= 4:
         last = parts[-1]
@@ -77,8 +80,30 @@ def haversine_m(lat1, lng1, lat2, lng2) -> float:
     return 2 * r * math.asin(math.sqrt(h))
 
 
+# 표기가 다른 같은 이름(네이버 장소명 기준)
+_SYNONYMS = [("경상남도", "경남"), ("부산광역시", "부산"), ("벡스코", "bexco")]
+
+
 def _squash(s: str) -> str:
-    return re.sub(r"[\s·・.\-()]", "", s or "").lower()
+    s = re.sub(r"[\s·・.\-()]", "", s or "").lower()
+    for a, b in _SYNONYMS:
+        s = s.replace(a, b)
+    return s
+
+
+def search_queries(name: str, region: str) -> list:
+    """네이버 지역 검색에 넣을 검색어 후보(앞에서부터 시도). 「3·15」→「3.15」, 앞의 시군 이름 제거, 뒤 토막 하나씩 줄이기."""
+    base = (name or "").replace("·", ".").strip()
+    if region and base.startswith(region + " "):
+        base = base[len(region) + 1:]
+    parts = [p for p in re.split(r"[\s,]+", base) if p]
+    out = []
+    for n in range(len(parts), 0, -1):
+        q = " ".join(parts[:n])
+        if len(q.replace(" ", "")) < 3:
+            break
+        out.append(f"{q} {region}".strip() if region else q)
+    return out[:3]
 
 
 def name_matches(query: str, found: str) -> bool:
@@ -106,10 +131,11 @@ def decide(query_name: str, region: str, candidates: list) -> tuple:
           and region_in_address(region, c.get("address", ""))]
     if not ok:
         return "pending", None
-    top = ok[0]
-    if not name_matches(query_name, top.get("name", "")):
+    named = [c for c in ok if name_matches(query_name, c.get("name", ""))]
+    if not named or not name_matches(query_name, ok[0].get("name", "")):
         return "pending", None
-    if len(ok) > 1 and name_matches(query_name, ok[1].get("name", "")):
-        if haversine_m(top["lat"], top["lng"], ok[1]["lat"], ok[1]["lng"]) > 300:
-            return "pending", None
+    # 이름이 맞는 후보 중 이름이 가장 짧은 것(본 건물). 「함양 문화예술회관 전기차충전소」보다 「함양문화예술회관」
+    top = min(named, key=lambda c: len(_squash(c.get("name", ""))))
+    if any(haversine_m(top["lat"], top["lng"], c["lat"], c["lng"]) > 300 for c in named):
+        return "pending", None
     return "confirmed", top
