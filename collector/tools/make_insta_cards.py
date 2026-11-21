@@ -45,6 +45,15 @@ RISO = {
 }
 
 
+def source_label(f) -> str:
+    """출처는 계정 태그나 이름으로만 쓴다. 인스타 캡션의 주소는 눌리지 않으므로 링크를 넣지 않는다(2026-11-21 운영자 규칙).
+    인스타 계정이 출처면 첫 @계정, 아니면 출처 이름."""
+    ms = [m if m.startswith("@") else f"@{m}" for m in (f.get("mentions") or [])]
+    if "instagram.com" in (f.get("source_url") or "") and ms:
+        return f"{f.get('source_name') or ''} {ms[0]}".strip()
+    return f.get("source_name") or ""
+
+
 def kdate(d: str) -> str:
     y, m, dd = map(int, d.split("-"))
     return f"{m}.{dd}({WEEK[date(y, m, dd).weekday()]})"
@@ -252,7 +261,7 @@ def slides_html(f: dict, poster: str, handle: str) -> list:
     <div class="act"><span class="i">📨</span>친구에게 보내기</div>
     <div class="act"><span class="i">➕</span>팔로우하고<br>매일 받기</div>
   </div>
-  <div class="pad src" style="top:1010px">출처 · {esc(f['source_name'])}<br>{esc(f['source_url'])[:90]}<br>방문 전 공식 안내에서 변경 사항을 꼭 확인하세요.</div>
+  <div class="pad src" style="top:1010px">출처 · {esc(source_label(f))}<br>방문 전 공식 안내에서 변경 사항을 꼭 확인하세요.</div>
   <div class="credit"><span>{esc(f['poster_credit'])}</span><span>문화예술 큐레이션</span></div>
 </div>""")
     return out
@@ -275,7 +284,7 @@ def caption_text(f: dict, handle: str) -> str:
         lines += ["", "🏷 " + " ".join(m if m.startswith("@") else f"@{m}" for m in f["mentions"])]
     lines += ["", "🔖 저장해 두고, 같이 갈 사람에게 보내 주세요.",
               "👉 이번 주 다른 공연·전시는 프로필 링크(피카 사이트)에서 지역별로 볼 수 있어요.",
-              f"출처: {f['source_name']} {f['source_url']}".strip(),
+              f"출처: {source_label(f)}",
               "방문 전 공식 안내에서 변경 사항을 꼭 확인하세요.", "", " ".join(tags)]
     out = "\n".join(lines)
     if pool:
