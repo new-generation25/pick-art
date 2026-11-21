@@ -56,7 +56,7 @@ description: "Task list for 내 주변 행사 (거리순 보기)"
 - [x] T017 [US1] BRAND_GUIDE.md(5·12절 등 화면 규칙)를 읽고 목록 항목 디자인을 기존 `EventCard`·피드와 맞춤(날짜가 가장 큰 글자)
 - [x] T018 [US1] `frontend/src/app/nearby/NearbyClient.tsx`: 「내 위치로 찾기」 버튼, 안내 한 줄, Geolocation 호출(timeout 6초, maximumAge 5분), 받는 중 표시, 정확도 1km 초과 시 「약」
 - [x] T019 [US1] 같은 파일: 거리순 목록 렌더, 「거리 확인 안 됨」 묶음(시군 표시), 장소 없는 행사 제외, 결과 0건 안내와 「2주로 넓히기」 「거리 제한 풀기」, 50km 초과 시 「부산·경남 행사만 소개해요」
-- [x] T020 [US1] 항목에 「대중교통 길찾기」 「자동차 길찾기」 버튼(`naverMap.ts`), 앱 미설치 시 1.5초 뒤 웹 전환
+- [x] T020 [US1] 항목에 「대중교통 길찾기」 「자동차 길찾기」 버튼(`naverMap.ts`), 앱 미설치 시 1.5초 뒤 웹 전환 (2026-11-21 운영자 결정으로 바뀜: 버튼 하나 「네이버지도 길찾기」 + 「앱이 없으면 웹에서 보기」 링크, 자동 전환 없음 — c16a455·89aeee3)
 - [x] T021 [US1] `frontend/src/components/ui/FilterBar.tsx`(및 모바일 하단 내비)에 「내 주변」 진입 링크
 - [x] T022 (2026-11-21 Vercel 미리보기 66a5216에서 확인: 광안리 좌표로 240m→910m→1.3km 거리순, 거리 표시 210·확인 안 됨 27, 요청 85건·저장소에 좌표 0건, 거부·6초 지연 문구 정상. 375px 폭은 미확인) [US1] 검증: `npx tsc --noEmit` 0, 내장 브라우저에서 geolocation 대체(광안리 좌표)로 거리 오름차순·「내 위치 기준」 확인, 네트워크 요청·URL에 좌표 0건(SC-005), 375px 가로 스크롤 없음, 스크린샷
 
@@ -123,7 +123,7 @@ description: "Task list for 내 주변 행사 (거리순 보기)"
 
 (2026-11-21 `/speckit-converge` — spec·plan·tasks·헌장과 현재 코드 대조. 열린 T029·T031은 그대로 두고 겹치는 작업은 만들지 않음)
 
-- [ ] T033 FR-013의 「앱이 없으면 네이버지도 웹 길찾기로 연다」와 현재 구현(자동 전환 없음, 별도 「앱이 없으면 웹에서 보기」 링크 = 장소 이름 검색)이 다르다. 운영자 결정(2026-11-21 아이폰 Chrome 되돌아감)대로 spec FR-013·contracts/naver-map-link.md(1.5초 자동 전환)·contracts/nearby-ui.md(버튼 2개)·plan Summary·T020 문구를 고칠지 사용자에게 확인한 뒤 반영 per FR-013 (partial)
+- [x] T033 (2026-11-21 사용자 「명세 고쳐」 → spec FR-013·contracts 2개·plan Summary·T020 문구를 현재 동작에 맞춤) FR-013의 「앱이 없으면 네이버지도 웹 길찾기로 연다」와 현재 구현(자동 전환 없음, 별도 「앱이 없으면 웹에서 보기」 링크 = 장소 이름 검색)이 다르다. 운영자 결정(2026-11-21 아이폰 Chrome 되돌아감)대로 spec FR-013·contracts/naver-map-link.md(1.5초 자동 전환)·contracts/nearby-ui.md(버튼 2개)·plan Summary·T020 문구를 고칠지 사용자에게 확인한 뒤 반영 per FR-013 (partial)
 - [ ] T034 표본 30곳의 표시 거리와 네이버지도 실측 직선거리 차이를 재서 `docs/REPORT_nearby_geocode.md`에 표로 기록(T011은 완료로 표시됐지만 이 파일이 없고, REPORT_nearby.md에 「30곳 실측은 하지 않음」으로 적혀 있음) per SC-002 (partial)
 - [ ] T035 여러 장소에서 열리는 행사(순회·여러 공간)를 가장 가까운 장소 거리로 보이고 「외 n곳」을 붙이기. 지금은 `events.venue_id` 하나만 있어 행사당 장소 1곳 per Edge Cases·Key Entities(Event) (missing)
 - [ ] T036 위치 정확도가 1km를 넘거나(「약」) 가장 가까운 행사가 50km를 넘을 때 지역 고르기도 함께 보이기. 지금은 위치 기준이면 지역 고르기가 숨겨짐(`NearbyClient.tsx` `!gpsOrigin` 조건) per Edge Cases(정확도 낮음·부산경남 밖) (partial)
