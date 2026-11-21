@@ -116,3 +116,15 @@ description: "Task list for 내 주변 행사 (거리순 보기)"
 1. Phase 1~2 → US1까지 끝내고 멈춰 확인(MVP). 이 시점에 배포할지 사용자에게 묻는다.
 2. US2(위치 거부 대응)를 바로 이어 붙인다 — 위치 거부 비율이 높을 수 있어 실제 공개 전에는 US2까지 있는 편이 낫다.
 3. US3·관리자 화면은 그다음.
+
+---
+
+## Phase 8: Convergence
+
+(2026-11-21 `/speckit-converge` — spec·plan·tasks·헌장과 현재 코드 대조. 열린 T029·T031은 그대로 두고 겹치는 작업은 만들지 않음)
+
+- [ ] T033 FR-013의 「앱이 없으면 네이버지도 웹 길찾기로 연다」와 현재 구현(자동 전환 없음, 별도 「앱이 없으면 웹에서 보기」 링크 = 장소 이름 검색)이 다르다. 운영자 결정(2026-11-21 아이폰 Chrome 되돌아감)대로 spec FR-013·contracts/naver-map-link.md(1.5초 자동 전환)·contracts/nearby-ui.md(버튼 2개)·plan Summary·T020 문구를 고칠지 사용자에게 확인한 뒤 반영 per FR-013 (partial)
+- [ ] T034 표본 30곳의 표시 거리와 네이버지도 실측 직선거리 차이를 재서 `docs/REPORT_nearby_geocode.md`에 표로 기록(T011은 완료로 표시됐지만 이 파일이 없고, REPORT_nearby.md에 「30곳 실측은 하지 않음」으로 적혀 있음) per SC-002 (partial)
+- [ ] T035 여러 장소에서 열리는 행사(순회·여러 공간)를 가장 가까운 장소 거리로 보이고 「외 n곳」을 붙이기. 지금은 `events.venue_id` 하나만 있어 행사당 장소 1곳 per Edge Cases·Key Entities(Event) (missing)
+- [ ] T036 위치 정확도가 1km를 넘거나(「약」) 가장 가까운 행사가 50km를 넘을 때 지역 고르기도 함께 보이기. 지금은 위치 기준이면 지역 고르기가 숨겨짐(`NearbyClient.tsx` `!gpsOrigin` 조건) per Edge Cases(정확도 낮음·부산경남 밖) (partial)
+- [ ] T037 휴대폰에서 「내 위치로 찾기」 → 첫 목록까지 시간을 재서 3초 안인지 REPORT_nearby.md에 기록 per SC-003 (partial)
