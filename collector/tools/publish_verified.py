@@ -1,6 +1,7 @@
 """검증을 통과한 raw_posts 를 events 로 발행한다(관리자 인박스 승인과 같은 결과).
 
-사용: python tools/publish_verified.py 2026-11-01 2026-11-30 [--dry-run]
+사용: python tools/publish_verified.py 2026-11-01 2026-11-30 [--dry-run] [--ids <raw id,...>] [--curated <큐레이션 json>]
+  --ids / --curated 를 주면 그 수집분만 발행한다(다른 수집분은 건드리지 않는다)
 검증 기준
   1. 날짜: date_start/date_end 가 YYYY-MM-DD 이고 기간이 [from, to] 와 겹친다
   2. 링크: source_url 이 지금 실제로 열린다(HTTP < 400)
@@ -37,9 +38,17 @@ def rank(row) -> int:
     return 0 if s == "KOPIS" else (2 if (row["content"].get("ai_suggestion") or {}).get("extracted_by") == "curated" else 1)
 
 
+ONLY_IDS = set()
+ONLY_URLS = set()
+
+
 async def main(date_from, date_to, dry):
     db = Database()
     rows = db.supabase.table("raw_posts").select("*").in_("status", ["COLLECTED", "PENDING"]).execute().data
+    if ONLY_IDS:  # --ids <raw_posts id,...>: 고른 수집분만 발행한다
+        rows = [r for r in rows if r["id"] in ONLY_IDS]
+    if ONLY_URLS:  # --curated <json>: 그 큐레이션 파일로 넣은 수집분만 발행한다
+        rows = [r for r in rows if r["source_url"] in ONLY_URLS]
     cands, skipped = [], {"날짜없음/형식오류": 0, "기간밖": 0, "기간지남": 0}
     # 오늘(한국 시간) 이전에 끝난 수집분은 '기간 지남'(EXPIRED)으로 돌려 인박스 검토 대기에서 뺀다.
     # 지우지 않으므로 같은 글을 다시 수집하지 않고 중복 판정에도 쓰인다. date_from 이 아니라 오늘 기준이다.
@@ -135,5 +144,13 @@ async def main(date_from, date_to, dry):
 
 
 if __name__ == "__main__":
+    if "--ids" in sys.argv:
+        i = sys.argv.index("--ids")
+        ONLY_IDS = set(sys.argv[i + 1].split(","))
+        del sys.argv[i:i + 2]
+    if "--curated" in sys.argv:
+        i = sys.argv.index("--curated")
+        ONLY_URLS = {e["url"] for e in json.load(open(sys.argv[i + 1], encoding="utf-8"))}
+        del sys.argv[i:i + 2]
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     asyncio.run(main(args[0], args[1], "--dry-run" in sys.argv))

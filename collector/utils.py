@@ -29,19 +29,23 @@ async def process_and_upload_image(supabase: Client, img_url: str, storage_path:
     """
     이미지를 다운로드하여 원본과 썸네일(600px) WebP로 변환 후 업로드합니다.
     """
-    origin = "{0.scheme}://{0.netloc}/".format(urlparse(img_url))
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-               "Referer": origin}
-    async with aiohttp.ClientSession(headers=headers) as session:
-        try:
-            async with session.get(img_url, timeout=aiohttp.ClientTimeout(total=40)) as resp:
-                if resp.status != 200:
-                    print(f"Failed to download image: {img_url} (status: {resp.status})")
-                    return None, None, None
-                img_data = await resp.read()
-        except Exception as e:
-            print(f"Error downloading image {img_url}: {e}")
-            return None, None, None
+    if os.path.isfile(img_url):  # 내려받아 둔 포스터(로컬 파일)도 받는다
+        with open(img_url, "rb") as f:
+            img_data = f.read()
+    else:
+        origin = "{0.scheme}://{0.netloc}/".format(urlparse(img_url))
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                   "Referer": origin}
+        async with aiohttp.ClientSession(headers=headers) as session:
+            try:
+                async with session.get(img_url, timeout=aiohttp.ClientTimeout(total=40)) as resp:
+                    if resp.status != 200:
+                        print(f"Failed to download image: {img_url} (status: {resp.status})")
+                        return None, None, None
+                    img_data = await resp.read()
+            except Exception as e:
+                print(f"Error downloading image {img_url}: {e}")
+                return None, None, None
 
     try:
         # 1. 이미지 처리 (Pillow). 공공기관 포스터는 수억 픽셀짜리도 있어 상한을 풀고 긴 변 1600px로 줄인다
