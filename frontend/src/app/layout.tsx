@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "@mantine/core/styles.css";
 import "./globals.css";
@@ -16,6 +16,15 @@ export const metadata: Metadata = {
   title: "피카 pica | 가까운 공연·전시·축제",
   description: DESCRIPTION,
   alternates: { canonical: "/" },
+  // 앱처럼 설치(PWA): 매니페스트는 app/manifest.ts, 아이폰 「홈 화면에 추가」는 아래 apple 아이콘·appleWebApp
+  icons: {
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  appleWebApp: {
+    capable: true,
+    title: "피카",
+    statusBarStyle: "default",
+  },
   openGraph: {
     siteName: SITE_NAME,
     locale: "ko_KR",
@@ -31,6 +40,10 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     images: [DEFAULT_OG_IMAGE.url],
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#F6EFDF",
 };
 
 const theme = createTheme({
