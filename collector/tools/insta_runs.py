@@ -111,7 +111,13 @@ def main():
         r = measure(a.add)
         if r:
             r["agents"] = len(a.add)
-            rows[sid] = {"session": sid, "task": a.task, "manual": True, **r}
+            rows[sid] = {"session": sid, "task": a.task, "manual": True, "files": a.add, **r}
+    for sid, row in list(rows.items()):  # 수동 회차 중 아직 running 인 것은 다시 센다
+        if row.get("manual") and row.get("status") == "running" and row.get("files"):
+            r = measure([f for f in row["files"] if os.path.exists(f)])
+            if r:
+                r["agents"] = len(row["files"])
+                rows[sid] = {**row, **r}
     for p in glob.glob(os.path.join(PROJ, "*.jsonl")):
         task = first_task(p)
         if not task:
