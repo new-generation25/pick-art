@@ -8,6 +8,18 @@ const nextConfig: NextConfig = {
     if (dev) config.cache = Object.freeze({ type: "memory" as const });
     return config;
   },
+  // 서비스 워커(public/sw.js)는 브라우저가 늘 새 판을 확인하도록 캐시하지 않는다
+  async headers() {
+    return [
+      {
+        source: "/sw.js",
+        headers: [
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "Service-Worker-Allowed", value: "/" },
+        ],
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {

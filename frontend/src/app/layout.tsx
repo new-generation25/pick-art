@@ -52,6 +52,7 @@ const theme = createTheme({
 });
 
 import { MainLayout } from "@/components/MainLayout";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 
 // ... (other imports)
 
@@ -85,6 +86,7 @@ export default function RootLayout({
         </MantineProvider>
         {/* Vercel Web Analytics — 방문 수와 유입 경로(utm 포함). 쿠키를 쓰지 않는다 */}
         <Analytics />
+        <ServiceWorkerRegister />
       </body>
     </html>
   );
