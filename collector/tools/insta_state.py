@@ -238,6 +238,8 @@ def cmd_add(a):
         fail(f"빠진 칸: {miss}")
     if "account" in rec:
         rec["account"] = norm(rec["account"])
+    if a.file in ("engaged", "dm", "feedback") and not rec.get("at"):
+        rec["at"] = datetime.now().astimezone().isoformat(timespec="seconds")  # 리포트에 실제 시각이 나오게
     with lock():
         rows = load(a.file)
         if a.file == "posted" and any(r.get("event_id") == rec["event_id"] for r in rows):
