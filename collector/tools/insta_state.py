@@ -10,6 +10,7 @@
   python tools/insta_state.py recent-texts --days 7       지난 n일 피카가 쓴 댓글·답글 문장(되풀이 방지)
   python tools/insta_state.py approved                    허락(yes)받고 아직 안 올린 행사
   python tools/insta_state.py posted-ids                  올린 event_id 목록
+  python tools/insta_state.py standing                    상시 동의 계정, 상시 동의를 아직 안 물은 허락 계정
   python tools/insta_state.py find-ask @계정               알림에 뜬 답글이 어느 허락 댓글 건인지(게시물 다시 안 열기)
   python tools/insta_state.py liked-recently @계정         지난 7일 그 계정에 답례 좋아요를 했는지
   python tools/insta_state.py has-account candidates @계정 목록에 이미 있는지(feedback·engaged·dm·candidates)
@@ -179,6 +180,15 @@ def cmd_approved(a):
     out({"rows": [{k: r.get(k) for k in keep} for r in _approved(load("dm"))]})
 
 
+def cmd_standing(a):
+    """상시 동의(앞으로 올릴 소식까지 허락) 계정과, 아직 상시 동의를 묻지 않은 옛 허락 계정."""
+    dm = load("dm")
+    yes = [r for r in dm if r.get("status") in ("yes", "posted")]
+    standing = sorted({norm(r["account"]) for r in yes if r.get("standing")})
+    to_ask = sorted({norm(r["account"]) for r in yes if not r.get("standing") and not r.get("standing_asked")} - set(standing))
+    out({"standing": standing, "to_ask": to_ask})
+
+
 def cmd_posted_ids(a):
     out({"ids": [r["event_id"] for r in load("posted") if r.get("event_id")]})
 
@@ -297,6 +307,7 @@ def main():
     p = sub.add_parser("recent-texts"); p.add_argument("--days", type=int, default=7); p.set_defaults(f=cmd_recent_texts)
     sub.add_parser("approved").set_defaults(f=cmd_approved)
     sub.add_parser("posted-ids").set_defaults(f=cmd_posted_ids)
+    sub.add_parser("standing").set_defaults(f=cmd_standing)
     p = sub.add_parser("find-ask"); p.add_argument("account"); p.set_defaults(f=cmd_find_ask)
     p = sub.add_parser("liked-recently"); p.add_argument("account"); p.set_defaults(f=cmd_liked_recently)
     p = sub.add_parser("has-account"); p.add_argument("file", choices=["candidates", "engaged", "dm", "feedback"])

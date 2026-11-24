@@ -1,4 +1,4 @@
-"""허락받아 인스타에 올린 소규모 행사(facts id 가 dm- 로 시작)를 피카 앱 DB에 넣을 큐레이션 JSON 으로 만든다.
+"""인스타에 올렸지만 피카 앱 DB에 없는 행사(facts id 가 DB UUID 가 아닌 것: 허락받은 소규모, 홈 피드에서 찾은 공공 등)를 피카 앱 DB에 넣을 큐레이션 JSON 으로 만든다.
 
 사용 (pick-art 폴더에서): python collector/tools/insta_approved_to_curated.py <out.json> [--since YYYY-MM-DD]
 - 사실은 게시 때 쓴 facts(docs/insta/<날짜>/facts/*.json)에서만 가져온다(게시물과 같은 값).
@@ -49,7 +49,7 @@ def main():
     for f in sorted(glob.glob(os.path.join(BASE, "*", "facts", "*.json"))):
         d = json.load(open(f, encoding="utf-8"))
         fid = str(d.get("id", ""))
-        if not fid.startswith("dm-") or fid not in posted:
+        if re.fullmatch(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", fid) or fid not in posted:
             continue
         p = posted[fid]
         rec = by_url.get(p["post_url"]) or next(
