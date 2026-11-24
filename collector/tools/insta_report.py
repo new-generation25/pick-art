@@ -162,7 +162,12 @@ def build_daily(runs):
                           "feedback": 0, "thanks_like": 0, "thanks_reply": 0}
         return days[date]
 
+    seen_posts = set()  # 순회공연은 회차마다 줄이 있고 게시물은 하나다 → 게시물 주소로 한 번만 센다
     for p in load("posted.json"):
+        key = p.get("post_url") or id(p)
+        if key in seen_posts:
+            continue
+        seen_posts.add(key)
         d = day(p.get("posted_at"))
         d["posts"] += 1
         sc = p.get("scale")
