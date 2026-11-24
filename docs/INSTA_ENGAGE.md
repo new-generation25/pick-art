@@ -95,14 +95,7 @@
 〈전시〉 소식 반가워요! 부산·경남 소식 전하는 피카예요. 이번 소식과 앞으로 올리실 공연·전시 소식도 저희 인스타와 피카 앱에 포스터와 함께 소개해도 될까요? 계정 태그하고 출처 밝힐게요🙏 괜찮으시면 답글 주세요
 ```
 
-**상시 동의** (2026-11-24): 위 문안에 「네」 등 허락하면 그 계정은 **상시 동의**다. dm.json 그 줄에 `"standing": true`를 넣는다(`insta_state.py update dm ... --set '{"status":"yes","standing":true}'`). 상시 동의 계정의 새 공연·전시 게시물은 다시 묻지 않고 바로 인스타에 올리고 피카 앱 DB에 넣는다(`insta_state.py standing`으로 목록을 본다). 옛 문안(이번 소식만)으로 허락한 계정은 `standing` 이 없으므로, 아래 「상시 동의 요청」을 한 번 보낸다.
-
-**상시 동의 요청** (옛 문안으로 이미 허락한 계정에 한 번만. 허락받은 채널 — 댓글이면 그 댓글 스레드의 답글, DM이면 DM — 로 보낸다):
-
-```
-지난번 소개 허락 감사했어요🙏 앞으로 올리실 공연·전시 소식도 저희 인스타와 피카 앱에 계정 태그하고 출처 밝혀서 소개해도 될까요? 괜찮으시면 답 주세요
-```
-보낸 뒤 dm.json 그 줄에 `"standing_asked": "<날짜>"`를 넣는다. 답이 허락이면 `"standing": true`.
+**상시 동의** (2026-11-24): 위 문안에 「네」 등 허락하면 그 계정은 **상시 동의**다. dm.json 그 줄에 `"standing": true`를 넣는다(`insta_state.py update dm ... --set '{"status":"yes","standing":true}'`). 상시 동의 계정의 새 공연·전시 게시물은 다시 묻지 않고 바로 인스타에 올리고 피카 앱 DB에 넣는다(`insta_state.py standing`으로 목록을 본다). **이미 허락한 계정도 상시 동의로 본다** (2026-11-24 운영자 지시): 옛 문안(이번 소식만)으로 허락한 계정에 다시 묻지 않는다. 그 18줄은 `standing: true`로 바꿔 두었다.
 
 기록: `docs/insta/dm.json`에 `{"date","channel":"comment|dm","account","name","post_url","event","text","status":"sent|yes|no|none|posted","reply","standing"?,"standing_asked"?}`. 일반 댓글과 따로 이 파일에 적는다(`engaged.json`에는 적지 않는다).
 
