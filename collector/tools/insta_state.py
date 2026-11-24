@@ -136,8 +136,9 @@ def cmd_summary(a):
     cnt = lambda typ: sum(1 for r in eng if r.get("date") == t and r.get("type") == typ)
     out({
         "date": t,
-        "posted_today": sum(1 for r in posted if day_of(r) == t),
-        "posted_today_small": sum(1 for r in posted if day_of(r) == t and r.get("scale") == "소규모"),
+        # 순회공연은 회차마다 줄이 있고 게시물은 하나다 → 게시물 주소로 센다
+        "posted_today": len({r.get("post_url") for r in posted if day_of(r) == t}),
+        "posted_today_small": len({r.get("post_url") for r in posted if day_of(r) == t and r.get("scale") == "소규모"}),
         "follow_today": cnt("follow"), "comment_today": cnt("comment"),
         "like_back_today": cnt("like_back"), "reply_today": cnt("reply"),
         "ask_today": sum(1 for r in dm if r.get("date") == t and r.get("channel") == "comment"),
