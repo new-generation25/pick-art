@@ -17,6 +17,9 @@
   python tools/insta_state.py claim account @계정 --by 참여  오늘 이 계정을 맡는다(다른 에이전트가 맡았으면 실패)
   python tools/insta_state.py claim event <event_id> --by 게시
   python tools/insta_state.py add engaged '<json>'        한 줄 더하기(posted·engaged·dm·feedback·candidates·stats)
+  python tools/insta_state.py add-many feedback '[...]'   여러 줄 한 번에 더하기(문제 있는 줄만 빠짐)
+  python tools/insta_state.py liked-many @a @b ...        여러 계정의 7일 안 답례 좋아요 여부
+  python tools/insta_state.py last-check [--set "11/24 2차"]  지난 반응 처리 시각(알림에서 이 뒤 것만 처리)
   python tools/insta_state.py mark-used @계정             candidates 의 used 를 오늘로
   python tools/insta_state.py update dm --match '{"account":"@x","post_url":"..."}' --set '{"status":"yes"}'
 
@@ -237,37 +240,81 @@ def cmd_claim(a):
     out({"ok": True, "key": key})
 
 
+def _check_new(file, rec, rows):
+    """더할 한 줄을 검사하고 고친다. 문제가 있으면 이유 문자열, 없으면 None."""
+    if not isinstance(rec, dict):
+        return "한 줄(객체)이 아니다"
+    miss = [k for k in REQUIRED[file] if rec.get(k) in (None, "")]
+    if miss:
+        return f"빠진 칸: {miss}"
+    if "account" in rec:
+        rec["account"] = norm(rec["account"])
+    if file in ("engaged", "dm", "feedback") and not rec.get("at"):
+        rec["at"] = datetime.now().astimezone().isoformat(timespec="seconds")  # 리포트에 실제 시각이 나오게
+    if file == "posted" and any(r.get("event_id") == rec["event_id"] for r in rows):
+        return "이미 posted.json 에 있는 event_id"
+    if file == "candidates" and any(norm(r.get("account")) == rec["account"] for r in rows):
+        return "이미 후보 목록에 있는 계정"
+    if file == "feedback" and any(r.get("account") == rec["account"] and r.get("kind") == rec["kind"]
+                                  and r.get("detail") == rec["detail"] for r in rows):
+        return "이미 적힌 반응"
+    return None
+
+
 def cmd_add(a):
     try:
         rec = json.loads(a.record)
     except json.JSONDecodeError as e:
         fail(f"JSON 이 아니다: {e}")
-    if not isinstance(rec, dict):
-        fail("한 줄(객체)만 더한다")
-    miss = [k for k in REQUIRED[a.file] if rec.get(k) in (None, "")]
-    if miss:
-        fail(f"빠진 칸: {miss}")
-    if "account" in rec:
-        rec["account"] = norm(rec["account"])
-    if a.file in ("engaged", "dm", "feedback") and not rec.get("at"):
-        rec["at"] = datetime.now().astimezone().isoformat(timespec="seconds")  # 리포트에 실제 시각이 나오게
     with lock():
         rows = load(a.file)
-        if a.file == "posted" and any(r.get("event_id") == rec["event_id"] for r in rows):
-            fail("이미 posted.json 에 있는 event_id")
-        if a.file == "candidates" and any(norm(r.get("account")) == rec["account"] for r in rows):
-            fail("이미 후보 목록에 있는 계정")
-        if a.file == "stats":
-            rows = [r for r in rows if r.get("date") != rec["date"]]  # 같은 날짜는 고친다
-        if a.file == "feedback" and any(
-                r.get("account") == rec["account"] and r.get("kind") == rec["kind"]
-                and r.get("detail") == rec["detail"] for r in rows):
-            fail("이미 적힌 반응")
+        if a.file == "stats" and isinstance(rec, dict):
+            rows = [r for r in rows if r.get("date") != rec.get("date")]  # 같은 날짜는 고친다
+        err = _check_new(a.file, rec, rows)
+        if err:
+            fail(err)
         rows.append(rec)
         if a.file == "stats":
             rows.sort(key=lambda r: r["date"])
         save(a.file, rows)
     out({"ok": True, "file": a.file, "count": len(rows)})
+
+
+def cmd_add_many(a):
+    """여러 줄을 한 번에 더한다(JSON 배열). 문제 있는 줄만 빼고 나머지는 더한다."""
+    try:
+        recs = json.loads(a.records)
+    except json.JSONDecodeError as e:
+        fail(f"JSON 이 아니다: {e}")
+    if not isinstance(recs, list):
+        fail("JSON 배열이어야 한다")
+    added, skipped = 0, []
+    with lock():
+        rows = load(a.file)
+        for i, rec in enumerate(recs):
+            err = _check_new(a.file, rec, rows)
+            if err:
+                skipped.append({"i": i, "why": err}); continue
+            rows.append(rec); added += 1
+        save(a.file, rows)
+    out({"ok": True, "file": a.file, "added": added, "skipped": skipped})
+
+
+def cmd_liked_many(a):
+    """여러 계정의 7일 안 답례 좋아요 여부를 한 번에."""
+    since = (date.today() - timedelta(days=7)).isoformat()
+    done = {norm(r.get("account")) for r in load("engaged") if r.get("type") == "like_back" and day_of(r) >= since}
+    out({norm(x): norm(x) in done for x in a.accounts})
+
+
+def cmd_last_check(a):
+    """지난 반응 처리 시각. --set 이면 지금으로 고친다. 알림에서 이 시각 이후 것만 처리한다."""
+    p = os.path.join(BASE, "last_check.json")
+    if a.set:
+        with lock():
+            with open(p, "w", encoding="utf-8") as f:
+                json.dump({"at": datetime.now().astimezone().isoformat(timespec="seconds"), "by": a.set}, f, ensure_ascii=False)
+    out(json.load(open(p, encoding="utf-8")) if os.path.exists(p) else {"at": None})
 
 
 def cmd_mark_used(a):
@@ -310,6 +357,10 @@ def main():
     sub.add_parser("standing").set_defaults(f=cmd_standing)
     p = sub.add_parser("find-ask"); p.add_argument("account"); p.set_defaults(f=cmd_find_ask)
     p = sub.add_parser("liked-recently"); p.add_argument("account"); p.set_defaults(f=cmd_liked_recently)
+    p = sub.add_parser("liked-many"); p.add_argument("accounts", nargs="+"); p.set_defaults(f=cmd_liked_many)
+    p = sub.add_parser("add-many"); p.add_argument("file", choices=list(REQUIRED)); p.add_argument("records")
+    p.set_defaults(f=cmd_add_many)
+    p = sub.add_parser("last-check"); p.add_argument("--set", help="처리한 회차 이름(예: 11/24 2차)"); p.set_defaults(f=cmd_last_check)
     p = sub.add_parser("has-account"); p.add_argument("file", choices=["candidates", "engaged", "dm", "feedback"])
     p.add_argument("account"); p.set_defaults(f=cmd_has_account)
     p = sub.add_parser("claim"); p.add_argument("kind", choices=["account", "event"]); p.add_argument("key")
