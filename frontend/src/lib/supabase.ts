@@ -57,6 +57,17 @@ export async function getPublishedEvents(filters?: { region?: string; category?:
     return data;
 }
 
+/** 상세에 보일 장소 정보 (specs/009). 공개 뷰라 좌표가 확인된 장소만 나온다 */
+export async function getVenueInfo(venueId: string | null | undefined): Promise<{ closed_days: string | null; capacity: number | null } | null> {
+    if (!venueId) return null;
+    const { data, error } = await supabase.from('public_venues').select('closed_days,capacity').eq('id', venueId).maybeSingle();
+    if (error) {
+        console.error('Error fetching venue info:', error.message);
+        return null;
+    }
+    return data;
+}
+
 export async function getEventById(id: string) {
     const { data, error } = await supabase
         .from('events')

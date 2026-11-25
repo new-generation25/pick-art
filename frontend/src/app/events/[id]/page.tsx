@@ -4,7 +4,9 @@ import { getEventById, getPublishedEvents } from "@/lib/supabase";
 import { Calendar, MapPin, ExternalLink, ArrowLeft, Info, Ticket, Baby } from "lucide-react";
 import { kidsInfo } from "@/lib/kids";
 import { splitDescription } from "@/lib/eventDetails";
-import { Clock } from "lucide-react";
+import { Clock, CalendarX, Armchair } from "lucide-react";
+import { AdminNoteControl } from "@/components/ui/AdminNoteControl";
+import { getVenueInfo } from "@/lib/supabase";
 import { AdminKidsControl } from "@/components/ui/AdminKidsControl";
 import { ReportButton } from "@/components/ui/ReportButton";
 import { ShareButton } from "@/components/ui/ShareButton";
@@ -95,6 +97,13 @@ export default async function EventDetailPage({ params }: EventPageProps) {
     // 설명의 「일시·러닝타임·출연·장르: 값」 줄은 칸으로 (specs/006). 상세 안내에는 나머지 글만
     const detail = splitDescription(event.description);
     facts.splice(1, 0, ...detail.rows.map(r => ({ icon: r.label === "공연 시각" ? Clock : Info, label: r.label, value: r.value })));
+    // 장소 정보 (specs/009): 휴관일은 전시에, 객석 수는 공연에. 공식 안내로 확인해 넣은 값만 있다
+    const venueInfo = await getVenueInfo(event.venue_id);
+    const placeAt = facts.findIndex(f => f.label === "장소") + 1;
+    const placeRows: typeof facts = [];
+    if (venueInfo?.closed_days && event.category === "전시") placeRows.push({ icon: CalendarX, label: "휴관일", value: venueInfo.closed_days });
+    if (venueInfo?.capacity && event.category === "공연") placeRows.push({ icon: Armchair, label: "객석", value: `${venueInfo.capacity.toLocaleString()}석` });
+    if (placeRows.length) facts.splice(placeAt, 0, ...placeRows);
 
     return (
         <main className="min-h-screen pb-20">
@@ -147,6 +156,15 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                         <h1 className="pica-display mt-3 text-[30px] leading-[1.2] text-ink sm:text-[44px]">
                             {event.title}
                         </h1>
+
+                        {/* 피카가 본 이유 (specs/009): 관리자가 쓴 한 줄. 없으면 보이지 않는다 */}
+                        {typeof event.pica_note === "string" && event.pica_note.trim() && (
+                            <p className="mt-4 border-l-[3px] border-accent pl-3 text-[16px] leading-relaxed text-ink">
+                                <span className="mr-2 text-[13px] font-bold text-accent">피카가 본 이유</span>
+                                {event.pica_note}
+                            </p>
+                        )}
+                        <AdminNoteControl eventId={event.id} note={event.pica_note ?? null} />
 
                         {/* 기간, 장소, 관람료, 출처 */}
                         <dl className="pica-box mt-6 divide-y divide-line">
