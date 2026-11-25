@@ -62,6 +62,31 @@ def reclaim_running(db, older_than=None, reason="시간 초과"):
 BLOG_REGIONS = "창원 진주 통영 사천 김해 밀양 거제 양산 의령 함안 창녕 고성 남해 하동 산청 함양 거창 합천".split()
 
 
+INSTAGRAM_MARK = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs", "instagram_last_run.txt")
+
+
+def _kst_now():
+    return datetime.now(timezone(timedelta(hours=9)))
+
+
+def instagram_due(now=None, mark_path=INSTAGRAM_MARK):
+    """오전 회차면 늘 돈다. 오후 회차는 그날(KST) 인스타 수집이 아직 성공하지 않았을 때만 돈다."""
+    now = now or _kst_now()
+    if now.hour < 12:
+        return True
+    try:
+        with open(mark_path, encoding="utf-8") as f:
+            return f.read().strip() != now.date().isoformat()
+    except OSError:
+        return True
+
+
+def mark_instagram_done(now=None, mark_path=INSTAGRAM_MARK):
+    os.makedirs(os.path.dirname(mark_path), exist_ok=True)
+    with open(mark_path, "w", encoding="utf-8") as f:
+        f.write((now or _kst_now()).date().isoformat())
+
+
 async def run_tool(script, timeout_min=60):
     """collector/tools/<script> 를 별도 프로세스로 실행하고 결과 한 줄을 돌려준다."""
     here = os.path.dirname(os.path.abspath(__file__))
@@ -146,9 +171,13 @@ async def run_crawlers(specific_target=None):
             # 인스타그램(하루 한 번, 오전 루틴): 새 게시물 → raw_posts REVIEW(주간 검토로만 공개), 계정 재채점·탐색.
             # 이 PC의 로그인 프로필(collector/.cache/ig_profile)이 필요하고 오래 걸리므로 별도 프로세스로 돌리고,
             # 실패하거나 시간을 넘겨도 루틴은 계속한다. INSTAGRAM_DAILY=off 면 건너뛴다.
-            if os.getenv("INSTAGRAM_DAILY", "on").lower() != "off" and datetime.now(timezone(timedelta(hours=9))).hour < 12:
+            # 오전 회차를 놓친 날(08:20에 PC가 꺼져 있던 날 등)은 오후 회차가 대신 돈다: 그날 수집이 성공했는지는 표시 파일로 안다
+            if os.getenv("INSTAGRAM_DAILY", "on").lower() != "off" and instagram_due():
                 for script in ("collect_instagram.py", "discover_instagram.py"):
-                    results.append(await run_tool(script, timeout_min=90))
+                    r = await run_tool(script, timeout_min=90)
+                    results.append(r)
+                    if script == "collect_instagram.py" and r["status"] == "SUCCESS":
+                        mark_instagram_done()
 
             # 내 주변 행사(specs/002): 새로 공개된 행사의 장소 좌표 채우기. 실패해도 루틴은 계속한다
             geo = await run_tool("geocode_venues.py", timeout_min=20)
