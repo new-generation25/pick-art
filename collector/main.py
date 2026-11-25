@@ -198,6 +198,23 @@ async def run_crawlers(specific_target=None):
                     if script == "collect_instagram.py" and r["status"] == "SUCCESS":
                         mark_instagram_done()
 
+            # 인스타 후보(REVIEW) 정리(specs/003 R2): 끝난 것 EXPIRED·이미 공개된 것 DUPLICATE, 남은 것에 무더기
+            # (공개 후보·동의 필요·사람 판단). 인스타 수집을 건너뛴 회차에도 돈다. 실패해도 루틴은 계속한다
+            triage = await run_tool("triage_review.py", timeout_min=10, args=["--apply"])
+            review_line = "• REVIEW 정리: " + triage["summary"].replace("✅ ✅ REVIEW 정리: ", "✅ ", 1)
+            # 관리자가 인박스 «공개 후보»에서 승인한 것(content.publish_approved_at)만 같은 검증(날짜·링크·중복)을 거쳐
+            # 공개한다. 검증에 걸리면 REVIEW 로 두고 review_reason 을 남긴다. AUTO_PUBLISH=off 면 함께 멈춘다
+            if os.getenv("AUTO_PUBLISH", "on").lower() != "off":
+                from tools.publish_verified import publish_approved
+                today = datetime.now(timezone(timedelta(hours=9))).date()
+                try:
+                    review_line += "\n• 승인 후보 공개: " + await publish_approved(
+                        today.isoformat(), (today + timedelta(days=60)).isoformat())
+                except Exception as e:
+                    review_line += f"\n• 승인 후보 공개 실패: {e}"
+            else:
+                review_line += "\n• 승인 후보 공개: 꺼짐 (AUTO_PUBLISH=off)"
+
             # 내 주변 행사(specs/002): 새로 공개된 행사의 장소 좌표 채우기. 실패해도 루틴은 계속한다
             geo = await run_tool("geocode_venues.py", timeout_min=20)
             geo_line = f"• 장소 좌표: {geo['summary']}"
@@ -230,6 +247,7 @@ async def run_crawlers(specific_target=None):
             for t, n in skipped.items():
                 lines.append(f"• {t} {n}곳 건너뜀 (미구현)")
             lines.append(publish_line)
+            lines.append(review_line)
             lines.append(geo_line)
             lines.append(backup_line)
             lines.append(f"• AI 추출: {'켜짐' if AIExtractor().enabled else '꺼짐 (기본값 사용)'}")
