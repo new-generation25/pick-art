@@ -57,6 +57,29 @@ export async function getPublishedEvents(filters?: { region?: string; category?:
     return data;
 }
 
+/** 피카 인스타에 최근 days 일 동안 소개한 공개 행사 (/insta). 정렬·묶음은 lib/instaFeed.ts */
+export async function getInstaEvents(days: number, region?: string) {
+    const since = addDays(todayKST(), -days);
+    let query = supabase
+        .from('events')
+        .select('*')
+        .eq('status', 'PUBLISHED')
+        .not('insta_post_url', 'is', null)
+        .gte('insta_posted_at', since);
+    for (const c of HIDDEN_CATEGORIES) {
+        query = query.neq('category', c);
+    }
+    if (region && region !== '전체') {
+        query = query.eq('region', region);
+    }
+    const { data, error } = await query.order('insta_posted_at', { ascending: false }).limit(300);
+    if (error) {
+        console.error('Error fetching insta events:', error);
+        return [];
+    }
+    return data;
+}
+
 export async function getEventById(id: string) {
     const { data, error } = await supabase
         .from('events')

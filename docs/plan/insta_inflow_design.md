@@ -2,6 +2,8 @@
 
 작성: 피카 앱 개선 세션 · 요청: 인스타 운영 세션(운영자 11/26 결정 「자동 처리」) · 상태: **B 단계 완료(11/26, 운영자 승인 「Add the columns」), C·D는 대기**
 
+> 진행 11/26 (C): 상세 「피카 인스타에서 보기」(insta_post_url 있는 행사만, 새 창)와 `/insta` 모음 페이지(최근 14일, 소개한 날 최신순, 지역 칩) 구현. `npm run build` 통과, 로컬 화면 확인(데스크톱·375px 가로 넘침 없음). **main 병합(배포) 전.** D(프로필 링크를 `https://pick-art.vercel.app/insta?utm_source=instagram&utm_medium=social&utm_campaign=profile`로 교체)는 배포 뒤 운영자 승인으로 인스타 세션이 한다.
+>
 > 진행 11/26: `events.insta_post_url`·`insta_posted_at` 적용(`supabase/migrations/20261126000000_events_insta_post.sql`), `collector/tools/sync_insta_posts.py`를 정기 수집에 연결. 첫 반영 소개한 행사 110 중 공개 행 95 채움, 15개는 posted.json의 event_id가 숨긴(HIDDEN) 행이라 반영 안 함.
 
 ## 전제 (확인한 것)

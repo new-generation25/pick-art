@@ -9,6 +9,7 @@ import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { EventCard } from "@/components/ui/EventCard";
 import { DEFAULT_OG_IMAGE } from "@/lib/site";
+import { InstagramIcon } from "@/components/ui/InstagramLink";
 
 interface EventPageProps {
     params: Promise<{
@@ -111,6 +112,20 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                                 </a>
                                 <ShareButton title={event.title} />
                             </div>
+
+                            {/* 피카 인스타에 소개한 행사만 (events.insta_post_url, 정기 수집이 채움) */}
+                            {typeof event.insta_post_url === "string" && event.insta_post_url.startsWith("https://www.instagram.com/") && (
+                                <a
+                                    href={event.insta_post_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="mx-auto mt-3 flex max-w-[400px] items-center justify-center gap-1.5 text-[14px] font-semibold text-ink-soft underline-offset-4 hover:text-ink hover:underline"
+                                >
+                                    <InstagramIcon size={16} />
+                                    피카 인스타에서 보기
+                                    <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                                </a>
+                            )}
                         </div>
                     </div>
 
