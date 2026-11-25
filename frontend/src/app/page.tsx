@@ -7,6 +7,7 @@ import { Container, Title, Text, TextInput, Button, SimpleGrid, Group, Box, Aler
 
 import { formatPeriod, todayKST } from "@/lib/utils";
 import { orderFeed } from "@/lib/feedOrder";
+import { ageLabel, fitsAge, kidsInfo, readKidsParam } from "@/lib/kids";
 
 interface HomeProps {
   searchParams: Promise<{
@@ -15,6 +16,7 @@ interface HomeProps {
     q?: string;
     date?: string;
     ended?: string;
+    kids?: string;
     subscribed?: string;
   }>;
 }
@@ -29,13 +31,21 @@ export default async function Home({ searchParams }: HomeProps) {
     ended: resolvedParams.ended
   };
 
-  const dbEvents = await getPublishedEvents(filters);
+  const fetched = await getPublishedEvents(filters);
   const isSubscribed = resolvedParams.subscribed === "true";
+
+  // 아이와 같이 가기 좋은 곳(specs/004): 규칙·운영자 수정으로 행사마다 구분을 매기고, 「아이」 필터가 켜지면 맞는 것만 남긴다
+  const kids = readKidsParam(resolvedParams.kids);
+  const kidsOf = new Map(fetched.map((e: any) => [e.id, kidsInfo(e)]));
+  const dbEvents = kids.on ? fetched.filter((e: any) => fitsAge(kidsOf.get(e.id)!, kids.age)) : fetched;
 
   const today = todayKST();
 
   // DB 행을 EventCard 모양으로
   const toCard = (event: any) => ({
+    kidMark: kidsOf.get(event.id)?.group === "target",
+    ageBadge: kids.on ? ageLabel(kidsOf.get(event.id)?.minMonths ?? null) : undefined,
+    kidRank: kids.on ? (kidsOf.get(event.id)?.group === "target" ? 0 : 1) : 0,
     id: event.id,
     title: event.title,
     category: event.category,
@@ -47,12 +57,16 @@ export default async function Home({ searchParams }: HomeProps) {
   });
 
   // 날짜 묶음(오늘·이번 주·다음 주·그 이후·상시·장기·최근 끝난 행사)과 묶음 안의 순서
-  const sections = orderFeed(dbEvents, today).map(s => ({ ...s, cards: s.items.map(toCard) }));
+  // 「아이」 필터가 켜지면 묶음 안에서 «아이 대상»을 먼저 (안정 정렬이라 그 안의 날짜 순서는 그대로)
+  const sections = orderFeed(dbEvents, today).map(s => ({
+    ...s,
+    cards: s.items.map(toCard).sort((a, b) => a.kidRank - b.kidRank),
+  }));
   const allEvents = dbEvents;
 
   // 머리말에 쓰는 오늘 날짜와 결과 수 (표시용)
   const [, todayMonth, todayDay] = today.split("-").map(Number);
-  const hasFilter = !!(filters.region || filters.category || filters.search || filters.date);
+  const hasFilter = !!(filters.region || filters.category || filters.search || filters.date || kids.on);
 
   const darkInput = { input: { backgroundColor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.22)', color: 'white' } };
 

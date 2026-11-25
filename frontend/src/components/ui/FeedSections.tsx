@@ -16,6 +16,9 @@ interface Card {
     imageUrl: string;
     isFree: boolean;
     isEnded?: boolean;
+    kidMark?: boolean;
+    ageBadge?: string;
+    kidRank?: number;
 }
 
 /**
@@ -37,7 +40,8 @@ export function FeedSections({ sections, filters }: { sections: { key: SectionKe
         return () => { cancelled = true; };
     }, []);
 
-    const rank = (c: Card) => (c.imageUrl ? 0 : 2) + (interests.includes(c.category) ? 0 : 1);
+    // 「아이」 필터가 켜졌으면 «아이 대상»(kidRank 0)이 늘 먼저다. 그다음 포스터·관심 분야 규칙
+    const rank = (c: Card) => (c.kidRank ?? 0) * 4 + (c.imageUrl ? 0 : 2) + (interests.includes(c.category) ? 0 : 1);
     const ordered = sections.map(s => ({
         ...s,
         // Array.sort 는 안정 정렬이라 같은 순위 안에서는 서버가 정한 순서가 그대로 남는다

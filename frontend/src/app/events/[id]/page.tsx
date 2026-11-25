@@ -1,7 +1,9 @@
 import { Header } from "@/components/ui/Header";
 import { formatPeriod, todayKST } from "@/lib/utils";
 import { getEventById, getPublishedEvents } from "@/lib/supabase";
-import { Calendar, MapPin, ExternalLink, ArrowLeft, Info, Ticket } from "lucide-react";
+import { Calendar, MapPin, ExternalLink, ArrowLeft, Info, Ticket, Baby } from "lucide-react";
+import { kidsInfo } from "@/lib/kids";
+import { AdminKidsControl } from "@/components/ui/AdminKidsControl";
 import { ShareButton } from "@/components/ui/ShareButton";
 import { PosterViewer } from "@/components/ui/PosterViewer";
 import Link from "next/link";
@@ -81,6 +83,10 @@ export default async function EventDetailPage({ params }: EventPageProps) {
         { icon: Ticket, label: "관람료", value: event.price_info || (event.is_free ? "무료" : "정보 없음") },
         { icon: Info, label: "출처", value: event.source || "정보 없음" },
     ];
+    // 원본에 관람 연령이 적혀 있으면 원문 그대로 (specs/004 FR-008). 운영자 수정 전의 규칙 결과는 관리자 칸에 보인다
+    const kids = kidsInfo(event);
+    const ruleKids = kidsInfo({ ...event, kids_override: null });
+    if (kids.ageText) facts.splice(3, 0, { icon: Baby, label: "관람 연령", value: kids.ageText });
 
     return (
         <main className="min-h-screen pb-20">
@@ -155,6 +161,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                                 </div>
                             ))}
                         </dl>
+                        <AdminKidsControl eventId={event.id} override={event.kids_override ?? null} ruleGroup={ruleKids.group} />
 
                         {/* 상세 안내 */}
                         <section className="mt-10">

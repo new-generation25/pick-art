@@ -11,6 +11,13 @@ import { CATEGORIES as FEED_CATEGORIES } from "@/lib/categories";
 
 const REGIONS = ["전체", ...GN_REGIONS];
 const CATEGORIES = ["전체", ...FEED_CATEGORIES];
+// 아이와 같이 가기 좋은 곳(specs/004). 값은 주소의 kids (lib/kids.ts readKidsParam)
+const KIDS_FILTERS = [
+    { label: "전체", value: "전체" },
+    { label: "아이와", value: "any" },
+    { label: "어린 아이(~6세)", value: "young" },
+    { label: "초등학생", value: "school" },
+];
 const DATE_FILTERS = [
     { label: "전체", value: "all" },
     { label: "오늘", value: "today" },
@@ -32,6 +39,7 @@ export function FilterBar() {
     const currentRegion = searchParams.get("region") || "전체";
     const currentCategory = searchParams.get("category") || "전체";
     const currentDate = searchParams.get("date") || "all";
+    const currentKids = searchParams.get("kids") || "전체";
     const showEnded = searchParams.get("ended") === "1";
     const [myRegion, setMyRegion] = useState<string | null>(null);
 
@@ -118,6 +126,20 @@ export function FilterBar() {
                         onClick={() => updateFilters("category", category)}
                     >
                         {category}
+                    </button>
+                ))}
+            </Row>
+
+            <Row label="아이">
+                {KIDS_FILTERS.map((k) => (
+                    <button
+                        key={k.value}
+                        type="button"
+                        className="pica-chip"
+                        aria-pressed={currentKids === k.value}
+                        onClick={() => updateFilters("kids", k.value)}
+                    >
+                        {k.label}
                     </button>
                 ))}
             </Row>

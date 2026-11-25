@@ -12,6 +12,8 @@ interface EventProps {
     imageUrl: string;
     isFree?: boolean;
     isEnded?: boolean;
+    kidMark?: boolean;   // 아이 대상 행사 (specs/004)
+    ageBadge?: string;   // 「아이」 필터가 켜졌을 때만: 관람 하한 (예: 24개월+, 만 7세+, 나이 정보 없음)
 }
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
@@ -101,6 +103,12 @@ export function EventCard({ event, priority = false, disableNavigation = false }
                         </span>
                         {event.isFree && (
                             <span className="pica-cat border-ink text-ink" style={{ borderColor: "currentColor" }}>무료</span>
+                        )}
+                        {event.kidMark && (
+                            <span className="pica-cat border-ink text-ink" style={{ borderColor: "currentColor" }}>아이와</span>
+                        )}
+                        {event.ageBadge && (
+                            <span className="text-[12px] font-semibold text-ink-soft">{event.ageBadge}</span>
                         )}
                     </div>
                     <h3
