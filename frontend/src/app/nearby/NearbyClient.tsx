@@ -3,14 +3,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Container } from "@mantine/core";
-import { LocateFixed, Navigation } from "lucide-react";
+import { LocateFixed } from "lucide-react";
 import { EventCard } from "@/components/ui/EventCard";
 import { buildNearby, formatDistance, type LatLng, type Period } from "@/lib/nearby";
-import { detectPlatform, naverRouteLinks } from "@/lib/naverMap";
 import { CATEGORIES } from "@/lib/categories";
 import { formatPeriod } from "@/lib/utils";
 import type { NearbyRow } from "@/lib/nearbyData";
 import { AREAS, findArea } from "@/lib/areaCenters";
+import { RouteButtons } from "@/components/ui/RouteButtons";
+import { NearbyMap } from "./NearbyMap";
 
 const AREA_KEY = "pica.nearby.area";
 
@@ -78,44 +79,15 @@ function toCard(e: NearbyRow) {
     };
 }
 
-// 길찾기 버튼 하나. 이동수단(대중교통·자동차·도보)은 네이버지도 길찾기 화면에서 고른다(2026-11-21 운영자 결정)
-function RouteButtons({ e, appname }: { e: NearbyRow; appname: string }) {
-    const links = () => naverRouteLinks({
-        name: e.venue || e.title,
-        region: e.region,
-        lat: e.coords?.lat,
-        lng: e.coords?.lng,
-        mode: "public",
-        platform: detectPlatform(navigator.userAgent),
-        appname,
-    });
-    // 앱 링크만 연다. 예전에는 1.5초 뒤 웹으로 자동 전환했는데, 아이폰 Chrome 에서 앱이 열린 뒤에도
-    // 탭이 웹으로 넘어가 Chrome 으로 되돌아오는 문제가 있었다(2026-11-21 운영자 실기기). 웹은 아래 링크로 따로 둔다
-    const open = () => {
-        const l = links();
-        if (l.primary.startsWith("https://")) window.open(l.primary, "_blank", "noopener");
-        else window.location.href = l.primary;
-    };
-    const openWeb = (ev: React.MouseEvent) => {
-        ev.preventDefault();
-        window.open(links().fallback, "_blank", "noopener");
-    };
-    return (
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <button type="button" className="pica-chip" onClick={open}>
-                <Navigation size={14} aria-hidden /> 네이버지도 길찾기
-            </button>
-            <a href="#" onClick={openWeb} className="text-[13px] text-ink-soft underline">앱이 없으면 웹에서 보기</a>
-        </div>
-    );
-}
-
 export function NearbyClient({ rows, today, appname }: { rows: NearbyRow[]; today: string; appname: string }) {
     const router = useRouter();
     const sp = useSearchParams();
     const period = (PERIODS.some(p => p.value === sp.get("p")) ? sp.get("p") : "week") as Period;
     const range = RANGES.some(r => r.value === sp.get("r")) ? sp.get("r")! : "all";
     const category = sp.get("c") || "전체";
+    // 보기 방식(specs/005): 주소 v=map 이면 지도. 지도를 못 불러오면 목록으로 돌아가고 안내한다
+    const [mapFailed, setMapFailed] = useState(false);
+    const view = sp.get("v") === "map" && !mapFailed ? "map" : "list";
 
     const [geo, setGeo] = useState<GeoState>("idle");
     const [gpsOrigin, setGpsOrigin] = useState<Origin | null>(null);
@@ -244,11 +216,29 @@ export function NearbyClient({ rows, today, appname }: { rows: NearbyRow[]; toda
                         </Row>
                     </div>
 
+                    <div className="mt-4 flex flex-wrap items-center gap-3">
+                        <div className="pica-chiprow" role="group" aria-label="보기 방식">
+                            <button type="button" className="pica-chip" aria-pressed={view === "list"} onClick={() => setParam("v", "list", "list")}>목록</button>
+                            <button type="button" className="pica-chip" aria-pressed={view === "map"} onClick={() => { setMapFailed(false); setParam("v", "map", "list"); }}>지도</button>
+                        </div>
+                        {mapFailed && <p className="text-[14px] text-ink" role="alert">지도를 불러오지 못해 목록으로 보여 드려요.</p>}
+                    </div>
+
                     {tooFar && (
                         <div className="pica-box mt-5 p-4 text-[15px]">부산·경남 행사만 소개해요. 가장 가까운 행사도 {formatDistance(result.near[0].distanceM)} 떨어져 있어요.</div>
                     )}
 
-                    {result.near.length === 0 && result.unknown.length === 0 ? (
+                    {view === "map" ? (
+                        <div className="mt-6">
+                            <NearbyMap items={result.near} origin={origin.point} originLabel={origin.label} range={range} appname={appname} onFail={() => setMapFailed(true)} />
+                            {result.unknown.length > 0 && (
+                                <p className="mt-3 text-[14px] text-ink-soft">
+                                    지도에 표시하지 못한 행사 <b className="text-ink">{result.unknown.length}건</b>(장소 위치 미확인) —{" "}
+                                    <button type="button" className="font-bold text-ink underline underline-offset-4" onClick={() => setParam("v", "list", "list")}>목록에서 보기</button>
+                                </p>
+                            )}
+                        </div>
+                    ) : result.near.length === 0 && result.unknown.length === 0 ? (
                         <div className="pica-box mt-6 flex flex-col gap-3 p-5">
                             <p className="text-[16px] font-bold text-ink">가까운 곳에 이 기간 행사가 없어요.</p>
                             <div className="flex flex-wrap gap-2">
@@ -268,7 +258,7 @@ export function NearbyClient({ rows, today, appname }: { rows: NearbyRow[]; toda
                         </ol>
                     )}
 
-                    {result.unknown.length > 0 && (
+                    {view === "list" && result.unknown.length > 0 && (
                         <section className="mt-10">
                             <h2 className="text-[18px] font-bold text-ink">거리 확인 안 됨</h2>
                             <p className="mt-1 text-[14px] text-ink-soft">장소 위치를 아직 확인하지 못한 행사예요. 시군으로만 표시해요.</p>

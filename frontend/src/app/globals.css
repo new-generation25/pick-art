@@ -243,3 +243,32 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .pica-public * { transition: none !important; }
 }
+
+/* 내 주변 지도 표시 (specs/005). 지도 위 마커 안의 HTML 이라 테마 변수를 그대로 쓴다 */
+.pica-pin {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--pk-accent, #2350d8);
+  color: var(--pk-on-accent, #fff);
+  border: 2px solid var(--pk-ink, #1a1a1a);
+  border-radius: 999px;
+  font: 700 14px/1 "Pretendard", system-ui, sans-serif;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+.pica-pin-cluster {
+  background: var(--pk-ink, #1a1a1a);
+  color: var(--pk-paper, #ecede6);
+}
+.pica-origin {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--pk-mark, #ff4fa3);
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px var(--pk-ink, #1a1a1a);
+}
