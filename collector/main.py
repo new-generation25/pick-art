@@ -158,6 +158,10 @@ async def run_crawlers(specific_target=None):
             backup = await run_tool("backup_insta.py", timeout_min=10)
             backup_line = f"• 인스타 기록 백업: {backup['summary']}"
 
+            # 인스타 리포트 숫자를 관리자 대시보드용 ops_snapshots 로 올린다. 실패해도 루틴은 계속한다
+            snap = await run_tool("publish_ops_snapshots.py", timeout_min=10)
+            backup_line += f"\n• 대시보드 스냅숏: {snap['summary']}"
+
             # 전체 종료 알림: 처리·실패·건너뜀을 숫자로 남긴다
             failed = [r for r in results if r['status'] != 'SUCCESS']
             n_blog = sum(1 for c in configs if c['target_type'] == 'naver_blog')
