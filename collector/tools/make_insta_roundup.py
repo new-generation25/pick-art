@@ -134,8 +134,8 @@ def build(spec: dict) -> list:
     out.append(f"""
 <div class="slide cta">
   <div class="top"><div class="brand" style="color:#fff">픽아트 <b style="color:{RISO['pink']}">pica</b> · {esc(HANDLE)}</div><div class="page" style="color:#fff">{n_total}/{n_total}</div></div>
-  <div class="pad disp big" style="top:240px">같이 갈<br>사람에게<br>보내기</div>
-  <div class="pad" style="top:760px;font-size:38px;font-weight:800;line-height:1.45">다른 날 공연·전시는<br>프로필 링크에서 볼 수 있어요</div>
+  <div class="pad disp big" style="top:240px">{spec.get('cta_big', '같이 갈<br>친구<br>태그하기')}</div>
+  <div class="pad" style="top:760px;font-size:38px;font-weight:800;line-height:1.45">{spec.get('cta_sub', '이번 주 우리 동네 공연·전시 전부<br>피카 앱에서 · picka.news')}</div>
   <div class="pad src" style="top:1010px">출처 · {esc(spec['sources'])}<br>방문 전 공식 안내에서 변경 사항을 꼭 확인하세요.</div>
   <div class="credit"><span>포스터: 각 주최 측</span><span>문화예술 큐레이션</span></div>
 </div>""")
