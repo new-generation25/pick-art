@@ -1,0 +1,167 @@
+<title>피카 디자인 개선 계획</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* 레이아웃: 편지 한 장처럼 좁은 본문 칼럼 + 캡처는 우표처럼 작은 격자. 색은 피카 확정 팔레트(까치 우편) 4색만 */
+:root {
+  --paper: #F6EFDF;      /* 편지 크림 */
+  --ink: #1C1C1C;        /* 먹 */
+  --slate: #4F6272;      /* 청회색 */
+  --red: #D33A2C;        /* 우체통 빨강: 24px 이상 굵은 제목에만 */
+  --line: #d9cfb8;
+  --card: #fbf7ee;
+  --display: "Black Han Sans", "Noto Sans KR", sans-serif;
+  --body: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #1d1f22; --ink: #efe7d6; --slate: #9fb2c2; --red: #ef6a5c; --line: #3a3d42; --card: #25282c; color-scheme: dark } }
+:root[data-theme="dark"] { --paper: #1d1f22; --ink: #efe7d6; --slate: #9fb2c2; --red: #ef6a5c; --line: #3a3d42; --card: #25282c; color-scheme: dark }
+
+body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.7; }
+.wrap { max-width: 860px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 72px; }
+h1, h2 { font-family: var(--display); font-weight: 400; text-wrap: balance; line-height: 1.25; margin: 0; }
+h1 { font-size: clamp(32px, 6vw, 46px); color: var(--red); }
+h2 { font-size: 26px; margin-top: 56px; padding-top: 16px; border-top: 2px solid var(--ink); }
+h3 { font-size: 17px; margin: 28px 0 6px; }
+p, li { max-width: 68ch; }
+.stamp { font-family: var(--mono); font-size: 13px; color: var(--slate); letter-spacing: .04em; }
+.lead { display: grid; gap: 8px; margin-top: 20px; padding: 18px 20px; border: 1.5px solid var(--ink); background: var(--card); }
+.lead p { margin: 0; }
+.lead b { font-weight: 700; }
+ul { padding-left: 1.2em; margin: 8px 0; }
+li { margin: 4px 0; }
+.shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 16px; margin-top: 18px; }
+figure { margin: 0; display: grid; gap: 6px; }
+figure img { width: 100%; max-width: 100%; border: 1.5px solid var(--ink); background: var(--card); aspect-ratio: 375 / 812; object-fit: cover; object-position: top; }
+figcaption { font-size: 13px; color: var(--slate); line-height: 1.5; }
+.find { display: grid; grid-template-columns: 2.2em minmax(0, 1fr); gap: 2px 10px; margin-top: 14px; }
+.find .n { font-family: var(--mono); color: var(--slate); padding-top: 2px; }
+.find p { margin: 0 0 10px; }
+.tbl { overflow-x: auto; margin-top: 14px; }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 14.5px; }
+th, td { text-align: left; vertical-align: top; padding: 9px 10px; border-bottom: 1px solid var(--line); }
+th { font-size: 13px; color: var(--slate); font-weight: 500; border-bottom: 1.5px solid var(--ink); }
+td.c { font-family: var(--mono); white-space: nowrap; }
+.stage { margin-top: 22px; padding: 16px 18px; border-left: 4px solid var(--ink); background: var(--card); }
+.stage h3 { margin: 0 0 4px; }
+.stage .meta { font-size: 13px; color: var(--slate); }
+.done { margin-top: 8px; font-size: 14.5px; }
+.done b { font-weight: 700; }
+.no li { color: var(--ink); }
+.decide { margin-top: 18px; display: grid; gap: 12px; counter-reset: d; }
+.decide div { padding: 14px 16px; border: 1.5px solid var(--ink); }
+.decide b { display: block; margin-bottom: 4px; }
+.decide span { font-size: 14.5px; color: var(--slate); }
+a { color: inherit; text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--slate); outline-offset: 2px; }
+</style>
+
+<div class="wrap">
+  <p class="stamp">PICA · 2026.11.26 · 디자인 개선 계획</p>
+  <h1>피카 디자인 개선 계획</h1>
+
+  <div class="lead">
+    <p><b>결론:</b> 휴대폰 첫 화면에서 행사가 거의 보이지 않는 것이 가장 큰 문제다. 다른 분야에서 가져올 패턴 8개 가운데 공수가 작은 4개(필터 막대 고정, 카드 정리, 상세 하단 고정 버튼, 빈 상태)로 먼저 푼다.</p>
+    <p><b>같이 정할 것:</b> 사이트는 아직 예전 리소 테마(회색 신문지·파랑·형광 분홍)다. 11/01에 확정한 「까치 우편」 4색으로 바꾸는 일을 1단계와 함께 하면 화면을 두 번 고치지 않는다.</p>
+    <p><b>근거:</b> picka.news를 375×812(휴대폰) 크기로 직접 열어 본 화면 4곳 + 다른 분야 앱·사이트 11곳 조사(<a href="https://github.com/new-generation25/pick-art/blob/main/docs/plan/design_bench_refs_2026-11-26.md">조사 문서</a>).</p>
+  </div>
+
+  <h2>지금 화면에서 본 것</h2>
+  <div class="shots">
+    <figure><img src="design_now_home_top.jpg" alt="홈 첫 화면: 제목, 검색, 내 주변 버튼, 필터 네 줄 아래에 카드 하나가 걸쳐 있다"><figcaption>홈 첫 화면. 카드는 맨 아래 한 장이 겨우 걸린다</figcaption></figure>
+    <figure><img src="design_now_home_cards.jpg" alt="오늘 묶음 안의 카드들. 카드마다 2026 11.26 목요일이 반복된다"><figcaption>「오늘」 묶음 안 카드마다 같은 날짜가 반복된다</figcaption></figure>
+    <figure><img src="design_now_detail_top.jpg" alt="행사 상세 첫 화면: 포스터가 화면 대부분을 차지하고 제목은 아래로 밀려 있다"><figcaption>상세 첫 화면은 포스터가 차지하고 제목·날짜는 아래에 있다</figcaption></figure>
+    <figure><img src="design_now_nearby.jpg" alt="내 주변 화면: 위치 버튼과 지역 선택만 있고 행사는 없다"><figcaption>내 주변은 위치·지역을 고르기 전까지 비어 있다</figcaption></figure>
+  </div>
+
+  <div class="find">
+    <span class="n">1</span><p><b>홈 첫 화면에 행사가 없다.</b> 큰 제목, 검색창, 「내 주변」 버튼, 필터 네 줄(언제·지역·분야·아이)이 첫 화면을 다 쓰고, 첫 카드는 화면 아래에 일부만 보인다.</p>
+    <span class="n">2</span><p><b>카드가 같은 정보를 반복한다.</b> 날짜로 묶은 「오늘」 안에서도 카드마다 「2026 · 11.26 · 목요일」 칸이 카드 폭의 3분의 1을 쓴다. 대신 공연 시각·관람료는 카드에 없다. KOPIS 제목 끝의 「[거제]」 같은 지역 꼬리도 지역 칸과 겹친다.</p>
+    <span class="n">3</span><p><b>상세는 정보보다 포스터가 먼저다.</b> 휴대폰에서 제목·기간·장소를 보려면 스크롤해야 한다. 「원본 안내 페이지 열기」는 데스크톱에서만 고정(<code>lg:sticky</code>)이라 휴대폰에서는 스크롤하면 사라진다. 머리말 아래에 빈 띠도 있다.</p>
+    <span class="n">4</span><p><b>빈 화면이 다음 행동을 알려 주지 않는다.</b> 「내 주변」은 위치를 허락하거나 지역을 고르기 전에는 행사가 0건이다.</p>
+    <span class="n">5</span><p><b>포스터 없는 행사가 169건이다</b>(공개 중인 행사 기준, 11/26 조회). 카드에 빈 회색 칸으로 보인다.</p>
+    <span class="n">6</span><p><b>사이트 색이 브랜드와 다르다.</b> 브랜드 가이드 2절은 크림·청회색·먹·우체통 빨강 4색이지만 사이트는 리소 테마다. 가이드 스스로 「사이트 색 전환은 따로 하는 코드 작업」이라고 적어 두었다. 꼬리말은 「© 2024」로 남아 있다.</p>
+  </div>
+
+  <h2>다른 분야에서 가져올 것 8가지</h2>
+  <p>행사 목록 서비스가 아닌 곳에서 골랐다. 브랜드 가이드(날짜가 주인공, 작은 무대를 같은 무게로, 4색, AI 이미지 금지)와 부딪치는 것은 뺐다.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>순위</th><th>패턴</th><th>참고한 곳</th><th>피카 화면</th><th>공수</th></tr></thead>
+    <tbody>
+      <tr><td class="c">1</td><td>「피카가 본 이유」 한 줄을 카드 제목 아래에 보인다(이미 상세에 있는 칸)</td><td>Resident Advisor 추천, Apple Music 편집 해설</td><td>홈 카드</td><td class="c">S</td></tr>
+      <tr><td class="c">2</td><td>「피카가 고르는 기준」 공개 페이지: 돈 받고 올리지 않음, 공식 출처 확인, 같은 카드 크기</td><td>컬리 품질 기준, Luma 추천 기준</td><td>새 페이지 + 상세 출처 줄 + 꼬리말</td><td class="c">S</td></tr>
+      <tr><td class="c">3</td><td>휴대폰 상세 아래 고정 버튼 막대(주 버튼은 「원본 안내 페이지 열기」 하나)</td><td>토스, DICE</td><td>행사 상세</td><td class="c">S</td></tr>
+      <tr><td class="c">4</td><td>포스터 없는 행사에 같은 3:4 칸의 글자 포스터(날짜·분야·제목, 그림 생성 없음)</td><td>Letterboxd</td><td>홈·찜·내 주변 카드</td><td class="c">M</td></tr>
+      <tr><td class="c">5</td><td>장소 화면과 장소별 캘린더 구독</td><td>Spotify 공연장 팔로우, Luma 캘린더 구독</td><td>상세 장소 줄 → 새 장소 화면</td><td class="c">M</td></tr>
+      <tr><td class="c">6</td><td>찜을 시간순 일정표로(이번 주말 / 다음 주 / 곧 끝남 / 끝남 접힘)</td><td>Airbnb 여행 목록</td><td>찜</td><td class="c">S~M</td></tr>
+      <tr><td class="c">7</td><td>필터 막대 한 줄을 위에 고정하고, 빈 결과에는 「기간 넓히기」 버튼 하나</td><td>토스, DICE</td><td>홈 필터, 빈 상태</td><td class="c">S</td></tr>
+      <tr><td class="c">8</td><td>공유 미리보기 이미지를 엽서 틀로(날짜가 가장 크게, 포스터는 원본 그대로)</td><td>Partiful</td><td>카카오톡·DM 링크 미리보기</td><td class="c">M</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>가져오지 않을 것</h3>
+  <ul class="no">
+    <li>사진 위 그라데이션 덮개: 가이드 2절이 그라데이션을 금지한다.</li>
+    <li>날짜순을 깨는 개인화 추천: 「날짜가 주인공」, 「같은 무게로」와 부딪친다.</li>
+    <li>사이트 화면의 마스코트 그림: 가이드 0절 7번(행사 정보 화면에 AI 그림 금지).</li>
+    <li>참석자 명단·댓글: 커뮤니티 기능은 「추후 예정」으로 보류하기로 했다.</li>
+    <li>화면 테마 고르기: 브랜드 색이 하나로 정해져 있다.</li>
+  </ul>
+
+  <h2>단계와 끝 조건</h2>
+
+  <div class="stage">
+    <h3>D1 · 첫 화면 정리</h3>
+    <p class="meta">공수 S · 위 1, 3, 7번과 관찰 1~4 · 화면 코드만, DB 변경 없음</p>
+    <ul>
+      <li>홈: 큰 제목을 한 줄로 줄이고, 필터 네 줄은 「언제」 칩 한 줄 + 「필터」 버튼(지역·분야·아이를 펼침)으로 바꿔 화면 위에 고정한다.</li>
+      <li>카드: 날짜로 묶인 구간에서는 카드의 날짜 칸을 줄이고(여러 날 행사만 「~12.20」 표시), 그 자리에 공연 시각·관람료, 「피카가 본 이유」 한 줄을 둔다. 제목 끝 지역 꼬리 「[거제]」는 화면에서만 뗀다.</li>
+      <li>상세: 휴대폰에서는 제목·기간·장소를 포스터 위(또는 옆 작은 포스터)로, 「원본 안내 페이지 열기」·찜·공유는 아래 고정 막대로 옮긴다. 머리말 아래 빈 띠를 없앤다.</li>
+      <li>빈 상태: 「내 주변」은 위치를 묻기 전에 마지막으로 고른 지역(없으면 전체)의 가까운 날짜 행사를 먼저 보인다. 홈에서 결과가 0건이면 「기간 넓히기」 버튼 하나를 둔다. 꼬리말 연도를 고친다.</li>
+    </ul>
+    <p class="done"><b>끝 조건:</b> 375×812에서 홈 첫 화면에 카드 3장 이상이 온전히 보임 · 상세 첫 화면에 제목·기간·장소 · 스크롤해도 원본 버튼이 화면에 남음 · 「내 주변」 첫 화면에 행사 1건 이상 · <code>npm run build</code> 통과 · 바꾸기 전후 캡처 비교.</p>
+  </div>
+
+  <div class="stage">
+    <h3>D2 · 브랜드 색 전환(까치 우편)</h3>
+    <p class="meta">공수 M · 관찰 6 · 운영자 결정 필요 · D1과 같이 하면 캡처·검증이 한 번으로 끝난다</p>
+    <ul>
+      <li><code>globals.css</code>에 <code>post</code> 테마 값(크림·청회색·먹·우체통 빨강)을 더하고 <code>MainLayout.tsx</code>의 <code>data-pica-theme</code>를 바꾼다(가이드 2절이 적어 둔 방법).</li>
+      <li>분야 꼬리표: 공연 빨강 면/흰 글자 · 전시 청회색 면/크림 글자 · 축제 먹 면/크림 글자 · 행사 크림 면+먹선.</li>
+      <li>제목 분홍 그림자는 없애고(가이드 3절), 빨강 글자는 24px 이상 굵은 제목에만 쓴다.</li>
+    </ul>
+    <p class="done"><b>끝 조건:</b> 화면 색이 4색 팔레트와 꼬리표 규칙만 씀 · 빨강·청회색이 맞붙는 곳 0 · 본문 명암비 4.5 이상 · 관리자 화면은 그대로.</p>
+  </div>
+
+  <div class="stage">
+    <h3>D3 · 정보가 빈 곳 채우기</h3>
+    <p class="meta">공수 S~M · 위 2, 4, 6번</p>
+    <ul>
+      <li>글자 포스터: 포스터 없는 169건에 같은 3:4 칸으로 날짜·분야·제목을 조판한다(이미지 생성 없음, 브랜드 4색).</li>
+      <li>「피카가 고르는 기준」 페이지를 만들고 상세 출처 줄과 꼬리말에서 잇는다.</li>
+      <li>찜을 「이번 주말 / 다음 주 / 곧 끝남 / 끝난 것(접힘)」 일정표로 묶는다.</li>
+    </ul>
+    <p class="done"><b>끝 조건:</b> 공개 행사 카드 중 빈 회색 칸 0 · 기준 페이지가 상세·꼬리말에서 열림 · 찜 화면이 날짜 구간으로 나뉨.</p>
+  </div>
+
+  <div class="stage">
+    <h3>D4 · 장소와 공유</h3>
+    <p class="meta">공수 M · 위 5, 8번</p>
+    <ul>
+      <li>장소 화면 <code>/venues/[id]</code>: 그 장소의 행사, 휴관일·객석(009에서 채운 값), 길찾기, 그 장소만 받는 캘린더 구독(<code>calendar.ics?venue=</code>).</li>
+      <li>공유 미리보기: 행사마다 엽서 틀 이미지(날짜 가장 크게, 포스터 원본, 「정보: 기관명」)를 만든다.</li>
+    </ul>
+    <p class="done"><b>끝 조건:</b> 상세 장소 줄에서 장소 화면이 열림 · 장소 구독 주소가 그 장소 행사만 돌려줌 · 카카오톡 공유 미리보기에 엽서 이미지가 보임.</p>
+  </div>
+
+  <h2>정할 것</h2>
+  <div class="decide">
+    <div><b>1. 브랜드 색 전환(D2)을 D1과 같이 할지</b><span>같이 하면 화면을 한 번만 고치고 캡처도 한 번이다. 따로 하면 D1을 리소 테마로 먼저 보고 나중에 색만 바꾼다.</span></div>
+    <div><b>2. 글자 포스터를 넣은 뒤에도 「포스터 없는 행사는 묶음 안에서 뒤로」를 유지할지</b><span>글자 포스터가 생기면 빈 칸이 아니게 되므로, 같은 무게 원칙대로 뒤로 미루지 않는 쪽도 가능하다.</span></div>
+    <div><b>3. 「피카가 본 이유」를 어떤 행사에 먼저 쓸지</b><span>카드에 보이기 시작하면 이 한 줄이 있는 행사가 눈에 띈다. 작은 단체 행사에 먼저 쓰면 「작은 무대를 같은 무게로」와 맞는다.</span></div>
+    <div><b>4. 기준 페이지에 「돈 받고 올리지 않는다」를 문장으로 넣을지</b><span>유료 노출은 이미 하지 않기로 정했다. 문장으로 밝히면 신뢰 표시가 되지만, 나중에 바꾸기 어렵다.</span></div>
+  </div>
+</div>
