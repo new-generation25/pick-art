@@ -123,6 +123,13 @@ export function AdminHeader() {
                             신고·제보
                         </Button>
                         <Button
+                            component={Link} href="/admin/leaflets"
+                            variant={isActive('/leaflets') ? "filled" : "subtle"}
+                            color="indigo" size="xs" leftSection={<Inbox size={14} />}
+                        >
+                            리플렛
+                        </Button>
+                        <Button
                             component={Link} href="/admin/counts"
                             variant={isActive('/counts') ? "filled" : "subtle"}
                             color="indigo" size="xs" leftSection={<BarChart3 size={14} />}

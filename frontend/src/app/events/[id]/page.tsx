@@ -21,6 +21,7 @@ import { AddToCalendar } from "@/components/ui/AddToCalendar";
 import { AdminInstaMark } from "@/components/ui/AdminInstaMark";
 import { CountedLink, EventViewCounter } from "@/components/ui/EventCounter";
 import { getEventOrgs } from "@/lib/places";
+import { isGroupProvided } from "@/lib/leaflets";
 import { Users } from "lucide-react";
 
 interface EventPageProps {
@@ -87,6 +88,9 @@ export default async function EventDetailPage({ params }: EventPageProps) {
         }));
 
     const isEnded = !!event.event_date_end && event.event_date_end < todayKST();
+    // 원본 안내 주소가 있는 행사만 «원본 안내 페이지 열기». 단체 제공(specs/013)은 공식 페이지가 없을 수 있다
+    const hasOriginal = typeof event.original_url === "string" && /^https?:\/\//.test(event.original_url);
+    const groupProvided = isGroupProvided(event.source);
     const facts: { icon: typeof Calendar; label: string; value: string }[] = [
         { icon: Calendar, label: "기간", value: formatPeriod(event.event_date_start, event.event_date_end) },
         { icon: MapPin, label: "장소", value: event.venue || "정보 없음" },
@@ -138,17 +142,24 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                             <PosterViewer src={event.poster_image_url} alt={event.title} ended={isEnded} />
 
                             <div className="mx-auto mt-4 flex max-w-[400px] gap-2">
-                                <CountedLink
-                                    eventId={event.id}
-                                    kind="outbound"
-                                    href={event.original_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex h-12 flex-1 items-center justify-center gap-2 border-[1.5px] border-ink bg-accent px-5 text-[15px] font-bold text-on-accent transition-colors hover:bg-ink"
-                                >
-                                    <ExternalLink className="h-4 w-4" aria-hidden />
-                                    원본 안내 페이지 열기
-                                </CountedLink>
+                                {hasOriginal ? (
+                                    <CountedLink
+                                        eventId={event.id}
+                                        kind="outbound"
+                                        href={event.original_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex h-12 flex-1 items-center justify-center gap-2 border-[1.5px] border-ink bg-accent px-5 text-[15px] font-bold text-on-accent transition-colors hover:bg-ink"
+                                    >
+                                        <ExternalLink className="h-4 w-4" aria-hidden />
+                                        원본 안내 페이지 열기
+                                    </CountedLink>
+                                ) : (
+                                    // 단체가 리플렛으로 직접 알려 준 행사(specs/013): 따로 공식 페이지가 없다
+                                    <span className="inline-flex h-12 flex-1 items-center justify-center border-[1.5px] border-dashed border-ink px-5 text-[14px] font-bold text-ink">
+                                        {groupProvided ? "단체가 직접 알려 준 행사" : "원본 안내 없음"}
+                                    </span>
+                                )}
                                 <FavoriteButton eventId={event.id} />
                                 <ShareButton title={event.title} eventId={event.id} />
                             </div>
@@ -166,6 +177,9 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                             )}
                             {isEnded && (
                                 <span className="bg-ink px-2 py-0.5 text-[13px] font-bold text-paper">종료</span>
+                            )}
+                            {groupProvided && (
+                                <span className="border-[1.5px] border-ink px-2 py-0.5 text-[13px] font-bold text-ink" title="단체가 피카에 리플렛으로 직접 알려 준 행사">단체 제공</span>
                             )}
                         </div>
 
@@ -224,7 +238,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                             <section className="mt-10">
                                 <h2 className="pica-display text-[24px] text-ink">상세 안내</h2>
                                 <div className="mt-3 max-w-[68ch] whitespace-pre-wrap text-[16px] leading-[1.85] text-ink sm:text-[17px]">
-                                    {detail.rest || "상세 안내가 없습니다. 원본 안내 페이지에서 확인해 주세요."}
+                                    {detail.rest || (hasOriginal ? "상세 안내가 없습니다. 원본 안내 페이지에서 확인해 주세요." : "상세 안내가 없습니다.")}
                                 </div>
                             </section>
                         )}
