@@ -10,6 +10,8 @@
   python tools/insta_state.py recent-texts --days 7       지난 n일 피카가 쓴 댓글·답글 문장(되풀이 방지)
   python tools/insta_state.py approved                    허락(yes)받고 아직 안 올린 행사
   python tools/insta_state.py posted-ids                  올린 event_id 목록
+  python tools/insta_state.py standing-due [--n 3]        한 달 넘게 안 가 본 상시 동의 계정(오래된 순)
+  python tools/insta_state.py standing-visited @계정 --found n  상시 동의 계정을 다녀온 기록
   python tools/insta_state.py post-done <게시물 주소>       이미 댓글·허락 댓글을 달았거나 소개한 게시물인지(댓글 전에 부른다)
   python tools/insta_state.py standing                    상시 동의 계정, 상시 동의를 아직 안 물은 허락 계정
   python tools/insta_state.py find-ask @계정               알림에 뜬 답글이 어느 허락 댓글 건인지(게시물 다시 안 열기)
@@ -209,6 +211,32 @@ def cmd_post_done(a):
     out({"post": k, "done": bool(hits), "why": hits})
 
 
+def _visits():
+    p = os.path.join(BASE, "standing_visits.json")
+    return json.load(open(p, encoding="utf-8")) if os.path.exists(p) else {}
+
+
+def cmd_standing_due(a):
+    """상시 동의 계정 중 마지막 방문 뒤 30일이 지난(또는 아직 안 간) 계정. 오래된 순."""
+    dm = load("dm")
+    standing = sorted({norm(r["account"]) for r in dm if r.get("standing") and r.get("status") in ("yes", "posted")})
+    v = _visits()
+    cut = (date.today() - timedelta(days=a.days)).isoformat()
+    due = sorted([acc for acc in standing if (v.get(acc, {}).get("at") or "") < cut], key=lambda x: v.get(x, {}).get("at") or "")
+    out({"due": due[:a.n], "due_total": len(due), "standing_total": len(standing)})
+
+
+def cmd_standing_visited(a):
+    acc = norm(a.account)
+    with lock():
+        v = _visits()
+        v[acc] = {"at": today(), "found": a.found}
+        p = os.path.join(BASE, "standing_visits.json")
+        with open(p, "w", encoding="utf-8") as f:
+            json.dump(v, f, ensure_ascii=False, indent=1)
+    out({"ok": True, "account": acc, "next_after": (date.today() + timedelta(days=30)).isoformat()})
+
+
 def cmd_posted_ids(a):
     out({"ids": [r["event_id"] for r in load("posted") if r.get("event_id")]})
 
@@ -377,6 +405,10 @@ def main():
     sub.add_parser("approved").set_defaults(f=cmd_approved)
     sub.add_parser("posted-ids").set_defaults(f=cmd_posted_ids)
     sub.add_parser("standing").set_defaults(f=cmd_standing)
+    p = sub.add_parser("standing-due"); p.add_argument("--n", type=int, default=3); p.add_argument("--days", type=int, default=30)
+    p.set_defaults(f=cmd_standing_due)
+    p = sub.add_parser("standing-visited"); p.add_argument("account"); p.add_argument("--found", type=int, default=0)
+    p.set_defaults(f=cmd_standing_visited)
     p = sub.add_parser("post-done"); p.add_argument("url"); p.set_defaults(f=cmd_post_done)
     p = sub.add_parser("find-ask"); p.add_argument("account"); p.set_defaults(f=cmd_find_ask)
     p = sub.add_parser("liked-recently"); p.add_argument("account"); p.set_defaults(f=cmd_liked_recently)
