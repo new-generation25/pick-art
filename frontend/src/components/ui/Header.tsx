@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LogOut, LayoutDashboard, Settings, ChevronDown, Search } from "lucide-react";
+import { LogOut, LayoutDashboard, Settings, ChevronDown, Search, Heart } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
@@ -74,6 +74,7 @@ export function Header() {
                                             관리자 페이지
                                         </Menu.Item>
                                     )}
+                                    <Menu.Item leftSection={<Heart size={14} />} component={Link} href="/saved">찜한 행사</Menu.Item>
                                     <Menu.Item leftSection={<Settings size={14} />} component={Link} href="/settings">설정</Menu.Item>
                                     <Menu.Divider />
                                     <Menu.Item color="red" leftSection={<LogOut size={14} />} onClick={handleLogout}>로그아웃</Menu.Item>

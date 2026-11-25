@@ -13,7 +13,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { EventCard } from "@/components/ui/EventCard";
-import { DEFAULT_OG_IMAGE } from "@/lib/site";
+import { DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/site";
+import { FavoriteButton } from "@/components/ui/FavoriteButton";
+import { AddToCalendar } from "@/components/ui/AddToCalendar";
 import { AdminInstaMark } from "@/components/ui/AdminInstaMark";
 
 interface EventPageProps {
@@ -122,8 +124,10 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                                     <ExternalLink className="h-4 w-4" aria-hidden />
                                     원본 안내 페이지 열기
                                 </a>
+                                <FavoriteButton eventId={event.id} />
                                 <ShareButton title={event.title} />
                             </div>
+                            <AddToCalendar event={{ ...event, url: `${SITE_URL}/events/${event.id}` }} />
                         </div>
                     </div>
 

@@ -18,6 +18,7 @@ export function SiteFooter() {
                     </Group>
                     <Group gap="md">
                         <Link href="/tip" className={linkClass}>행사 제보하기</Link>
+                        <Link href="/calendar" className={linkClass}>캘린더로 받아 보기</Link>
                         <Link href="/terms" className={linkClass}>이용약관</Link>
                         <Link href="/privacy" className={linkClass}>개인정보처리방침</Link>
                         <Text fz="xs" c="var(--pk-ink-soft)">&copy; 2024 pickart (pica). All rights reserved.</Text>
