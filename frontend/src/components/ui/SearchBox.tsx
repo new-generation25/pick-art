@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { TextInput, CloseButton } from "@mantine/core";
 import { Search } from "lucide-react";
 
@@ -10,6 +10,8 @@ import { Search } from "lucide-react";
 export function SearchBox({ initialQuery }: { initialQuery: string }) {
     const router = useRouter();
     const searchParams = useSearchParams();
+    // 지역 주소(/region/김해)에서 찾으면 그 지역 안에서 찾는다
+    const pathname = usePathname() || "/";
     const [value, setValue] = useState(initialQuery);
 
     const clear = () => {
@@ -18,11 +20,11 @@ export function SearchBox({ initialQuery }: { initialQuery: string }) {
         const params = new URLSearchParams(searchParams.toString());
         params.delete("q");
         const qs = params.toString();
-        router.push(qs ? `/?${qs}` : "/");
+        router.push(qs ? `${pathname}?${qs}` : pathname);
     };
 
     return (
-        <form action="/" method="GET" className="mt-5" role="search">
+        <form action={pathname} method="GET" className="mt-5" role="search">
             <TextInput
                 name="q"
                 value={value}

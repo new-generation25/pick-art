@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Checkbox } from "@mantine/core";
 import { Calendar, LocateFixed } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { GN_REGIONS } from "@/lib/regions";
+import { GN_REGIONS, regionFromPath, regionPath } from "@/lib/regions";
 import { CATEGORIES as FEED_CATEGORIES } from "@/lib/categories";
 
 const REGIONS = ["전체", ...GN_REGIONS];
@@ -36,8 +36,11 @@ const Row = ({ label, children }: { label: string; children: React.ReactNode }) 
 export function FilterBar() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const pathname = usePathname();
+    // 지역 고정 주소(/region/김해)면 주소의 지역, 홈이면 ?region= (자동 적용을 끈 '전체'만 남는다)
+    const pathRegion = regionFromPath(pathname);
 
-    const currentRegion = searchParams.get("region") || "전체";
+    const currentRegion = pathRegion || searchParams.get("region") || "전체";
     const currentCategory = searchParams.get("category") || "전체";
     const currentDate = searchParams.get("date") || "all";
     const currentKids = searchParams.get("kids") || "전체";
@@ -58,26 +61,32 @@ export function FilterBar() {
                 .single();
             if (cancelled || !profile || profile.auto_region === false || !GN_REGIONS.includes(profile.region)) return;
             setMyRegion(profile.region);
-            if (!searchParams.get("region")) {
-                const params = new URLSearchParams(searchParams.toString());
-                params.set("region", profile.region);
-                router.replace(`/?${params.toString()}`);
+            // 홈에서 지역을 고르지 않았을 때만 (지역 주소에 들어온 사람은 그 지역을 그대로 본다)
+            if (pathname === "/" && !searchParams.get("region")) {
+                const qs = searchParams.toString();
+                router.replace(`${regionPath(profile.region)}${qs ? `?${qs}` : ""}`);
             }
         })();
         return () => { cancelled = true; };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // 지역은 주소 경로(/region/김해)로, 나머지 조건은 ?뒤에 둔다. 공유한 링크가 곧 지역 주소가 된다
     const updateFilters = (key: string, value: string) => {
         const params = new URLSearchParams(searchParams.toString());
-        if (key === "region" && value === "전체" && myRegion) {
-            params.set(key, value); // 자동 적용 사용자가 고른 '전체'는 주소에 남긴다
+        let region = currentRegion;
+        if (key === "region") {
+            region = value;
+            params.delete("region");
         } else if (value === "전체" || value === "all") {
             params.delete(key);
         } else {
             params.set(key, value);
         }
-        router.push(`/?${params.toString()}`);
+        if (region === "전체" && myRegion) params.set("region", "전체"); // 자동 적용 사용자가 고른 '전체'는 주소에 남긴다
+        else if (region === "전체") params.delete("region");
+        const qs = params.toString();
+        router.push(`${region === "전체" ? "/" : regionPath(region)}${qs ? `?${qs}` : ""}`);
     };
 
     return (
