@@ -1,0 +1,42 @@
+{
+  "slug": "hadong_culture",
+  "name": "하동군 공연/전시",
+  "_comment": "하동군청 '공연/전시' 달력(specialty/05099.web). 김해시 행사일정과 같은 달력 CMS: 일정이 있는 날의 링크(?selday=N)를 따라가 그날 목록(.schedule1list1 li.li1)을 읽는다. 날짜 링크에 월이 붙지 않아 다음 달 화면을 따라가면 이번 달 날짜로 읽힐 수 있으므로 이번 달만 읽는다(months_ahead 0). 항목별 상세 주소가 없어 그날 화면을 링크로, 제목+시작일을 id 로 쓴다. 하동문화예술회관 공연·전시가 여기 올라온다. 일정이 없는 달이 많아 min_rows 0",
+  "verified_at": "2026-11-25",
+  "match": [
+    "hadong.go.kr/specialty/05099"
+  ],
+  "region": "하동",
+  "venue": "",
+  "boards": [
+    {
+      "url": "https://www.hadong.go.kr/specialty/05099.web",
+      "category": "공연"
+    }
+  ],
+  "list": {
+    "follow": "a.schedule1opener",
+    "rows": ".schedule1list1 li.li1",
+    "title": "strong.t1",
+    "period": "span.t2wrap:nth-of-type(1) .t2",
+    "venue": "span.t2wrap:nth-of-type(2) .t2:nth-of-type(2)",
+    "image": ".schedule1list1c img@src",
+    "id_from_title": true,
+    "dedupe": true,
+    "category": "strong.t1",
+    "category_map": {
+      "전시": "전시",
+      "展": "전시",
+      "아카이빙": "전시",
+      "축제": "축제"
+    }
+  },
+  "expect": {
+    "min_rows": 0,
+    "required": [
+      "title",
+      "link",
+      "period"
+    ]
+  }
+}
