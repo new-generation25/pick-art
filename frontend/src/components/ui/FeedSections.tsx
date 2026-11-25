@@ -17,6 +17,7 @@ interface Card {
     isFree: boolean;
     isEnded?: boolean;
     kidMark?: boolean;
+    endingSoon?: boolean;
     ageBadge?: string;
     kidRank?: number;
 }

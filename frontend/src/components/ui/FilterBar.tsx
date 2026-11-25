@@ -22,7 +22,8 @@ const DATE_FILTERS = [
     { label: "전체", value: "all" },
     { label: "오늘", value: "today" },
     { label: "이번 주", value: "week" },
-    { label: "이번 달", value: "month" }
+    { label: "이번 달", value: "month" },
+    { label: "곧 끝남", value: "ending" }
 ];
 
 const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (

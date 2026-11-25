@@ -3,6 +3,8 @@ import { formatPeriod, todayKST } from "@/lib/utils";
 import { getEventById, getPublishedEvents } from "@/lib/supabase";
 import { Calendar, MapPin, ExternalLink, ArrowLeft, Info, Ticket, Baby } from "lucide-react";
 import { kidsInfo } from "@/lib/kids";
+import { splitDescription } from "@/lib/eventDetails";
+import { Clock } from "lucide-react";
 import { AdminKidsControl } from "@/components/ui/AdminKidsControl";
 import { ShareButton } from "@/components/ui/ShareButton";
 import { PosterViewer } from "@/components/ui/PosterViewer";
@@ -87,6 +89,9 @@ export default async function EventDetailPage({ params }: EventPageProps) {
     const kids = kidsInfo(event);
     const ruleKids = kidsInfo({ ...event, kids_override: null });
     if (kids.ageText) facts.splice(3, 0, { icon: Baby, label: "관람 연령", value: kids.ageText });
+    // 설명의 「일시·러닝타임·출연·장르: 값」 줄은 칸으로 (specs/006). 상세 안내에는 나머지 글만
+    const detail = splitDescription(event.description);
+    facts.splice(1, 0, ...detail.rows.map(r => ({ icon: r.label === "공연 시각" ? Clock : Info, label: r.label, value: r.value })));
 
     return (
         <main className="min-h-screen pb-20">
@@ -152,7 +157,11 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                                             label === "기간" ? "pica-display text-[22px] text-accent tabular-nums" : "text-[15px] font-semibold text-ink",
                                         ].join(" ")}
                                     >
-                                        {value}
+                                        {label === "출처" && typeof event.original_url === "string" && /^https?:\/\//.test(event.original_url) ? (
+                                            <a href={event.original_url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-accent">
+                                                {value}
+                                            </a>
+                                        ) : value}
                                         {/* 피카 인스타에 소개한 행사: 관리자에게만 아이콘 (events.insta_post_url) */}
                                         {label === "출처" && typeof event.insta_post_url === "string" && (
                                             <AdminInstaMark url={event.insta_post_url} postedAt={event.insta_posted_at} />
@@ -163,13 +172,15 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                         </dl>
                         <AdminKidsControl eventId={event.id} override={event.kids_override ?? null} ruleGroup={ruleKids.group} />
 
-                        {/* 상세 안내 */}
-                        <section className="mt-10">
-                            <h2 className="pica-display text-[24px] text-ink">상세 안내</h2>
-                            <div className="mt-3 max-w-[68ch] whitespace-pre-wrap text-[16px] leading-[1.85] text-ink sm:text-[17px]">
-                                {event.description || "상세 안내가 없습니다. 원본 안내 페이지에서 확인해 주세요."}
-                            </div>
-                        </section>
+                        {/* 상세 안내: 설명이 전부 정보 표 칸으로 옮겨졌으면(KOPIS) 따로 두지 않는다 */}
+                        {(detail.rest || detail.rows.length === 0) && (
+                            <section className="mt-10">
+                                <h2 className="pica-display text-[24px] text-ink">상세 안내</h2>
+                                <div className="mt-3 max-w-[68ch] whitespace-pre-wrap text-[16px] leading-[1.85] text-ink sm:text-[17px]">
+                                    {detail.rest || "상세 안내가 없습니다. 원본 안내 페이지에서 확인해 주세요."}
+                                </div>
+                            </section>
+                        )}
 
                         <p className="mt-10 flex gap-2.5 border-[1.5px] border-dashed border-line px-4 py-3.5 text-[14px] leading-relaxed text-ink">
                             <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />

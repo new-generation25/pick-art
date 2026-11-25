@@ -13,6 +13,7 @@ interface EventProps {
     isFree?: boolean;
     isEnded?: boolean;
     kidMark?: boolean;   // 아이 대상 행사 (specs/004)
+    endingSoon?: boolean; // 7일 넘게 하는 행사가 7일 안에 끝남 (specs/006)
     ageBadge?: string;   // 「아이」 필터가 켜졌을 때만: 관람 하한 (예: 24개월+, 만 7세+, 나이 정보 없음)
 }
 
@@ -103,6 +104,9 @@ export function EventCard({ event, priority = false, disableNavigation = false }
                         </span>
                         {event.isFree && (
                             <span className="pica-cat border-ink text-ink" style={{ borderColor: "currentColor" }}>무료</span>
+                        )}
+                        {event.endingSoon && !event.isEnded && (
+                            <span className="bg-ink px-1.5 py-px text-[12px] font-bold text-paper">곧 끝남</span>
                         )}
                         {event.kidMark && (
                             <span className="pica-cat border-ink text-ink" style={{ borderColor: "currentColor" }}>아이와</span>
