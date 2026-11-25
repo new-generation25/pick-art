@@ -19,6 +19,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const districtOf = new Map((venues ?? []).map(v => [v.id, v.district as string]));
     const districts = BUSAN_DISTRICTS.filter(d => (data ?? []).some(e => e.region === "부산" && districtOf.get(e.venue_id) === d.name));
 
+    // 공간·단체 페이지 (specs/012): 다가오는 행사가 있는 곳만. 소규모 단체(동의 전)는 검색에서 뺀다
+    const active = new Set((data ?? []).map(e => e.id));
+    const venueIds = [...new Set((data ?? []).map(e => e.venue_id).filter((v): v is string => !!v))];
+    const { data: pubVenues } = await supabase.from("public_venues").select("id").in("id", venueIds.slice(0, 1000));
+    const { data: links } = await supabase.from("event_orgs").select("event_id, org_id").limit(10000);
+    const { data: orgRows } = await supabase.from("orgs").select("id, small").eq("small", false).limit(5000);
+    const bigOrgs = new Set((orgRows ?? []).map(o => o.id));
+    const orgIds = [...new Set((links ?? []).filter(l => active.has(l.event_id) && bigOrgs.has(l.org_id)).map(l => l.org_id))];
+
     return [
         { url: `${SITE_URL}/`, changeFrequency: "daily", priority: 1 },
         ...GN_REGIONS.filter(r => (data ?? []).some(e => e.region === r)).map(r => ({
@@ -31,6 +40,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             changeFrequency: "daily" as const,
             priority: 0.7,
         })),
+        ...(pubVenues ?? []).map(v => ({ url: `${SITE_URL}/venues/${v.id}`, changeFrequency: "weekly" as const, priority: 0.5 })),
+        ...orgIds.map(id => ({ url: `${SITE_URL}/orgs/${id}`, changeFrequency: "weekly" as const, priority: 0.5 })),
         ...(data ?? []).map(e => ({
             url: `${SITE_URL}/events/${e.id}`,
             ...(e.published_at && { lastModified: new Date(e.published_at) }),

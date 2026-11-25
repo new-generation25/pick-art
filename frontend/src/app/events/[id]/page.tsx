@@ -20,6 +20,8 @@ import { FavoriteButton } from "@/components/ui/FavoriteButton";
 import { AddToCalendar } from "@/components/ui/AddToCalendar";
 import { AdminInstaMark } from "@/components/ui/AdminInstaMark";
 import { CountedLink, EventViewCounter } from "@/components/ui/EventCounter";
+import { getEventOrgs } from "@/lib/places";
+import { Users } from "lucide-react";
 
 interface EventPageProps {
     params: Promise<{
@@ -105,6 +107,15 @@ export default async function EventDetailPage({ params }: EventPageProps) {
     if (venueInfo?.closed_days && event.category === "전시") placeRows.push({ icon: CalendarX, label: "휴관일", value: venueInfo.closed_days });
     if (venueInfo?.capacity && event.category === "공연") placeRows.push({ icon: Armchair, label: "객석", value: `${venueInfo.capacity.toLocaleString()}석` });
     if (placeRows.length) facts.splice(placeAt, 0, ...placeRows);
+    // 주최·주관 (specs/012): 이 행사에 이어진 기관·단체. 단체 페이지로 잇는다 (인스타 게시 계정은 «올린 곳»)
+    const eventOrgs = await getEventOrgs(event.id);
+    const hostOrgs = eventOrgs.filter(o => o.role !== "게시");
+    const postOrgs = eventOrgs.filter(o => o.role === "게시");
+    const orgLinks = (list: typeof eventOrgs) => [...new Map(list.map(o => [o.org.id, o.org])).values()];
+    const orgRows: { label: string; orgs: { id: string; name: string }[] }[] = [];
+    if (hostOrgs.length) orgRows.push({ label: "주최·주관", orgs: orgLinks(hostOrgs) });
+    if (postOrgs.length) orgRows.push({ label: "올린 곳", orgs: orgLinks(postOrgs) });
+    const hasVenuePage = !!venueInfo && !!event.venue_id;
 
     return (
         <main className="min-h-screen pb-20">
@@ -173,7 +184,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
 
                         {/* 기간, 장소, 관람료, 출처 */}
                         <dl className="pica-box mt-6 divide-y divide-line">
-                            {facts.map(({ icon: Icon, label, value }) => (
+                            {[...facts, ...orgRows.map(r => ({ icon: Users, label: r.label, value: "" }))].map(({ icon: Icon, label, value }) => (
                                 <div key={label} className="grid grid-cols-[88px_minmax(0,1fr)] items-start gap-3 px-4 py-3.5 sm:grid-cols-[110px_minmax(0,1fr)] sm:px-5">
                                     <dt className="flex items-center gap-2 text-[14px] font-semibold text-ink-soft">
                                         <Icon className="h-4 w-4 shrink-0" aria-hidden />
@@ -185,7 +196,15 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                                             label === "기간" ? "pica-display text-[22px] text-accent tabular-nums" : "text-[15px] font-semibold text-ink",
                                         ].join(" ")}
                                     >
-                                        {label === "출처" && typeof event.original_url === "string" && /^https?:\/\//.test(event.original_url) ? (
+                                        {orgRows.some(r => r.label === label) ? (
+                                            <span className="flex flex-wrap gap-x-3 gap-y-1">
+                                                {orgRows.find(r => r.label === label)!.orgs.map(o => (
+                                                    <Link key={o.id} href={`/orgs/${o.id}`} className="underline underline-offset-4 hover:text-accent">{o.name}</Link>
+                                                ))}
+                                            </span>
+                                        ) : label === "장소" && hasVenuePage ? (
+                                            <Link href={`/venues/${event.venue_id}`} className="underline underline-offset-4 hover:text-accent">{value}</Link>
+                                        ) : label === "출처" && typeof event.original_url === "string" && /^https?:\/\//.test(event.original_url) ? (
                                             <CountedLink eventId={event.id} kind="outbound" href={event.original_url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-accent">
                                                 {value}
                                             </CountedLink>
