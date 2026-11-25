@@ -1,6 +1,6 @@
 # Feature Specification: 방문 수와 행사별 조회·클릭 집계
 
-**Feature Branch**: `revive/2026-10` (명세 `specs/011-visit-counts`) | **Created**: 2026-11-26 | **Status**: 명세 — 운영자 결정 대기(아래 «정할 것»)
+**Feature Branch**: `revive/2026-10` (명세 `specs/011-visit-counts`) | **Created**: 2026-11-26 | **Status**: 구현·로컬 검증 완료 — 운영자 11/26 «모두 진행해»(시장조사 세션 입력, 기록 확인). Vercel 토큰 자동 표시는 하지 않음(관리자 화면에 Vercel Analytics 링크)
 
 **Input**: 시장조사 세션 요청(사용자 11/26 「앱 개선에 넘겨」). 지원금(로컬기업 육성사업 동남권)·문화재단 용역에 낼 실적 숫자(방문자)와, 단체에게 줄 «월간 노출·클릭 증빙»(specs/012)의 바탕. 조건: 쿠키 없음, 관객 개인 단위 기록 없음(«방문 수만 셉니다»).
 
@@ -35,3 +35,20 @@
 1. 방문자 숫자를 관리자 화면에 자동으로 올릴지 — 올리려면 pick-art를 읽을 수 있는 Vercel 토큰(읽기용)을 운영자가 만들어야 한다. 아니면 운영자가 Vercel 대시보드에서 직접 본다.
 2. 새 표 `event_counts_daily` 만들기(마이그레이션) 승인.
 3. 개인정보처리방침 문구 추가 승인.
+
+## 구현 (2026-11-26)
+
+- 마이그레이션 `20261126060000_counts_orgs.sql`(적용): `event_counts_daily` + `count_event(p_event, p_kind)`(security definer — 공개 행사만, 관리자 접속 제외, 한국 날짜). 익명: 표 읽기 `[]`, 직접 넣기 401, 함수 호출 204.
+- 화면: 상세 열면 view(같은 창 새로 고침은 한 번만 — sessionStorage, 서버로 보내지 않음), «원본 안내 페이지 열기»·출처 줄 링크 outbound, 캘린더 구글·.ics calendar, 공유 share. 봇 UA·자동화 브라우저는 세지 않음(`lib/countEvent.ts`).
+- 관리자 «노출·클릭»(`/admin/counts`): 달·단체(012) 고르기, 행사별 표, CSV 내려받기(엑셀 한글 BOM), Vercel Analytics 링크.
+- 개인정보처리방침: 수집 항목 2줄(행사별 조회·클릭 수, 방문 통계), 보유 기간 1줄, 변경 고지 이력 1줄.
+
+## 검증 (로컬 `next start`, 11/26)
+
+- 익명으로 상세를 두 번 열고 원본 버튼·구글 캘린더를 누름 → view 1 · outbound 1 · calendar 1
+- 관리자(pick.art.pica)로 같은 상세를 연 뒤에도 view 1 그대로, `/admin/counts`에 «노출 1 · 클릭 2»
+- 시험 숫자는 지움. `src/lib/__tests__/eventCounts.test.mjs` 3개 통과
+
+## 남은 것
+
+- 개인정보처리방침은 «바꾸면 시행 7일 전부터 알린다»고 적혀 있다. 이번 줄은 사람을 알아볼 수 없는 숫자라 처리 범위가 바뀌지 않는다고 보고 이력에 적었다 — 운영자 확인 필요.

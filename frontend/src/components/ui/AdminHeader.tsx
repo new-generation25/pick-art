@@ -123,6 +123,13 @@ export function AdminHeader() {
                             신고·제보
                         </Button>
                         <Button
+                            component={Link} href="/admin/counts"
+                            variant={isActive('/counts') ? "filled" : "subtle"}
+                            color="indigo" size="xs" leftSection={<BarChart3 size={14} />}
+                        >
+                            노출·클릭
+                        </Button>
+                        <Button
                             component={Link} href="/admin/storage"
                             variant={isActive('/storage') ? "filled" : "subtle"}
                             color="indigo" size="xs" leftSection={<HardDrive size={14} />}

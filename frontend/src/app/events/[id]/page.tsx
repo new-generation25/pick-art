@@ -19,6 +19,7 @@ import { DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/site";
 import { FavoriteButton } from "@/components/ui/FavoriteButton";
 import { AddToCalendar } from "@/components/ui/AddToCalendar";
 import { AdminInstaMark } from "@/components/ui/AdminInstaMark";
+import { CountedLink, EventViewCounter } from "@/components/ui/EventCounter";
 
 interface EventPageProps {
     params: Promise<{
@@ -107,6 +108,8 @@ export default async function EventDetailPage({ params }: EventPageProps) {
 
     return (
         <main className="min-h-screen pb-20">
+            {/* 조회 수 (specs/011): 날짜별 숫자만 센다 */}
+            <EventViewCounter eventId={event.id} />
             {/* layout.tsx에 이미 Header가 있으므로 여기서 제거합니다. */}
             <div className="mx-auto max-w-6xl px-4 pt-20 sm:px-6 sm:pt-24">
                 <Link
@@ -124,7 +127,9 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                             <PosterViewer src={event.poster_image_url} alt={event.title} ended={isEnded} />
 
                             <div className="mx-auto mt-4 flex max-w-[400px] gap-2">
-                                <a
+                                <CountedLink
+                                    eventId={event.id}
+                                    kind="outbound"
                                     href={event.original_url}
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -132,9 +137,9 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                                 >
                                     <ExternalLink className="h-4 w-4" aria-hidden />
                                     원본 안내 페이지 열기
-                                </a>
+                                </CountedLink>
                                 <FavoriteButton eventId={event.id} />
-                                <ShareButton title={event.title} />
+                                <ShareButton title={event.title} eventId={event.id} />
                             </div>
                             <AddToCalendar event={{ ...event, url: `${SITE_URL}/events/${event.id}` }} />
                         </div>
@@ -181,9 +186,9 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                                         ].join(" ")}
                                     >
                                         {label === "출처" && typeof event.original_url === "string" && /^https?:\/\//.test(event.original_url) ? (
-                                            <a href={event.original_url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-accent">
+                                            <CountedLink eventId={event.id} kind="outbound" href={event.original_url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-accent">
                                                 {value}
-                                            </a>
+                                            </CountedLink>
                                         ) : value}
                                         {/* 피카 인스타에 소개한 행사: 관리자에게만 아이콘 (events.insta_post_url) */}
                                         {label === "출처" && typeof event.insta_post_url === "string" && (

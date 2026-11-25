@@ -2,12 +2,14 @@
 
 import { Share2, Check } from "lucide-react";
 import { useState } from "react";
+import { countEvent } from "@/lib/countEvent";
 
-export function ShareButton({ title }: { title: string }) {
+export function ShareButton({ title, eventId }: { title: string; eventId?: string }) {
     const [copied, setCopied] = useState(false);
 
     const handleShare = async () => {
         const url = window.location.href;
+        if (eventId) countEvent(eventId, "share"); // 공유 수 (specs/011)
 
         // 1. Web Share API (Mobile)
         if (navigator.share) {
