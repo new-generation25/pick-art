@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-26T01:33:59+09:00",
+ "generated_at": "2026-11-26T01:35:33+09:00",
  "mode": "apply",
  "events": 698,
  "kopis": {
@@ -9,11 +9,11 @@
  },
  "orgs_new_by_kind": {},
  "event_orgs_by_role": {
-  "주최": 625,
-  "기획": 219,
   "주관": 285,
+  "주최": 625,
   "게시": 43,
-  "제작": 81
+  "제작": 81,
+  "기획": 219
  },
  "small_accounts": 0,
  "skipped": {
