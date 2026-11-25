@@ -1,0 +1,374 @@
+[
+ {
+  "venue": "3.15아트센터",
+  "result": "confirmed",
+  "basis": "3.15아트홀 대극장",
+  "address_or_candidates": "경상남도 창원시 마산회원구 삼호로 135 3.15아트센터"
+ },
+ {
+  "venue": "BNK부산갤러리",
+  "result": "confirmed",
+  "basis": "BNK부산은행갤러리",
+  "address_or_candidates": "부산광역시 중구 광복중앙로 13 2층"
+ },
+ {
+  "venue": "거제문화예술회관 전시실 1, 2",
+  "result": "confirmed",
+  "basis": "거제문화예술회관 전시실",
+  "address_or_candidates": "경상남도 거제시 장승로 145 (장승포동) 거제문화예술회관 본관 1층 전시실"
+ },
+ {
+  "venue": "경남문화예술회관, 라브리애, 실크테라, 연하루 커피",
+  "result": "failed",
+  "basis": "여러 장소(경남문화예술회관·라브리애·실크테라·연하루 커피)를 도는 행사라 한 점으로 정하지 않음",
+  "address_or_candidates": ""
+ },
+ {
+  "venue": "KBS홀",
+  "result": "confirmed",
+  "basis": "KBS창원홀",
+  "address_or_candidates": "경상남도 창원시 성산구 중앙대로 178"
+ },
+ {
+  "venue": "경상대학교 칠암캠퍼스",
+  "result": "confirmed",
+  "basis": "경상국립대학교 칠암캠퍼스",
+  "address_or_candidates": "경상남도 진주시 진주대로816번길 15 경상대학교의학전문대학원"
+ },
+ {
+  "venue": "국립부산국악원 예지당",
+  "result": "confirmed",
+  "basis": "국립부산국악원 소극장",
+  "address_or_candidates": "부산광역시 부산진구 국악로 2 국립부산국악원"
+ },
+ {
+  "venue": "기타",
+  "result": "failed",
+  "basis": "장소 이름이 아님(「기타」)",
+  "address_or_candidates": ""
+ },
+ {
+  "venue": "김해시립김영원미술관 B3F 제",
+  "result": "confirmed",
+  "basis": "김해시립김영원미술관",
+  "address_or_candidates": "경상남도 김해시 가야로 243 김해시립김영원미술관"
+ },
+ {
+  "venue": "김해시립김영원미술관 B5F 제",
+  "result": "confirmed",
+  "basis": "김해시립김영원미술관",
+  "address_or_candidates": "경상남도 김해시 가야로 243 김해시립김영원미술관"
+ },
+ {
+  "venue": "김해시립김영원미술관 야외 아트캔버스",
+  "result": "confirmed",
+  "basis": "김해시립김영원미술관",
+  "address_or_candidates": "경상남도 김해시 가야로 243 김해시립김영원미술관"
+ },
+ {
+  "venue": "빈집 미술관",
+  "result": "failed",
+  "basis": "골목길 가정집 전시(주소 비공개), 네이버 검색 결과 없음",
+  "address_or_candidates": ""
+ },
+ {
+  "venue": "진양호공원 다이나믹광장",
+  "result": "confirmed",
+  "basis": "진양호공원",
+  "address_or_candidates": "경상남도 진주시 남강로1번길 96-6 진양호공원"
+ },
+ {
+  "venue": "문기타, 문씨어터",
+  "result": "confirmed",
+  "basis": "문기타 & 문씨어터",
+  "address_or_candidates": "경상남도 진주시 석갑로155번길 17-13"
+ },
+ {
+  "venue": "실크테라카페",
+  "result": "confirmed",
+  "basis": "실크테라 문산본점",
+  "address_or_candidates": "경상남도 진주시 문산읍 월아산로996번길 40 SILKTELA"
+ },
+ {
+  "venue": "클레이아크김해미술관 큐빅하우스",
+  "result": "confirmed",
+  "basis": "클레이아크 김해미술관김해큐빅하우스",
+  "address_or_candidates": "경상남도 김해시 진례면 진례로 275-51"
+ },
+ {
+  "venue": "킨키",
+  "result": "confirmed",
+  "basis": "킨키",
+  "address_or_candidates": "부산광역시 수영구 남천동로108번길 46 2층 전층"
+ },
+ {
+  "venue": "경남 진주시 내동면 칠봉산길 190, 남가람박물관 2층, 제",
+  "result": "confirmed",
+  "basis": "남가람박물관",
+  "address_or_candidates": "경상남도 진주시 내동면 칠봉산길 190"
+ },
+ {
+  "venue": "동서대학교 센텀캠퍼스 5층 소향실험극장",
+  "result": "confirmed",
+  "basis": "동서대학교 센텀캠퍼스 소향실험극장",
+  "address_or_candidates": "부산광역시 해운대구 센텀중앙로 55 경남정보대학교및동서대학교센텀산학캠퍼스"
+ },
+ {
+  "venue": "부산 민주공원",
+  "result": "confirmed",
+  "basis": "민주공원",
+  "address_or_candidates": "부산광역시 중구 민주공원길 19"
+ },
+ {
+  "venue": "진주문고 본점 1층 아트스페이스 진주",
+  "result": "confirmed",
+  "basis": "진주문고",
+  "address_or_candidates": "경상남도 진주시 진양호로240번길 8 진주문고"
+ },
+ {
+  "venue": "부산 남구 청년창조발전소 1층 맛있는 미술관",
+  "result": "confirmed",
+  "basis": "청년창조발전소고고씽Job",
+  "address_or_candidates": "부산광역시 남구 용소로46번길 7 청년창조발전소 고고씽JOB"
+ },
+ {
+  "venue": "부산민주공원",
+  "result": "confirmed",
+  "basis": "민주공원 민주항쟁기념관",
+  "address_or_candidates": "부산광역시 중구 민주공원길 19"
+ },
+ {
+  "venue": "거창 9경",
+  "result": "failed",
+  "basis": "거창 9경 여러 곳을 도는 행사",
+  "address_or_candidates": ""
+ },
+ {
+  "venue": "경남도립미술관 1·2층",
+  "result": "confirmed",
+  "basis": "경남도립미술관",
+  "address_or_candidates": "경상남도 창원시 의창구 용지로 296"
+ },
+ {
+  "venue": "경남도립미술관 1층 영상전시실",
+  "result": "confirmed",
+  "basis": "경남도립미술관",
+  "address_or_candidates": "경상남도 창원시 의창구 용지로 296"
+ },
+ {
+  "venue": "고성 당항포관광지",
+  "result": "confirmed",
+  "basis": "당항포관광지",
+  "address_or_candidates": "경상남도 고성군 회화면 당항만로 1116 당항포관광지"
+ },
+ {
+  "venue": "고성군문화체육센터",
+  "result": "confirmed",
+  "basis": "고성군문화체육센터",
+  "address_or_candidates": "경상남도 고성군 고성읍 송학고분로 193"
+ },
+ {
+  "venue": "고성군종합운동장 순환도로",
+  "result": "confirmed",
+  "basis": "고성군종합운동장국궁장",
+  "address_or_candidates": "경상남도 고성군 고성읍 송학고분로 193"
+ },
+ {
+  "venue": "고성군청소년센터 '온'",
+  "result": "confirmed",
+  "basis": "고성군청소년센터온",
+  "address_or_candidates": "경상남도 고성군 고성읍 성내로 61 고성군청소년센터온"
+ },
+ {
+  "venue": "공간결",
+  "result": "confirmed",
+  "basis": "공간결",
+  "address_or_candidates": "부산광역시 수영구 광안해변로370번길 9-8 블루오션 4층"
+ },
+ {
+  "venue": "국립진주박물관",
+  "result": "confirmed",
+  "basis": "국립진주박물관",
+  "address_or_candidates": "경상남도 진주시 남강로 626-35 진주성"
+ },
+ {
+  "venue": "김해 시민의 종, 분성광장, 동상시장 일원",
+  "result": "failed",
+  "basis": "김해 시민의 종·분성광장·동상시장 일원 여러 곳",
+  "address_or_candidates": ""
+ },
+ {
+  "venue": "김해공예창작지원센터 체험관",
+  "result": "confirmed",
+  "basis": "김해공예창작지원센터",
+  "address_or_candidates": "경상남도 김해시 진례면 분청로 25"
+ },
+ {
+  "venue": "김해다어울림생활문화센터 4층·5층",
+  "result": "confirmed",
+  "basis": "김해다어울림생활문화센터",
+  "address_or_candidates": "경상남도 김해시 가락로94번길 7 중앙상가빌딩 5층"
+ },
+ {
+  "venue": "김해시립김영원미술관 B4F 공용홀·교육체험실",
+  "result": "confirmed",
+  "basis": "김해시립김영원미술관",
+  "address_or_candidates": "경상남도 김해시 가야로 243 김해시립김영원미술관"
+ },
+ {
+  "venue": "문신원형미술관 1층 교육실",
+  "result": "confirmed",
+  "basis": "창원시립마산문신미술관",
+  "address_or_candidates": "경상남도 창원시 마산합포구 문신길 147"
+ },
+ {
+  "venue": "밀양아리나 스튜디오1극장",
+  "result": "confirmed",
+  "basis": "밀양아리나 스튜디오극장1",
+  "address_or_candidates": "경상남도 밀양시 부북면 창밀로 3097-16 밀양아리나"
+ },
+ {
+  "venue": "벡스코",
+  "result": "confirmed",
+  "basis": "BEXCO",
+  "address_or_candidates": "부산광역시 해운대구 APEC로 55"
+ },
+ {
+  "venue": "봉황예술극장 옆 부스 및 봉황대길 일원",
+  "result": "failed",
+  "basis": "봉황대길 일원 거리 행사",
+  "address_or_candidates": ""
+ },
+ {
+  "venue": "부산 물만골 문화센터 · 창원 카페 스타치오 · 통영 잘피의 집",
+  "result": "failed",
+  "basis": "부산·창원·통영 세 곳 순회 행사",
+  "address_or_candidates": ""
+ },
+ {
+  "venue": "부산 중구 광복로 차 없는 거리",
+  "result": "failed",
+  "basis": "광복로 차 없는 거리(거리 구간)",
+  "address_or_candidates": ""
+ },
+ {
+  "venue": "부산 중구 광복로·광복중앙로 일원",
+  "result": "failed",
+  "basis": "광복로·광복중앙로 일원(거리 구간)",
+  "address_or_candidates": ""
+ },
+ {
+  "venue": "부산근현대역사관 본관 지하 1층 금고미술관",
+  "result": "confirmed",
+  "basis": "부산근현대역사관 본관",
+  "address_or_candidates": "부산광역시 중구 대청로 112 부산근현대역사관 본관"
+ },
+ {
+  "venue": "부산현대미술관 전시실 2·3 , 전시실 4",
+  "result": "confirmed",
+  "basis": "부산현대미술관",
+  "address_or_candidates": "부산광역시 사하구 낙동남로 1191 부산현대미술관"
+ },
+ {
+  "venue": "부산현대미술관 전시실 5",
+  "result": "confirmed",
+  "basis": "부산현대미술관",
+  "address_or_candidates": "부산광역시 사하구 낙동남로 1191 부산현대미술관"
+ },
+ {
+  "venue": "북부지구도시재생현장센터 2층 문화놀이터",
+  "result": "confirmed",
+  "basis": "북부지구도시재생현장센터",
+  "address_or_candidates": "경상남도 양산시 북안남5길 22"
+ },
+ {
+  "venue": "산청문화예술회관",
+  "result": "confirmed",
+  "basis": "산청군문화예술회관 대공연장",
+  "address_or_candidates": "경상남도 산청군 금서면 친환경로2631번길 12 문화예술회관"
+ },
+ {
+  "venue": "스탠포드호텔 통영",
+  "result": "confirmed",
+  "basis": "스탠포드호텔앤리조트",
+  "address_or_candidates": "경상남도 통영시 도남로 347"
+ },
+ {
+  "venue": "열두달 3층",
+  "result": "confirmed",
+  "basis": "밀양시문화도시센터 열두달",
+  "address_or_candidates": "경상남도 밀양시 밀양대로 1908 5호관 1층"
+ },
+ {
+  "venue": "예담찬갤러리",
+  "result": "confirmed",
+  "basis": "예담찬디자인아트센터",
+  "address_or_candidates": "경상남도 사천시 한내로 38-1"
+ },
+ {
+  "venue": "옥포수변공원 일원",
+  "result": "confirmed",
+  "basis": "옥포수변공원",
+  "address_or_candidates": "경상남도 거제시 옥포로2길 14"
+ },
+ {
+  "venue": "용호광장, 상남동 분수광장, 진해 중원로터리, 마산 문화광장 등",
+  "result": "failed",
+  "basis": "창원 여러 광장 순회",
+  "address_or_candidates": ""
+ },
+ {
+  "venue": "이동면행정복지센터 출발·도착",
+  "result": "confirmed",
+  "basis": "이동면행정복지센터",
+  "address_or_candidates": "경상남도 남해군 이동면 무림로 76 이동면의용소방대"
+ },
+ {
+  "venue": "죽림 만남의 광장 일원",
+  "result": "confirmed",
+  "basis": "죽림만남의광장",
+  "address_or_candidates": "경상남도 통영시 광도면"
+ },
+ {
+  "venue": "중소벤처기업진흥공단 1층 강연장",
+  "result": "confirmed",
+  "basis": "중소벤처기업진흥공단 본부",
+  "address_or_candidates": "경상남도 진주시 동진로 430 중소벤처기업진흥공단"
+ },
+ {
+  "venue": "진례면 행정복지센터 3층 대회의실",
+  "result": "confirmed",
+  "basis": "진례면행정복지센터",
+  "address_or_candidates": "경상남도 김해시 진례면 진례로 241 진례면사무소"
+ },
+ {
+  "venue": "진해구청 대회의실",
+  "result": "confirmed",
+  "basis": "진해구청",
+  "address_or_candidates": "경상남도 창원시 진해구 진해대로 1101"
+ },
+ {
+  "venue": "창원시 마산합포구 창동사거리 일원",
+  "result": "confirmed",
+  "basis": "창동사거리",
+  "address_or_candidates": "경상남도 창원시 마산합포구 창동"
+ },
+ {
+  "venue": "창원중앙·성산·상남 도서관",
+  "result": "failed",
+  "basis": "창원 도서관 세 곳(중앙·성산·상남)",
+  "address_or_candidates": ""
+ },
+ {
+  "venue": "창조문화활력센터 소극장 624",
+  "result": "failed",
+  "basis": "주소는 KOPIS로 확인(부산 북구 백양대로 1167), 네이버 검색에 장소가 없어 좌표 미확정",
+  "address_or_candidates": ""
+ },
+ {
+  "venue": "함안박물관 제1전시관 1층 북카페 · 아라가야 체험장",
+  "result": "confirmed",
+  "basis": "함안박물관",
+  "address_or_candidates": "경상남도 함안군 가야읍 고분길 153-31"
+ }
+]
