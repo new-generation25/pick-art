@@ -10,6 +10,7 @@
   python tools/insta_state.py recent-texts --days 7       지난 n일 피카가 쓴 댓글·답글 문장(되풀이 방지)
   python tools/insta_state.py approved                    허락(yes)받고 아직 안 올린 행사
   python tools/insta_state.py posted-ids                  올린 event_id 목록
+  python tools/insta_state.py post-done <게시물 주소>       이미 댓글·허락 댓글을 달았거나 소개한 게시물인지(댓글 전에 부른다)
   python tools/insta_state.py standing                    상시 동의 계정, 상시 동의를 아직 안 물은 허락 계정
   python tools/insta_state.py find-ask @계정               알림에 뜬 답글이 어느 허락 댓글 건인지(게시물 다시 안 열기)
   python tools/insta_state.py liked-recently @계정         지난 7일 그 계정에 답례 좋아요를 했는지
@@ -193,6 +194,21 @@ def cmd_standing(a):
     out({"standing": standing, "to_ask": to_ask})
 
 
+def _short(u):
+    m = re.search(r"/(?:p|reel)/([A-Za-z0-9_-]+)", u or "")
+    return m.group(1) if m else (u or "").rstrip("/")
+
+
+def cmd_post_done(a):
+    """이 게시물에 이미 댓글·허락 댓글을 달았거나, 그 행사를 이미 소개했으면 done=true (댓글 전에 부른다)."""
+    k = _short(a.url)
+    hits = [f"댓글 {r.get('date')}" for r in load("engaged")
+            if r.get("type") in ("comment", "reply") and _short(r.get("post_url")) == k]
+    hits += [f"허락 댓글/DM {r.get('date')} {r.get('status')}" for r in load("dm") if _short(r.get("post_url")) == k]
+    hits += [f"소개함 {r.get('posted_at', '')[:10]}" for r in load("dm") if r.get("posted_url") and _short(r.get("post_url")) == k]
+    out({"post": k, "done": bool(hits), "why": hits})
+
+
 def cmd_posted_ids(a):
     out({"ids": [r["event_id"] for r in load("posted") if r.get("event_id")]})
 
@@ -358,6 +374,7 @@ def main():
     sub.add_parser("approved").set_defaults(f=cmd_approved)
     sub.add_parser("posted-ids").set_defaults(f=cmd_posted_ids)
     sub.add_parser("standing").set_defaults(f=cmd_standing)
+    p = sub.add_parser("post-done"); p.add_argument("url"); p.set_defaults(f=cmd_post_done)
     p = sub.add_parser("find-ask"); p.add_argument("account"); p.set_defaults(f=cmd_find_ask)
     p = sub.add_parser("liked-recently"); p.add_argument("account"); p.set_defaults(f=cmd_liked_recently)
     p = sub.add_parser("liked-many"); p.add_argument("accounts", nargs="+"); p.set_defaults(f=cmd_liked_many)
