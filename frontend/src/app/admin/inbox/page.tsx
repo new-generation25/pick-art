@@ -17,6 +17,7 @@ import {
     ActionIcon, SegmentedControl, Paper, ScrollArea, rem, ThemeIcon
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { ReviewQueue, BUCKET_LABEL, type ReviewBucket, type ReviewChange } from "./ReviewQueue";
 
 interface RawPost {
     id: string;
@@ -28,7 +29,9 @@ interface RawPost {
     status: string;
 }
 
-type TabType = "pending" | "published";
+// pending = 인박스(COLLECTED·PENDING). candidate·consent·human = 인스타 후보(REVIEW)의 무더기(specs/003 R2)
+type TabType = "pending" | ReviewBucket | "published";
+const REVIEW_BUCKETS: ReviewBucket[] = ["candidate", "consent", "human"];
 
 export default function AdminInboxPage() {
     const [activeTab, setActiveTab] = useState<TabType>("pending");
@@ -62,6 +65,7 @@ export default function AdminInboxPage() {
     const [promptLoading, setPromptLoading] = useState(false);
 
     const [rejectedPosts, setRejectedPosts] = useState<RawPost[]>([]);
+    const [reviewPosts, setReviewPosts] = useState<RawPost[]>([]);
     const [stats, setStats] = useState({ pending: 0, published: 0, rejected: 0 });
 
     // 다중 선택 모드 (아이폰 스타일 삭제)
@@ -95,6 +99,21 @@ export default function AdminInboxPage() {
             .select("*")
             .eq("status", "REJECTED")
             .order("collected_at", { ascending: false });
+
+        // 4. 인스타 후보(REVIEW). 1,000건씩 끝까지 읽는다
+        const reviewData: RawPost[] = [];
+        for (let from = 0; ; from += 1000) {
+            const { data: page, error: reviewError } = await supabase
+                .from("raw_posts")
+                .select("*")
+                .eq("status", "REVIEW")
+                .order("collected_at", { ascending: false })
+                .range(from, from + 999);
+            if (reviewError || !page) break;
+            reviewData.push(...page);
+            if (page.length < 1000) break;
+        }
+        setReviewPosts(reviewData);
 
         if (pendingData) {
             setPosts(pendingData);
@@ -187,11 +206,16 @@ export default function AdminInboxPage() {
     };
 
     const handleRestore = async (postId: string) => {
-        const { error } = await supabase.from("raw_posts").update({ status: "PENDING" }).eq("id", postId);
+        // 인스타 후보 탭에서 «반영 안 함»한 줄(무더기가 있음)은 REVIEW 로 되돌린다. PENDING 으로 두면 정기 자동 공개에 걸린다
+        const fromReview = !!rejectedPosts.find(p => p.id === postId)?.content?.review_bucket;
+        const { error } = await supabase.from("raw_posts").update({ status: fromReview ? "REVIEW" : "PENDING" }).eq("id", postId);
         if (!error) {
             const restoredPost = rejectedPosts.find(p => p.id === postId);
             setRejectedPosts(rejectedPosts.filter(p => p.id !== postId));
-            if (restoredPost) {
+            if (restoredPost && fromReview) {
+                setReviewPosts(prev => [{ ...restoredPost, status: "REVIEW" }, ...prev]);
+                setStats(prev => ({ ...prev, rejected: prev.rejected - 1 }));
+            } else if (restoredPost) {
                 setPosts(prev => [restoredPost, ...prev]);
                 setStats(prev => ({ ...prev, rejected: prev.rejected - 1, pending: prev.pending + 1 }));
             }
@@ -302,6 +326,26 @@ export default function AdminInboxPage() {
     };
 
 
+    // 인스타 후보 탭에서 바뀐 줄 반영: REVIEW 면 내용만 바꾸고, 아니면(REJECTED) 목록에서 빼 휴지통에 넣는다
+    const applyReviewChanges = (changes: ReviewChange[]) => {
+        if (changes.length === 0) return;
+        const byId = new Map(changes.map(c => [c.id, c]));
+        setReviewPosts(prev => prev.flatMap(p => {
+            const ch = byId.get(p.id);
+            if (!ch) return [p];
+            return ch.status === "REVIEW" ? [{ ...p, content: ch.content }] : [];
+        }));
+        const rejected = changes.filter(c => c.status === "REJECTED");
+        if (rejected.length) {
+            const moved = reviewPosts.filter(p => rejected.some(c => c.id === p.id))
+                .map(p => ({ ...p, status: "REJECTED", content: byId.get(p.id)!.content }));
+            setRejectedPosts(prev => [...moved, ...prev]);
+            setStats(prev => ({ ...prev, rejected: prev.rejected + moved.length }));
+        }
+    };
+
+    const reviewCount = (b: ReviewBucket) => reviewPosts.filter(p => p.content?.review_bucket === b).length;
+
     const copyDMMessage = (post: RawPost) => {
         const author = post.content.username || "작가";
         const title = post.content.title || "작품/행사";
@@ -385,18 +429,19 @@ export default function AdminInboxPage() {
                 </Group>
 
                 {/* Tabs */}
-                <Box mb={30}>
+                <ScrollArea mb={30} type="auto" offsetScrollbars>
                     <SegmentedControl
                         value={activeTab}
                         onChange={(value) => setActiveTab(value as TabType)}
                         data={[
-                            { label: `검토 대기 (${stats.pending})`, value: 'pending' },
+                            { label: `인박스(COLLECTED) (${stats.pending})`, value: 'pending' },
+                            ...REVIEW_BUCKETS.map(b => ({ label: `${BUCKET_LABEL[b]} (${reviewCount(b)})`, value: b })),
                             { label: `현재 노출 (${stats.published})`, value: 'published' },
                         ]}
                         size="md"
                         radius="xl"
                     />
-                </Box>
+                </ScrollArea>
 
                 {/* Content based on active tab */}
                 {activeTab === "pending" ? (
@@ -517,6 +562,15 @@ export default function AdminInboxPage() {
                             </Stack>
                         )}
                     </Box>
+                ) : activeTab !== "published" ? (
+                    /* 인스타 후보(REVIEW) 무더기 탭 */
+                    <ReviewQueue
+                        key={activeTab}
+                        bucket={activeTab}
+                        posts={reviewPosts.filter(p => p.content?.review_bucket === activeTab)}
+                        loading={loading}
+                        onChanged={applyReviewChanges}
+                    />
                 ) : (
                     /* Published Events - 원래 카드 디자인 + 다중 선택 */
                     <Box mb={60}>
