@@ -162,6 +162,10 @@ async def run_crawlers(specific_target=None):
             snap = await run_tool("publish_ops_snapshots.py", timeout_min=10)
             backup_line += f"\n• 대시보드 스냅숏: {snap['summary']}"
 
+            # 피카 인스타에 소개한 행사 → events.insta_post_url·insta_posted_at (posted.json 을 읽기만 한다)
+            synced = await run_tool("sync_insta_posts.py", timeout_min=10)
+            backup_line += f"\n• 인스타 게시 반영: {synced['summary']}"
+
             # 전체 종료 알림: 처리·실패·건너뜀을 숫자로 남긴다
             failed = [r for r in results if r['status'] != 'SUCCESS']
             n_blog = sum(1 for c in configs if c['target_type'] == 'naver_blog')
