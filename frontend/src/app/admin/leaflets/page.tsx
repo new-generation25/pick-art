@@ -155,7 +155,9 @@ export default function AdminLeafletsPage() {
                                             </Group>
                                             <TextInput label="관람료" value={d.price_info} onChange={e => setD(s.id, "price_info", e.currentTarget.value)} />
                                             <Checkbox label="무료" checked={d.is_free} onChange={e => setD(s.id, "is_free", e.currentTarget.checked)} />
-                                            <TextInput label="원본 안내 주소(있으면)" value={d.original_url} onChange={e => setD(s.id, "original_url", e.currentTarget.value)} placeholder="없으면 «단체 제공»으로만 표시" />
+                                            <TextInput label="원본 안내 주소(있으면)" value={d.original_url} onChange={e => setD(s.id, "original_url", e.currentTarget.value)} placeholder="없으면 «단체 제공»으로만 표시"
+                                                description={!s.official_url && d.original_url ? "단체가 적은 주소가 아니라 리플렛에 인쇄된 예매 주소로 채웠습니다. 열리는지 눌러 확인한 뒤 등록하세요(헌장 I)." : undefined}
+                                                rightSection={/^https?:\/\//.test(d.original_url) ? <Anchor href={d.original_url} target="_blank" rel="noopener noreferrer" size="xs">열기</Anchor> : null} rightSectionWidth={44} />
                                             <Textarea label="상세 안내(이미지에 적힌 글·단체가 준 글만)" value={d.description} autosize minRows={2} onChange={e => setD(s.id, "description", e.currentTarget.value)} />
                                             <Checkbox label={a.personal_info_visible ? "이 이미지를 포스터로 쓰기 — 개인 연락처가 보여 쓸 수 없음(단체에 번호 없는 판을 요청)" : "이 이미지를 포스터로 쓰기"}
                                                 disabled={s.image_kind !== "file" || !!a.personal_info_visible}

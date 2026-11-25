@@ -63,7 +63,8 @@ export function EventCard({ event, priority = false, disableNavigation = false }
             <div className="relative w-[92px] shrink-0 self-stretch bg-paper sm:w-full sm:self-auto sm:border-b-[length:var(--pk-border)] sm:border-line">
                 <div className="relative h-full min-h-[124px] w-full sm:aspect-[3/4] sm:h-auto">
                     <ImageWithFallback
-                        src={event.imageUrl || `https://picsum.photos/seed/${event.id}/400/600`}
+                        // 포스터가 없으면 «포스터 없음» 칸 (헌장 I: 공식 원본이 아닌 사진을 포스터처럼 쓰지 않는다 — 예전에는 임의 사진을 불러왔다)
+                        src={event.imageUrl || ""}
                         alt={event.title}
                         fill
                         className={event.isEnded ? "object-cover grayscale opacity-70" : "object-cover"}

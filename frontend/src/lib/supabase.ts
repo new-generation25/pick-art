@@ -47,14 +47,20 @@ export async function getPublishedEvents(filters?: { region?: string; category?:
         }
     }
 
-    const { data, error } = await query.order('event_date_start', { ascending: true });
-
-    if (error) {
-        console.error('Error fetching events:', error);
-        return [];
+    // 한 번에 1,000줄까지만 오므로 나눠 읽는다(공개 행사가 1,000건을 넘으면 뒤가 빠지던 문제). 같은 정렬에 id 를 더해 쪽이 겹치지 않게 한다
+    const ordered = query.order('event_date_start', { ascending: true }).order('id', { ascending: true });
+    const rows: any[] = [];
+    for (let from = 0; from < 20000; from += 1000) {
+        const { data, error } = await ordered.range(from, from + 999);
+        if (error) {
+            console.error('Error fetching events:', error);
+            return rows.length ? rows : [];
+        }
+        rows.push(...(data ?? []));
+        if (!data || data.length < 1000) break;
     }
     // 노출 순서(묶음·정렬·섞기)는 lib/feedOrder.ts 의 orderFeed 가 정한다
-    return data;
+    return rows;
 }
 
 /** 상세에 보일 장소 정보 (specs/009). 공개 뷰라 좌표가 확인된 장소만 나온다 */

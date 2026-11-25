@@ -8,11 +8,19 @@ export const revalidate = 3600;
 
 /** 홈 + 지역 주소(행사가 있는 지역만) + 공개 행사 중 끝나지 않은 것. 익명 키로 읽어 RLS가 비공개를 뺀다 */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const { data } = await supabase
-        .from("events")
-        .select("id, published_at, region, venue_id")
-        .eq("status", "PUBLISHED")
-        .gte("event_date_end", todayKST());
+    // 한 번에 1,000줄까지만 오므로 나눠 읽는다
+    const data: { id: string; published_at: string | null; region: string | null; venue_id: string | null }[] = [];
+    for (let from = 0; from < 20000; from += 1000) {
+        const { data: page } = await supabase
+            .from("events")
+            .select("id, published_at, region, venue_id")
+            .eq("status", "PUBLISHED")
+            .gte("event_date_end", todayKST())
+            .order("id")
+            .range(from, from + 999);
+        data.push(...(page ?? []));
+        if (!page || page.length < 1000) break;
+    }
 
     // 부산 구·군: 장소(venues.district)로 가른 행사가 있는 곳만
     const { data: venues } = await supabase.from("public_venues").select("id, district").not("district", "is", null);
