@@ -1,0 +1,262 @@
+<title>피카 구조개편 계획 2026-11</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* 레이아웃: 한 줄 읽기 폭의 계획서. 단계 카드는 소인(우표 날짜 도장) 모양의 번호표를 단다 */
+:root{
+  --paper:#F6EFDF; --card:#FFFBF2; --ink:#1C1C1C; --slate:#4F6272; --red:#D33A2C; --line:#DDD3BE;
+  --ok:#2F7A4B; --warn:#B7791F; --bad:#C0392B; --soft:#EFE6D2;
+  --f-display:"Black Han Sans","Noto Sans KR",sans-serif;
+  --f-body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#1A1C1E; --card:#232629; --ink:#ECE6D8; --slate:#9DB0C0; --red:#F0695B; --line:#3A3F44;
+  --ok:#6CC08B; --warn:#E0B05A; --bad:#F07A6C; --soft:#2B2F33; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#1A1C1E; --card:#232629; --ink:#ECE6D8; --slate:#9DB0C0; --red:#F0695B; --line:#3A3F44;
+  --ok:#6CC08B; --warn:#E0B05A; --bad:#F07A6C; --soft:#2B2F33; color-scheme:dark}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.7;margin:0}
+.wrap{max-width:860px;margin:0 auto;padding-block:32px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:40px}
+h1{font-family:var(--f-display);font-weight:400;font-size:2.1rem;line-height:1.25;margin:0;text-wrap:balance}
+h2{font-family:var(--f-display);font-weight:400;font-size:1.45rem;margin:0 0 12px;text-wrap:balance}
+h3{font-size:1.05rem;margin:0;font-weight:700}
+p{margin:0}
+.meta{color:var(--slate);font-size:.88rem}
+.lead{display:flex;flex-direction:column;gap:10px}
+.box{background:var(--card);border:1px solid var(--line);padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+.box.red{border-left:4px solid var(--red)}
+ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px}
+li{min-width:0}
+code,.mono{font-family:var(--f-mono);font-size:.85em;background:var(--soft);padding:0 4px;border-radius:2px;word-break:break-all}
+.tbl{overflow-x:auto;border:1px solid var(--line);background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:.9rem}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--line)}
+th{font-weight:700;color:var(--slate);font-size:.8rem;letter-spacing:.04em;background:var(--soft)}
+tr:last-child td{border-bottom:0}
+.num{font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font-size:.75rem;font-weight:700;padding:1px 8px;border-radius:999px;white-space:nowrap;border:1px solid currentColor}
+.p-ok{color:var(--ok)} .p-warn{color:var(--warn)} .p-bad{color:var(--bad)} .p-mid{color:var(--slate)}
+.stages{display:flex;flex-direction:column;gap:14px}
+.stage{background:var(--card);border:1px solid var(--line);display:grid;grid-template-columns:72px 1fr;gap:0}
+.stamp{border-right:1px dashed var(--line);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:16px 6px;gap:6px}
+.stamp b{font-family:var(--f-display);font-weight:400;font-size:1.5rem;color:var(--red);width:52px;height:52px;border:2px solid var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.stamp span{font-size:.7rem;color:var(--slate);text-align:center;line-height:1.3}
+.sbody{padding:14px 18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.done{border-top:1px solid var(--line);padding-top:8px;font-size:.9rem}
+.done strong{color:var(--red)}
+.ask{font-size:.85rem;color:var(--warn);font-weight:500}
+.flow{overflow-x:auto;background:var(--card);border:1px solid var(--line);padding:12px}
+.decide{background:var(--card);border:2px solid var(--ink);padding:20px;display:flex;flex-direction:column;gap:14px}
+.decide ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:10px}
+.small{font-size:.85rem;color:var(--slate)}
+@media (max-width:520px){.stage{grid-template-columns:1fr}.stamp{flex-direction:row;border-right:0;border-bottom:1px dashed var(--line);justify-content:flex-start;padding:10px 14px}.stamp b{width:40px;height:40px;font-size:1.1rem}h1{font-size:1.7rem}}
+</style>
+
+<div class="wrap">
+
+<header class="lead">
+  <p class="meta">피카(pick-art) 앱 코딩 세션 · 2026-11-25 · 근거: 이날 저장소·DB·작업 스케줄러·세션 기록을 직접 확인</p>
+  <h1>피카 구조개편 계획 — 반자동에서 전자동으로</h1>
+  <p>10/28 계획(S0~S6)은 거의 끝났다. 수집·검증·자동 공개는 이미 사람 없이 돈다. 지금 막히는 곳은 «돌았는지, 무엇이 비정상인지 아무도 모르는 것»과 «사람 판단 대기열이 다섯 군데에 흩어진 것»이다. 그래서 이번 계획의 중심은 <b>상태 기록 → 이상 판정 → 대시보드 하나 → 승인 대기함 하나</b>이고, 코드 정리는 그 뒤에 한다.</p>
+</header>
+
+<section>
+  <h2>1. 10/28 계획 이후 지금 상태</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>단계</th><th>그때 목표</th><th>지금</th><th>근거</th></tr></thead>
+    <tbody>
+      <tr><td>S0 보안</td><td>키 정리, 커밋</td><td><span class="pill p-ok">완료</span></td><td>10/30 커밋. 저장소에 남은 JWT는 로컬 기본 키(<code>supabase-demo</code>)와 자리표시자뿐(디코드로 확인)</td></tr>
+      <tr><td>S1 스키마</td><td>마이그레이션만으로 새 DB</td><td><span class="pill p-ok">완료</span></td><td><code>supabase/migrations</code> 6개, 테이블 11개(venues 포함)</td></tr>
+      <tr><td>S2 F:에서 실행</td><td>환경 파일 하나</td><td><span class="pill p-warn">일부</span></td><td>실행은 됨. 그러나 <code>collector/.env</code>와 <code>.env.local</code>이 둘 다 있고 키 목록이 다르다(main.py는 <code>.env.local</code>을 읽음)</td></tr>
+      <tr><td>S3 거짓 신호</td><td>RUNNING 회수, 저장 확인, PID</td><td><span class="pill p-ok">완료</span></td><td>10/31 커밋 4개</td></tr>
+      <tr><td>S4 KOPIS</td><td>정기 수집에 연결</td><td><span class="pill p-bad">11/19부터 0건</span></td><td>KOPIS 방화벽이 aiohttp 기본 User-Agent를 막음. 11/25 19:34 수정 커밋(<code>0630a16</code>), 정기 실행으로는 아직 확인 전. 그사이 정기 실행 11회 모두 0건</td></tr>
+      <tr><td>S5 사이트 정의</td><td>셀렉터를 파일로</td><td><span class="pill p-ok">완료</span></td><td><code>collector/sources/</code> 28개. 거창문화재단·함안문화예술회관은 «정의 만료 의심» 상태</td></tr>
+      <tr><td>S6 화면 연결</td><td>빌드·배포·끝까지 한 건</td><td><span class="pill p-ok">완료</span></td><td>https://pick-art.vercel.app 운영 중. <code>main</code>은 11/24까지 반영, <code>revive/2026-10</code>이 20커밋 앞섬(대부분 수집기·문서)</td></tr>
+      <tr><td>REVIVAL P4·P6 정리</td><td>일회성 스크립트 _attic 이동</td><td><span class="pill p-bad">안 함</span></td><td><code>collector/</code> 최상위 .py 51개 중 37개는 어디서도 import하지 않는 일회성. 루트 일회성 sql·mjs·py·ts 34개</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small" style="margin-top:10px">10/28 이후 새로 생긴 것: 인스타 운영 도구(<code>tools/insta_state·insta_report·insta_runs</code>, 카드·릴스·묶음 생성기 7개), 큐레이션 흐름(<code>curated/*.json</code> → <code>publish_verified --curated</code>), 부산 확장(KOPIS 26, 기관 9곳), 내 주변 행사(002, venues), PWA, Spec Kit, 포인트·커뮤니티 계획 문서(구현 전).</p>
+</section>
+
+<section>
+  <h2>2. 지금 무엇이 자동이고 무엇이 손인가</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>단계</th><th>지금 누가 하나</th><th>수준</th><th>확인한 문제</th></tr></thead>
+    <tbody>
+      <tr><td>정기 수집 (웹 28·KOPIS·블로그)</td><td>Windows 작업 스케줄러 08:20·15:00</td><td><span class="pill p-ok">자동</span></td><td class="num">PC가 꺼져 있으면 그 회차를 건너뛴다(«놓친 실행 시작» 꺼짐). 11/10~25 아침 회차 16번 중 <b>8번</b>만 돌았다</td></tr>
+      <tr><td>장애 감지</td><td>텔레그램 실행 보고(한 번에 35줄)</td><td><span class="pill p-bad">사실상 없음</span></td><td>KOPIS 0건이 6일·11회 이어지는 동안 보고는 매번 나갔지만 «⚠️ 실패 2»가 매일 같은 모양이라 묻혔다</td></tr>
+      <tr><td>자동 공개</td><td><code>publish_verified</code> (날짜·열리는 링크·중복, 오늘~60일)</td><td><span class="pill p-ok">자동</span></td><td>실행마다 결과 JSON을 <code>docs/</code>에 하나씩 남긴다(지금 36개, 28개는 git 미추적)</td></tr>
+      <tr><td>인박스 승인</td><td>운영자가 /admin/inbox</td><td><span class="pill p-mid">수동</span></td><td class="num">COLLECTED 73건 대기</td></tr>
+      <tr><td>인스타 수집분 검토</td><td>Claude 세션이 <code>review_instagram.py</code>로</td><td><span class="pill p-warn">반자동</span></td><td class="num">raw_posts REVIEW <b>663건</b> 적체</td></tr>
+      <tr><td>큐레이션 등록</td><td>Claude 세션이 공식 페이지 확인 → curated JSON</td><td><span class="pill p-warn">반자동</span></td><td>사람 동의가 필요한 소규모 행사가 섞여 있어 전부 자동은 안 된다</td></tr>
+      <tr><td>장소 좌표</td><td><code>geocode_venues</code> + /admin/venues 확인</td><td><span class="pill p-ok">자동+확인</span></td><td>확인 대기는 소수(11/25 실행에서 1곳)</td></tr>
+      <tr><td>인스타 게시·참여·답례</td><td>Claude 예약 작업 10시·16시</td><td><span class="pill p-ok">자동</span></td><td class="num">한 회 평균 56분, 캐시 읽기 4,850만 토큰, 게시 1건당 1,430만 토큰(7일 평균)</td></tr>
+      <tr><td>인스타 리포트</td><td><code>insta_report.py</code> → Claude가 아티팩트에 올림</td><td><span class="pill p-warn">반자동</span></td><td><code>docs/insta/</code>(446MB)가 통째로 gitignore라 <b>백업이 없다</b>. 이 PC의 F: 외장 SSD 한 곳에만 있다</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="lead">
+  <h2>3. 뿌리 문제 넷</h2>
+  <div class="box red"><h3>① 돌았는지·비정상인지 판정하는 곳이 없다</h3><p>실행 결과는 로그 파일과 텔레그램 글에만 있고 DB에는 없다(정기 실행은 <code>crawl_logs</code>에 쓰지 않는다). 그래서 «KOPIS 0건 2회 연속», «아침 회차 누락», «정의 만료 의심 3일째» 같은 판정을 아무도 하지 않는다.</p></div>
+  <div class="box red"><h3>② 사람 판단 대기열이 다섯 군데다</h3><p>인박스 73 · 인스타 REVIEW 663 · 장소 확인 · 정의 만료 · 허락 답 대기 47(인스타 리포트). 어디부터 볼지 한 화면에 없다.</p></div>
+  <div class="box red"><h3>③ 이 PC와 외장 SSD에 묶여 있다</h3><p>실행 누락과 운영 기록 무백업이 둘 다 여기서 온다.</p></div>
+  <div class="box"><h3>④ 코드 정리가 밀렸다</h3><p>일회성 스크립트 71개(수집기 37 + 루트 34), Streamlit <code>admin/</code>, <code>.agent/</code>, <code>testsprite_tests/</code>, 쓰지 않는 화면·API(<code>ai-prompt</code>, <code>getPrompt/updatePrompt</code>, 구독자 0명인 뉴스레터, 쓰지 않는 <code>pg</code> 의존성, <code>page.tsx.backup</code>), 같은 숫자를 보여 주는 <code>/admin</code>과 <code>/admin/stats</code>. 위험보다 «어느 것이 지금 쓰는 것인지 모른다»가 문제다.</p></div>
+</section>
+
+<section>
+  <h2>4. 목표 구조</h2>
+  <div class="flow"><pre class="mermaid">
+flowchart LR
+  T["예약 실행<br/>놓치면 켤 때 실행"] --> C["수집<br/>사이트 정의·KOPIS·블로그·인스타"]
+  C --> V{"검증<br/>날짜·링크·중복·출처 등급"}
+  V -->|통과| P["자동 공개"]
+  V -->|판단 필요| Q["승인 대기함 하나"]
+  C --> L["실행 기록 DB<br/>출처별 발견·신규·실패"]
+  P --> L
+  L --> H{"이상 판정<br/>0건 연속·누락·정의 만료"}
+  H -->|이상| A["텔레그램 짧은 경고 1통"]
+  L --> D["운영 대시보드 /admin"]
+  Q --> D
+  H --> D
+  </pre></div>
+  <p class="small" style="margin-top:10px">사람이 남는 곳은 셋뿐이다: 승인 대기함의 판단, 소규모 단체의 동의(인스타 규칙), 사이트 개편으로 정의가 깨졌을 때 Claude가 한 번 들어가 정의 파일을 고치는 일.</p>
+</section>
+
+<section>
+  <h2>5. 대시보드 — 무엇을 만들지</h2>
+  <div class="tbl"><table>
+    <thead><tr><th></th><th>(a) 앱 관리자 운영 대시보드</th><th>(b) 인스타 리포트를 앱으로 이전</th></tr></thead>
+    <tbody>
+      <tr><td>자리</td><td><code>/admin</code> 첫 화면을 바꾼다(지금은 «오늘의 수집 회»·구독자 0명 같은 숫자 4개)</td><td>새 관리자 페이지</td></tr>
+      <tr><td>보여 줄 것</td><td>이상 경고 · 행사 공급(활성 수, 7/30/60일, 시군·분야별, 0건 시군) · 출처별 최근 실행 · 대기열 4종 · 가입 회원 수 대비 1만 명</td><td>게시·허락 깔때기·팔로워·실행 비용(지금 아티팩트와 같은 지표 29개)</td></tr>
+      <tr><td>데이터</td><td>지금 DB로 바로 가능(행사·수집분·장소·회원). 출처별 실행은 R1 뒤</td><td><code>docs/insta/</code>가 PC에만 있어 Vercel에서 못 읽는다. DB에 올리는 새 테이블이 필요(스키마 변경)</td></tr>
+      <tr><td>바로 만들 수 있나</td><td>1차는 스키마 변경 없이 가능</td><td>R4 승인 뒤</td></tr>
+    </tbody>
+  </table></div>
+  <p style="margin-top:10px"><b>추천: (a)를 먼저 만들고 (b)의 지표는 R4에서 같은 화면 아래 칸으로 합친다.</b> 그 전까지는 인스타 칸에 지금 아티팩트 링크를 둔다. 회원 칸은 «앱코딩» 세션에서 정한 유료 전환 기준(가입 회원 1만 명 = <code>profiles</code> 행 수, 지금 <span class="num">2</span>명)을 그대로 쓴다.</p>
+  <p class="small" style="margin-top:6px">11/25 DB 숫자: events 1,168(전부 PUBLISHED, 끝난 행사 포함) · raw_posts 2,449(REVIEW 663 · COLLECTED 73 · REJECTED 272 · EXPIRED 198 · PUBLISHED 1,168) · whitelist 120 · venues 136 · profiles 2 · subscribers 0</p>
+</section>
+
+<section>
+  <h2>6. 단계 계획</h2>
+  <p class="small" style="margin-bottom:12px">각 단계는 «끝 조건»을 통과해야 다음으로 간다. 단계마다 커밋하고 push·배포는 따로 승인받는다. <span style="color:var(--warn)">노란 줄</span>은 되돌리기 번거로워 따로 묻는 항목이다.</p>
+  <div class="stages">
+
+    <article class="stage"><div class="stamp"><b>R0</b><span>안전망<br/>반나절</span></div><div class="sbody">
+      <h3>놓친 실행·무백업부터 막는다</h3>
+      <ul>
+        <li>작업 스케줄러 «pick-art 정기 수집»에 «예약 시간을 놓치면 가능한 빨리 실행» 켜기</li>
+        <li><code>docs/insta/</code> 운영 기록(JSON만, 이미지 제외) 하루 한 번 백업</li>
+        <li>KOPIS 수정이 정기 실행에서 통하는지 확인</li>
+      </ul>
+      <p class="ask">따로 물음: 스케줄러 설정 변경 · 백업 위치(G: Drive 폴더 / 비공개 git 저장소 / Supabase)</p>
+      <p class="done"><strong>끝 조건</strong> 11/26 08:20 회차 로그에 KOPIS 경남·부산이 각각 1건 이상 · PC를 꺼 둔 뒤 켜면 놓친 회차 로그가 생김 · 백업 위치에 오늘 날짜 사본 1벌</p>
+    </div></article>
+
+    <article class="stage"><div class="stamp"><b>D1</b><span>대시보드 1차<br/>1~2일</span></div><div class="sbody">
+      <h3>/admin 운영 대시보드 (스키마 변경 없음)</h3>
+      <ul>
+        <li>행사 공급: 활성 행사 수, 앞으로 7·30·60일, 시군별·분야별, 행사 0건 시군, 포스터 없는 행사</li>
+        <li>대기열: 인박스 COLLECTED, 인스타 REVIEW, 장소 확인 대기 — 각 칸에서 해당 관리 화면으로 바로 이동</li>
+        <li>회원: 가입 회원 수와 1만 명 목표</li>
+        <li>최근 공개: 지난 7일 날짜별 새 공개 건수, 출처 종류별(KOPIS·기관·큐레이션·인스타)</li>
+        <li>인스타: 아티팩트 링크(R4까지)</li>
+        <li><code>/admin/stats</code>는 이 화면으로 넘긴다(옛 화면은 R6에서 정리)</li>
+      </ul>
+      <p class="ask">따로 물음: 화면 확인용 개발 서버 띄우기(메모리 상한 2GB, 확인 뒤 끔)</p>
+      <p class="done"><strong>끝 조건</strong> <code>npm run build</code> 통과 · 관리자 계정으로 연 화면 스크린샷 · 화면의 활성 행사 수와 REVIEW 수가 같은 시각 DB 직접 조회 값과 같음</p>
+    </div></article>
+
+    <article class="stage"><div class="stamp"><b>R1</b><span>상태 기록<br/>1~2일</span></div><div class="sbody">
+      <h3>정기 실행 결과를 DB에, 이상만 경고로</h3>
+      <ul>
+        <li>정기 실행마다 출처별 결과(발견·신규·중복·실패·정의 만료)를 <code>crawl_logs</code>에 한 줄씩 쓴다. 이미 있는 테이블이라 스키마 변경 없음(컬럼이 모자라면 그때 따로 묻는다)</li>
+        <li>이상 판정 규칙: 같은 출처 0건 2회 연속, 마지막 성공 실행 14시간 초과, 정의 만료 의심, 자동 공개 0건 3회 연속</li>
+        <li>텔레그램은 이상이 있을 때만 3~5줄 경고, 하루 요약은 1통으로 줄인다</li>
+        <li>대시보드에 «출처별 최근 실행»과 «이상» 칸을 켠다(D2)</li>
+        <li>공개 결과 JSON은 <code>docs/</code> 대신 <code>collector/logs/publish/</code>에 쓴다</li>
+      </ul>
+      <p class="done"><strong>끝 조건</strong> KOPIS User-Agent를 시험으로 기본값으로 돌린 1회 실행에서 «KOPIS 0건» 경고가 생기고 대시보드에 빨간 줄로 표시 · 되돌린 뒤 다음 실행에서 경고가 사라짐 · 정기 실행 1회의 출처 수(30)와 <code>crawl_logs</code> 새 줄 수가 같음</p>
+    </div></article>
+
+    <article class="stage"><div class="stamp"><b>R2</b><span>대기함 하나<br/>2~3일</span></div><div class="sbody">
+      <h3>사람 판단을 한 곳에 모으고, 판단할 필요 없는 것은 자동으로 치운다</h3>
+      <ul>
+        <li>인스타 REVIEW 663건 자동 분류: 지난 행사 → EXPIRED, 기관 계정 + 날짜·장소 추출 성공 + 공식 링크 열림 → 자동 공개 후보, 개인·소규모 계정 → «동의 필요», 나머지 → «사람 판단»</li>
+        <li><code>/admin/inbox</code>에 탭 넷: 인박스 · 동의 필요 · 사람 판단 · 장소 확인. 정의 만료는 대시보드 경고에서 바로 Claude 작업으로 넘긴다</li>
+        <li>분류 규칙은 코드가 아니라 설정 파일 한 곳(<code>collector/rules/review.json</code>)</li>
+      </ul>
+      <p class="done"><strong>끝 조건</strong> 먼저 dry-run으로 663건이 네 무더기로 나뉜 숫자를 보여 드리고 승인받은 뒤 적용 · 적용 후 REVIEW 0건(전부 어느 무더기엔가 들어감) · 무작위 20건을 눈으로 보고 잘못 분류 0건 · 승인 1건이 공개 피드에 표시</p>
+    </div></article>
+
+    <article class="stage"><div class="stamp"><b>R3</b><span>인스타 지표<br/>1일</span></div><div class="sbody">
+      <h3>인스타 리포트를 앱 대시보드로 (D3)</h3>
+      <ul>
+        <li><code>insta_report.py</code>가 만든 지표·날짜별 숫자를 Supabase 새 테이블 <code>ops_snapshots</code>(이름·JSON·갱신 시각, 관리자만 읽기)에 올린다</li>
+        <li>대시보드 아래 «인스타 운영» 칸: 게시 수·소규모 비율·허락 깔때기·팔로워·실행 비용</li>
+        <li>R0의 백업이 DB로 정해지면 같은 테이블을 쓴다</li>
+      </ul>
+      <p class="ask">따로 물음: 새 테이블 추가(마이그레이션)</p>
+      <p class="done"><strong>끝 조건</strong> 대시보드의 지표 29개가 같은 시각 <code>metrics.json</code> 값과 모두 같음 · 로그아웃 상태에서 테이블 조회가 거부됨(RLS)</p>
+    </div></article>
+
+    <article class="stage"><div class="stamp"><b>R4</b><span>수집기 정리<br/>1~2일</span></div><div class="sbody">
+      <h3>collector/ 를 «지금 쓰는 것»만 남게</h3>
+      <ul>
+        <li>남김: <code>main · database · public_scraper · kopis_scraper · naver_blog_scraper · source_loader · rule_extractor · utils · venue_norm · notifier · ai_extractor</code>, 인스타 수집에 쓰는 <code>insta_browser_scraper</code></li>
+        <li><code>main.py</code>가 import만 하고 쓰지 않는 <code>insta_scraper</code>·<code>fb_scraper_service</code>는 import 줄을 지우고 <code>_attic/</code>으로</li>
+        <li>일회성 37개 → <code>collector/_attic/</code>, 그중 <code>delete_*</code> 4개 → <code>_attic/danger/</code>(삭제 없음, 이동만)</li>
+        <li>환경 파일을 <code>collector/.env</code> 하나로(키 이름만 맞추고 값은 출력하지 않음)</li>
+        <li>디버그 산출물(<code>facebook_debug.*</code>, 옛 로그 txt)은 목록만 보여 드리고 처리 방법을 묻는다</li>
+      </ul>
+      <p class="ask">따로 물음: 파일 이동 목록 승인 · <code>fb_scraper_service.py</code>(봇 탐지 우회 코드, 지금 실행 경로 없음) 처리</p>
+      <p class="done"><strong>끝 조건</strong> <code>collector/</code> 최상위 .py 15개 이하 · 이동 직후 정기 실행 1회의 출처별 발견 건수가 직전 회차와 같음 · <code>python -m pytest collector/tests</code> 통과</p>
+    </div></article>
+
+    <article class="stage"><div class="stamp"><b>R5</b><span>저장소 정리<br/>1일</span></div><div class="sbody">
+      <h3>루트·frontend의 쓰지 않는 것 정리</h3>
+      <ul>
+        <li>루트 일회성 34개 → <code>_attic/</code>. 낡은 안내서(E: 경로가 적힌 <code>AUTO_COLLECTOR_GUIDE.md</code> 등)는 <code>_attic/docs/</code></li>
+        <li><code>admin/</code>(Streamlit, 1월 이후 안 씀) · <code>.agent/</code>(설계만) · <code>testsprite_tests/</code> → 접을지 운영자가 결정</li>
+        <li>frontend: <code>ai-prompt</code> 화면과 <code>getPrompt/updatePrompt</code> API(AI 꺼짐), <code>pg</code> 의존성, <code>page.tsx.backup</code>, <code>/admin/stats</code>. 뉴스레터·구독자 화면은 «구독자 0명»이라 남길지 묻는다</li>
+        <li><code>README.md</code>를 지금 구조로 다시 쓴다</li>
+      </ul>
+      <p class="ask">따로 물음: 접을 폴더·지울 화면 목록 승인</p>
+      <p class="done"><strong>끝 조건</strong> <code>npm run build</code> 통과 · 관리자 메뉴의 모든 페이지가 열림(스크린샷) · 저장소 루트에 일회성 스크립트 0개</p>
+    </div></article>
+
+    <article class="stage"><div class="stamp"><b>R6</b><span>선택<br/>나중</span></div><div class="sbody">
+      <h3>PC 의존 줄이기</h3>
+      <ul>
+        <li>웹 정의·KOPIS·블로그 수집은 로그인 없이 돌아서 클라우드 예약 실행(GitHub Actions 등)으로 옮길 수 있다. 인스타 수집은 이 PC의 로그인 프로필이 필요해 남는다</li>
+        <li>비용 0 범위인지, 기관 사이트가 해외 IP를 막는지 먼저 시험한다</li>
+      </ul>
+      <p class="done"><strong>끝 조건</strong> 같은 시각 클라우드 1회 실행과 PC 1회 실행의 출처별 발견 건수가 같음</p>
+    </div></article>
+
+  </div>
+  <p class="small" style="margin-top:12px">권장 순서: R0 → D1 → R1(D2) → R2 → R3(D3) → R4 → R5 → R6. 대시보드 1차를 앞에 둔 이유: 지금 DB만으로 만들 수 있고, 뒤 단계의 끝 조건을 그 화면으로 확인할 수 있다.</p>
+</section>
+
+<section>
+  <h2>7. «앱코딩» 세션에서 가져온 것</h2>
+  <ul>
+    <li>포인트·커뮤니티 제도(<code>docs/PLAN_community_2026-11.md</code>, <code>docs/points/</code>)는 문서만 있고 앱 구현 전이다. 이번 계획에는 넣지 않고, D1 대시보드에 그 기준 숫자(가입 회원 1만 명)만 넣는다</li>
+    <li>검색창 X 버튼은 배포돼 있다. 그때 알린 두 가지는 아직 그대로다: 관리자 화면 검색창 4곳(blacklist·whitelist·sources·subscribers)에는 X가 없고, 지역·분야 필터를 건 채 검색어를 Enter로 보내면 필터가 풀린다(<code>SearchBox</code>가 <code>q</code>만 보냄). 둘 다 이번 계획 밖이라 손대지 않는다</li>
+    <li>그 세션이 «관리자 화면에 가입 회원 수를 보여 주는 자리가 있는지는 확인하지 않았다»고 남긴 부분: 지금 <code>/admin</code>·<code>/admin/stats</code> 어디에도 없다(확인함). D1에서 넣는다</li>
+  </ul>
+</section>
+
+<section class="decide">
+  <h2 style="margin:0">운영자가 정할 것</h2>
+  <ol>
+    <li><b>대시보드 범위</b> — (a) 앱 관리자 운영 대시보드를 먼저 만들고 인스타 지표는 R3에서 합치기 [추천] / (b) 인스타 리포트 이전만 / 둘을 처음부터 같이(새 테이블 먼저 승인 필요)</li>
+    <li><b>이 계획과 순서 승인</b> — R0 → D1 → R1 → R2 → R3 → R4 → R5 (R6은 나중)</li>
+    <li><b>D1 화면 확인용 개발 서버</b> — 메모리 상한 2GB로 띄우고 스크린샷 뒤 끈다</li>
+    <li><b>단계 안에서 따로 묻는 것</b>(그 단계에 들어갈 때 다시 묻는다): 스케줄러 설정 · 백업 위치 · 새 테이블 · 파일 이동 목록 · 접을 폴더와 지울 화면</li>
+  </ol>
+</section>
+
+</div>
