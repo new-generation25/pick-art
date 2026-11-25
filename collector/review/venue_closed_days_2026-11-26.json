@@ -1,0 +1,155 @@
+[
+ {
+  "building": "김해시립김영원미술관",
+  "region": "김해",
+  "closed_days": "매주 월요일(공휴일이면 운영·다음날 휴관), 1월 1일, 설, 추석",
+  "source": "https://gma.ghct.or.kr/content/hours-admission",
+  "venues": [
+   "김해시립김영원미술관",
+   "김해시립김영원미술관 B3F 제",
+   "김해시립김영원미술관 B5F 제",
+   "김해시립김영원미술관 야외 아트캔버스",
+   "김해시립김영원미술관 B4F 공용홀·교육체험실"
+  ]
+ },
+ {
+  "building": "문신미술관",
+  "region": "창원",
+  "closed_days": "매주 월요일, 1월 1일, 설, 추석",
+  "source": "https://changwon.go.kr/moonshin/visit/guide.php",
+  "venues": [
+   "창원시립마산문신미술관 문신미술관"
+  ]
+ },
+ {
+  "building": "부산시립미술관",
+  "region": "부산",
+  "closed_days": "매주 월요일, 1월 1일(월요일이 공휴일이면 다음날 휴관)",
+  "source": "https://art.busan.go.kr/index.nm",
+  "venues": [
+   "부산시립미술관"
+  ]
+ },
+ {
+  "building": "클레이아크김해미술관",
+  "region": "김해",
+  "closed_days": "매주 월요일, 1월 1일, 설, 추석",
+  "source": "https://clayarch.ghct.or.kr",
+  "venues": [
+   "클레이아크김해미술관 장유도서관",
+   "클레이아크김해미술관 큐빅하우스"
+  ]
+ },
+ {
+  "building": "남가람박물관",
+  "region": "진주",
+  "closed_days": "매주 월요일",
+  "source": "https://www.namgaram.or.kr/",
+  "venues": [
+   "경남 진주시 내동면 칠봉산길 190, 남가람박물관 2층, 제"
+  ]
+ },
+ {
+  "building": "김해한글박물관",
+  "region": "김해",
+  "closed_days": "매주 월요일(공휴일이면 운영·다음날 휴관), 1월 1일, 설·추석 당일",
+  "source": "https://www.gimhae.go.kr/00204/03660/02598.web?amode=view&idx=999",
+  "venues": [
+   "김해한글박물관"
+  ]
+ },
+ {
+  "building": "부산현대미술관",
+  "region": "부산",
+  "closed_days": "매주 월요일(공휴일·연휴면 다음날 휴관), 1월 1일",
+  "source": "https://www.busan.go.kr/moca/show01",
+  "venues": [
+   "부산현대미술관 전시실 2·3 , 전시실 4",
+   "부산현대미술관 전시실 5"
+  ]
+ },
+ {
+  "building": "국립김해박물관",
+  "region": "김해",
+  "closed_days": "매주 월요일, 1월 1일, 설날·추석 당일",
+  "source": "https://gimhae.museum.go.kr/kr/",
+  "venues": [
+   "국립김해박물관"
+  ]
+ },
+ {
+  "building": "부산박물관",
+  "region": "부산",
+  "closed_days": "매주 월요일(공휴일이면 다음 평일 휴관), 1월 1일",
+  "source": "https://museum.busan.go.kr/busan/index",
+  "venues": [
+   "부산박물관"
+  ]
+ },
+ {
+  "building": "경남도립미술관",
+  "region": "창원",
+  "closed_days": "매주 월요일(공휴일이면 다음 첫 평일), 1월 1일, 설날, 추석",
+  "source": "https://www.gyeongnam.go.kr/index.gyeong?menuCd=DOM_000009201000000000",
+  "venues": [
+   "경남도립미술관",
+   "경남도립미술관 1·2층",
+   "경남도립미술관 1층 영상전시실"
+  ]
+ },
+ {
+  "building": "국립부산과학관",
+  "region": "부산",
+  "closed_days": "매주 월요일(공휴일이면 다음날 휴관), 1월 1일, 설날·추석 당일",
+  "source": "https://www.sciport.or.kr/kor/CMS/Contents/Contents.do?mCode=MN002",
+  "venues": [
+   "국립부산과학관"
+  ]
+ },
+ {
+  "building": "부산근현대역사관",
+  "region": "부산",
+  "closed_days": "매주 월요일(공휴일이면 다음날 휴관), 1월 1일",
+  "source": "https://www.busan.go.kr/mmch/index",
+  "venues": [
+   "부산근현대역사관",
+   "부산근현대역사관 본관 지하 1층 금고미술관"
+  ]
+ },
+ {
+  "building": "부산해양자연사박물관",
+  "region": "부산",
+  "closed_days": "매주 월요일(공휴일이면 다음날 휴관), 1월 1일",
+  "source": "https://sea.busan.go.kr/",
+  "venues": [
+   "부산해양자연사박물관"
+  ]
+ },
+ {
+  "building": "양산시립박물관",
+  "region": "양산",
+  "closed_days": "매주 월요일, 1월 1일, 설날·추석 당일",
+  "source": "https://www.yangsan.go.kr/museum/",
+  "venues": [
+   "양산시립박물관"
+  ]
+ },
+ {
+  "building": "정관박물관",
+  "region": "부산",
+  "closed_days": "매주 월요일(공휴일이면 다음날 휴관), 1월 1일",
+  "source": "https://museum.busan.go.kr/jeonggwan/index",
+  "venues": [
+   "정관박물관"
+  ]
+ },
+ {
+  "building": "국립진주박물관",
+  "region": "진주",
+  "closed_days": "매주 월요일, 1월 1일, 설·추석 당일",
+  "source": "https://jinju.museum.go.kr/kor/",
+  "venues": [
+   "국립진주박물관"
+  ]
+ }
+]

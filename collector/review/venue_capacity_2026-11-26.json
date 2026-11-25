@@ -1,0 +1,2039 @@
+[
+ {
+  "venue": "쌍벽루아트홀",
+  "region": "양산",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "쌍벽루아트홀",
+  "halls": [
+   [
+    "쌍벽루아트홀",
+    "250"
+   ]
+  ],
+  "hall": "쌍벽루아트홀",
+  "result": "capacity",
+  "capacity": 250,
+  "applied": true
+ },
+ {
+  "venue": "밀양아리랑아트센터",
+  "region": "밀양",
+  "events": 8,
+  "kopis_events": 2,
+  "nonkopis": 6,
+  "kopis_facility": "밀양아리랑아트센터",
+  "halls": [
+   [
+    "대공연장",
+    "765"
+   ],
+   [
+    "소공연장",
+    "236"
+   ]
+  ],
+  "result": "skip",
+  "why": "홀이 여러 개, 활성 공연이 쓰는 홀이 하나로 정해지지 않음 (KOPIS 밖 행사 있음)"
+ },
+ {
+  "venue": "김해문화의전당",
+  "region": "김해",
+  "events": 21,
+  "kopis_events": 9,
+  "nonkopis": 12,
+  "kopis_facility": "김해문화의전당",
+  "halls": [
+   [
+    "누리홀",
+    "540"
+   ],
+   [
+    "마루홀",
+    "1,464"
+   ],
+   [
+    "애두름마당",
+    "500"
+   ]
+  ],
+  "result": "skip",
+  "why": "홀이 여러 개, 활성 공연이 쓰는 홀이 하나로 정해지지 않음 (KOPIS 밖 행사 있음)"
+ },
+ {
+  "venue": "부산콘서트홀",
+  "region": "부산",
+  "events": 19,
+  "kopis_events": 19,
+  "nonkopis": 0,
+  "kopis_facility": "부산콘서트홀",
+  "halls": [
+   [
+    "콘서트홀",
+    "2,011"
+   ],
+   [
+    "챔버홀",
+    "400"
+   ]
+  ],
+  "result": "skip",
+  "why": "홀이 여러 개, 활성 공연이 쓰는 홀이 하나로 정해지지 않음"
+ },
+ {
+  "venue": "함안문화예술회관",
+  "region": "함안",
+  "events": 3,
+  "kopis_events": 3,
+  "nonkopis": 0,
+  "kopis_facility": "함안문화예술회관",
+  "halls": [
+   [
+    "대공연장",
+    "510"
+   ],
+   [
+    "다목적홀",
+    "140"
+   ],
+   [
+    "야외공연장",
+    "0"
+   ]
+  ],
+  "hall": "대공연장",
+  "result": "skip",
+  "capacity": 510,
+  "why": "홀이 3개인 건물이라 건물 한 값으로 적지 않음(지금 활성 공연은 대공연장 510석)"
+ },
+ {
+  "venue": "김해칠암문화센터",
+  "region": "김해",
+  "events": 2,
+  "kopis_events": 2,
+  "nonkopis": 0,
+  "kopis_facility": "김해칠암문화센터 (칠암도서관)",
+  "halls": [
+   [
+    "공연장",
+    "306"
+   ]
+  ],
+  "hall": "공연장",
+  "result": "capacity",
+  "capacity": 306,
+  "applied": true
+ },
+ {
+  "venue": "3.15아트센터",
+  "region": "창원",
+  "events": 4,
+  "kopis_events": 4,
+  "nonkopis": 0,
+  "kopis_facility": "3.15아트센터",
+  "halls": [
+   [
+    "대극장",
+    "1,182"
+   ],
+   [
+    "소극장",
+    "485"
+   ],
+   [
+    "자유마당",
+    "80"
+   ]
+  ],
+  "hall": "대극장",
+  "result": "skip",
+  "capacity": 1182,
+  "why": "홀이 3개인 건물이라 건물 한 값으로 적지 않음(지금 활성 공연은 대극장 1182석)"
+ },
+ {
+  "venue": "성산아트홀",
+  "region": "창원",
+  "events": 40,
+  "kopis_events": 7,
+  "nonkopis": 33,
+  "kopis_facility": "성산아트홀",
+  "halls": [
+   [
+    "대극장",
+    "1,700"
+   ],
+   [
+    "소극장",
+    "510"
+   ]
+  ],
+  "result": "skip",
+  "why": "홀이 여러 개, 활성 공연이 쓰는 홀이 하나로 정해지지 않음 (KOPIS 밖 행사 있음)"
+ },
+ {
+  "venue": "부산문화회관",
+  "region": "부산",
+  "events": 46,
+  "kopis_events": 10,
+  "nonkopis": 36,
+  "kopis_facility": "부산문화회관",
+  "halls": [
+   [
+    "대극장",
+    "1,417"
+   ],
+   [
+    "사랑채극장 (소극장)",
+    "312"
+   ],
+   [
+    "중극장",
+    "783"
+   ],
+   [
+    "챔버홀",
+    "414"
+   ],
+   [
+    "다듬채 무용/연극연습실(1F)",
+    "0"
+   ],
+   [
+    "다듬채 음악연습실(2F)",
+    "0"
+   ]
+  ],
+  "result": "skip",
+  "why": "홀이 여러 개, 활성 공연이 쓰는 홀이 하나로 정해지지 않음 (KOPIS 밖 행사 있음)"
+ },
+ {
+  "venue": "김해서부문화센터",
+  "region": "김해",
+  "events": 13,
+  "kopis_events": 4,
+  "nonkopis": 9,
+  "kopis_facility": "김해서부문화센터",
+  "halls": [
+   [
+    "하늬홀",
+    "691"
+   ]
+  ],
+  "hall": "하늬홀",
+  "result": "capacity",
+  "capacity": 691,
+  "applied": true
+ },
+ {
+  "venue": "낙동아트센터",
+  "region": "부산",
+  "events": 12,
+  "kopis_events": 11,
+  "nonkopis": 1,
+  "kopis_facility": "낙동아트센터",
+  "halls": [
+   [
+    "콘서트홀",
+    "987"
+   ],
+   [
+    "앙상블극장",
+    "292"
+   ]
+  ],
+  "result": "skip",
+  "why": "홀이 여러 개, 활성 공연이 쓰는 홀이 하나로 정해지지 않음 (KOPIS 밖 행사 있음)"
+ },
+ {
+  "venue": "아르디ys아트홀",
+  "region": "양산",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "아르디ys아트홀",
+  "halls": [
+   [
+    "아르디ys아트홀",
+    "80"
+   ]
+  ],
+  "hall": "아르디ys아트홀",
+  "result": "capacity",
+  "capacity": 80,
+  "applied": true
+ },
+ {
+  "venue": "양산문화예술회관",
+  "region": "양산",
+  "events": 4,
+  "kopis_events": 4,
+  "nonkopis": 0,
+  "kopis_facility": "양산문화예술회관",
+  "halls": [
+   [
+    "대공연장",
+    "796"
+   ],
+   [
+    "소공연장",
+    "167"
+   ]
+  ],
+  "hall": "대공연장",
+  "result": "skip",
+  "capacity": 796,
+  "why": "홀이 2개인 건물이라 건물 한 값으로 적지 않음(지금 활성 공연은 대공연장 796석)"
+ },
+ {
+  "venue": "영도문화예술회관",
+  "region": "부산",
+  "events": 8,
+  "kopis_events": 8,
+  "nonkopis": 0,
+  "kopis_facility": "영도문화예술회관",
+  "halls": [
+   [
+    "대공연장(봉래홀)",
+    "428"
+   ],
+   [
+    "소공연장(절영홀)",
+    "160"
+   ],
+   [
+    "학여울마당",
+    "600"
+   ]
+  ],
+  "result": "skip",
+  "why": "홀 이름 대응 불분명()"
+ },
+ {
+  "venue": "경상남도문화예술회관",
+  "region": "진주",
+  "events": 19,
+  "kopis_events": 9,
+  "nonkopis": 10,
+  "kopis_facility": "경상남도문화예술회관",
+  "halls": [
+   [
+    "대공연장",
+    "1,528"
+   ],
+   [
+    "로비",
+    "0"
+   ],
+   [
+    "야외특설무대",
+    "0"
+   ],
+   [
+    "창작관",
+    "0"
+   ],
+   [
+    "블랙박스극장",
+    "0"
+   ]
+  ],
+  "hall": "대공연장",
+  "result": "skip",
+  "capacity": 1528,
+  "why": "홀이 5개인 건물이라 건물 한 값으로 적지 않음(지금 활성 공연은 대공연장 1528석)"
+ },
+ {
+  "venue": "경상대학교 칠암캠퍼스",
+  "region": "진주",
+  "events": 6,
+  "kopis_events": 6,
+  "nonkopis": 0,
+  "kopis_facility": "경상대학교 칠암캠퍼스",
+  "halls": [
+   [
+    "대강당",
+    "400"
+   ]
+  ],
+  "hall": "대강당",
+  "result": "capacity",
+  "capacity": 400,
+  "applied": true
+ },
+ {
+  "venue": "문기타, 문씨어터",
+  "region": "진주",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "문기타, 문씨어터 [진주]",
+  "halls": [
+   [
+    "문씨어터",
+    "0"
+   ]
+  ],
+  "hall": "문씨어터",
+  "result": "skip",
+  "why": "객석 값 없음(0)"
+ },
+ {
+  "venue": "영화의전당",
+  "region": "부산",
+  "events": 17,
+  "kopis_events": 13,
+  "nonkopis": 4,
+  "kopis_facility": "(재) 영화의전당",
+  "halls": [
+   [
+    "하늘연극장",
+    "841"
+   ],
+   [
+    "야외극장",
+    "4,000"
+   ],
+   [
+    "인디플러스",
+    "36"
+   ],
+   [
+    "로비",
+    "0"
+   ],
+   [
+    "야외광장 (두레라움광장)",
+    "0"
+   ]
+  ],
+  "hall": "하늘연극장",
+  "result": "skip",
+  "capacity": 841,
+  "why": "홀이 5개인 건물이라 건물 한 값으로 적지 않음(지금 활성 공연은 하늘연극장 841석)"
+ },
+ {
+  "venue": "웅상문화체육센터",
+  "region": "양산",
+  "events": 2,
+  "kopis_events": 2,
+  "nonkopis": 0,
+  "kopis_facility": "웅상문화체육센터",
+  "halls": [
+   [
+    "공연장",
+    "312"
+   ]
+  ],
+  "hall": "공연장",
+  "result": "capacity",
+  "capacity": 312,
+  "applied": true
+ },
+ {
+  "venue": "을숙도문화회관",
+  "region": "부산",
+  "events": 4,
+  "kopis_events": 3,
+  "nonkopis": 1,
+  "kopis_facility": "을숙도문화회관",
+  "halls": [
+   [
+    "대공연장",
+    "717"
+   ],
+   [
+    "소공연장",
+    "210"
+   ],
+   [
+    "야외특설무대",
+    "0"
+   ]
+  ],
+  "result": "skip",
+  "why": "홀이 여러 개, 활성 공연이 쓰는 홀이 하나로 정해지지 않음 (KOPIS 밖 행사 있음)"
+ },
+ {
+  "venue": "진해문화센터",
+  "region": "창원",
+  "events": 3,
+  "kopis_events": 2,
+  "nonkopis": 1,
+  "kopis_facility": "진해문화센터 (진해구민회관)",
+  "halls": [
+   [
+    "공연장",
+    "395"
+   ],
+   [
+    "야외공연장",
+    "964"
+   ]
+  ],
+  "result": "skip",
+  "why": "홀 이름 대응 불분명(공연장)"
+ },
+ {
+  "venue": "진해아트홀",
+  "region": "창원",
+  "events": 6,
+  "kopis_events": 3,
+  "nonkopis": 3,
+  "kopis_facility": "진해아트홀",
+  "halls": [
+   [
+    "진해아트홀",
+    "600"
+   ]
+  ],
+  "hall": "진해아트홀",
+  "result": "capacity",
+  "capacity": 600,
+  "applied": true
+ },
+ {
+  "venue": "창원과학체험관",
+  "region": "창원",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "창원과학체험관",
+  "halls": [
+   [
+    "다목적강당",
+    "160"
+   ],
+   [
+    "제2강의실",
+    "20"
+   ],
+   [
+    "야외북카페",
+    "0"
+   ]
+  ],
+  "hall": "다목적강당",
+  "result": "skip",
+  "capacity": 160,
+  "why": "홀이 3개인 건물이라 건물 한 값으로 적지 않음(지금 활성 공연은 다목적강당 160석)"
+ },
+ {
+  "venue": "통영시민문화회관",
+  "region": "통영",
+  "events": 8,
+  "kopis_events": 1,
+  "nonkopis": 7,
+  "kopis_facility": "통영시민문화회관",
+  "halls": [
+   [
+    "대극장",
+    "880"
+   ],
+   [
+    "소극장",
+    "290"
+   ]
+  ],
+  "result": "skip",
+  "why": "홀이 여러 개, 활성 공연이 쓰는 홀이 하나로 정해지지 않음 (KOPIS 밖 행사 있음)"
+ },
+ {
+  "venue": "해운대문화회관",
+  "region": "부산",
+  "events": 13,
+  "kopis_events": 10,
+  "nonkopis": 3,
+  "kopis_facility": "해운대문화회관",
+  "halls": [
+   [
+    "해운홀",
+    "458"
+   ],
+   [
+    "고운홀",
+    "130"
+   ],
+   [
+    "대천공원",
+    "0"
+   ]
+  ],
+  "result": "skip",
+  "why": "홀이 여러 개, 활성 공연이 쓰는 홀이 하나로 정해지지 않음 (KOPIS 밖 행사 있음)"
+ },
+ {
+  "venue": "통영국제음악당 콘서트홀",
+  "region": "통영",
+  "events": 3,
+  "kopis_events": 0,
+  "nonkopis": 3,
+  "result": "skip",
+  "why": "KOPIS 공연 없음"
+ },
+ {
+  "venue": "거제 옥포동 언드",
+  "region": "거제",
+  "events": 1,
+  "kopis_events": 0,
+  "nonkopis": 1,
+  "result": "skip",
+  "why": "KOPIS 공연 없음"
+ },
+ {
+  "venue": "부산시민회관",
+  "region": "부산",
+  "events": 39,
+  "kopis_events": 18,
+  "nonkopis": 21,
+  "kopis_facility": "부산시민회관",
+  "halls": [
+   [
+    "대극장",
+    "1,606"
+   ],
+   [
+    "소극장",
+    "385"
+   ],
+   [
+    "전시실 (1F)",
+    "0"
+   ],
+   [
+    "전시실 (2F)",
+    "0"
+   ],
+   [
+    "연습실 (4F)",
+    "0"
+   ]
+  ],
+  "result": "skip",
+  "why": "홀이 여러 개, 활성 공연이 쓰는 홀이 하나로 정해지지 않음 (KOPIS 밖 행사 있음)"
+ },
+ {
+  "venue": "현장아트홀",
+  "region": "진주",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "현장아트홀",
+  "halls": [
+   [
+    "현장아트홀",
+    "109"
+   ],
+   [
+    "현장아지트 (B1)",
+    "0"
+   ],
+   [
+    "옥상극장",
+    "0"
+   ]
+  ],
+  "hall": "현장아트홀",
+  "result": "capacity",
+  "capacity": 109,
+  "applied": true
+ },
+ {
+  "venue": "통영국제음악당",
+  "region": "통영",
+  "events": 3,
+  "kopis_events": 3,
+  "nonkopis": 0,
+  "kopis_facility": "통영국제음악당",
+  "halls": [
+   [
+    "콘서트홀",
+    "1,309"
+   ],
+   [
+    "블랙박스",
+    "254"
+   ],
+   [
+    "레스토랑",
+    "50"
+   ],
+   [
+    "라운지",
+    "0"
+   ]
+  ],
+  "hall": "콘서트홀",
+  "result": "skip",
+  "capacity": 1309,
+  "why": "홀이 4개인 건물이라 건물 한 값으로 적지 않음(지금 활성 공연은 콘서트홀 1309석)"
+ },
+ {
+  "venue": "사천세계아트서커스",
+  "region": "사천",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "사천세계아트서커스 (사천세계문화컨텐츠)",
+  "halls": [
+   [
+    "사천세계아트서커스 (사천세계문화컨텐츠)",
+    "480"
+   ]
+  ],
+  "hall": "사천세계아트서커스 (사천세계문화컨텐츠)",
+  "result": "capacity",
+  "capacity": 480,
+  "applied": true
+ },
+ {
+  "venue": "진해문화센터_구민회관",
+  "region": "창원",
+  "events": 4,
+  "kopis_events": 0,
+  "nonkopis": 4,
+  "result": "skip",
+  "why": "KOPIS 공연 없음"
+ },
+ {
+  "venue": "3·15아트홀",
+  "region": "창원",
+  "events": 33,
+  "kopis_events": 0,
+  "nonkopis": 33,
+  "result": "skip",
+  "why": "KOPIS 공연 없음"
+ },
+ {
+  "venue": "나다소극장",
+  "region": "부산",
+  "events": 3,
+  "kopis_events": 2,
+  "nonkopis": 1,
+  "kopis_facility": "나다소극장",
+  "halls": [
+   [
+    "나다소극장",
+    "80"
+   ]
+  ],
+  "hall": "나다소극장",
+  "result": "capacity",
+  "capacity": 80,
+  "applied": true
+ },
+ {
+  "venue": "드리운 스튜디오",
+  "region": "창원",
+  "events": 2,
+  "kopis_events": 2,
+  "nonkopis": 0,
+  "kopis_facility": "드리운 스튜디오 ",
+  "halls": [
+   [
+    "드리운 스튜디오",
+    "0"
+   ]
+  ],
+  "hall": "드리운 스튜디오",
+  "result": "skip",
+  "why": "객석 값 없음(0)"
+ },
+ {
+  "venue": "실크테라카페",
+  "region": "진주",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "실크테라카페",
+  "halls": [
+   [
+    "실크테라카페",
+    "100"
+   ]
+  ],
+  "hall": "실크테라카페",
+  "result": "capacity",
+  "capacity": 100,
+  "applied": true
+ },
+ {
+  "venue": "창원역사민속관",
+  "region": "창원",
+  "events": 2,
+  "kopis_events": 0,
+  "nonkopis": 2,
+  "result": "skip",
+  "why": "KOPIS 공연 없음"
+ },
+ {
+  "venue": "리본플라자",
+  "region": "거제",
+  "events": 1,
+  "kopis_events": 0,
+  "nonkopis": 1,
+  "result": "skip",
+  "why": "KOPIS 공연 없음"
+ },
+ {
+  "venue": "상상마당 부산",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 0,
+  "nonkopis": 1,
+  "result": "skip",
+  "why": "KOPIS 공연 없음"
+ },
+ {
+  "venue": "거제문화예술회관",
+  "region": "거제",
+  "events": 7,
+  "kopis_events": 5,
+  "nonkopis": 2,
+  "kopis_facility": "거제문화예술회관",
+  "halls": [
+   [
+    "대극장",
+    "1,209"
+   ],
+   [
+    "소극장",
+    "424"
+   ],
+   [
+    "야외공연장",
+    "300"
+   ],
+   [
+    "교육실",
+    "20"
+   ],
+   [
+    "소담홀(문화지음 4층)",
+    "90"
+   ]
+  ],
+  "result": "skip",
+  "why": "홀이 여러 개, 활성 공연이 쓰는 홀이 하나로 정해지지 않음 (KOPIS 밖 행사 있음)"
+ },
+ {
+  "venue": "거제시청소년수련관",
+  "region": "거제",
+  "events": 3,
+  "kopis_events": 3,
+  "nonkopis": 0,
+  "kopis_facility": "거제시청소년수련관",
+  "halls": [
+   [
+    "공연장",
+    "404"
+   ]
+  ],
+  "hall": "공연장",
+  "result": "capacity",
+  "capacity": 404,
+  "applied": true
+ },
+ {
+  "venue": "부산 민주공원",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 0,
+  "nonkopis": 1,
+  "result": "skip",
+  "why": "KOPIS 공연 없음"
+ },
+ {
+  "venue": "라브리애",
+  "region": "진주",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "라브리애",
+  "halls": [
+   [
+    "라브리애",
+    "0"
+   ]
+  ],
+  "hall": "라브리애",
+  "result": "skip",
+  "why": "객석 값 없음(0)"
+ },
+ {
+  "venue": "창원 블레이홀",
+  "region": "창원",
+  "events": 1,
+  "kopis_events": 0,
+  "nonkopis": 1,
+  "result": "skip",
+  "why": "KOPIS 공연 없음"
+ },
+ {
+  "venue": "김해 장유문화센터",
+  "region": "김해",
+  "events": 5,
+  "kopis_events": 5,
+  "nonkopis": 0,
+  "kopis_facility": "김해 장유문화센터",
+  "halls": [
+   [
+    "공연장",
+    "333"
+   ]
+  ],
+  "hall": "공연장",
+  "result": "capacity",
+  "capacity": 333,
+  "applied": true
+ },
+ {
+  "venue": "함양문화예술회관",
+  "region": "함양",
+  "events": 2,
+  "kopis_events": 1,
+  "nonkopis": 1,
+  "kopis_facility": "함양문화예술회관",
+  "halls": [
+   [
+    "대공연장",
+    "486"
+   ],
+   [
+    "소공연장",
+    "205"
+   ]
+  ],
+  "result": "skip",
+  "why": "홀이 여러 개, 활성 공연이 쓰는 홀이 하나로 정해지지 않음 (KOPIS 밖 행사 있음)"
+ },
+ {
+  "venue": "금정문화회관",
+  "region": "부산",
+  "events": 8,
+  "kopis_events": 7,
+  "nonkopis": 1,
+  "kopis_facility": "금정문화회관",
+  "halls": [
+   [
+    "대공연장(금빛누리홀)",
+    "880"
+   ],
+   [
+    "소공연장(은빛샘홀)",
+    "394"
+   ],
+   [
+    "야외공연장",
+    "300"
+   ]
+  ],
+  "result": "skip",
+  "why": "홀이 여러 개, 활성 공연이 쓰는 홀이 하나로 정해지지 않음 (KOPIS 밖 행사 있음)"
+ },
+ {
+  "venue": "동서대학교 센텀캠퍼스 5층 소향실험극장",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 0,
+  "nonkopis": 1,
+  "result": "skip",
+  "why": "KOPIS 공연 없음"
+ },
+ {
+  "venue": "거창문화센터",
+  "region": "거창",
+  "events": 6,
+  "kopis_events": 0,
+  "nonkopis": 6,
+  "result": "skip",
+  "why": "KOPIS 공연 없음"
+ },
+ {
+  "venue": "부산 남구 청년창조발전소 1층 맛있는 미술관",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 0,
+  "nonkopis": 1,
+  "result": "skip",
+  "why": "KOPIS 공연 없음"
+ },
+ {
+  "venue": "진주 현장아트홀",
+  "region": "진주",
+  "events": 1,
+  "kopis_events": 0,
+  "nonkopis": 1,
+  "result": "skip",
+  "why": "KOPIS 공연 없음"
+ },
+ {
+  "venue": "부산민주공원",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 0,
+  "nonkopis": 1,
+  "result": "skip",
+  "why": "KOPIS 공연 없음"
+ },
+ {
+  "venue": "KBS홀",
+  "region": "창원",
+  "events": 4,
+  "kopis_events": 4,
+  "nonkopis": 0,
+  "kopis_facility": "KBS홀 [창원]",
+  "halls": [
+   [
+    "KBS홀 [창원]",
+    "1,807"
+   ]
+  ],
+  "hall": "KBS홀 [창원]",
+  "result": "capacity",
+  "capacity": 1807,
+  "applied": true
+ },
+ {
+  "venue": "KT&G 상상마당",
+  "region": "부산",
+  "events": 7,
+  "kopis_events": 7,
+  "nonkopis": 0,
+  "kopis_facility": "KT&G 상상마당 라이브홀 [부산]",
+  "halls": [
+   [
+    "라이브홀",
+    "217"
+   ],
+   [
+    "특설무대 (야외)",
+    "0"
+   ],
+   [
+    "루프탑 (13F)",
+    "0"
+   ],
+   [
+    "댄스 스튜디오 (B1)",
+    "0"
+   ],
+   [
+    "라운지",
+    "0"
+   ]
+  ],
+  "result": "skip",
+  "why": "홀이 여러 개, 활성 공연이 쓰는 홀이 하나로 정해지지 않음"
+ },
+ {
+  "venue": "진해구청 대회의실",
+  "region": "창원",
+  "events": 1,
+  "kopis_events": 0,
+  "nonkopis": 1,
+  "result": "skip",
+  "why": "KOPIS 공연 없음"
+ },
+ {
+  "venue": "산청문화예술회관",
+  "region": "산청",
+  "events": 2,
+  "kopis_events": 0,
+  "nonkopis": 2,
+  "result": "skip",
+  "why": "KOPIS 공연 없음"
+ },
+ {
+  "venue": "고성군문화체육센터",
+  "region": "고성",
+  "events": 1,
+  "kopis_events": 0,
+  "nonkopis": 1,
+  "result": "skip",
+  "why": "KOPIS 공연 없음"
+ },
+ {
+  "venue": "밀양아리나 스튜디오1극장",
+  "region": "밀양",
+  "events": 1,
+  "kopis_events": 0,
+  "nonkopis": 1,
+  "result": "skip",
+  "why": "KOPIS 공연 없음"
+ },
+ {
+  "venue": "사천시문화예술회관",
+  "region": "사천",
+  "events": 2,
+  "kopis_events": 0,
+  "nonkopis": 2,
+  "result": "skip",
+  "why": "KOPIS 공연 없음"
+ },
+ {
+  "venue": "부산북구문화예술회관",
+  "region": "부산",
+  "events": 2,
+  "kopis_events": 2,
+  "nonkopis": 0,
+  "kopis_facility": "부산북구문화예술회관 (구.북구문화빙상센터)",
+  "halls": [
+   [
+    "공연장",
+    "341"
+   ]
+  ],
+  "hall": "공연장",
+  "result": "capacity",
+  "capacity": 341,
+  "applied": true
+ },
+ {
+  "venue": "전람회의그림",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "전람회의그림",
+  "halls": [
+   [
+    "전람회의그림",
+    "0"
+   ]
+  ],
+  "hall": "전람회의그림",
+  "result": "skip",
+  "why": "객석 값 없음(0)"
+ },
+ {
+  "venue": "금사락",
+  "region": "부산",
+  "events": 2,
+  "kopis_events": 2,
+  "nonkopis": 0,
+  "kopis_facility": "금사락",
+  "halls": [
+   [
+    "금사락",
+    "200"
+   ]
+  ],
+  "hall": "금사락",
+  "result": "capacity",
+  "capacity": 200,
+  "applied": true
+ },
+ {
+  "venue": "벡스코",
+  "region": "부산",
+  "events": 12,
+  "kopis_events": 12,
+  "nonkopis": 0,
+  "kopis_facility": "벡스코 (BEXCO)",
+  "halls": [
+   [
+    "오디토리움",
+    "4,002"
+   ],
+   [
+    "제1전시장",
+    "18,000"
+   ],
+   [
+    "제2전시장",
+    "6,000"
+   ],
+   [
+    "제1전시장 1홀",
+    "6,000"
+   ],
+   [
+    "제1전시장 3홀",
+    "6,000"
+   ]
+  ],
+  "result": "skip",
+  "why": "홀이 여러 개, 활성 공연이 쓰는 홀이 하나로 정해지지 않음"
+ },
+ {
+  "venue": "소향씨어터",
+  "region": "부산",
+  "events": 6,
+  "kopis_events": 6,
+  "nonkopis": 0,
+  "kopis_facility": "소향씨어터",
+  "halls": [
+   [
+    "우리은행홀 (구. 신한카드홀)",
+    "1,134"
+   ]
+  ],
+  "hall": "우리은행홀 (구. 신한카드홀)",
+  "result": "capacity",
+  "capacity": 1134,
+  "applied": true
+ },
+ {
+  "venue": "초록마술극장",
+  "region": "부산",
+  "events": 2,
+  "kopis_events": 2,
+  "nonkopis": 0,
+  "kopis_facility": "초록마술극장",
+  "halls": [
+   [
+    "초록마술극장",
+    "100"
+   ]
+  ],
+  "hall": "초록마술극장",
+  "result": "capacity",
+  "capacity": 100,
+  "applied": true
+ },
+ {
+  "venue": "경성대학교 콘서트홀",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "경성대학교 콘서트홀",
+  "halls": [
+   [
+    "경성대학교 콘서트홀",
+    "449"
+   ]
+  ],
+  "hall": "경성대학교 콘서트홀",
+  "result": "capacity",
+  "capacity": 449,
+  "applied": true
+ },
+ {
+  "venue": "백양문화예술회관",
+  "region": "부산",
+  "events": 3,
+  "kopis_events": 3,
+  "nonkopis": 0,
+  "kopis_facility": "백양문화예술회관",
+  "halls": [
+   [
+    "공연장",
+    "100"
+   ]
+  ],
+  "hall": "공연장",
+  "result": "capacity",
+  "capacity": 100,
+  "applied": true
+ },
+ {
+  "venue": "브릭홀",
+  "region": "부산",
+  "events": 2,
+  "kopis_events": 2,
+  "nonkopis": 0,
+  "kopis_facility": "브릭홀 [부산]",
+  "halls": [
+   [
+    "브릭홀 [부산]",
+    "200"
+   ]
+  ],
+  "hall": "브릭홀 [부산]",
+  "result": "capacity",
+  "capacity": 200,
+  "applied": true
+ },
+ {
+  "venue": "일터 소극장",
+  "region": "부산",
+  "events": 2,
+  "kopis_events": 2,
+  "nonkopis": 0,
+  "kopis_facility": "일터 소극장",
+  "halls": [
+   [
+    "일터 소극장",
+    "100"
+   ]
+  ],
+  "hall": "일터 소극장",
+  "result": "capacity",
+  "capacity": 100,
+  "applied": true
+ },
+ {
+  "venue": "HQ광안",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "HQ광안",
+  "halls": [
+   [
+    "HQ광안(4F)",
+    "0"
+   ]
+  ],
+  "hall": "HQ광안(4F)",
+  "result": "skip",
+  "why": "객석 값 없음(0)"
+ },
+ {
+  "venue": "센텀아트홀",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "센텀아트홀",
+  "halls": [
+   [
+    "센텀아트홀",
+    "100"
+   ]
+  ],
+  "hall": "센텀아트홀",
+  "result": "capacity",
+  "capacity": 100,
+  "applied": true
+ },
+ {
+  "venue": "신세계 문화홀",
+  "region": "부산",
+  "events": 6,
+  "kopis_events": 6,
+  "nonkopis": 0,
+  "kopis_facility": "신세계 문화홀 [센텀시티]",
+  "halls": [
+   [
+    "신세계 문화홀 [센텀시티]",
+    "0"
+   ],
+   [
+    "빅탑",
+    "0"
+   ]
+  ],
+  "hall": "신세계 문화홀 [센텀시티]",
+  "result": "skip",
+  "why": "객석 값 없음(0)"
+ },
+ {
+  "venue": "창조문화활력센터 소극장 624",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "창조문화활력센터 소극장 624",
+  "halls": [
+   [
+    "창조문화활력센터 소극장 624",
+    "108"
+   ],
+   [
+    "카페 공간 (F1)",
+    "15"
+   ]
+  ],
+  "hall": "창조문화활력센터 소극장 624",
+  "result": "capacity",
+  "capacity": 108,
+  "applied": true
+ },
+ {
+  "venue": "다누림센터",
+  "region": "부산",
+  "events": 2,
+  "kopis_events": 2,
+  "nonkopis": 0,
+  "kopis_facility": "다누림센터",
+  "halls": [
+   [
+    "다누림홀",
+    "210"
+   ]
+  ],
+  "hall": "다누림홀",
+  "result": "capacity",
+  "capacity": 210,
+  "applied": true
+ },
+ {
+  "venue": "공간결",
+  "region": "부산",
+  "events": 2,
+  "kopis_events": 2,
+  "nonkopis": 0,
+  "kopis_facility": "공간결",
+  "halls": [
+   [
+    "공연장",
+    "0"
+   ]
+  ],
+  "hall": "공연장",
+  "result": "skip",
+  "why": "객석 값 없음(0)"
+ },
+ {
+  "venue": "창녕문화예술회관",
+  "region": "창녕",
+  "events": 2,
+  "kopis_events": 2,
+  "nonkopis": 0,
+  "kopis_facility": "창녕문화예술회관",
+  "halls": [
+   [
+    "대공연장",
+    "496"
+   ],
+   [
+    "소공연장",
+    "196"
+   ],
+   [
+    "야외공연장",
+    "0"
+   ]
+  ],
+  "hall": "대공연장",
+  "result": "skip",
+  "capacity": 496,
+  "why": "홀이 3개인 건물이라 건물 한 값으로 적지 않음(지금 활성 공연은 대공연장 496석)"
+ },
+ {
+  "venue": "KBS홀",
+  "region": "부산",
+  "events": 7,
+  "kopis_events": 7,
+  "nonkopis": 0,
+  "kopis_facility": "KBS홀 [부산]",
+  "halls": [
+   [
+    "KBS홀 [부산]",
+    "2,847"
+   ]
+  ],
+  "hall": "KBS홀 [부산]",
+  "result": "capacity",
+  "capacity": 2847,
+  "applied": true
+ },
+ {
+  "venue": "정관에듀파크",
+  "region": "부산",
+  "events": 5,
+  "kopis_events": 5,
+  "nonkopis": 0,
+  "kopis_facility": "정관에듀파크",
+  "halls": [
+   [
+    "소학대홀",
+    "626"
+   ]
+  ],
+  "hall": "소학대홀",
+  "result": "capacity",
+  "capacity": 626,
+  "applied": true
+ },
+ {
+  "venue": "부전교회",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "부전교회 ",
+  "halls": [
+   [
+    "이음홀",
+    "0"
+   ]
+  ],
+  "hall": "이음홀",
+  "result": "skip",
+  "why": "객석 값 없음(0)"
+ },
+ {
+  "venue": "어댑터씨어터 2관",
+  "region": "부산",
+  "events": 2,
+  "kopis_events": 2,
+  "nonkopis": 0,
+  "kopis_facility": "어댑터씨어터 2관",
+  "halls": [
+   [
+    "어댑터씨어터 2관",
+    "92"
+   ]
+  ],
+  "hall": "어댑터씨어터 2관",
+  "result": "capacity",
+  "capacity": 92,
+  "applied": true
+ },
+ {
+  "venue": "부산예술회관",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "부산예술회관",
+  "halls": [
+   [
+    "부산예술회관",
+    "240"
+   ]
+  ],
+  "hall": "부산예술회관",
+  "result": "capacity",
+  "capacity": 240,
+  "applied": true
+ },
+ {
+  "venue": "오방가르드",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "오방가르드",
+  "halls": [
+   [
+    "오방가르드",
+    "0"
+   ]
+  ],
+  "hall": "오방가르드",
+  "result": "skip",
+  "why": "객석 값 없음(0)"
+ },
+ {
+  "venue": "용천지랄소극장",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "용천지랄소극장",
+  "halls": [
+   [
+    "용천지랄소극장",
+    "80"
+   ]
+  ],
+  "hall": "용천지랄소극장",
+  "result": "capacity",
+  "capacity": 80,
+  "applied": true
+ },
+ {
+  "venue": "클럽 벨포스",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "클럽 벨포스",
+  "halls": [
+   [
+    "클럽 벨포스",
+    "0"
+   ]
+  ],
+  "hall": "클럽 벨포스",
+  "result": "skip",
+  "why": "객석 값 없음(0)"
+ },
+ {
+  "venue": "동래문화회관",
+  "region": "부산",
+  "events": 6,
+  "kopis_events": 6,
+  "nonkopis": 0,
+  "kopis_facility": "동래문화회관",
+  "halls": [
+   [
+    "대극장",
+    "505"
+   ],
+   [
+    "소극장",
+    "196"
+   ],
+   [
+    "야외공연장",
+    "1,130"
+   ]
+  ],
+  "result": "skip",
+  "why": "홀이 여러 개, 활성 공연이 쓰는 홀이 하나로 정해지지 않음"
+ },
+ {
+  "venue": "드림씨어터",
+  "region": "부산",
+  "events": 2,
+  "kopis_events": 2,
+  "nonkopis": 0,
+  "result": "skip",
+  "why": "KOPIS 시설이 둘 이상"
+ },
+ {
+  "venue": "부산예술대학교 원곡예술관",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "부산예술대학교 원곡예술관",
+  "halls": [
+   [
+    "공연장",
+    "594"
+   ]
+  ],
+  "hall": "공연장",
+  "result": "capacity",
+  "capacity": 594,
+  "applied": true
+ },
+ {
+  "venue": "초콜릿팩토리",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "초콜릿팩토리",
+  "halls": [
+   [
+    "초콜릿팩토리",
+    "164"
+   ]
+  ],
+  "hall": "초콜릿팩토리",
+  "result": "capacity",
+  "capacity": 164,
+  "applied": true
+ },
+ {
+  "venue": "필슈파스",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "필슈파스 [부산진구]",
+  "halls": [
+   [
+    "필슈파스 (4F)",
+    "0"
+   ]
+  ],
+  "hall": "필슈파스 (4F)",
+  "result": "skip",
+  "why": "객석 값 없음(0)"
+ },
+ {
+  "venue": "해바라기소극장",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "해바라기소극장 [부산]",
+  "halls": [
+   [
+    "해바라기소극장 [부산]",
+    "119"
+   ]
+  ],
+  "hall": "해바라기소극장 [부산]",
+  "result": "capacity",
+  "capacity": 119,
+  "applied": true
+ },
+ {
+  "venue": "로드아트센터",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "로드아트센터 [부산]",
+  "halls": [
+   [
+    "로드아트센터(2F)",
+    "45"
+   ]
+  ],
+  "hall": "로드아트센터(2F)",
+  "result": "capacity",
+  "capacity": 45,
+  "applied": true
+ },
+ {
+  "venue": "소극장 6번출구",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "소극장 6번출구",
+  "halls": [
+   [
+    "소극장 6번출구",
+    "90"
+   ]
+  ],
+  "hall": "소극장 6번출구",
+  "result": "capacity",
+  "capacity": 90,
+  "applied": true
+ },
+ {
+  "venue": "피아크",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "피아크",
+  "halls": [
+   [
+    "오션가든",
+    "0"
+   ]
+  ],
+  "hall": "오션가든",
+  "result": "skip",
+  "why": "객석 값 없음(0)"
+ },
+ {
+  "venue": "남양 열린운동장",
+  "region": "창원",
+  "events": 1,
+  "kopis_events": 0,
+  "nonkopis": 1,
+  "result": "skip",
+  "why": "KOPIS 공연 없음"
+ },
+ {
+  "venue": "봉황예술극장",
+  "region": "김해",
+  "events": 1,
+  "kopis_events": 0,
+  "nonkopis": 1,
+  "result": "skip",
+  "why": "KOPIS 공연 없음"
+ },
+ {
+  "venue": "하우스오브베르",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "하우스오브베르",
+  "halls": [
+   [
+    "공연장",
+    "0"
+   ]
+  ],
+  "hall": "공연장",
+  "result": "skip",
+  "why": "객석 값 없음(0)"
+ },
+ {
+  "venue": "하하아트홀",
+  "region": "부산",
+  "events": 2,
+  "kopis_events": 2,
+  "nonkopis": 0,
+  "kopis_facility": "하하아트홀 (구. 성원아트홀)",
+  "halls": [
+   [
+    "하하아트홀 (구. 성원아트홀)",
+    "174"
+   ]
+  ],
+  "hall": "하하아트홀 (구. 성원아트홀)",
+  "result": "capacity",
+  "capacity": 174,
+  "applied": true
+ },
+ {
+  "venue": "기장군청",
+  "region": "부산",
+  "events": 3,
+  "kopis_events": 3,
+  "nonkopis": 0,
+  "kopis_facility": "기장군청",
+  "halls": [
+   [
+    "차성아트홀",
+    "383"
+   ]
+  ],
+  "hall": "차성아트홀",
+  "result": "capacity",
+  "capacity": 383,
+  "applied": true
+ },
+ {
+  "venue": "가온아트홀",
+  "region": "부산",
+  "events": 3,
+  "kopis_events": 3,
+  "nonkopis": 0,
+  "kopis_facility": "가온아트홀 [부산]",
+  "halls": [
+   [
+    "1관",
+    "150"
+   ],
+   [
+    "2관",
+    "100"
+   ]
+  ],
+  "result": "skip",
+  "why": "홀이 여러 개, 활성 공연이 쓰는 홀이 하나로 정해지지 않음"
+ },
+ {
+  "venue": "어댑터씨어터 1관",
+  "region": "부산",
+  "events": 2,
+  "kopis_events": 2,
+  "nonkopis": 0,
+  "kopis_facility": "어댑터씨어터 1관 (구.어댑터플레이스)",
+  "halls": [
+   [
+    "어댑터씨어터 1관",
+    "80"
+   ]
+  ],
+  "hall": "어댑터씨어터 1관",
+  "result": "capacity",
+  "capacity": 80,
+  "applied": true
+ },
+ {
+  "venue": "거제 리본플라자",
+  "region": "거제",
+  "events": 1,
+  "kopis_events": 0,
+  "nonkopis": 1,
+  "result": "skip",
+  "why": "KOPIS 공연 없음"
+ },
+ {
+  "venue": "의령군민문화회관",
+  "region": "의령",
+  "events": 2,
+  "kopis_events": 1,
+  "nonkopis": 1,
+  "kopis_facility": "의령군민문화회관",
+  "halls": [
+   [
+    "의령군민문화회관",
+    "354"
+   ]
+  ],
+  "hall": "의령군민문화회관",
+  "result": "capacity",
+  "capacity": 354,
+  "applied": true
+ },
+ {
+  "venue": "남부하동청년센터",
+  "region": "하동",
+  "events": 1,
+  "kopis_events": 0,
+  "nonkopis": 1,
+  "result": "skip",
+  "why": "KOPIS 공연 없음"
+ },
+ {
+  "venue": "국립부산국악원 예지당",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 0,
+  "nonkopis": 1,
+  "result": "skip",
+  "why": "KOPIS 공연 없음"
+ },
+ {
+  "venue": "김해문화원",
+  "region": "김해",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "김해문화원",
+  "halls": [
+   [
+    "공연장",
+    "218"
+   ]
+  ],
+  "hall": "공연장",
+  "result": "capacity",
+  "capacity": 218,
+  "applied": true
+ },
+ {
+  "venue": "킨키",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "킨키[부산]",
+  "halls": [
+   [
+    "킨키 [부산]",
+    "20"
+   ]
+  ],
+  "hall": "킨키 [부산]",
+  "result": "capacity",
+  "capacity": 20,
+  "applied": true
+ },
+ {
+  "venue": "BNK부산은행 조은극장",
+  "region": "부산",
+  "events": 2,
+  "kopis_events": 2,
+  "nonkopis": 0,
+  "kopis_facility": "BNK부산은행 조은극장",
+  "halls": [
+   [
+    "1관",
+    "245"
+   ],
+   [
+    "2관",
+    "167"
+   ],
+   [
+    "스타홀",
+    "160"
+   ]
+  ],
+  "result": "skip",
+  "why": "홀이 여러 개, 활성 공연이 쓰는 홀이 하나로 정해지지 않음"
+ },
+ {
+  "venue": "F1963",
+  "region": "부산",
+  "events": 5,
+  "kopis_events": 5,
+  "nonkopis": 0,
+  "kopis_facility": "F1963",
+  "halls": [
+   [
+    "석천홀",
+    "500"
+   ],
+   [
+    "야외무대",
+    "0"
+   ],
+   [
+    "GMC금난새뮤직센터",
+    "120"
+   ]
+  ],
+  "result": "skip",
+  "why": "홀이 여러 개, 활성 공연이 쓰는 홀이 하나로 정해지지 않음"
+ },
+ {
+  "venue": "KNN시어터",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "KNN시어터",
+  "halls": [
+   [
+    "KNN시어터",
+    "280"
+   ]
+  ],
+  "hall": "KNN시어터",
+  "result": "capacity",
+  "capacity": 280,
+  "applied": true
+ },
+ {
+  "venue": "가로수극장",
+  "region": "창원",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "가로수극장 [창원]",
+  "halls": [
+   [
+    "가로수극장 [창원]",
+    "50"
+   ]
+  ],
+  "hall": "가로수극장 [창원]",
+  "result": "capacity",
+  "capacity": 50,
+  "applied": true
+ },
+ {
+  "venue": "기타",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 0,
+  "nonkopis": 1,
+  "result": "skip",
+  "why": "KOPIS 공연 없음"
+ },
+ {
+  "venue": "몰입공유연습실",
+  "region": "창원",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "몰입공유연습실",
+  "halls": [
+   [
+    "몰입공유연습실",
+    "20"
+   ]
+  ],
+  "hall": "몰입공유연습실",
+  "result": "capacity",
+  "capacity": 20,
+  "applied": true
+ },
+ {
+  "venue": "유어타입 본점",
+  "region": "부산",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "유어타입 본점",
+  "halls": [
+   [
+    "유어타입 본점",
+    "0"
+   ]
+  ],
+  "hall": "유어타입 본점",
+  "result": "skip",
+  "why": "객석 값 없음(0)"
+ },
+ {
+  "venue": "음악이주는선물",
+  "region": "김해",
+  "events": 1,
+  "kopis_events": 1,
+  "nonkopis": 0,
+  "kopis_facility": "음악이주는선물",
+  "halls": [
+   [
+    "음악이주는선물",
+    "0"
+   ]
+  ],
+  "hall": "음악이주는선물",
+  "result": "skip",
+  "why": "객석 값 없음(0)"
+ }
+]
