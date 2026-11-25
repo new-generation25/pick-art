@@ -3,14 +3,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
-    Container, Title, Text, SimpleGrid, Paper, Group, Stack, Badge, Button, Progress, Anchor, Loader, Box, Tooltip,
+    Container, Title, Text, SimpleGrid, Paper, Group, Stack, Badge, Button, Progress, Anchor, Loader, Box, Tooltip, Table,
 } from "@mantine/core";
 import { RefreshCw, ExternalLink } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { GN_REGIONS } from "@/lib/regions";
 import {
-    ALERT_RULES, SOURCE_KINDS, computeSupply, daysBetween, lastNewByKind, newByDay,
-    type Alert, type DayKinds, type OpsEvent, type SourceKind,
+    ALERT_RULES, SOURCE_KINDS, checkMissedRun, computeSupply, daysBetween, foundSeries, lastNewByKind, latestRunRows, newByDay,
+    runStatusTone, splitCollectorAlerts,
+    type Alert, type CollectorAlert, type CollectorRun, type DayKinds, type OpsEvent, type SourceKind,
 } from "@/lib/opsStats";
 
 // 운영 대시보드: 지금 DB(행사·수집분·장소·회원)와 수집기가 올린 인스타 리포트 숫자(ops_snapshots)를 한 화면에.
@@ -148,6 +149,47 @@ function buildAlerts(ops: Ops, supply: ReturnType<typeof computeSupply>, lastNew
 const LEVEL_COLOR = { bad: "red", warn: "yellow", info: "gray" } as const;
 const LEVEL_LABEL = { bad: "이상", warn: "주의", info: "대기" } as const;
 
+/** 수집기가 올린 묶음의 rows. 모양이 다르면 빈 목록(contracts/ops-snapshots.md) */
+function snapshotRows<T>(snap: Snapshot | undefined): T[] {
+    const rows = snap?.data?.rows;
+    return Array.isArray(rows) ? (rows as unknown as T[]) : [];
+}
+
+/** 수집기 경고(켜진 것) + 실행 누락 → 「살펴볼 것」 맨 위 줄. text 는 데이터라 글자로만 그린다 */
+function collectorAlertLines(missed: ReturnType<typeof checkMissedRun>, open: CollectorAlert[]): Alert[] {
+    const a: Alert[] = [];
+    if (missed.state === "missed") {
+        a.push({ level: "bad", text: `수집기 실행 누락: 마지막 실행 ${fmtTime(missed.lastRunAt)} (${Math.round(missed.hours)}시간 전, 기준 ${ALERT_RULES.collectorRunMissHours}시간 · 정기 실행 08:20·15:00)` });
+    }
+    for (const c of open) a.push({ level: c.level === "bad" ? "bad" : "warn", text: c.text });
+    return a;
+}
+
+const RUN_TONE_BADGE = {
+    ok: { color: "teal", variant: "light" },
+    bad: { color: "red", variant: "filled" },
+    other: { color: "yellow", variant: "light" },
+} as const;
+
+function fmtNum(v: number | null | undefined): string {
+    return typeof v === "number" ? v.toLocaleString() : "—";
+}
+
+/** 출처 하나의 최근 found 를 작은 막대로. 오래된 것이 왼쪽. 0 은 빨간 바닥선만 */
+function FoundStrip({ points, source }: { points: { run_at: string; found: number }[]; source: string }) {
+    const H = 20;
+    const max = Math.max(1, ...points.map(p => p.found));
+    return (
+        <Group gap={2} wrap="nowrap" align="flex-end" h={H} role="img" aria-label={`${source} 최근 ${points.length}회 발견 수`}>
+            {points.map(p => (
+                <Box key={p.run_at} title={`${fmtTime(p.run_at)} · 발견 ${p.found}`} w={6}
+                    h={p.found ? Math.max(2, Math.round((p.found / max) * H)) : 1}
+                    style={{ background: p.found ? "var(--mantine-color-blue-5)" : "var(--mantine-color-red-4)", borderRadius: 1, flexShrink: 0 }} />
+            ))}
+        </Group>
+    );
+}
+
 function Tile({ label, value, sub, href }: { label: string; value: React.ReactNode; sub?: React.ReactNode; href?: string }) {
     const body = (
         <Paper withBorder p="md" radius="md" h="100%">
@@ -254,14 +296,20 @@ export default function AdminDashboard() {
         const instaDays = metricRows.filter(r => r.kind === "day").slice(0, 14).reverse()
             .map(r => ({ day: r.date || "", 소규모: r.posts_small || 0, 공공: r.posts_public || 0, 기타: Math.max(0, (r.posts || 0) - (r.posts_small || 0) - (r.posts_public || 0)) }));
         const groups = [...new Set(summary.map(r => r.group || ""))].filter(g => g !== "공급");
-        const alerts = buildAlerts(ops, supply, lastNew, summary);
-        return { supply, days, lastNew, summary, instaDays, groups, alerts };
+        const nowMs = ops.loadedAt.getTime();
+        const runRows = snapshotRows<CollectorRun>(ops.snapshots["collector_runs"]);
+        const latestRuns = latestRunRows(runRows);
+        const series = new Map(foundSeries(runRows, 10).map(s => [s.source, s.points]));
+        const missed = checkMissedRun(runRows, nowMs);
+        const collector = splitCollectorAlerts(snapshotRows<CollectorAlert>(ops.snapshots["collector_alerts"]), nowMs, 7);
+        const alerts = [...collectorAlertLines(missed, collector.open), ...buildAlerts(ops, supply, lastNew, summary)];
+        return { supply, days, lastNew, summary, instaDays, groups, alerts, latestRuns, series, missed, resolvedCollector: collector.resolved };
     }, [ops]);
 
     if (!ops || !view) {
         return <Container size="xl" py={60}><Group><Loader size="sm" /><Text c="dimmed">운영 숫자를 읽는 중…</Text></Group></Container>;
     }
-    const { supply, days, lastNew, summary, instaDays, groups, alerts } = view;
+    const { supply, days, lastNew, summary, instaDays, groups, alerts, latestRuns, series, missed, resolvedCollector } = view;
     const snap = ops.snapshots["insta_metrics"];
     const added7 = days.slice(-7).reduce((s, d) => s + SOURCE_KINDS.reduce((t, k) => t + d[k], 0), 0);
 
@@ -289,6 +337,22 @@ export default function AdminDashboard() {
                                 </Group>
                             ))}
                         </Stack>
+                    )}
+                    {missed.state === "none" && <Text size="sm" c="dimmed" mt={6}>수집기 정기 실행: 실행 기록이 아직 없습니다</Text>}
+                    {resolvedCollector.length > 0 && (
+                        <Box component="details" mt="sm" id="collector-alerts-resolved">
+                            <Text component="summary" size="sm" c="dimmed" style={{ cursor: "pointer" }}>
+                                수집기 경고 — 최근 7일 안에 풀린 것 {resolvedCollector.length}건
+                            </Text>
+                            <Stack gap={4} mt={6}>
+                                {resolvedCollector.map((c, i) => (
+                                    <Group key={i} gap="sm" wrap="nowrap" align="flex-start">
+                                        <Badge color={c.level === "bad" ? "red" : "yellow"} variant="light" w={48} style={{ flexShrink: 0 }}>{c.level === "bad" ? "이상" : "주의"}</Badge>
+                                        <Text size="sm" c="dimmed">{c.resolved_at ? `${fmtTime(c.resolved_at)} 풀림 · ` : ""}{c.text}</Text>
+                                    </Group>
+                                ))}
+                            </Stack>
+                        </Box>
                     )}
                 </Paper>
 
@@ -334,6 +398,53 @@ export default function AdminDashboard() {
                         </Text>
                     </Paper>
                 </SimpleGrid>
+
+                <Paper withBorder radius="md" p="md" id="collector-runs">
+                    <Text fw={700}>출처별 최근 실행</Text>
+                    <Text size="xs" c="dimmed" mb="sm">
+                        {latestRuns.length
+                            ? `${fmtTime(latestRuns[0].run_at)} 정기 실행 · 수집기가 올린 기록 · 막대는 출처별 최근 10회 발견 수(왼쪽이 오래된 것, 빨간 바닥선은 0건)`
+                            : "실행 기록이 아직 없습니다"}
+                    </Text>
+                    {latestRuns.length > 0 && (
+                        <Table.ScrollContainer minWidth={760}>
+                            <Table verticalSpacing={6} fz="sm">
+                                <Table.Thead>
+                                    <Table.Tr>
+                                        <Table.Th>출처</Table.Th>
+                                        <Table.Th>상태</Table.Th>
+                                        <Table.Th ta="right">발견</Table.Th>
+                                        <Table.Th ta="right">신규</Table.Th>
+                                        <Table.Th ta="right">중복</Table.Th>
+                                        <Table.Th ta="right">실패</Table.Th>
+                                        <Table.Th>최근 10회 발견</Table.Th>
+                                        <Table.Th>메모</Table.Th>
+                                    </Table.Tr>
+                                </Table.Thead>
+                                <Table.Tbody>
+                                    {latestRuns.map((r, i) => {
+                                        const tone = RUN_TONE_BADGE[runStatusTone(r.status)];
+                                        return (
+                                            <Table.Tr key={`${r.source}-${i}`}>
+                                                <Table.Td>
+                                                    <Text size="sm">{r.source}</Text>
+                                                    {r.kind === "publish" && <Text size="xs" c="dimmed">발견 = 공개한 수</Text>}
+                                                </Table.Td>
+                                                <Table.Td><Badge size="sm" color={tone.color} variant={tone.variant}>{r.status || "—"}</Badge></Table.Td>
+                                                <Table.Td ta="right" style={{ fontVariantNumeric: "tabular-nums" }} c={r.found === 0 ? "red" : undefined}>{fmtNum(r.found)}</Table.Td>
+                                                <Table.Td ta="right" style={{ fontVariantNumeric: "tabular-nums" }}>{fmtNum(r.new)}</Table.Td>
+                                                <Table.Td ta="right" style={{ fontVariantNumeric: "tabular-nums" }}>{fmtNum(r.dup)}</Table.Td>
+                                                <Table.Td ta="right" style={{ fontVariantNumeric: "tabular-nums" }} c={r.fail ? "red" : undefined}>{fmtNum(r.fail)}</Table.Td>
+                                                <Table.Td><FoundStrip source={r.source} points={series.get(r.source) || []} /></Table.Td>
+                                                <Table.Td><Text size="xs" c="dimmed" truncate="end" maw={280} title={r.note || undefined}>{r.note || ""}</Text></Table.Td>
+                                            </Table.Tr>
+                                        );
+                                    })}
+                                </Table.Tbody>
+                            </Table>
+                        </Table.ScrollContainer>
+                    )}
+                </Paper>
 
                 <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
                     <Paper withBorder radius="md" p="md" id="by-region">

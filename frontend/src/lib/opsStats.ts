@@ -124,4 +124,90 @@ export const ALERT_RULES = {
     officialQuietDays: 3,     // 기관 게시판 28곳 합쳐 사흘 넘게 0건이면 의심
     snapshotStaleHours: 30,   // 인스타 숫자는 정기 실행(하루 2번)마다 올라온다
     rawQuietHours: 24,        // 마지막 새 수집분이 이보다 오래되면 정기 실행을 의심
+    collectorRunMissHours: 14, // 정기 실행(08:20·15:00) 기록이 이보다 오래되면 「실행 누락」. specs/003-ops-automation/contracts/alert-rules.md
 };
+
+// ── 수집기 실행 기록(ops_snapshots.collector_runs / collector_alerts) ──
+// 칸 이름은 specs/003-ops-automation/contracts/ops-snapshots.md 를 따른다. 수집기가 바꾸면 여기도 고친다.
+
+export type CollectorRun = {
+    run_at: string;
+    source: string;
+    kind?: string;            // kopis · website · blog · publish(자동 공개, found = 공개한 수) …
+    status?: string;
+    found?: number | null;
+    new?: number | null;
+    dup?: number | null;
+    fail?: number | null;
+    expired_def?: boolean;
+    note?: string | null;
+};
+
+export type CollectorAlert = {
+    rule: string;
+    target?: string;
+    level: string;            // bad | warn
+    text: string;
+    since?: string | null;
+    resolved_at?: string | null;
+};
+
+function timeOf(iso: string | null | undefined): number {
+    const t = iso ? Date.parse(iso) : NaN;
+    return Number.isFinite(t) ? t : NaN;
+}
+
+/** 마지막 실행(run_at 이 가장 늦은 것)의 줄들. 원래 순서(실행 순서)를 지킨다. 시각은 오프셋이 달라도 같은 순간이면 같은 실행 */
+export function latestRunRows(rows: CollectorRun[]): CollectorRun[] {
+    const valid = rows.filter(r => r && Number.isFinite(timeOf(r.run_at)));
+    if (!valid.length) return [];
+    const last = Math.max(...valid.map(r => timeOf(r.run_at)));
+    return valid.filter(r => timeOf(r.run_at) === last);
+}
+
+/** 출처별 최근 n회 found. 오래된 것이 앞. 출처 순서는 마지막 실행의 순서, 그다음 그 밖의 출처(최근에 나온 순) */
+export function foundSeries(rows: CollectorRun[], n = 10): { source: string; points: { run_at: string; found: number }[] }[] {
+    const valid = rows.filter(r => r && r.source && Number.isFinite(timeOf(r.run_at)))
+        .slice().sort((a, b) => timeOf(b.run_at) - timeOf(a.run_at));   // 최근 것이 앞(같은 시각이면 원래 순서 유지)
+    const by = new Map<string, { run_at: string; found: number }[]>();
+    for (const r of valid) {
+        const list = by.get(r.source) || [];
+        if (!by.has(r.source)) by.set(r.source, list);
+        if (list.length < n) list.push({ run_at: r.run_at, found: typeof r.found === "number" ? r.found : 0 });
+    }
+    const order = [...latestRunRows(rows).map(r => r.source), ...by.keys()];
+    return [...new Set(order)].filter(s => by.has(s)).map(source => ({ source, points: by.get(source)!.slice().reverse() }));
+}
+
+export type MissedRun =
+    | { state: "none" }                                          // 실행 기록이 아직 없음
+    | { state: "ok" | "missed"; lastRunAt: string; hours: number };
+
+/** 지금 − 마지막 run_at 이 ALERT_RULES.collectorRunMissHours 를 넘으면 missed */
+export function checkMissedRun(rows: CollectorRun[] | null | undefined, nowMs: number,
+    limitHours = ALERT_RULES.collectorRunMissHours): MissedRun {
+    const latest = latestRunRows(rows || []);
+    if (!latest.length) return { state: "none" };
+    const lastRunAt = latest[0].run_at;
+    const hours = (nowMs - timeOf(lastRunAt)) / 3600000;
+    return { state: hours > limitHours ? "missed" : "ok", lastRunAt, hours };
+}
+
+/** 켜진 경고(resolved_at 없음, bad 가 앞)와 최근 days일 안에 풀린 경고(최근에 풀린 것이 앞)로 나눈다 */
+export function splitCollectorAlerts(rows: CollectorAlert[], nowMs: number, days = 7): { open: CollectorAlert[]; resolved: CollectorAlert[] } {
+    const valid = rows.filter(r => r && typeof r.text === "string");
+    const open = valid.filter(r => r.resolved_at == null)
+        .map((r, i) => ({ r, i })).sort((a, b) => (a.r.level === "bad" ? 0 : 1) - (b.r.level === "bad" ? 0 : 1) || a.i - b.i).map(x => x.r);
+    const from = nowMs - days * 86400000;
+    const resolved = valid.filter(r => r.resolved_at != null && timeOf(r.resolved_at) >= from && timeOf(r.resolved_at) <= nowMs)
+        .sort((a, b) => timeOf(b.resolved_at) - timeOf(a.resolved_at));
+    return { open, resolved };
+}
+
+/** 실행 상태 글자 → 화면 색 갈래 */
+export function runStatusTone(status: string | null | undefined): "ok" | "bad" | "other" {
+    const s = (status || "").toUpperCase();
+    if (s === "SUCCESS" || s === "OK") return "ok";
+    if (s.includes("FAIL") || s.includes("ERROR")) return "bad";
+    return "other";
+}
