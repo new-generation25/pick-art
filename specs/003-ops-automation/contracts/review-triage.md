@@ -3,6 +3,7 @@
 ```text
 python tools/triage_review.py --dry-run          # 바꾸지 않고 표만
 python tools/triage_review.py --apply            # 적용 (첫 적용은 운영자가 dry-run 표를 승인한 뒤)
+python tools/triage_review.py --undo <목록 파일>  # 그 적용에서 바꾼 줄을 이전 상태·무더기로 되돌림
 ```
 
 ## 입력
@@ -26,6 +27,7 @@ python tools/triage_review.py --apply            # 적용 (첫 적용은 운영�
 
 - 표준 출력 마지막 줄(정기 실행 보고용): `✅ REVIEW 정리: 만료 556 · 중복 n · 동의 필요 n · 공개 후보 n · 사람 판단 n (남은 REVIEW n)`
 - dry-run은 `collector/logs/triage/triage_<날짜>.json`에 줄마다 `{id, title, rule, result}`를 남긴다(운영자 확인용).
+- apply는 `collector/logs/triage/applied_<날짜시각>.json`에 줄마다 `{id, prev_status, prev_bucket, new_status, new_bucket}`를 남긴다. `--undo`는 이 파일만 읽어 되돌린다(그사이 사람이 바꾼 줄은 건너뛰고 건수를 알린다).
 
 ## 정기 실행 연결
 
