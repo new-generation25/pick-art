@@ -323,7 +323,10 @@ def cmd_liked_many(a):
     """여러 계정의 7일 안 답례 좋아요 여부를 한 번에."""
     since = (date.today() - timedelta(days=7)).isoformat()
     done = {norm(r.get("account")) for r in load("engaged") if r.get("type") == "like_back" and day_of(r) >= since}
-    out({norm(x): norm(x) in done for x in a.accounts})
+    # 비공개·게시물 없음으로 답례를 건너뛴 계정은 다시 열지 않는다(2026-11-25: 같은 비공개 계정을 두 번 열었다)
+    skip = {norm(r.get("account")) for r in load("feedback")
+            if any(w in (r.get("detail") or "") for w in ("비공개", "게시물 없음", "답례 못 함", "답례 건너뜀"))}
+    out({norm(x): (norm(x) in done or norm(x) in skip) for x in a.accounts})
 
 
 def cmd_last_check(a):
