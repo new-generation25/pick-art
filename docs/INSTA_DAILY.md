@@ -7,7 +7,7 @@
 
 - 홈 피드·허락받은 소규모·상시 동의 계정에서 찾은 행사도 **먼저 피카 앱 DB(`events`)에 넣는다**(큐레이션 JSON → `add_curated.py` → `publish_verified.py --curated`). DB에 이미 있으면 넣지 않는다.
 - 게시 후보는 **DB `events`에서만** 고른다. 게시 기록(`posted.json`)의 `event_id`는 반드시 DB 행사 번호(UUID)다 — `insta_state.py add posted`가 UUID 가 아니면 거부한다. 그래서 같은 행사는 `posted-ids`·`claim event`로 저절로 걸러진다.
-- 11/25 1차가 이미 올린 〈나비〉(11/21, `dm-doublestage-nabi`)를 다시 올리려 한 일이 있었다. 행사 번호가 DB 번호가 아니어서 중복이 걸리지 않았다.
+- 11/25 1차가 이미 올린 〈나비〉(11/21, `dm-doublestage-nabi`)를 다시 올린 일이 있었다(11/25 `DgJdyQMEmDy`, 같은 공연 11.28~29 소극장 624). 행사 번호가 DB 번호가 아니어서 중복이 걸리지 않았다. 2026-11-25에 옛 임시 번호 18줄(`dm-` 17 · `home-` 1)을 모두 DB 번호로 바꿨다(옛 번호는 `temp_id` 칸, 원본은 `docs/insta/backup_2026-11-25/`).
 
 ## 하루 두 회차와 에이전트 나눔 (2026-11-23 운영자 지시)
 
@@ -102,5 +102,7 @@
 
 ## 5. 기록과 보고
 
-- 올린 것마다 `docs/insta/posted.json`에 `{"event_id", "title", "region", "posted_at", "post_url"}`을 더한다(프로필 첫 게시물 링크로 확인).
+- 올린 것마다 `insta_state.py add posted`로 `{"event_id"(DB UUID), "title", "region", "posted_at", "post_url", "scale":"소규모|공공"}`을 더한다(프로필 첫 게시물 링크로 확인. 여섯 칸 모두 있어야 받는다 — 2026-11-25 도구와 맞춤).
+- DB에 같은 공연이 두 줄(예: 인스타 큐레이션 줄과 예매처 「제목 [부산]」 줄)로 있으면 두 번호를 모두 같은 `post_url`로 적어 다시 뽑히지 않게 한다(순회 묶음과 같은 방식). 2026-11-25 정리 때 이런 줄 5개를 찾았다.
+- 릴스·묶음 카드처럼 여러 행사를 한 게시물에 담은 것은 `docs/insta/roundups.json`에 적는다(`posted.json`에 넣지 않는다 — 그 행사의 단독 게시를 막지 않으려고).
 - 마지막에 짧게 보고한다: 올린 수 / 목표 10, 행사 목록(지역·날짜), 뺀 행사와 이유, 멈췄다면 그 이유.
