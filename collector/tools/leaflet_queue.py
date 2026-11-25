@@ -41,7 +41,8 @@ READ_BY = "claude-scheduled"
 
 TEXT_FIELDS = ("title", "date_text", "time_text", "venue", "region_hint", "price_text",
                "booking_text", "booking_url", "organizer", "contact")
-ALLOWED_KEYS = set(TEXT_FIELDS) | {"multiple_events"}
+BOOL_FIELDS = ("multiple_events", "personal_info_visible")  # personal_info_visible: 이미지에 개인 휴대전화·계좌번호·개인 메일이 보임 → 포스터로 공개하지 않음(FR-042)
+ALLOWED_KEYS = set(TEXT_FIELDS) | set(BOOL_FIELDS)
 CONFIDENCE = {"high", "low", "none"}
 UUID = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
 EXT_OK = {"jpg", "jpeg", "png", "webp", "heic", "heif"}
@@ -162,9 +163,12 @@ def validate(data):
     if extra:
         raise ValidationError(f"칸 밖 키: {sorted(extra)}")
     out, dropped = {}, []
-    me = data.get("multiple_events", False)
-    if not isinstance(me, bool):
-        raise ValidationError("multiple_events 는 true/false 여야 한다")
+    flags = {}
+    for b in BOOL_FIELDS:
+        v = data.get(b, False)
+        if not isinstance(v, bool):
+            raise ValidationError(f"{b} 는 true/false 여야 한다")
+        flags[b] = v
     for name in TEXT_FIELDS:
         f = data.get(name)
         if f is None:
@@ -190,7 +194,10 @@ def validate(data):
             field = {"raw": None, "value": None, "confidence": "none"}
             dropped.append({"field": name, "reason": reason})
         out[name] = field
-    out["multiple_events"] = me
+    out.update(flags)
+    # 칸에서 개인 연락처를 걸러 냈다면 이미지에도 보인다는 뜻이다
+    if dropped:
+        out["personal_info_visible"] = True
     return out, dropped
 
 

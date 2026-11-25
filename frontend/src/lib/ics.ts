@@ -4,6 +4,10 @@
  * 가져오는 모듈이 없어 node 테스트로 바로 돌린다.
  */
 
+// 개인 휴대전화 가리기 — lib/privacy.ts 와 같은 규칙(이 파일은 가져오는 모듈 없이 node 테스트로 돌리므로 여기 둔다)
+const MOBILE = /(?:\+?82[\s.\-]*0?|(?<!\d)0)1[016789][\s.\-)]*\d{3,4}[\s.\-]*\d{4}(?!\d)/g;
+const maskPersonalPhones = (t: string) => t.replace(MOBILE, "(개인 연락처는 원본 안내에서 확인)");
+
 export type IcsEvent = {
     id: string;
     title: string;
@@ -49,7 +53,8 @@ export function vevent(e: IcsEvent, stamp: string): string[] | null {
     const end = e.event_date_end || start;
     if (!start || !end) return null;
     const where = [e.venue, e.region].filter(Boolean).join(", ");
-    const desc = [(e.description || "").slice(0, 600), `피카에서 보기: ${e.url}`].filter(Boolean).join("\n\n");
+    // 개인 휴대전화는 캘린더에도 넣지 않는다(운영자 11/26) — 원본 안내에서 확인
+    const desc = [maskPersonalPhones(e.description || "").slice(0, 600), `피카에서 보기: ${e.url}`].filter(Boolean).join("\n\n");
     return [
         "BEGIN:VEVENT",
         `UID:${e.id}@picka.news`,

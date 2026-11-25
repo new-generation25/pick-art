@@ -266,3 +266,21 @@ def test_cleanup_dry_run_and_apply():
     assert done["files_removed"] == 1 and done["rows_cleared"] == 1
     assert store.removed == [f"u1/{old}.png"] and store.rows[old]["image_path"] is None
     assert store.rows[SID]["image_path"] == f"u1/{SID}.jpg"
+
+
+def test_personal_info_visible_flag():
+    # 예약작업이 표시하면 그대로, 없으면 False
+    out, _ = lq.validate(full(personal_info_visible=True))
+    assert out["personal_info_visible"] is True
+    out, _ = lq.validate(full())
+    assert out["personal_info_visible"] is False
+    with pytest.raises(lq.ValidationError):
+        lq.validate(full(personal_info_visible="yes"))
+
+
+def test_dropped_contact_sets_personal_info_visible():
+    # 칸에 휴대전화가 들어와 걸러졌다면 이미지에도 보인다는 뜻 → 포스터로 쓰지 않게 표시
+    d = full()
+    d["contact"] = {"raw": "문의 010-1234-5678", "value": "010-1234-5678", "confidence": "high"}
+    out, dropped = lq.validate(d)
+    assert dropped and out["personal_info_visible"] is True

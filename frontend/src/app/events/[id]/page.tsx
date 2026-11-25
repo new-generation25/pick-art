@@ -22,6 +22,7 @@ import { AdminInstaMark } from "@/components/ui/AdminInstaMark";
 import { CountedLink, EventViewCounter } from "@/components/ui/EventCounter";
 import { getEventOrgs } from "@/lib/places";
 import { isGroupProvided } from "@/lib/leaflets";
+import { maskPersonalPhones } from "@/lib/privacy";
 import { Users } from "lucide-react";
 
 interface EventPageProps {
@@ -37,7 +38,7 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
     if (!event) return { title: "찾을 수 없는 페이지 | 피카 pica", robots: { index: false } };
 
     const where = [event.venue, event.region].filter(Boolean).join(", ");
-    const description = event.description?.trim().slice(0, 160)
+    const description = maskPersonalPhones(event.description)?.trim().slice(0, 160)
         || `${formatPeriod(event.event_date_start, event.event_date_end)}${where ? ` · ${where}` : ""}`;
     const url = `/events/${event.id}`;
     // 포스터가 없으면 기본 공유 이미지
@@ -102,7 +103,8 @@ export default async function EventDetailPage({ params }: EventPageProps) {
     const ruleKids = kidsInfo({ ...event, kids_override: null });
     if (kids.ageText) facts.splice(3, 0, { icon: Baby, label: "관람 연령", value: kids.ageText });
     // 설명의 「일시·러닝타임·출연·장르: 값」 줄은 칸으로 (specs/006). 상세 안내에는 나머지 글만
-    const detail = splitDescription(event.description);
+    // 개인 휴대전화는 피카 화면에 보이지 않게 가리고 원본 안내에서 확인하게 한다(운영자 11/26)
+    const detail = splitDescription(maskPersonalPhones(event.description));
     facts.splice(1, 0, ...detail.rows.map(r => ({ icon: r.label === "공연 시각" ? Clock : Info, label: r.label, value: r.value })));
     // 장소 정보 (specs/009): 휴관일은 전시에, 객석 수는 공연에. 공식 안내로 확인해 넣은 값만 있다
     const venueInfo = await getVenueInfo(event.venue_id);

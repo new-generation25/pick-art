@@ -14,7 +14,7 @@ import { leafletSource } from "@/lib/leaflets";
 type Field = { raw?: string | null; value?: string | null; confidence?: "high" | "low" | "none" };
 type Sub = {
     id: string; user_id: string; image_path: string | null; image_kind: "file" | "photo"; official_url: string | null; group_name: string | null;
-    given: Record<string, string>; note: string | null; rights_version: string; ai_result: (Record<string, Field> & { date_start?: string | null; date_end?: string | null; error?: string }) | null;
+    given: Record<string, string>; note: string | null; rights_version: string; ai_result: (Record<string, Field> & { date_start?: string | null; date_end?: string | null; error?: string; personal_info_visible?: boolean }) | null;
     status: "uploaded" | "read" | "published" | "rejected"; admin_note: string | null; event_id: string | null; created_at: string;
 };
 type Draft = { title: string; category: string; region: string; venue: string; date_start: string; date_end: string; price_info: string; is_free: boolean; original_url: string; description: string; use_poster: boolean };
@@ -36,7 +36,8 @@ function draftOf(s: Sub): Draft {
         is_free: /무료/.test(v(a.price_text as Field)),
         original_url: s.official_url || (/^https?:\/\//.test(v(a.booking_url as Field)) ? v(a.booking_url as Field) : ""),
         description: s.note || "",
-        use_poster: s.image_kind === "file",
+        // 휴대폰 사진, 개인 연락처가 보이는 이미지는 포스터로 쓰지 않는다(운영자 11/26, FR-042)
+        use_poster: s.image_kind === "file" && !s.ai_result?.personal_info_visible,
     };
 }
 
@@ -73,7 +74,7 @@ export default function AdminLeafletsPage() {
         if (d.original_url && !/^https?:\/\//.test(d.original_url)) { setMsg(m => ({ ...m, [s.id]: "원본 주소는 http로 시작해야 합니다" })); return; }
         setMsg(m => ({ ...m, [s.id]: "등록 중…" }));
         let poster = "";
-        if (d.use_poster && s.image_kind === "file" && s.image_path) {
+        if (d.use_poster && s.image_kind === "file" && !s.ai_result?.personal_info_visible && s.image_path) {
             const { data: blob } = await supabase.storage.from("leaflets").download(s.image_path);
             if (blob) {
                 const path = `leaflets/${s.id}.jpg`;
@@ -86,7 +87,7 @@ export default function AdminLeafletsPage() {
             title: d.title.trim(), category: d.category, region: d.region, venue: d.venue.trim() || null,
             event_date_start: d.date_start, event_date_end: d.date_end || d.date_start,
             price_info: d.price_info.trim() || null, is_free: d.is_free, description: d.description.trim() || null,
-            poster_image_url: poster, source: leafletSource(s.group_name || "단체"), original_url: d.original_url.trim() || null,
+            poster_image_url: poster || null, source: leafletSource(s.group_name || "단체"), original_url: d.original_url.trim() || null,
             status: "PUBLISHED", published_at: new Date().toISOString(),
         }).select("id").single();
         if (error || !ev) { setMsg(m => ({ ...m, [s.id]: `등록하지 못했습니다: ${error?.message ?? ""}` })); return; }
@@ -156,7 +157,10 @@ export default function AdminLeafletsPage() {
                                             <Checkbox label="무료" checked={d.is_free} onChange={e => setD(s.id, "is_free", e.currentTarget.checked)} />
                                             <TextInput label="원본 안내 주소(있으면)" value={d.original_url} onChange={e => setD(s.id, "original_url", e.currentTarget.value)} placeholder="없으면 «단체 제공»으로만 표시" />
                                             <Textarea label="상세 안내(이미지에 적힌 글·단체가 준 글만)" value={d.description} autosize minRows={2} onChange={e => setD(s.id, "description", e.currentTarget.value)} />
-                                            <Checkbox label="이 이미지를 포스터로 쓰기" disabled={s.image_kind !== "file"} checked={d.use_poster && s.image_kind === "file"} onChange={e => setD(s.id, "use_poster", e.currentTarget.checked)} />
+                                            <Checkbox label={a.personal_info_visible ? "이 이미지를 포스터로 쓰기 — 개인 연락처가 보여 쓸 수 없음(단체에 번호 없는 판을 요청)" : "이 이미지를 포스터로 쓰기"}
+                                                disabled={s.image_kind !== "file" || !!a.personal_info_visible}
+                                                checked={d.use_poster && s.image_kind === "file" && !a.personal_info_visible}
+                                                onChange={e => setD(s.id, "use_poster", e.currentTarget.checked)} />
                                             <Group mt={6}>
                                                 <Button onClick={() => publish(s)}>등록</Button>
                                                 <Button variant="subtle" color="red" onClick={() => reject(s)}>반영 안 함</Button>

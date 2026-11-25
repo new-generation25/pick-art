@@ -23,8 +23,13 @@ export function PosterViewer({ src, alt, ended = false }: { src?: string | null;
         />
     );
 
+    // 포스터가 없으면 그림 대신 «포스터 없음» 칸 (예전 대체 파일 /images/placeholder.webp 는 저장소에 없어 깨진 그림이 보였다)
     if (!canZoom) {
-        return <div className="pica-box relative mx-auto aspect-[3/4] w-full max-w-[400px] overflow-hidden">{thumb}</div>;
+        return (
+            <div className="pica-box relative mx-auto flex aspect-[3/4] w-full max-w-[400px] items-center justify-center overflow-hidden">
+                <span className="text-[15px] font-semibold text-ink-soft">포스터 없음</span>
+            </div>
+        );
     }
 
     return (

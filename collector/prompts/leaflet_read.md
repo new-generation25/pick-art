@@ -28,7 +28,7 @@
 
 ## 칸
 
-JSON 맨 위 키는 아래 11개만 쓴다. 다른 키가 있으면 저장이 거절된다.
+JSON 맨 위 키는 아래 12개만 쓴다. 다른 키가 있으면 저장이 거절된다.
 
 | 키 | 옮길 글자 |
 |---|---|
@@ -43,8 +43,9 @@ JSON 맨 위 키는 아래 11개만 쓴다. 다른 키가 있으면 저장이 �
 | `organizer` | 주최·주관 단체 이름 |
 | `contact` | 문의 연락처 |
 | `multiple_events` | 한 장에 서로 다른 행사가 2개 이상이면 `true`, 아니면 `false` (true/false 만) |
+| `personal_info_visible` | 이미지 어딘가에 **개인 휴대전화 번호(010 등)·계좌번호·개인 이메일**이 인쇄돼 보이면 `true`, 아니면 `false`. 번호 자체는 어느 칸에도 옮기지 않는다 — 이 표시가 있으면 운영자가 그 이미지를 포스터로 공개하지 않는다 |
 
-`multiple_events` 를 뺀 10칸은 모두 이 모양이다:
+`multiple_events`·`personal_info_visible` 을 뺀 10칸은 모두 이 모양이다:
 
 ```json
 {"raw": "인쇄된 글자 그대로", "value": "같은 글자를 정리한 것", "confidence": "high"}
@@ -85,7 +86,8 @@ JSON 맨 위 키는 아래 11개만 쓴다. 다른 키가 있으면 저장이 �
   "booking_url": {"raw": null, "value": null, "confidence": "none"},
   "organizer": {"raw": "주최: 극단 예시", "value": "극단 예시", "confidence": "high"},
   "contact": {"raw": "문의 055-330-1234", "value": "055-330-1234", "confidence": "high"},
-  "multiple_events": false
+  "multiple_events": false,
+  "personal_info_visible": false
 }
 ```
 
@@ -107,8 +109,9 @@ JSON 맨 위 키는 아래 11개만 쓴다. 다른 키가 있으면 저장이 �
   "booking_url": {"raw": null, "value": null, "confidence": "none"},
   "organizer": {"raw": null, "value": null, "confidence": "none"},
   "contact": {"raw": null, "value": null, "confidence": "none"},
-  "multiple_events": false
+  "multiple_events": false,
+  "personal_info_visible": true
 }
 ```
 
-연도 `2026` 을 붙이지 않았다(`--save` 가 날짜 칸을 비워 두고, 단체·운영자가 넣는다). 시·군 이름은 인쇄되지 않아 `region_hint` 를 비웠다(`대동면` 으로 김해를 짐작하지 않는다). 개인 휴대전화는 옮기지 않았다.
+연도 `2026` 을 붙이지 않았다(`--save` 가 날짜 칸을 비워 두고, 단체·운영자가 넣는다). 시·군 이름은 인쇄되지 않아 `region_hint` 를 비웠다(`대동면` 으로 김해를 짐작하지 않는다). 개인 휴대전화는 옮기지 않았고, 이미지에 보이므로 `personal_info_visible: true`.
