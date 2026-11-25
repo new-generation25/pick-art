@@ -1,6 +1,6 @@
 # Feature Specification: 피카가 본 이유 · 휴관일 · 객석 수
 
-**Feature Branch**: `revive/2026-10` (명세 `specs/009-pica-note-venue-info`) | **Created**: 2026-11-26 | **Status**: 구현·검증 완료 (장소 값은 채우는 중)
+**Feature Branch**: `revive/2026-10` (명세 `specs/009-pica-note-venue-info`) | **Created**: 2026-11-26 | **Status**: 구현·검증 완료
 
 **Input**: 벤치마킹 묶음의 마지막 단계(006 → 007 → 008 → 005 → 009). 묶음: [docs/plan/benchmark_features_2026-11-26.md](../../docs/plan/benchmark_features_2026-11-26.md)
 
@@ -27,9 +27,10 @@
   - 같은 주소를 로그아웃 상태(curl, 내장 브라우저)로 열면 그 줄이 서버 HTML에 있고, 관리자 입력칸은 없음
   - 비우고 저장 → 줄이 사라짐(서버 HTML 0건), `events?pica_note=not.is.null` 0건
 - 휴관일·객석 줄: 값이 없을 때 줄이 나오지 않는 것은 확인함
-- 배포 뒤(71bc609) db 세션이 객석 수를 43곳에 넣음 → picka.news «어린이 서커스 쇼 [김해]» 상세에서 «장소» 아래 «객석 306석» 확인. 휴관일은 아직 0곳
+- 배포 뒤(71bc609) db 세션이 객석 수를 43곳에 넣음 → picka.news «어린이 서커스 쇼 [김해]» 상세에서 «장소» 아래 «객석 306석» 확인
+- db 세션이 휴관일 23곳(공식 누리집 이용안내로 확인한 16개 건물)·객석 44곳(KOPIS seatscale, 홀 하나인 곳만)을 채움 → picka.news «조각지도 The Unfolding Atlas»(김해시립김영원미술관) 상세에서 «휴관일: 매주 월요일(공휴일이면 운영·다음날 휴관), 1월 1일, 설, 추석» 확인. 근거 파일: collector/review/venue_capacity_2026-11-26.json · venue_closed_days_2026-11-26.json
 
 ## 남은 것
 
-- 장소별 휴관일 채우기(db 세션에 요청함). 값이 들어가면 전시 1건 상세에서 줄이 나오는지 확인한다.
+- 홀이 여러 개인 건물 8곳(경남문화예술회관·3·15아트센터 등)은 venues가 건물 단위라 객석을 넣지 않았다. 홀 단위로 나누려면 장소 구조를 바꿔야 한다.
 - «피카가 본 이유»를 어떤 행사에 쓸지는 운영자가 정한다(빈 칸이면 아무것도 보이지 않음).
