@@ -31,9 +31,27 @@ a{color:var(--accent)} a:focus-visible{outline:2px solid var(--accent);outline-o
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:24px}
 @media (max-width:700px){.cols{grid-template-columns:1fr}}
 .cols>div{min-width:0}
+th.n,td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+#stats h3{font-size:15px;margin:18px 0 8px}
+#stats .tbl table{min-width:560px}
 </style>
 <main>
 <header><h1>소규모 단체 발굴 11/25</h1><p class="lead">@picka.news 브라우저로 프로필과 게시물을 직접 보고 판단한 부산·경남 소규모 단체·작가 목록입니다. 인스타에서 직접 판단한 47곳에, KOPIS 공연 기록으로 확인한 부산·경남 연극·뮤지컬 단체 116곳을 더했습니다(겹치는 곳 포함).</p></header>
+<section id="stats"><h2>통계 (2026-11-26 기준)</h2>
+<div class="kpi">
+<div class="goal"><b>190</b><span>소규모 계정(단체·작가) — 11/25 전 10곳</span></div>
+<div><b>157 · 33</b><span>단체 · 작가</span></div>
+<div><b>275</b><span>인스타 수집 목록 전체 — 11/25 전 91곳</span></div>
+<div><b>69 · 16</b><span>기관 · 제보 계정</span></div>
+</div>
+<h3>분야 × 지역 (소규모 190곳)</h3>
+<div class="tbl"><table><thead><tr><th>분야</th><th class="n">부산</th><th class="n">창원</th><th class="n">김해</th><th class="n">진주</th><th class="n">양산</th><th class="n">거제</th><th class="n">통영</th><th class="n">경남(시군 미상)</th><th class="n">미상</th><th class="n">계</th></tr></thead><tbody><tr><th>연극</th><td class="n">30</td><td class="n">8</td><td class="n">5</td><td class="n"></td><td class="n"></td><td class="n">1</td><td class="n">1</td><td class="n">2</td><td class="n">9</td><td class="n"><b>56</b></td></tr><tr><th>뮤지컬</th><td class="n">6</td><td class="n">1</td><td class="n">1</td><td class="n">3</td><td class="n">1</td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"><b>12</b></td></tr><tr><th>음악</th><td class="n">28</td><td class="n">3</td><td class="n">4</td><td class="n">5</td><td class="n">1</td><td class="n">1</td><td class="n"></td><td class="n">4</td><td class="n"></td><td class="n"><b>46</b></td></tr><tr><th>무용</th><td class="n">3</td><td class="n"></td><td class="n">1</td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"><b>4</b></td></tr><tr><th>전통</th><td class="n">3</td><td class="n"></td><td class="n">1</td><td class="n">1</td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n">3</td><td class="n"></td><td class="n"><b>8</b></td></tr><tr><th>전시</th><td class="n">26</td><td class="n">3</td><td class="n">4</td><td class="n">5</td><td class="n">1</td><td class="n"></td><td class="n">2</td><td class="n"></td><td class="n"></td><td class="n"><b>41</b></td></tr><tr><th>공예</th><td class="n">5</td><td class="n">1</td><td class="n">1</td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"><b>7</b></td></tr><tr><th>문학</th><td class="n">1</td><td class="n"></td><td class="n">1</td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"><b>2</b></td></tr><tr><th>복합</th><td class="n">2</td><td class="n"></td><td class="n">1</td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"><b>3</b></td></tr><tr><th>축제</th><td class="n">1</td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"><b>1</b></td></tr><tr><th>미분류</th><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n">10</td><td class="n"><b>10</b></td></tr><tr><th>합계</th><td class="n"><b>105</b></td><td class="n"><b>16</b></td><td class="n"><b>19</b></td><td class="n"><b>14</b></td><td class="n"><b>3</b></td><td class="n"><b>2</b></td><td class="n"><b>3</b></td><td class="n"><b>9</b></td><td class="n"><b>19</b></td><td class="n"><b>190</b></td></tr></tbody></table></div>
+<p class="note">지역은 수집 목록에 적은 판단 근거의 「지역」 값입니다. 「미상」은 11/25 이전 계정(분야·지역 미기록)과 지역을 적지 않은 1차 연극 단체입니다. 해운대·센텀은 부산, 마산은 창원으로 합쳤습니다.</p>
+<h3>찾은 경로</h3>
+<div class="tbl"><table><thead><tr><th>경로</th><th class="n">계정 수</th></tr></thead><tbody><tr><td>KOPIS 공연 단체 이름 검색</td><td class="n">94</td></tr><tr><td>프로필·비슷한 계정·해시태그 직접 확인</td><td class="n">53</td></tr><tr><td>해시태그 게시물</td><td class="n">27</td></tr><tr><td>11/25 이전</td><td class="n">10</td></tr><tr><td>피카 DB 전시 장소</td><td class="n">4</td></tr><tr><td>아트페어 참가 갤러리</td><td class="n">2</td></tr></tbody></table></div>
+<p class="note">부산에 쏠려 있고(부산 105곳), 양산·거제·통영과 서부 경남 군 지역은 몇 곳뿐입니다. 공예는 「전시를 여는 공방만」 기준(11/26 운영자 지시)으로 셉니다.</p>
+</section>
+
 <section id="update-1126"><h2>11/26 이어서 찾은 결과</h2>
 <p>수집 목록(DB whitelist)의 인스타 소규모 계정(단체 group·작가 artist)이 <b>10곳 → 174곳</b>이 되었습니다(11/25~26에 164곳 추가). 분야: 연극 56 · 음악 46 · 전시 28 · 뮤지컬 12 · 전통 8 · 공예 4 · 무용 4 · 복합 3 · 문학 2 · 축제 1 · 미분류 10(11/25 이전 계정).</p>
 <ul>
