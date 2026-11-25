@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getPublishedEvents } from "@/lib/supabase";
+import { getDistrictVenueIds, getPublishedEvents } from "@/lib/supabase";
 import { FeedSections } from "@/components/ui/FeedSections";
 import { FilterBar } from "@/components/ui/FilterBar";
 import { SearchBox } from "@/components/ui/SearchBox";
@@ -21,7 +21,7 @@ export type HomeParams = {
 };
 
 /** 홈 목록 화면. 지역 페이지(/region/[name])는 region 을 고정해 같은 화면을 쓴다 */
-export async function HomeFeed({ params: resolvedParams, region }: { params: HomeParams; region?: string }) {
+export async function HomeFeed({ params: resolvedParams, region, district }: { params: HomeParams; region?: string; district?: string }) {
   const filters = {
     region: region ?? resolvedParams.region,
     category: resolvedParams.category,
@@ -30,7 +30,9 @@ export async function HomeFeed({ params: resolvedParams, region }: { params: Hom
     ended: resolvedParams.ended
   };
 
-  const fetched = await getPublishedEvents(filters);
+  // 부산 구·군 페이지: 그 구에 있는 장소의 행사만 (장소를 모르는 행사는 «부산» 페이지에만 나온다)
+  const districtVenues = district ? await getDistrictVenueIds(district) : null;
+  const fetched = (await getPublishedEvents(filters)).filter((e: any) => !districtVenues || districtVenues.has(e.venue_id));
   const isSubscribed = resolvedParams.subscribed === "true";
 
   // 아이와 같이 가기 좋은 곳(specs/004): 규칙·운영자 수정으로 행사마다 구분을 매기고, 「아이」 필터가 켜지면 맞는 것만 남긴다
@@ -87,7 +89,7 @@ export async function HomeFeed({ params: resolvedParams, region }: { params: Hom
             <div>
               <p className="text-[14px] font-bold text-accent">{todayMonth}월 {todayDay}일 기준</p>
               <h1 className="pica-display mt-2 text-[34px] leading-[1.15] text-ink sm:text-[52px]">
-                {region ? <>{region}에서 열리는</> : "가까운 곳에서 열리는"}<br />공연·전시·축제
+                {region ? <>{district ? `${region} ${district}` : region}에서 열리는</> : "가까운 곳에서 열리는"}<br />공연·전시·축제
               </h1>
               <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
                 {hasFilter ? "조건에 맞는 행사" : "지금 볼 수 있는 행사"}{" "}

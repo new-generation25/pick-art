@@ -68,6 +68,16 @@ export async function getVenueInfo(venueId: string | null | undefined): Promise<
     return data;
 }
 
+/** 부산 구·군에 있는 장소 id (specs/010, venues.district). 좌표가 확인된 공개 장소만 */
+export async function getDistrictVenueIds(district: string): Promise<Set<string>> {
+    const { data, error } = await supabase.from('public_venues').select('id').eq('district', district);
+    if (error) {
+        console.error('Error fetching district venues:', error.message);
+        return new Set();
+    }
+    return new Set((data ?? []).map((v: { id: string }) => v.id));
+}
+
 export async function getEventById(id: string) {
     const { data, error } = await supabase
         .from('events')

@@ -5,16 +5,55 @@ export const GN_REGIONS = [
     "부산",
 ];
 
-/** 지역 고정 주소(검색 노출용, 2026-11-26). 목록에 있는 지역이면 /region/김해, 아니면 홈 */
-export function regionPath(region?: string | null): string {
-    return region && GN_REGIONS.includes(region) ? `/region/${encodeURIComponent(region)}` : "/";
+/**
+ * 지역 고정 주소(검색 노출용, specs/010). 주소는 국어의 로마자 표기법 소문자(운영자 11/26 「지역명을 영어로해」),
+ * 화면 글자는 한글 그대로. /region/gimhae, 부산 구·군은 /region/busan/haeundae
+ */
+export const REGION_SLUGS: Record<string, string> = {
+    "창원": "changwon", "김해": "gimhae", "진주": "jinju", "통영": "tongyeong", "거제": "geoje",
+    "양산": "yangsan", "밀양": "miryang", "사천": "sacheon", "함안": "haman", "고성": "goseong",
+    "합천": "hapcheon", "거창": "geochang", "함양": "hamyang", "창녕": "changnyeong", "의령": "uiryeong",
+    "남해": "namhae", "하동": "hadong", "산청": "sancheong", "부산": "busan",
+};
+
+/** 부산 16개 구·군(venues.district 값)과 주소 */
+export const BUSAN_DISTRICTS: { name: string; slug: string }[] = [
+    { name: "중구", slug: "jung" }, { name: "서구", slug: "seo" }, { name: "동구", slug: "dong" },
+    { name: "영도구", slug: "yeongdo" }, { name: "부산진구", slug: "busanjin" }, { name: "동래구", slug: "dongnae" },
+    { name: "남구", slug: "nam" }, { name: "북구", slug: "buk" }, { name: "해운대구", slug: "haeundae" },
+    { name: "사하구", slug: "saha" }, { name: "금정구", slug: "geumjeong" }, { name: "강서구", slug: "gangseo" },
+    { name: "연제구", slug: "yeonje" }, { name: "수영구", slug: "suyeong" }, { name: "사상구", slug: "sasang" },
+    { name: "기장군", slug: "gijang" },
+];
+
+const safeDecode = (s: string) => { try { return decodeURIComponent(s); } catch { return s; } };
+
+/** 주소 조각(로마자 또는 한글) → 지역 이름. 목록에 없으면 null */
+export function regionFromSlug(raw: string): string | null {
+    const s = safeDecode(raw);
+    if (GN_REGIONS.includes(s)) return s;
+    return Object.keys(REGION_SLUGS).find(k => REGION_SLUGS[k] === s.toLowerCase()) ?? null;
 }
 
-/** 주소의 /region/<이름> 에서 지역. 목록에 없으면 null */
-export function regionFromPath(pathname: string | null | undefined): string | null {
-    const m = (pathname || "").match(/^\/region\/([^/?#]+)/);
-    if (!m) return null;
-    let name = m[1];
-    try { name = decodeURIComponent(name); } catch { /* 이미 풀린 글자 */ }
-    return GN_REGIONS.includes(name) ? name : null;
+/** 주소 조각(로마자 또는 한글, 「해운대」도 받음) → 부산 구·군 이름 */
+export function districtFromSlug(raw: string): string | null {
+    const s = safeDecode(raw);
+    const d = BUSAN_DISTRICTS.find(x => x.slug === s.toLowerCase() || x.name === s || x.name === `${s}구` || x.name === `${s}군`);
+    return d?.name ?? null;
+}
+
+/** 지역(·부산 구·군) 고정 주소. 목록에 없으면 홈 */
+export function regionPath(region?: string | null, district?: string | null): string {
+    if (!region || !REGION_SLUGS[region]) return "/";
+    const d = region === "부산" && district ? BUSAN_DISTRICTS.find(x => x.name === district) : undefined;
+    return `/region/${REGION_SLUGS[region]}${d ? `/${d.slug}` : ""}`;
+}
+
+/** 주소 /region/<지역>[/<구>] 에서 지역과 구. 지역 주소가 아니면 region null */
+export function regionFromPath(pathname: string | null | undefined): { region: string | null; district: string | null } {
+    const m = (pathname || "").match(/^\/region\/([^/?#]+)(?:\/([^/?#]+))?/);
+    if (!m) return { region: null, district: null };
+    const region = regionFromSlug(m[1]);
+    const district = region === "부산" && m[2] ? districtFromSlug(m[2]) : null;
+    return { region, district };
 }

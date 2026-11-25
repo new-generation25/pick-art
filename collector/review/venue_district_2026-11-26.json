@@ -1,0 +1,653 @@
+[
+ {
+  "id": "d0cd5e29-f0df-4bb0-818d-17101c514e53",
+  "name": "BNK부산은행 조은극장",
+  "address": "부산광역시 중구 구덕로34번길 4 뉴남포빌딩 3층",
+  "set": "중구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "2d76ac31-7d01-49f1-bc44-f16a60ae5922",
+  "name": "F1963",
+  "address": "부산광역시 수영구 구락로123번길 20",
+  "set": "수영구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "66f5e525-ffb6-45b1-8ecc-eaf66302c204",
+  "name": "가온아트홀",
+  "address": "부산광역시 동구 자성로133번길 10 천일고속빌딩 지하1층",
+  "set": "동구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "c43fa5a6-0d3b-42d6-81cc-d7252f04b7e4",
+  "name": "KT&G 상상마당",
+  "address": "부산광역시 부산진구 서면로 39",
+  "set": "부산진구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "5ea7a879-58b3-4c2c-922f-e0e581068694",
+  "name": "KBS홀",
+  "address": "부산광역시 수영구 수영로 429 KBS부산방송총국",
+  "set": "수영구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "13534901-9081-4673-bac0-4e7cac705cbf",
+  "name": "KNN시어터",
+  "address": "부산광역시 해운대구 센텀서로 30 KNN타워 지하1층",
+  "set": "해운대구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "184d71d5-637a-42fa-bc3e-17bb9ddd1d1a",
+  "name": "BNK부산갤러리",
+  "address": "부산광역시 중구 광복중앙로 13 2층",
+  "set": "중구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "a809c3e8-2652-46a3-bd40-8ab60071c6be",
+  "name": "공간소극장",
+  "address": null,
+  "district": null,
+  "set": null
+ },
+ {
+  "id": "1f4cdffe-5df9-4317-a424-2ab80525ba98",
+  "name": "국립부산국악원",
+  "address": "부산광역시 부산진구 국악로 2 국립부산국악원",
+  "set": "부산진구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "f1b481e6-6b85-4a1d-9d63-ca94c61778b3",
+  "name": "기장군청",
+  "address": "부산광역시 기장군 기장읍 기장대로 560 기장군청",
+  "set": "기장군",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "42312cb0-f52d-4503-9611-ebc704a3d4a2",
+  "name": "금정문화회관",
+  "address": "부산광역시 금정구 체육공원로 7 금정문화회관",
+  "set": "금정구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "4d79bdb3-b573-42ec-b13d-b9bb4e101c16",
+  "name": "기타",
+  "address": null,
+  "district": null,
+  "set": null
+ },
+ {
+  "id": "c2dd3e2a-be8a-4e3f-8c8b-22610d43cbc1",
+  "name": "나다소극장",
+  "address": "부산광역시 남구 용소로40번길 11 지하1층 나다소극장",
+  "set": "남구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "48d32999-62bb-4657-ada7-52d4e7d87fab",
+  "name": "금사락",
+  "address": "부산광역시 금정구 개좌로 162",
+  "set": "금정구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "95cbc3a4-e0d5-4007-ba94-a01dea0c50f3",
+  "name": "동구 문화플랫폼",
+  "address": "부산광역시 동구 중앙대로 380",
+  "set": "동구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "366aaee3-f4f5-4115-9345-92a0d58f9d46",
+  "name": "드림씨어터",
+  "address": "부산광역시 남구 전포대로 133",
+  "set": "남구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "2fcc12e0-0911-4370-8ce3-504451d0844c",
+  "name": "부산콘서트홀 콘서트홀",
+  "address": "부산광역시 부산진구 동평로 250",
+  "set": "부산진구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "e592fe8d-811a-42d3-abcd-810f92cf5e15",
+  "name": "부전교회",
+  "address": "부산광역시 동래구 중앙대로 1276",
+  "set": "동래구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "e33ad78d-e1eb-4a00-95f0-c7042aab43c4",
+  "name": "동래문화회관",
+  "address": "부산광역시 동래구 문화로 80 동래문화회관",
+  "set": "동래구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "49979d2d-983a-4dc7-a47b-e1c5617b3e03",
+  "name": "브릭홀",
+  "address": "부산광역시 남구 용소로19번길 10 지하1층",
+  "set": "남구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "81843ef9-aa5f-4cdc-8a81-43ace2f54ea3",
+  "name": "다누림센터",
+  "address": "부산광역시 사상구 가야대로196번길 51",
+  "set": "사상구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "3b07acc2-1e52-40db-95f9-46f543e7cffb",
+  "name": "부산콘서트홀",
+  "address": "부산광역시 부산진구 동평로 250",
+  "set": "부산진구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "7ab6082f-497e-42e3-9079-35bc95df0945",
+  "name": "부산시립미술관",
+  "address": "부산광역시 해운대구 APEC로 58",
+  "set": "해운대구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "696e2be5-f588-463a-8744-b7d6630c7da7",
+  "name": "부산북구문화예술회관",
+  "address": "부산광역시 북구 금곡대로46번길 50 (덕천동) 본관 2층",
+  "set": "북구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "ad24b175-b8fb-417e-9d0d-fd1fffad2216",
+  "name": "백양문화예술회관",
+  "address": "부산광역시 부산진구 당감서로94번길 8 백양문화예술회관",
+  "set": "부산진구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "34503a66-6ef4-4bcc-9a1e-c3054ee83f6f",
+  "name": "부산예술회관",
+  "address": "부산광역시 남구 용소로 78",
+  "set": "남구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "f207f08f-6feb-4abd-a34a-eef1536c9b29",
+  "name": "로드아트센터",
+  "address": "부산광역시 동래구 충렬대로237번길 109 2층 201호",
+  "set": "동래구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "f6722508-882a-4218-b846-61d5574cb252",
+  "name": "부산박물관",
+  "address": "부산광역시 남구 유엔평화로 63 부산박물관",
+  "set": "남구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "af607fa8-7598-4abb-a248-8f7f39866e1f",
+  "name": "오방가르드",
+  "address": "부산광역시 남구 용소로7번길 15-1 지하 오방가르드",
+  "set": "남구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "4f02af6e-7eba-4519-8c3c-2eb7a8d0a404",
+  "name": "을숙도문화회관",
+  "address": "부산광역시 사하구 낙동남로1233번길 25 을숙도문화회관",
+  "set": "사하구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "fd90ebb6-d244-4f9d-8135-74ce098b88a4",
+  "name": "정관에듀파크",
+  "address": "부산광역시 기장군 정관읍 모전로 11 정관에듀파크",
+  "set": "기장군",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "81e17530-fd8b-4e2e-8486-1f28d5be6c1f",
+  "name": "신세계 문화홀",
+  "address": "부산광역시 해운대구 센텀남대로 35 신세계백화점센텀시티점 9F",
+  "set": "해운대구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "cb7f52e9-9f2d-471f-affb-a2feff76f32a",
+  "name": "용천지랄소극장",
+  "address": "부산광역시 남구 용소로13번길 36-1",
+  "set": "남구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "0cdd620c-d5ef-49c3-8566-caedc12d055e",
+  "name": "영도문화예술회관",
+  "address": "부산광역시 영도구 함지로79번길 6 1층",
+  "set": "영도구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "1eb87024-1093-496a-821c-669740a2ce91",
+  "name": "영화의전당",
+  "address": "부산광역시 해운대구 수영강변대로 120 영화의전당",
+  "set": "해운대구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "eee83780-f11e-4725-8b48-a42fecc2ca8a",
+  "name": "어댑터씨어터 2관",
+  "address": "부산광역시 수영구 광남로 102",
+  "set": "수영구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "7755e42b-98f4-4066-a5b9-2e3c29ec0d95",
+  "name": "소향씨어터",
+  "address": "부산광역시 해운대구 센텀중앙로 55 소향씨어터 우리은행홀",
+  "set": "해운대구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "81505680-94d1-4358-b92c-6bae7c4f91f9",
+  "name": "소극장 6번출구",
+  "address": "부산광역시 수영구 수영로 477 화민빌딩 지하",
+  "set": "수영구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "ce2b6dab-a0f1-4aa2-8842-4b5419d3e676",
+  "name": "어댑터씨어터 1관",
+  "address": "부산광역시 수영구 광안해변로 193 7층",
+  "set": "수영구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "c50c41a3-3d0a-482b-8da3-57bc66329969",
+  "name": "클럽 벨포스",
+  "address": "부산광역시 부산진구 서전로10번길 61",
+  "set": "부산진구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "2b3584ac-298d-45e0-bd2a-63b8d4f210a4",
+  "name": "피아크",
+  "address": "부산광역시 영도구 해양로195번길 180 피아크",
+  "set": "영도구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "04c70420-a584-4ba6-8a2c-749d35ba1fa6",
+  "name": "필슈파스",
+  "address": "부산광역시 부산진구 서전로58번길 16 4층",
+  "set": "부산진구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "92123ed7-ab1c-4bc9-b6a4-5708238dd08a",
+  "name": "하우스오브베르",
+  "address": "부산광역시 수영구 광남로 14 3층 301호",
+  "set": "수영구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "8105e3b1-f6e8-405a-86c7-35861a9660f8",
+  "name": "초콜릿팩토리",
+  "address": "부산광역시 남구 수영로 298 초콜릿팩토리 지하1층",
+  "set": "남구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "742f8ae2-d9ed-4f5b-8759-a56988d7492c",
+  "name": "초록마술극장",
+  "address": "부산광역시 금정구 기찰로108번길 49 B1",
+  "set": "금정구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "d4346ce0-647b-45bc-92c6-bcf6852b1049",
+  "name": "해바라기소극장",
+  "address": "부산광역시 남구 용소로13번길 30 대명빌딩 부산 해바라기소극장",
+  "set": "남구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "6ef4bf04-61f0-4206-ac22-b135e99a17cc",
+  "name": "하하아트홀",
+  "address": "부산광역시 강서구 명지오션시티4로 88 8층(하하메디컬빌딩)",
+  "set": "강서구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "dd36b5ed-c4df-45db-999b-01971ebb533e",
+  "name": "킨키",
+  "address": "부산광역시 수영구 남천동로108번길 46 2층 전층",
+  "set": "수영구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "3ea6f77c-7ebe-445c-82e9-65c67acadf74",
+  "name": "소극장 624",
+  "address": null,
+  "district": null,
+  "set": null
+ },
+ {
+  "id": "f0cc6498-1026-4ae5-a6f8-fe6b77f0f21a",
+  "name": "낙동아트센터",
+  "address": "부산광역시 강서구 명지국제1로 141",
+  "set": "강서구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "0a1ff14a-37ac-435e-8629-0695472177ef",
+  "name": "18-1갤러리",
+  "address": "부산광역시 중구 대청로141번길 18-1 1,2층",
+  "set": "중구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "f9a96cf7-d636-4f4e-adfd-39e6aa422575",
+  "name": "상상마당 부산",
+  "address": "부산광역시 부산진구 서면로 39",
+  "set": "부산진구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "afc6b89e-43f1-49fb-a8e5-c472ea8b737c",
+  "name": "스페이스 원지",
+  "address": "부산광역시 영도구 봉래나루로 214 스페이스 원지",
+  "set": "영도구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "c1548f64-b2ca-4b10-8d02-848bc0aa9f37",
+  "name": "부산시민회관",
+  "address": "부산광역시 동구 자성로133번길 16 부산시민회관",
+  "set": "동구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "dd7e58ea-fd06-4a15-ae8d-8760aba540c8",
+  "name": "부산문화회관",
+  "address": "부산광역시 남구 유엔평화로76번길 1 부산문화회관",
+  "set": "남구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "14a501b3-d4a2-4b0d-8c3e-9f90bb0ef95f",
+  "name": "해운대문화회관",
+  "address": "부산광역시 해운대구 양운로 97",
+  "set": "해운대구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "3c424919-47dc-4beb-934f-960c8bc4cc88",
+  "name": "동서대학교 센텀캠퍼스 5층 소향실험극장",
+  "address": "부산광역시 해운대구 센텀중앙로 55 경남정보대학교및동서대학교센텀산학캠퍼스",
+  "set": "해운대구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "6d17e8fb-75a0-4ab3-b206-50e1d96f8d0a",
+  "name": "부산 민주공원",
+  "address": "부산광역시 중구 민주공원길 19",
+  "set": "중구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "6adaa2f0-b3c1-455e-8bd7-88bf269afd3f",
+  "name": "부산 남구 청년창조발전소 1층 맛있는 미술관",
+  "address": "부산광역시 남구 용소로46번길 7 청년창조발전소 고고씽JOB",
+  "set": "남구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "3d8b181c-3c0b-46f9-a8f0-698e314497e0",
+  "name": "부산 나다소극장",
+  "address": "부산광역시 남구 용소로40번길 11 지하1층 나다소극장",
+  "set": "남구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "8fac0c07-4e79-4285-9895-cb48634160e3",
+  "name": "HQ광안",
+  "address": "부산광역시 수영구 광안해변로 237",
+  "set": "수영구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "1164d3f4-36a1-4c08-a4ba-018eb32b401b",
+  "name": "공간결",
+  "address": "부산광역시 수영구 광안해변로370번길 9-8 블루오션 4층",
+  "set": "수영구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "53566967-eea1-43ac-8f53-f6a25ddefeb1",
+  "name": "경성대학교 콘서트홀",
+  "address": "부산광역시 남구 대연동 산114-8",
+  "set": "남구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "aad17823-3d36-457b-bd64-9a3e4f0024f8",
+  "name": "벡스코",
+  "address": "부산광역시 해운대구 APEC로 55",
+  "set": "해운대구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "51ea67eb-f759-45bc-91f8-31db114c7c60",
+  "name": "부산 물만골 문화센터 · 창원 카페 스타치오 · 통영 잘피의 집",
+  "address": null,
+  "district": null,
+  "set": null
+ },
+ {
+  "id": "3b19c6cc-654b-4927-8f38-74b651e4fcd6",
+  "name": "부산 중구 광복로 차 없는 거리",
+  "address": null,
+  "set": "중구",
+  "basis": "name",
+  "prev": null
+ },
+ {
+  "id": "8b9721f0-587e-4b94-8b77-96e64670807a",
+  "name": "부산 중구 광복로·광복중앙로 일원",
+  "address": null,
+  "set": "중구",
+  "basis": "name",
+  "prev": null
+ },
+ {
+  "id": "d01d5e8c-6e74-4069-85f3-8c937a57cc92",
+  "name": "부산예술대학교 원곡예술관",
+  "address": "부산광역시 남구 못골번영로71번길 74",
+  "set": "남구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "5409f921-4ab8-4c4b-a2b8-ff2ab24f973b",
+  "name": "부산현대미술관 전시실 2·3 , 전시실 4",
+  "address": "부산광역시 사하구 낙동남로 1191 부산현대미술관",
+  "set": "사하구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "f108a9b8-a10b-4373-821a-ba67a1c3c92f",
+  "name": "부산현대미술관 전시실 5",
+  "address": "부산광역시 사하구 낙동남로 1191 부산현대미술관",
+  "set": "사하구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "266ee6cc-70b1-4dc8-b98a-02a0321d359f",
+  "name": "국립부산과학관",
+  "address": "부산광역시 기장군 기장읍 동부산관광6로 59 국립부산과학관",
+  "set": "기장군",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "e5de9422-c26c-4dc9-ba58-be08dae75d6e",
+  "name": "부산근현대역사관",
+  "address": "부산광역시 중구 대청로 112 부산근현대역사관 본관",
+  "set": "중구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "dd6e1582-ce6d-4f74-b7a4-a5a6b6fffcf4",
+  "name": "부산근현대역사관 본관 지하 1층 금고미술관",
+  "address": "부산광역시 중구 대청로 112 부산근현대역사관 본관",
+  "set": "중구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "6a6b0884-5860-4020-b987-72e87ab43401",
+  "name": "부산해양자연사박물관",
+  "address": "부산광역시 동래구 우장춘로 175 부산해양자연사박물관",
+  "set": "동래구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "ba78e4b3-601f-4f91-bbc5-ea678e5cb6db",
+  "name": "유어타입 본점",
+  "address": "부산광역시 수영구 광남로 157 2층",
+  "set": "수영구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "02fad4ff-8454-4d3b-978f-f9f6e441fa68",
+  "name": "전람회의그림",
+  "address": "부산광역시 금정구 금강로 280",
+  "set": "금정구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "bffa2d82-c219-45d0-acf0-45f8411bc897",
+  "name": "일터 소극장",
+  "address": "부산광역시 동구 자성로141번길 13",
+  "set": "동구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "6a8f5cb2-36ff-4bfd-bd50-edf7ec018fbb",
+  "name": "센텀아트홀",
+  "address": "부산광역시 해운대구 센텀중앙로 97 센텀스카이비즈 A동 지하1층B116호",
+  "set": "해운대구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "0ba9d6b7-af23-4db1-9094-33b5e71050ab",
+  "name": "정관박물관",
+  "address": "부산광역시 기장군 정관읍 정관중앙로 122",
+  "set": "기장군",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "4febf300-bbd8-4cf1-925b-412e74db312f",
+  "name": "국립부산국악원 예지당",
+  "address": "부산광역시 부산진구 국악로 2 국립부산국악원",
+  "set": "부산진구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "6458f30b-6e16-4594-acde-9009f7ce287b",
+  "name": "부산민주공원",
+  "address": "부산광역시 중구 민주공원길 19",
+  "set": "중구",
+  "basis": "address",
+  "prev": null
+ },
+ {
+  "id": "64b085b9-b248-481d-8eca-4d22451845f6",
+  "name": "창조문화활력센터 소극장 624",
+  "address": null,
+  "district": null,
+  "set": null
+ }
+]

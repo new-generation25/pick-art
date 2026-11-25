@@ -6,7 +6,7 @@ import { Checkbox } from "@mantine/core";
 import { Calendar, LocateFixed } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { GN_REGIONS, regionFromPath, regionPath } from "@/lib/regions";
+import { BUSAN_DISTRICTS, GN_REGIONS, regionFromPath, regionPath } from "@/lib/regions";
 import { CATEGORIES as FEED_CATEGORIES } from "@/lib/categories";
 
 const REGIONS = ["전체", ...GN_REGIONS];
@@ -38,7 +38,7 @@ export function FilterBar() {
     const searchParams = useSearchParams();
     const pathname = usePathname();
     // 지역 고정 주소(/region/김해)면 주소의 지역, 홈이면 ?region= (자동 적용을 끈 '전체'만 남는다)
-    const pathRegion = regionFromPath(pathname);
+    const { region: pathRegion, district: pathDistrict } = regionFromPath(pathname);
 
     const currentRegion = pathRegion || searchParams.get("region") || "전체";
     const currentCategory = searchParams.get("category") || "전체";
@@ -75,9 +75,13 @@ export function FilterBar() {
     const updateFilters = (key: string, value: string) => {
         const params = new URLSearchParams(searchParams.toString());
         let region = currentRegion;
+        let district: string | null = pathDistrict;
         if (key === "region") {
             region = value;
+            district = null;
             params.delete("region");
+        } else if (key === "district") {
+            district = value === "전체" ? null : value;
         } else if (value === "전체" || value === "all") {
             params.delete(key);
         } else {
@@ -86,7 +90,7 @@ export function FilterBar() {
         if (region === "전체" && myRegion) params.set("region", "전체"); // 자동 적용 사용자가 고른 '전체'는 주소에 남긴다
         else if (region === "전체") params.delete("region");
         const qs = params.toString();
-        router.push(`${region === "전체" ? "/" : regionPath(region)}${qs ? `?${qs}` : ""}`);
+        router.push(`${region === "전체" ? "/" : regionPath(region, district)}${qs ? `?${qs}` : ""}`);
     };
 
     return (
@@ -125,6 +129,22 @@ export function FilterBar() {
                     </button>
                 ))}
             </Row>
+            {/* 부산을 고르면 구·군 (specs/010). 장소 주소로 가른 것이라 장소를 모르는 행사는 «전체»에만 나온다 */}
+            {currentRegion === "부산" && (
+                <Row label="구·군">
+                    {[{ name: "전체" }, ...BUSAN_DISTRICTS].map((d) => (
+                        <button
+                            key={d.name}
+                            type="button"
+                            className="pica-chip"
+                            aria-pressed={(pathDistrict || "전체") === d.name}
+                            onClick={() => updateFilters("district", d.name)}
+                        >
+                            {d.name}
+                        </button>
+                    ))}
+                </Row>
+            )}
 
             <Row label="분야">
                 {CATEGORIES.map((category) => (
