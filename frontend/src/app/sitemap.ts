@@ -23,10 +23,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const active = new Set((data ?? []).map(e => e.id));
     const venueIds = [...new Set((data ?? []).map(e => e.venue_id).filter((v): v is string => !!v))];
     const { data: pubVenues } = await supabase.from("public_venues").select("id").in("id", venueIds.slice(0, 1000));
-    const { data: links } = await supabase.from("event_orgs").select("event_id, org_id").limit(10000);
+    // 한 번에 1,000줄까지만 오므로 나눠 읽는다
+    const links: { event_id: string; org_id: string }[] = [];
+    for (let from = 0; from < 20000; from += 1000) {
+        const { data: page } = await supabase.from("event_orgs").select("event_id, org_id").range(from, from + 999);
+        links.push(...(page ?? []));
+        if (!page || page.length < 1000) break;
+    }
     const { data: orgRows } = await supabase.from("orgs").select("id, small").eq("small", false).limit(5000);
     const bigOrgs = new Set((orgRows ?? []).map(o => o.id));
-    const orgIds = [...new Set((links ?? []).filter(l => active.has(l.event_id) && bigOrgs.has(l.org_id)).map(l => l.org_id))];
+    const orgIds = [...new Set(links.filter(l => active.has(l.event_id) && bigOrgs.has(l.org_id)).map(l => l.org_id))];
 
     return [
         { url: `${SITE_URL}/`, changeFrequency: "daily", priority: 1 },
