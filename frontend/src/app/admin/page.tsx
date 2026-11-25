@@ -140,7 +140,7 @@ function buildAlerts(ops: Ops, supply: ReturnType<typeof computeSupply>, lastNew
         a.push({ level: "warn", text: `인스타 ${m.name}: ${m.value}${m.unit || ""} (${m.target})` });
     }
     if (ops.inbox) a.push({ level: "info", text: `인박스 승인 대기 ${ops.inbox}건`, href: "/admin/inbox" });
-    if (ops.review) a.push({ level: "info", text: `인스타 수집분 검토 대기 ${ops.review}건 (앱 화면 없음, 승인 대기함 통합은 다음 단계)` });
+    if (ops.review) a.push({ level: "info", text: `인스타 수집분 검토 대기 ${ops.review}건 — 인박스의 «공개 후보·동의 필요·사람 판단» 탭`, href: "/admin/inbox" });
     if (ops.reportsNew) a.push({ level: "info", text: `신고·제보 ${ops.reportsNew}건 확인 대기`, href: "/admin/reports" });
     if (ops.venuesPending) a.push({ level: "info", text: `장소 좌표 확인 대기 ${ops.venuesPending}곳`, href: "/admin/venues" });
     for (const e of ops.errors) a.push({ level: "bad", text: `읽기 실패 — ${e}` });
@@ -388,7 +388,7 @@ export default function AdminDashboard() {
                         <Text fw={700} mb="sm">사람 판단 대기</Text>
                         <SimpleGrid cols={2} spacing="sm">
                             <Tile label="인박스 승인" value={ops.inbox} sub="수집분 COLLECTED → 인박스" href="/admin/inbox" />
-                            <Tile label="인스타 수집분 검토" value={ops.review} sub="REVIEW · 앱 화면 없음" />
+                            <Tile label="인스타 수집분 검토" value={ops.review} sub="REVIEW · 인박스 탭에서 처리" />
                             <Tile label="장소 좌표 확인" value={ops.venuesPending} sub="venues pending → 장소 확인" href="/admin/venues" />
                             <Tile label="신고·제보" value={ops.reportsNew} sub="회원이 보낸 것 → 확인·반영" href="/admin/reports" />
                             <Tile label="인스타 허락 답 대기" value={summary.find(r => r.id === "pending")?.value ?? "—"}
