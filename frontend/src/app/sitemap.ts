@@ -36,6 +36,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     return [
         { url: `${SITE_URL}/`, changeFrequency: "daily", priority: 1 },
+        { url: `${SITE_URL}/about`, changeFrequency: "monthly", priority: 0.4 },
+        { url: `${SITE_URL}/partners`, changeFrequency: "monthly", priority: 0.4 },
         ...GN_REGIONS.filter(r => (data ?? []).some(e => e.region === r)).map(r => ({
             url: `${SITE_URL}${regionPath(r)}`,
             changeFrequency: "daily" as const,
