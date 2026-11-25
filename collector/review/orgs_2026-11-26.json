@@ -1,0 +1,3198 @@
+{
+ "generated_at": "2026-11-26T01:33:59+09:00",
+ "mode": "apply",
+ "events": 698,
+ "kopis": {
+  "total": 305,
+  "with_org": 288,
+  "fetched_from_api": 0
+ },
+ "orgs_new_by_kind": {},
+ "event_orgs_by_role": {
+  "주최": 625,
+  "기획": 219,
+  "주관": 285,
+  "게시": 43,
+  "제작": 81
+ },
+ "small_accounts": 0,
+ "skipped": {
+  "인스타 계정 없음": 21,
+  "모음 출처: 웹검색": 24,
+  "모음 출처: 진주시 우리 지역 행사·축제": 5,
+  "모음 출처: 부산문화재단 문화예술행사정보": 6,
+  "모음 출처: 김해시 블로그": 1,
+  "모음 출처: 비짓부산 축제·행사": 6,
+  "모음 출처: 남해군 행사일정": 2
+ },
+ "top_orgs": [
+  {
+   "name": "창원문화재단",
+   "events": 111
+  },
+  {
+   "name": "부산문화회관",
+   "events": 61
+  },
+  {
+   "name": "부산시민회관",
+   "events": 27
+  },
+  {
+   "name": "경상남도문화예술회관",
+   "events": 25
+  },
+  {
+   "name": "김해문화의전당",
+   "events": 14
+  },
+  {
+   "name": "통영시민문화회관",
+   "events": 14
+  },
+  {
+   "name": "김해서부문화센터",
+   "events": 13
+  },
+  {
+   "name": "부산시립예술단",
+   "events": 13
+  },
+  {
+   "name": "해운대문화회관",
+   "events": 11
+  },
+  {
+   "name": "(재)예술경영지원센터",
+   "events": 11
+  },
+  {
+   "name": "낙동아트센터",
+   "events": 11
+  },
+  {
+   "name": "(재) 김해문화관광재단",
+   "events": 11
+  },
+  {
+   "name": "(주)조이컬처",
+   "events": 10
+  },
+  {
+   "name": "(재)영화의전당",
+   "events": 10
+  },
+  {
+   "name": "김해시립김영원미술관",
+   "events": 9
+  }
+ ],
+ "ambiguous_merges": [
+  {
+   "norm_name": "부산문화회관",
+   "names": {
+    "부산문화회관": 40,
+    "(재)부산문화회관": 23
+   },
+   "kept": "부산문화회관",
+   "only_prefix_or_space": true
+  },
+  {
+   "norm_name": "영화의전당",
+   "names": {
+    "(재)영화의전당": 8,
+    "영화의전당": 6
+   },
+   "kept": "(재)영화의전당",
+   "only_prefix_or_space": true
+  },
+  {
+   "norm_name": "창원문화재단",
+   "names": {
+    "창원문화재단": 104,
+    "(재)창원문화재단": 19
+   },
+   "kept": "창원문화재단",
+   "only_prefix_or_space": true
+  },
+  {
+   "norm_name": "@yangsan_cf",
+   "names": {
+    "양산문화재단": 2
+   },
+   "kept": "따로 둠",
+   "same_as_org": "양산문화재단",
+   "only_prefix_or_space": false
+  },
+  {
+   "norm_name": "@clayarchmuseum",
+   "names": {
+    "클레이아크김해미술관": 2
+   },
+   "kept": "따로 둠",
+   "same_as_org": "클레이아크김해미술관",
+   "only_prefix_or_space": false
+  },
+  {
+   "norm_name": "@moonshin.art.museum",
+   "names": {
+    "창원시립마산문신미술관": 1
+   },
+   "kept": "따로 둠",
+   "same_as_org": "창원시립마산문신미술관",
+   "only_prefix_or_space": false
+  },
+  {
+   "norm_name": "@gimhaekimyoungwon",
+   "names": {
+    "김해시립김영원미술관": 1
+   },
+   "kept": "따로 둠",
+   "same_as_org": "김해시립김영원미술관",
+   "only_prefix_or_space": false
+  }
+ ],
+ "odd": {
+  "insta_author_differs": [
+   "account=geochang_welcome author=gccf_official: 국립합창단 청년교육단원 합창연주회 〈삶을 노래하다〉",
+   "account=clayarchmuseum author=ghcraftcenter: 일일공예수업 「공예사계」 12월 : 실크스크린 다용도 패브릭",
+   "account=haman_official_ author=haman_museum: 함안박물관 겨울나기 교육프로그램",
+   "account=haman_official_ author=haman_museum: 사뿐사뿐 성산산성 트레킹",
+   "account=haman_official_ author=hamanwoodcenter: 함안 목재교육 입문과정 2기",
+   "account=geochang_welcome author=gccf_official: 창작발레 〈레미제라블 Les Misérables〉",
+   "account=musisis.gn author=gncepc: 2026 경남콘텐츠페어 G-CON",
+   "account=haman_official_ author=haman_museum: 함안박물관 성인 원데이 클래스 - 아라홍련 클레이 비누 만들기"
+  ],
+  "kopis_no_org": [
+   "호두까기인형 [부산 북구]",
+   "라푼젤 [진주]",
+   "윤도경 4집 만학도 발매 쇼케이스 [부산]",
+   "AILEE BAND CONCERT: I AM: WE ARE [부산]",
+   "빨간모자와 늑대 [김해]",
+   "어린이 서커스 쇼 [김해]",
+   "미녀와 야수 [부산]",
+   "피아니스트 박지은 & 색소포니스트 우다연 듀오 리사이틀, 베토벤 첼로 소나타 전곡: The Complete Cello Sonatas [부산]",
+   "장화신은고양이 [거제]",
+   "백설공주 [부산]",
+   "빨간 모자와 늑대 [부산]",
+   "빨간코 루돌프와 산타클로스 [진주]",
+   "호두까기인형 [부산 기장]",
+   "초록마술사의 과학마술쇼 [부산]",
+   "공룡어드벤처 [진주]",
+   "어린이 마술 콘서트 [김해]",
+   "어린이 마술쇼 [부산 사상]"
+  ],
+  "kind_conflict": [
+   "(재)영화의전당: ['기관', '단체'] → 기관"
+  ],
+  "name_contains": [
+   "경상남도 ⊂ 경상남도문화예술회관",
+   "경상남도 ⊂ 경상남도 함양군문화시설사업소(함양군문화예술회관)",
+   "(재) 김해문화관광재단 ⊂ (재) 김해문화관광재단 김해문화의전당",
+   "김해문화의전당 ⊂ (재) 김해문화관광재단 김해문화의전당",
+   "김해서부문화센터 ⊂ (재)김해문화재단(김해서부문화센터)",
+   "락엔터테인먼트 ⊂ 지누락엔터테인먼트",
+   "부산광역시 ⊂ 부산광역시 북구청",
+   "(재) 부산진문화재단 ⊂ (재) 부산진문화재단(백양문화예술회관)"
+  ]
+ },
+ "created_orgs": [
+  {
+   "id": "93c26342-7e5a-4f73-891a-3a9085b6be0d",
+   "name": "봉황예술극장",
+   "norm_name": "@bh_arts_theater",
+   "kind": "계정",
+   "insta_handle": "bh_arts_theater",
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "cad95015-a0df-433c-91a5-2966f29e84ff",
+   "name": "창원시",
+   "norm_name": "@changwon_city",
+   "kind": "계정",
+   "insta_handle": "changwon_city",
+   "small": false,
+   "events": 4
+  },
+  {
+   "id": "9d41840e-4e28-4ab0-aa9e-696da9c75c67",
+   "name": "창원문화재단(성산아트홀·3.15아트센터·진해문화센터)",
+   "norm_name": "@changwonculture",
+   "kind": "계정",
+   "insta_handle": "changwonculture",
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "c366da07-117b-41bf-a78a-f79ac6812339",
+   "name": "창원관광",
+   "norm_name": "@changwontour",
+   "kind": "계정",
+   "insta_handle": "changwontour",
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "84fe1bf9-722a-4e60-8fdb-bcd4a5ef71be",
+   "name": "클레이아크김해미술관",
+   "norm_name": "@clayarchmuseum",
+   "kind": "계정",
+   "insta_handle": "clayarchmuseum",
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "cc785735-3bfa-4344-8428-071c862e9e12",
+   "name": "김해다어울림생활문화센터",
+   "norm_name": "@daeoullim",
+   "kind": "계정",
+   "insta_handle": "daeoullim",
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "94319667-5825-4195-a6d7-026f22ea45ba",
+   "name": "고성군",
+   "norm_name": "@dinogoseong",
+   "kind": "계정",
+   "insta_handle": "dinogoseong",
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "3d368ec9-967d-42f2-9724-f23194975144",
+   "name": "경남도립미술관",
+   "norm_name": "@gam_art_museum",
+   "kind": "계정",
+   "insta_handle": "gam_art_museum",
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "f51ddfa2-fb9f-4abd-a076-fcb7c10f28ed",
+   "name": "경남문화예술진흥원",
+   "norm_name": "@gcaf19",
+   "kind": "계정",
+   "insta_handle": "gcaf19",
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "4ee52208-b0bb-4710-8eed-5b47e2e59327",
+   "name": "거창군",
+   "norm_name": "@geochang_welcome",
+   "kind": "계정",
+   "insta_handle": "geochang_welcome",
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "2170c1bd-87a2-4f17-848e-fd1774c4a26c",
+   "name": "거제문화예술재단(거제문화예술회관)",
+   "norm_name": "@geojeart_official",
+   "kind": "계정",
+   "insta_handle": "geojeart_official",
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "e1f9d460-b4d0-4d60-bb3e-b7068d06a258",
+   "name": "김해시립김영원미술관",
+   "norm_name": "@gimhaekimyoungwon",
+   "kind": "계정",
+   "insta_handle": "gimhaekimyoungwon",
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "4f6c10dd-5d4e-4e9e-986d-00ea5c431e61",
+   "name": "하동군",
+   "norm_name": "@hadonggun_official",
+   "kind": "계정",
+   "insta_handle": "hadonggun_official",
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "95ca4d55-28a7-4ef6-bc96-ac207b041bf2",
+   "name": "함안군",
+   "norm_name": "@haman_official_",
+   "kind": "계정",
+   "insta_handle": "haman_official_",
+   "small": false,
+   "events": 4
+  },
+  {
+   "id": "bd42b786-8c76-4b99-9f78-c98b2870fcf9",
+   "name": "국립진주박물관",
+   "norm_name": "@jinju_national_museum",
+   "kind": "계정",
+   "insta_handle": "jinju_national_museum",
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "9b3dc3c4-6f74-4a34-91f2-d33a1feb3996",
+   "name": "진주관광",
+   "norm_name": "@jinjugogo",
+   "kind": "계정",
+   "insta_handle": "jinjugogo",
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "ebd0b881-9cae-4714-88ff-fa28c2a4a1d4",
+   "name": "진주문화관광재단",
+   "norm_name": "@jjctf_",
+   "kind": "계정",
+   "insta_handle": "jjctf_",
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "46cdb434-af5f-43f2-8fd2-4770e674be47",
+   "name": "밀양시",
+   "norm_name": "@miryangsi",
+   "kind": "계정",
+   "insta_handle": "miryangsi",
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "5a061599-8005-4a69-ac04-d58de0678457",
+   "name": "창원시립마산문신미술관",
+   "norm_name": "@moonshin.art.museum",
+   "kind": "계정",
+   "insta_handle": "moonshin.art.museum",
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "3fd34b06-bbb8-49fa-9920-74fa5be3d3ea",
+   "name": "경남음악창작소 뮤지시스",
+   "norm_name": "@musisis.gn",
+   "kind": "계정",
+   "insta_handle": "musisis.gn",
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "747e07a8-7558-4826-b563-b5aa0ac63236",
+   "name": "남해군",
+   "norm_name": "@namhaegun",
+   "kind": "계정",
+   "insta_handle": "namhaegun",
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "ee7c0098-9a47-494a-95c1-1bd5823309a1",
+   "name": "사천시",
+   "norm_name": "@sacheoncity",
+   "kind": "계정",
+   "insta_handle": "sacheoncity",
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "1b3dee67-20fc-4cee-bb0c-02649403edfd",
+   "name": "산청군",
+   "norm_name": "@sancheong_official",
+   "kind": "계정",
+   "insta_handle": "sancheong_official",
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "4039cb8a-5704-4c56-8bdc-e7768ffff3fc",
+   "name": "통영시",
+   "norm_name": "@tongyeongsi",
+   "kind": "계정",
+   "insta_handle": "tongyeongsi",
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "d6bc5c58-b53e-4944-b8d2-a3e8337457ff",
+   "name": "합천군",
+   "norm_name": "@travelhc_official",
+   "kind": "계정",
+   "insta_handle": "travelhc_official",
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "116d4daa-8de6-476d-8527-4c5fcfaf5e59",
+   "name": "의령군",
+   "norm_name": "@uiryeong_official",
+   "kind": "계정",
+   "insta_handle": "uiryeong_official",
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "c1d44df4-b150-4a02-97b5-53004d286878",
+   "name": "양산문화재단",
+   "norm_name": "@yangsan_cf",
+   "kind": "계정",
+   "insta_handle": "yangsan_cf",
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "11223e26-7afc-4568-b120-cabc99c5e489",
+   "name": "김해 청년365핫플레이스",
+   "norm_name": "@youth365on",
+   "kind": "계정",
+   "insta_handle": "youth365on",
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "01306f8b-f6e0-480e-9971-2e074234e6b6",
+   "name": "(주)325E&C",
+   "norm_name": "325ec",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "a523acdc-7dfe-4275-9ae8-c9d1d42c9193",
+   "name": "BNK부산은행조은극장",
+   "norm_name": "bnk부산은행조은극장",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "d3acd9c4-b318-4442-ae7a-7bf105dc22c1",
+   "name": "(주)BT엔터테인먼트",
+   "norm_name": "bt엔터테인먼트",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "358890d1-9183-4428-9829-0003a118fcf2",
+   "name": "CGN((재) 온누리 선교재단)",
+   "norm_name": "cgn온누리선교재단",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "9c490b9b-e4cb-42e6-8e08-1728909a5162",
+   "name": "(주)CJ ENM",
+   "norm_name": "cjenm",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "d5aaa80c-81a2-446a-b043-b7f7668adf3d",
+   "name": "DY company (디와이 컴퍼니)",
+   "norm_name": "dycompany디와이컴퍼니",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "fe9b6eb8-e6b9-4091-9817-6dea101f3a52",
+   "name": "EMK엔터테인먼트",
+   "norm_name": "emk엔터테인먼트",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "3a207f60-6060-4fce-9a5c-0a80590493a1",
+   "name": "GS엔터테인먼트",
+   "norm_name": "gs엔터테인먼트",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "f0c3de80-372e-4c94-9349-0d19d4df885f",
+   "name": "(사) KNN방송교향악단",
+   "norm_name": "knn방송교향악단",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "105baaf3-b102-4801-8219-6b3531906ec6",
+   "name": "KT&G 상상마당 [부산]",
+   "norm_name": "ktg상상마당부산",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "dac980ba-6cd6-418f-9f63-7e674ec09fae",
+   "name": "MBN",
+   "norm_name": "mbn",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "d6a38b05-c5e8-444c-ab03-6ee8368cc29c",
+   "name": "Question Note (물음표)",
+   "norm_name": "questionnote물음표",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "d8d184a9-66a9-49d5-8f50-e350138c6062",
+   "name": "SBU&Partner(에스비유)",
+   "norm_name": "sbupartner에스비유",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "9475776b-afc2-4fd0-a2c1-010e6c6a0039",
+   "name": "(주)SMI엔터테인먼트",
+   "norm_name": "smi엔터테인먼트",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "b8241f9e-1bf2-417c-b3a0-229f19543fbb",
+   "name": "SPA엔터테인먼트(에스피에이엔터테인먼트) [창원]",
+   "norm_name": "spa엔터테인먼트에스피에이엔터테인먼트창원",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "2fd4960f-95d3-4fcf-a93c-e34e13605bdf",
+   "name": "TAJOY ENTERTAINMENT(타조이 엔터테인먼트)",
+   "norm_name": "tajoyentertainment타조이엔터테인먼트",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "04508490-c674-4f08-a87c-d1f9d1ebd81a",
+   "name": "TKC (the kim classic)",
+   "norm_name": "tkcthekimclassic",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "c2d064b2-2fc8-4561-a1d8-f707152ede10",
+   "name": "YMK(와이엠케이)엔터테인먼트",
+   "norm_name": "ymk와이엠케이엔터테인먼트",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "1f60bc1d-f9cd-4af8-b0a3-4170d15ed80b",
+   "name": "강북구청",
+   "norm_name": "강북구청",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "cdc4a6df-d0f6-4457-9c13-ea15e10c9121",
+   "name": "(재)강북문화재단",
+   "norm_name": "강북문화재단",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "a1993b83-2a74-4e7f-b855-5a895eeaf705",
+   "name": "(주) 갤럭시코퍼레이션(Galaxy Corporation)",
+   "norm_name": "갤럭시코퍼레이션galaxycorporation",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "48637bdb-fd21-4ed3-81a4-6ca71ccb48f9",
+   "name": "거제문화예술회관",
+   "norm_name": "거제문화예술회관",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "d8afb530-43dc-49e2-86cc-5c74723a3dcb",
+   "name": "(재)거제시문화예술재단",
+   "norm_name": "거제시문화예술재단",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 5
+  },
+  {
+   "id": "12c24b87-2cf3-4fe6-b259-2a32840e1406",
+   "name": "거창문화재단",
+   "norm_name": "거창문화재단",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "4dbdc2d5-29c6-44ba-b97d-375412e7d80e",
+   "name": "경남도립극단",
+   "norm_name": "경남도립극단",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "ad96d115-6ea2-4c88-9813-b8b99e204bcb",
+   "name": "경남도립예술단",
+   "norm_name": "경남도립예술단",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "67f81e72-e2f1-406c-9d42-9115e95c8ac2",
+   "name": "경상남도",
+   "norm_name": "경상남도",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "f135c273-cd2f-4f86-8f08-a808bd4ed406",
+   "name": "경상남도문화예술회관",
+   "norm_name": "경상남도문화예술회관",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 25
+  },
+  {
+   "id": "c53567c3-c489-49ed-bcfc-c82a30c62d8d",
+   "name": "경상남도 함양군문화시설사업소(함양군문화예술회관)",
+   "norm_name": "경상남도함양군문화시설사업소함양군문화예술회관",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "076b7ef0-1db3-418a-ad59-93de54670ab0",
+   "name": "경상필하모닉오케스트라",
+   "norm_name": "경상필하모닉오케스트라",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "ed3a04a2-80e8-4d6c-b8a1-3c37f75358cc",
+   "name": "(주)고엔터테인먼트",
+   "norm_name": "고엔터테인먼트",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "37a8fb98-b8d3-46a4-a1e4-3d9327694911",
+   "name": "공간결",
+   "norm_name": "공간결",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "d98c84b7-012a-4cbc-bd99-7e9535a92419",
+   "name": "(주)공감엔피엠",
+   "norm_name": "공감엔피엠",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "b38d6076-496a-49a6-b00b-74e438f5ea51",
+   "name": "(주)공연마루",
+   "norm_name": "공연마루",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "7177dcf3-7d55-43fe-92e9-43f71ddb1bcc",
+   "name": "(주)공연이야기",
+   "norm_name": "공연이야기",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "00d92d0e-9e45-4f41-97ff-6ed7debbea7b",
+   "name": "(주)공연팀",
+   "norm_name": "공연팀",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "24db909f-f1ec-45fb-adce-1d3bf607c2d2",
+   "name": "(재)국립합창단",
+   "norm_name": "국립합창단",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "0766d32b-82e9-476d-9810-8f79d33fb2fa",
+   "name": "굿초이스",
+   "norm_name": "굿초이스",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 7
+  },
+  {
+   "id": "1fb5f4bc-0760-440c-bb1e-4d0485445a62",
+   "name": "굿카펜터즈(GOOD CARPENTERS)",
+   "norm_name": "굿카펜터즈goodcarpenters",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "52e06793-57dc-45f7-a30a-7f081a309aaa",
+   "name": "(사)그라시아스합창단",
+   "norm_name": "그라시아스합창단",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "cfbb9f9a-778d-4c18-a95c-2a3056b1bd9f",
+   "name": "그란디스씨어터(주)",
+   "norm_name": "그란디스씨어터",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "6904e596-4736-4a19-894b-e40e58cb63bb",
+   "name": "그랜드오페라단 [부산]",
+   "norm_name": "그랜드오페라단부산",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "08b7d8b5-61dd-4926-85ba-e571e8df9bb4",
+   "name": "극단 놀이",
+   "norm_name": "극단놀이",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "aa31cce0-e3b2-4f9c-943e-6f24810ac9a1",
+   "name": "극단 누리에",
+   "norm_name": "극단누리에",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "61acb6b2-0207-4f87-801f-687f346679f5",
+   "name": "극단 더블스테이지",
+   "norm_name": "극단더블스테이지",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "4ddb2415-fd4b-4a6f-a64d-a553430aed02",
+   "name": "극단 디아코노스",
+   "norm_name": "극단디아코노스",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "10a1f950-572a-4807-b66c-973e18582300",
+   "name": "극단 바다와문화를 사랑하는 사람들",
+   "norm_name": "극단바다와문화를사랑하는사람들",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "ae417806-6d39-4383-9196-e7cd727654fb",
+   "name": "극단 바라",
+   "norm_name": "극단바라",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "ae891e39-ee79-458c-bc62-7ace2a0c9d92",
+   "name": "극단 복주머니",
+   "norm_name": "극단복주머니",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "ec27d42c-e023-4ebb-a987-b37b2cb19b34",
+   "name": "극단 쁘띠벨",
+   "norm_name": "극단쁘띠벨",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "1afab3f2-8bfe-4cb6-83df-706040f322c5",
+   "name": "극단 손톱달",
+   "norm_name": "극단손톱달",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "7eeaceaa-e3d6-406a-9985-5f7ed7f1005b",
+   "name": "극단 아이 (뮤지컬)",
+   "norm_name": "극단아이뮤지컬",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "a0760dec-3dde-4f46-9ce2-47e333c141eb",
+   "name": "극단 예군",
+   "norm_name": "극단예군",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 4
+  },
+  {
+   "id": "38bdf73f-61c7-41f2-b8e0-000a70086ade",
+   "name": "극단 예일",
+   "norm_name": "극단예일",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "212f742f-7608-45aa-bcd1-32f14adab270",
+   "name": "극단 오오씨어터",
+   "norm_name": "극단오오씨어터",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "fcdd5ecf-ccae-420b-8fda-521899b7c7db",
+   "name": "극단이야기협동조합",
+   "norm_name": "극단이야기협동조합",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "0de3a8c6-7179-4e56-872d-6c27358f2bb9",
+   "name": "극단 이후",
+   "norm_name": "극단이후",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "47e9969a-bcfd-4d45-bb9c-5770dd63e67b",
+   "name": "극단적즐거움",
+   "norm_name": "극단적즐거움",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "40a84fb6-9819-4c51-95f2-e8daac0d7e13",
+   "name": "극단 지우",
+   "norm_name": "극단지우",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "f99d5c55-84f5-4ad4-a334-93a8aa6f7629",
+   "name": "극단 파아란",
+   "norm_name": "극단파아란",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "d2b520dc-c01c-4077-9df4-dbae9b0f84eb",
+   "name": "극단 판플",
+   "norm_name": "극단판플",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "0e15e6c6-af4e-4005-9852-4e72e93b1ae9",
+   "name": "극단 피크닉",
+   "norm_name": "극단피크닉",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "5d1a6801-a416-49e3-824e-781a20e47c78",
+   "name": "극단 해풍",
+   "norm_name": "극단해풍",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "0080642a-e543-4ec9-a3b8-350382bad70b",
+   "name": "극단 해프닝",
+   "norm_name": "극단해프닝",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "6d7836c0-1cc7-43fd-8ee2-23f02e541ba2",
+   "name": "(사)극단 현장 [진주]",
+   "norm_name": "극단현장진주",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "f2da4e2c-33a6-496a-b4ec-4d280eb7d378",
+   "name": "(주)극단희망",
+   "norm_name": "극단희망",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "fd91cae2-0350-4e1c-b2c3-84a75a1b525a",
+   "name": "금정문화회관",
+   "norm_name": "금정문화회관",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "e51519a8-3f04-472d-8fcb-2cbf3a5610a1",
+   "name": "(재) 김해문화관광재단",
+   "norm_name": "김해문화관광재단",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 11
+  },
+  {
+   "id": "462d38e0-f72d-4831-b08a-6403bcc8cd04",
+   "name": "(재) 김해문화관광재단 김해문화의전당",
+   "norm_name": "김해문화관광재단김해문화의전당",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 6
+  },
+  {
+   "id": "a1ae84bf-ac0b-4270-965b-20173f78fe21",
+   "name": "김해문화의전당",
+   "norm_name": "김해문화의전당",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 14
+  },
+  {
+   "id": "32fe0e40-89a2-4354-aad2-8856a30cd94a",
+   "name": "(재)김해문화재단(김해서부문화센터)",
+   "norm_name": "김해문화재단김해서부문화센터",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "384d6c22-fe47-4a26-8a68-aec578227bd9",
+   "name": "김해서부문화센터",
+   "norm_name": "김해서부문화센터",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 13
+  },
+  {
+   "id": "4486bcc3-1c4f-4d09-8f8e-12bfe18ac9e2",
+   "name": "김해시립김영원미술관",
+   "norm_name": "김해시립김영원미술관",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 9
+  },
+  {
+   "id": "52b7e65d-8d38-4f90-b0c3-b6193b4b0901",
+   "name": "깐딴떼부산",
+   "norm_name": "깐딴떼부산",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "17bded3f-24a0-4723-b724-36c49ba77c42",
+   "name": "나다소극장",
+   "norm_name": "나다소극장",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "5d8373bb-ec22-404e-b4b0-2137f4c48c71",
+   "name": "나라사랑음악회 조직위원회",
+   "norm_name": "나라사랑음악회조직위원회",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "b5d582b7-3925-4e15-ad73-51a185cf0ce5",
+   "name": "(주)나인스토리",
+   "norm_name": "나인스토리",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "ffb8a1e5-9828-401f-81a7-77eb5af7d029",
+   "name": "낙동아트센터",
+   "norm_name": "낙동아트센터",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 11
+  },
+  {
+   "id": "2480fe8c-7f0e-45ec-9b54-7110d3d8886d",
+   "name": "(주)네버랜드 엔터테인먼트",
+   "norm_name": "네버랜드엔터테인먼트",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "1edd66f6-108a-499a-8ac7-78700eae6634",
+   "name": "(주)네스토리",
+   "norm_name": "네스토리",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "1b8ad61b-87dc-42d1-a950-31e1ceb9c68e",
+   "name": "놀유니버스",
+   "norm_name": "놀유니버스",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "6cff62f2-a646-4f61-8b6a-15a7538953b1",
+   "name": "놀이터",
+   "norm_name": "놀이터",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "6616dd21-804b-4ced-8727-e12491b9f21e",
+   "name": "뉴 뮤직 리서치 그룹 (New Music Research Group)",
+   "norm_name": "뉴뮤직리서치그룹newmusicresearchgroup",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "6d1b33b8-74c8-4aa7-b53e-7438e43a1aa3",
+   "name": "(주)대박기획",
+   "norm_name": "대박기획",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "616f1abd-d75a-4e5d-aee7-33ec17b70f99",
+   "name": "더핑크퐁컴퍼니(주)",
+   "norm_name": "더핑크퐁컴퍼니",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "3e257f90-9a51-404b-a2e1-1e38d2fdbf26",
+   "name": "더하우스콘서트",
+   "norm_name": "더하우스콘서트",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "a1b602de-75c2-4b37-aefd-ea7ba01fb508",
+   "name": "(주)더화랑이엔티",
+   "norm_name": "더화랑이엔티",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "68ea26ae-db23-4f6a-95ce-3ca89ebd0c93",
+   "name": "동래문화회관",
+   "norm_name": "동래문화회관",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 5
+  },
+  {
+   "id": "87b53b72-8f18-4356-9e4e-41cbc42f5a8b",
+   "name": "두남재엔터테인먼트(주)",
+   "norm_name": "두남재엔터테인먼트",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 4
+  },
+  {
+   "id": "b72a5540-136c-45dd-854c-c77814e4f901",
+   "name": "드렁큰씨어터",
+   "norm_name": "드렁큰씨어터",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "adc8d917-0ef9-4729-a928-2caa589666a4",
+   "name": "드리운 스튜디오",
+   "norm_name": "드리운스튜디오",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "82f8bc41-d0d9-46b4-b97b-ddb70b5f2a34",
+   "name": "드림씨어터",
+   "norm_name": "드림씨어터",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "4fbd532b-fecb-42f4-8fee-444775857a34",
+   "name": "(주)드림어스컴퍼니",
+   "norm_name": "드림어스컴퍼니",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "034c5731-8444-446c-afcf-32b33250d7e8",
+   "name": "디토 오케스트라",
+   "norm_name": "디토오케스트라",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "293af426-9a0e-4f50-ae75-29ffb631acdd",
+   "name": "라이브(주)",
+   "norm_name": "라이브",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "81e7c987-54d2-4a09-b4db-035ed6a5ce53",
+   "name": "(주)라이브네이션코리아",
+   "norm_name": "라이브네이션코리아",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "197a3313-5b80-4b94-aca7-baa200e06bfc",
+   "name": "(주)라이브유니크 (LIVE UNIQUE Co., Ltd.)",
+   "norm_name": "라이브유니크liveuniquecoltd",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "7cdbb8e1-c2de-40ec-9454-3c47151364a6",
+   "name": "락엔터테인먼트",
+   "norm_name": "락엔터테인먼트",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "6624a536-d198-4ca1-bd7c-f333be9815bf",
+   "name": "래프터스(rafters.seoul)",
+   "norm_name": "래프터스raftersseoul",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "ffb6b727-081d-4fbc-a7d0-4fab6738f629",
+   "name": "로드아트센터(L'ORD ARTS CENTER)",
+   "norm_name": "로드아트센터lordartscenter",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "ecddda1e-d668-4640-bcab-3d2a21724dd0",
+   "name": "(주) 루트59(ROUTE59)",
+   "norm_name": "루트59route59",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "a7b99b80-018e-46df-b024-ee057ddfa57c",
+   "name": "리드예술기획",
+   "norm_name": "리드예술기획",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "45db1520-4250-41f0-9ea0-ed574fc393cb",
+   "name": "마당세실극장 [대학로]",
+   "norm_name": "마당세실극장대학로",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "ceb10615-a6c8-4860-b7f3-8f91a2e14ab2",
+   "name": "(주)마당플레이웍스(구.마당세실)",
+   "norm_name": "마당플레이웍스구마당세실",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "07d64f16-402b-42c1-9445-df272704b3da",
+   "name": "마운드미디어",
+   "norm_name": "마운드미디어",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "d7bf352b-d8b5-4a5d-9d4e-8d07bae762a8",
+   "name": "매직스트로베리사운드",
+   "norm_name": "매직스트로베리사운드",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "4dc95580-26f0-4df4-a779-53efc02e967d",
+   "name": "모모미디어(구. 극단 삼월)",
+   "norm_name": "모모미디어구극단삼월",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "74fa661d-a8b2-4059-a942-c95c367eb83f",
+   "name": "문기타",
+   "norm_name": "문기타",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "86929994-9d74-4aef-aa08-166cc3f45e7e",
+   "name": "(주)문화락",
+   "norm_name": "문화락",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "e0fe6068-b2ea-4177-8602-062563704fc2",
+   "name": "문화예술올타",
+   "norm_name": "문화예술올타",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "6c2c7fdc-05dc-46b7-85b4-8a58a039596f",
+   "name": "(재)문화재단1963",
+   "norm_name": "문화재단1963",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 5
+  },
+  {
+   "id": "3f9b459f-b1a2-4826-85d6-16e01a297200",
+   "name": "문화체육관광부",
+   "norm_name": "문화체육관광부",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "7cda0c5a-ce2b-4116-842b-7977852f3657",
+   "name": "(주)뮤지컬넌센스",
+   "norm_name": "뮤지컬넌센스",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "4036a813-e18b-4dae-80b1-17cd55f74eca",
+   "name": "(주)뮤직앤아트컴퍼니",
+   "norm_name": "뮤직앤아트컴퍼니",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "ccaf8a55-8bad-467c-99bb-87c3c9161374",
+   "name": "미니티켓",
+   "norm_name": "미니티켓",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "6a3a232a-896f-45c4-bf1a-83cc62dbd865",
+   "name": "(주)미스틱엔터테인먼트 (구. (주)미스틱스토리)",
+   "norm_name": "미스틱엔터테인먼트구미스틱스토리",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "bf5c84bc-42fe-4142-b4f9-99de7091a66c",
+   "name": "(사)밀레니엄심포니오케스트라",
+   "norm_name": "밀레니엄심포니오케스트라",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "360134f9-00cb-42b3-837b-27514a6a0b16",
+   "name": "(주)밀레니엄필하모닉오케스트라",
+   "norm_name": "밀레니엄필하모닉오케스트라",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "181da908-4b8c-4e8b-b221-ed1e38fb3791",
+   "name": "(재)밀양문화관광재단",
+   "norm_name": "밀양문화관광재단",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "1dd4b3c2-28d0-415c-b8e0-b737adae40e1",
+   "name": "(주)밝은누리",
+   "norm_name": "밝은누리",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "c4ea66a7-a6e5-43a6-b654-9cfbacdf7d0f",
+   "name": "밴드 더 픽스(THE FIX)",
+   "norm_name": "밴드더픽스thefix",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "2a4d53ed-f5f8-4cc8-b73f-9ff5f76e8b2a",
+   "name": "부산광역시",
+   "norm_name": "부산광역시",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "9004ddd0-b85f-48dc-a674-2fc7665eaf1b",
+   "name": "부산광역시 북구청",
+   "norm_name": "부산광역시북구청",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "b914037b-e60d-485c-8ff3-39bf42eb5726",
+   "name": "부산국제매직페스티벌 조직위원회",
+   "norm_name": "부산국제매직페스티벌조직위원회",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "3adb34c5-bc61-4542-bbcd-5d73323385af",
+   "name": "부산내셔널심포니오케스트라",
+   "norm_name": "부산내셔널심포니오케스트라",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "ce780cfd-650c-4cf0-ae57-4a838d781b74",
+   "name": "부산문화회관",
+   "norm_name": "부산문화회관",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 61
+  },
+  {
+   "id": "175122e2-3774-49b1-b222-c27501b148c8",
+   "name": "부산뮤직정관실용음악학원",
+   "norm_name": "부산뮤직정관실용음악학원",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "ae947219-4297-4706-85cf-563ce87c6fbc",
+   "name": "부산박물관",
+   "norm_name": "부산박물관",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "0a56eb93-4a4e-4ebc-b88d-cddfc86cf94a",
+   "name": "부산북구문화예술회관",
+   "norm_name": "부산북구문화예술회관",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "618af1fd-6e84-4bf8-898c-8858650cb66a",
+   "name": "부산소공연장연합회",
+   "norm_name": "부산소공연장연합회",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "433f6829-fc16-46b3-a640-423727e59a96",
+   "name": "부산시립교향악단",
+   "norm_name": "부산시립교향악단",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "934401d0-9d5a-4cf7-a4ae-fea0880f5589",
+   "name": "부산시립국악관현악단",
+   "norm_name": "부산시립국악관현악단",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "9d382817-cd95-4ade-b0d3-def42c31b291",
+   "name": "부산시립극단",
+   "norm_name": "부산시립극단",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "df10a2d7-69d9-4ecc-b6da-4c27120542a4",
+   "name": "부산시립미술관",
+   "norm_name": "부산시립미술관",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 4
+  },
+  {
+   "id": "f46ab184-0bc9-4b9e-becb-a32ddb115e6b",
+   "name": "부산시립예술단",
+   "norm_name": "부산시립예술단",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 13
+  },
+  {
+   "id": "d64f275a-c665-4452-a07b-3ea224a854d3",
+   "name": "부산시민회관",
+   "norm_name": "부산시민회관",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 27
+  },
+  {
+   "id": "5cd67f3a-65ee-49ec-ab46-944902b5cd10",
+   "name": "(사)부산심포니오케스트라",
+   "norm_name": "부산심포니오케스트라",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "1cf9ce61-a5eb-498c-b6a5-0059a7fc79c9",
+   "name": "부산 아이디 발레단",
+   "norm_name": "부산아이디발레단",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "fffce1c3-5aaf-41f4-942f-68ac9c7a6a82",
+   "name": "부산오페라하우스발레단",
+   "norm_name": "부산오페라하우스발레단",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "3a7950fe-8d8e-44f6-b3fa-9fbbe00c8a74",
+   "name": "부산유니온발레단",
+   "norm_name": "부산유니온발레단",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "44202d76-5fd4-4541-b68f-179cb6bdd039",
+   "name": "부산진구청",
+   "norm_name": "부산진구청",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "9ad724ca-0c56-485a-ba10-364e4d5c714a",
+   "name": "(재) 부산진문화재단",
+   "norm_name": "부산진문화재단",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "f6646501-1657-4de4-b5a8-822ea42dd2af",
+   "name": "(재) 부산진문화재단(백양문화예술회관)",
+   "norm_name": "부산진문화재단백양문화예술회관",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "ac642e92-50d1-475d-aa85-00804e86cfb8",
+   "name": "부산콘서트홀",
+   "norm_name": "부산콘서트홀",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "8824a988-1c8f-44d8-9f40-24eb848d5096",
+   "name": "(주)뷰티크(VIEWTYQUE)",
+   "norm_name": "뷰티크viewtyque",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "2f5ace28-3e96-4c75-9c68-2765553eda8e",
+   "name": "브릭홀(BRICK HALL) [부산]",
+   "norm_name": "브릭홀brickhall부산",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "e020cdbd-24aa-471f-9e71-3350baccde72",
+   "name": "(주) 블렌딩 아트 컴퍼니(Blending Art Company)",
+   "norm_name": "블렌딩아트컴퍼니blendingartcompany",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "21fb1b92-acf7-4c44-a5f0-7416c43240b7",
+   "name": "비바아첼 인터네셔널 필하모닉(Vivaacell International Philharmonic)",
+   "norm_name": "비바아첼인터네셔널필하모닉vivaacellinternationalphilharmonic",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "ea711043-6f08-4c3e-bc04-c18c50a396a7",
+   "name": "비바아첼 챔버홀&아카데미(Vivaacell)",
+   "norm_name": "비바아첼챔버홀아카데미vivaacell",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "037cf747-9f24-4951-99e8-f6b884b05416",
+   "name": "(주)비유엔터테인먼트 (B*You Entertainment)",
+   "norm_name": "비유엔터테인먼트byouentertainment",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "e2286e85-ff22-4644-9a9a-ce0b9bd3205a",
+   "name": "빅쇼이엔엠",
+   "norm_name": "빅쇼이엔엠",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "16b3492b-e270-4fa1-b563-1f6167550cbb",
+   "name": "빅픽처스테이지",
+   "norm_name": "빅픽처스테이지",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "cef864d4-bea7-481a-b171-8e3ca5491330",
+   "name": "(주) 빌리언스",
+   "norm_name": "빌리언스",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "c5c7f68b-c332-418d-8b20-6b555271909f",
+   "name": "㈜뽀로로파크",
+   "norm_name": "뽀로로파크",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "b0661c86-7a61-4cc6-a990-7e426d87d166",
+   "name": "사천문화재단",
+   "norm_name": "사천문화재단",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "2d90d556-264d-4f57-8eb0-845d89d2a9af",
+   "name": "(주)상상플레이스",
+   "norm_name": "상상플레이스",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "481e3fa1-b942-4667-949d-3c154e6bc124",
+   "name": "서울 페스타 필하모닉 오케스트라",
+   "norm_name": "서울페스타필하모닉오케스트라",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 4
+  },
+  {
+   "id": "14215e53-6cf3-4259-8611-b4e6c77668fc",
+   "name": "세레나데",
+   "norm_name": "세레나데",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "6653cdf6-1243-487a-9181-9a7f87b80873",
+   "name": "(재)세향국악오케스트라",
+   "norm_name": "세향국악오케스트라",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "3fdbf7b0-9c80-46d4-b43e-f786cb13429c",
+   "name": "센텀아트홀",
+   "norm_name": "센텀아트홀",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "91c78047-b779-43cd-a9ec-a0ef98ea4c79",
+   "name": "센텀합창단",
+   "norm_name": "센텀합창단",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "7f94507f-95a5-43c6-82ca-98a0809b79f2",
+   "name": "(주)소프트네이션(캔디드뮤직)",
+   "norm_name": "소프트네이션캔디드뮤직",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "c730648a-6b28-4a61-b80e-58a6360c2a22",
+   "name": "(주)쇼노트",
+   "norm_name": "쇼노트",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "b7ab7fb9-421f-4e62-9327-1660ae6bcfbc",
+   "name": "수컴퍼니 (su company)",
+   "norm_name": "수컴퍼니sucompany",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "4f045375-2067-4070-b06e-2a68ae1fcc35",
+   "name": "슈크림북",
+   "norm_name": "슈크림북",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "c9b58758-275c-4e67-90c0-30c3d59de927",
+   "name": "(주)스프링이엔티",
+   "norm_name": "스프링이엔티",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "5a0d76e9-1df6-442a-bec6-605589062124",
+   "name": "쑈하우",
+   "norm_name": "쑈하우",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "aff194c7-9905-48d8-8fa4-18f7bb61ce58",
+   "name": "(주)씨에이치수박",
+   "norm_name": "씨에이치수박",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "a0d95154-13da-4ace-bf53-e3cd557f6d70",
+   "name": "아델라이데 뮤직프로덕션",
+   "norm_name": "아델라이데뮤직프로덕션",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "06e65633-a912-4c70-8359-deb3a8e036ca",
+   "name": "(주)아메바컬쳐",
+   "norm_name": "아메바컬쳐",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "b290ce50-5f98-4b4c-b03f-7d0aaa79fcfd",
+   "name": "아시아 원 (ASIA ONE)",
+   "norm_name": "아시아원asiaone",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "1cb66028-c835-4aae-bf82-73966ca95463",
+   "name": "(주)아우라이엔에스",
+   "norm_name": "아우라이엔에스",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "a5f42d9a-12ef-4996-8155-a940fda17ebe",
+   "name": "아이씨엠매니지먼트코리아(주)",
+   "norm_name": "아이씨엠매니지먼트코리아",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "54730d8d-6e23-4635-afa5-eea98c13f0a5",
+   "name": "(사)아지무스오페라단",
+   "norm_name": "아지무스오페라단",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "83436ee7-81a7-492f-a268-189ff8ac312a",
+   "name": "(주)아트팩토리",
+   "norm_name": "아트팩토리",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "cb72057d-e6f3-4e6b-a25a-ed8d325c8706",
+   "name": "안녕컴퍼니",
+   "norm_name": "안녕컴퍼니",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "e4f0ac3d-05de-4599-afcd-94c92f7fcfd6",
+   "name": "안애순컴퍼니(안애순무용단)",
+   "norm_name": "안애순컴퍼니안애순무용단",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "6f82596a-d3f9-4a0c-808f-1909557ac96c",
+   "name": "앙상블 자비에",
+   "norm_name": "앙상블자비에",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "c6f4aa70-896c-46b2-9c7d-866cf5e343bf",
+   "name": "앙상블 탄토(Ensemble tanto)",
+   "norm_name": "앙상블탄토ensembletanto",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "28def11a-d0dc-458d-aada-ddd499dc12ba",
+   "name": "(주)애드칸",
+   "norm_name": "애드칸",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "828284fa-c217-4d6d-9a61-f451b5bcbead",
+   "name": "앰비규어스댄스컴퍼니",
+   "norm_name": "앰비규어스댄스컴퍼니",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "3170969c-65fe-4db1-b9f2-311b52672f6c",
+   "name": "(재) 양산문화재단",
+   "norm_name": "양산문화재단",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "3e4ccea2-cdcc-401b-84e1-36e123a2440e",
+   "name": "어댑터 시어터(Adapter.Theater)",
+   "norm_name": "어댑터시어터adaptertheater",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "bd8b4393-13a9-49fb-9b04-8ec76250122e",
+   "name": "어비스컴퍼니",
+   "norm_name": "어비스컴퍼니",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "a778c96b-9a98-447b-a910-79f88742f377",
+   "name": "언해피 컴퍼니(UNHAPPY COMPANY)",
+   "norm_name": "언해피컴퍼니unhappycompany",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "a4677bd4-dae4-4a76-bcd3-2683d0a7269f",
+   "name": "에스앤코(S&CO)",
+   "norm_name": "에스앤코sco",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "93bc6e5b-f8cc-450a-9f6a-dcd4dfbae267",
+   "name": "(주)에스엠엔터테인먼트 (SM ENTERTAINMENT)",
+   "norm_name": "에스엠엔터테인먼트smentertainment",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "38d1f0cb-2bcb-448c-b58d-4a096097efc8",
+   "name": "(주)에스이십칠",
+   "norm_name": "에스이십칠",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "5976b59a-d287-4e6c-995f-a104e8a91fe6",
+   "name": "(주)에스제이이엔티",
+   "norm_name": "에스제이이엔티",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "16928e9e-fcb6-4cae-80ce-b9ce2e901993",
+   "name": "(주)에이치오씨앤씨(HO CNC)",
+   "norm_name": "에이치오씨앤씨hocnc",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "4aaefb76-9aa7-452a-9672-5198338f3bb6",
+   "name": "(주) 에이치오이엔티(HO ENT)",
+   "norm_name": "에이치오이엔티hoent",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "59bef6e0-f61a-4082-a124-b03f2154b9d7",
+   "name": "(주)에이치제이컬쳐(HJ컬쳐)",
+   "norm_name": "에이치제이컬쳐hj컬쳐",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "3c573bf4-6009-452b-855d-5eacc9a644ac",
+   "name": "(주)에프엑스솔루션",
+   "norm_name": "에프엑스솔루션",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "90542a20-604a-4dca-9ec5-c5a5f0f76771",
+   "name": "(주)에프엘엔터테인먼트",
+   "norm_name": "에프엘엔터테인먼트",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "8c2f75a7-1364-484f-93be-a825c87d6e8a",
+   "name": "엔터720",
+   "norm_name": "엔터720",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "0503b639-d05d-4d24-8976-88fb01ef5a60",
+   "name": "(주)엔터크라우드",
+   "norm_name": "엔터크라우드",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "605389ba-bfea-4f87-9aa5-eba057dc09a9",
+   "name": "엠스타그룹 에듀컴퍼니",
+   "norm_name": "엠스타그룹에듀컴퍼니",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "024161a1-b98f-4cc7-add0-ae96f2ea1a98",
+   "name": "(주)영감의샘터",
+   "norm_name": "영감의샘터",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "e1d88360-57d4-4479-9743-afcf666b06cf",
+   "name": "영기획",
+   "norm_name": "영기획",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "fd9365e1-bf41-4d6e-8492-bc1619268c4f",
+   "name": "영도문화예술회관",
+   "norm_name": "영도문화예술회관",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 8
+  },
+  {
+   "id": "921a47b1-309e-4226-b104-fecb481aadb7",
+   "name": "(재)영화의전당",
+   "norm_name": "영화의전당",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 10
+  },
+  {
+   "id": "823e0ed5-05cc-4cbc-9124-06d67e8bb12b",
+   "name": "(재)예술경영지원센터",
+   "norm_name": "예술경영지원센터",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 11
+  },
+  {
+   "id": "5b21b519-dc52-442c-ad6f-204a11968fc5",
+   "name": "예술기획 젬마",
+   "norm_name": "예술기획젬마",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "91c3145e-2c4c-46b6-bc82-be128b971171",
+   "name": "예술도깨비",
+   "norm_name": "예술도깨비",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "cb0202be-ac24-4d6d-b1e7-c90cdefad326",
+   "name": "(주)예술은 공유다",
+   "norm_name": "예술은공유다",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "5188e805-5ccc-47f7-a710-13fdf9304898",
+   "name": "예술인",
+   "norm_name": "예술인",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "fda9734c-9b39-49f7-b820-a1a12f9e6b39",
+   "name": "온테이블",
+   "norm_name": "온테이블",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "89e47fcf-6889-4eb0-ae70-76827a7ca4ef",
+   "name": "옴니아트홀",
+   "norm_name": "옴니아트홀",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "157ffe09-04c1-42da-a870-80be6f588d69",
+   "name": "(주) 와이피씨 (YPC)",
+   "norm_name": "와이피씨ypc",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "dc44dda6-f7eb-41df-8ae9-dbd54eb7fd73",
+   "name": "우정엔터테인먼트",
+   "norm_name": "우정엔터테인먼트",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "ad7f7e95-2297-42cb-a4ed-f2febc06ec36",
+   "name": "움라우트 뮤직",
+   "norm_name": "움라우트뮤직",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "705083d5-b363-43ab-b65b-74594bb4892e",
+   "name": "원더매직",
+   "norm_name": "원더매직",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "cd9bcfd7-1a4d-4b81-b558-848d40d54fc6",
+   "name": "(주)원앤원엔터테인먼트",
+   "norm_name": "원앤원엔터테인먼트",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "3ce0c239-02d4-40a3-a5f4-fbd5ffd6ff1c",
+   "name": "(주)월드쇼마켓",
+   "norm_name": "월드쇼마켓",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 6
+  },
+  {
+   "id": "12965f64-4535-47cc-baeb-08a1ea129e2d",
+   "name": "(주)위아더컬쳐",
+   "norm_name": "위아더컬쳐",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "2e1f0765-88a7-4707-8e90-6f2396c8b933",
+   "name": "위플레이",
+   "norm_name": "위플레이",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 7
+  },
+  {
+   "id": "ad3a2954-6b6d-49c6-9ecf-74a4bb0e80a7",
+   "name": "(주)유니원커뮤니케이션즈(Unione Commuications)",
+   "norm_name": "유니원커뮤니케이션즈unionecommuications",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "a03ab74d-aab0-4eae-9940-b0ca4ab8c39f",
+   "name": "유어타입",
+   "norm_name": "유어타입",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "1c505b31-5d7e-464e-9622-756b4e8b53a5",
+   "name": "윤스토리엔터테인먼트",
+   "norm_name": "윤스토리엔터테인먼트",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "61565771-7c46-4713-a7c5-3472c25aa9ec",
+   "name": "율 컴퍼니",
+   "norm_name": "율컴퍼니",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "daaf9193-6a5b-42f7-bf31-1d6b3dd41223",
+   "name": "을숙도문화회관",
+   "norm_name": "을숙도문화회관",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 5
+  },
+  {
+   "id": "370105d0-26dc-4047-95e9-b1e596445cf6",
+   "name": "음악이 주는 선물",
+   "norm_name": "음악이주는선물",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "be054781-6bd7-4003-89e1-03e1e9756769",
+   "name": "의령군청(의령군)",
+   "norm_name": "의령군청의령군",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "0fd3803a-0597-4905-bd15-76932760762d",
+   "name": "(주)이에스생활문화 (ES생활문화)",
+   "norm_name": "이에스생활문화es생활문화",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 4
+  },
+  {
+   "id": "8063887d-bd3d-4bbb-b2dd-5890f8bda342",
+   "name": "전남광주통합특별시립발레단 (구. 광주시립발레단)",
+   "norm_name": "전남광주통합특별시립발레단구광주시립발레단",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "d972d8dd-d6f1-49a1-b325-3ca9ab23d029",
+   "name": "(주)제이제이팩토리",
+   "norm_name": "제이제이팩토리",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "50cd9572-4e40-46f3-a9ca-ceebbf47d4a6",
+   "name": "조은문화마을",
+   "norm_name": "조은문화마을",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "90b6e7f3-6656-4a5e-8519-1499da5bf05f",
+   "name": "(주)조은아트플러스",
+   "norm_name": "조은아트플러스",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "14cae6df-b59a-45cb-b9db-df96a8fed664",
+   "name": "(주)조이컬처",
+   "norm_name": "조이컬처",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 10
+  },
+  {
+   "id": "95e96a42-be80-4704-8da5-04a45bba12fc",
+   "name": "조이컬쳐",
+   "norm_name": "조이컬쳐",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "3e586b7b-480c-411b-be7e-95fd77237c2b",
+   "name": "좋은날 음악기획",
+   "norm_name": "좋은날음악기획",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "c03a6505-75b6-439d-8b85-19764e6abdbb",
+   "name": "좋은사람들",
+   "norm_name": "좋은사람들",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "f4b7a5b9-9d13-43a0-bca0-72bea29d218d",
+   "name": "(주)좋은콘서트",
+   "norm_name": "좋은콘서트",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 7
+  },
+  {
+   "id": "f94c3f46-9541-4ba2-a2d6-8f85c6697293",
+   "name": "주니엔터테인먼트",
+   "norm_name": "주니엔터테인먼트",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "4dc2d20f-bea7-4c40-81fe-d5aefd8e8778",
+   "name": "주주메카",
+   "norm_name": "주주메카",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "6de207e3-183f-48bb-935f-f2c4c56a3aa1",
+   "name": "중원씨어터",
+   "norm_name": "중원씨어터",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "c4ee4276-4640-4f59-a9fc-72fbac4c06ef",
+   "name": "즐겨찾기",
+   "norm_name": "즐겨찾기",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 4
+  },
+  {
+   "id": "c179110d-8715-4216-b752-4fc09f3618e2",
+   "name": "지누락엔터테인먼트",
+   "norm_name": "지누락엔터테인먼트",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "32e1e403-ac43-4ea3-afb2-740354afb513",
+   "name": "지오엠 ENT(GOM ENT)",
+   "norm_name": "지오엠entgoment",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "c9ce2721-b083-4ad5-8a50-696397fe1e42",
+   "name": "진엔터컴",
+   "norm_name": "진엔터컴",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "791ab126-0f2c-4ad0-9730-80fa282c5fe6",
+   "name": "진주국제재즈페스티벌 조직위원회",
+   "norm_name": "진주국제재즈페스티벌조직위원회",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 4
+  },
+  {
+   "id": "efe7752c-6f77-4b53-ae8c-778c42caf699",
+   "name": "진주문화원",
+   "norm_name": "진주문화원",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "b0579e82-453b-4178-8667-1ba4656524ed",
+   "name": "진해아트홀",
+   "norm_name": "진해아트홀",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "39d77173-bff3-46c7-a4d8-c4ca1d5a7d2f",
+   "name": "창녕군청(창녕문화예술회관)",
+   "norm_name": "창녕군청창녕문화예술회관",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "2dfd0ce5-ac52-4600-b3d8-1be0eb05c29b",
+   "name": "(주)창라이프",
+   "norm_name": "창라이프",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "b982eb5d-526f-4d32-bae4-66779437ada8",
+   "name": "창원문화재단",
+   "norm_name": "창원문화재단",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 111
+  },
+  {
+   "id": "b6c50696-35fe-4e6e-8e03-d4b4e6b0c7cb",
+   "name": "창원시립교향악단",
+   "norm_name": "창원시립교향악단",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "c7a1ed18-d8bc-4f43-b52f-8920976ff6be",
+   "name": "창원시립마산문신미술관",
+   "norm_name": "창원시립마산문신미술관",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 4
+  },
+  {
+   "id": "bbcf9924-bdb1-4f8f-93fe-8e5de47c4c1a",
+   "name": "창원시립소년소녀합창단",
+   "norm_name": "창원시립소년소녀합창단",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "f3c508a0-b80c-4827-b0ac-e7f67bfb982f",
+   "name": "창원시립예술단",
+   "norm_name": "창원시립예술단",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "0be979cf-7d68-4991-ab4f-9b303c3d7270",
+   "name": "창원시립합창단",
+   "norm_name": "창원시립합창단",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "9530d410-ceb9-4060-a946-8833c0f799f0",
+   "name": "창원시청",
+   "norm_name": "창원시청",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "03fffbd6-7745-4f7b-85c5-90ccb279326d",
+   "name": "창작집단 문",
+   "norm_name": "창작집단문",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "58d112c9-41f1-4439-813b-efdfec996c71",
+   "name": "청년문화창작소",
+   "norm_name": "청년문화창작소",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "a85a8a6a-2a8a-4735-84a0-43d3ed607bb4",
+   "name": "첼리스트의 서재",
+   "norm_name": "첼리스트의서재",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "2f91c28e-74ea-458c-b308-1df3c830fe14",
+   "name": "친친탱고(CHINCHIN TANGO)",
+   "norm_name": "친친탱고chinchintango",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "10af4837-5336-4375-9931-dae3d33e87fc",
+   "name": "(주)케이엔엔(KNN)",
+   "norm_name": "케이엔엔knn",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "689d6386-f857-420e-9649-897ed9cdb4c3",
+   "name": "(주)코르부스 CORVUS",
+   "norm_name": "코르부스corvus",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "c01097f6-8dab-4b95-b68a-04c66cf594a6",
+   "name": "(재)코리안심포니오케스트라(국립심포니오케스트라)",
+   "norm_name": "코리안심포니오케스트라국립심포니오케스트라",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "fc742f13-d156-46db-abf5-a19bdc339479",
+   "name": "(주)콘서트가든",
+   "norm_name": "콘서트가든",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "8de6bc8d-58f6-4732-bfa5-665dddac92dc",
+   "name": "콘텐츠윈",
+   "norm_name": "콘텐츠윈",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "1b1f7aec-9e17-4e58-b05c-550b3303db87",
+   "name": "(주)콘텐츠컬쳐플레이스",
+   "norm_name": "콘텐츠컬쳐플레이스",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "e1a2d29f-48a2-452f-842d-ae1034808ed9",
+   "name": "(주) 크레디아뮤직앤아티스트",
+   "norm_name": "크레디아뮤직앤아티스트",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "282e1247-8b08-4110-8da7-8b7200fb8a0f",
+   "name": "크레이프사운드",
+   "norm_name": "크레이프사운드",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "625ebfba-43a3-4fed-9102-50d0a5b91e54",
+   "name": "클래식부산",
+   "norm_name": "클래식부산",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 5
+  },
+  {
+   "id": "72020b65-3841-48db-8281-25ae950731c7",
+   "name": "클랩(CLAP)",
+   "norm_name": "클랩clap",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "358cb27f-e546-4ae3-ba1d-e8acda22d044",
+   "name": "클럽 벨포스(belpos)",
+   "norm_name": "클럽벨포스belpos",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "9240759e-53b3-4b51-b68b-cf71152cb3ef",
+   "name": "클레이아크김해미술관",
+   "norm_name": "클레이아크김해미술관",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "209cbfb8-b1e1-4f28-9357-ba212c8e08e7",
+   "name": "클립서비스",
+   "norm_name": "클립서비스",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "69144e76-b3ff-4a1c-a1b5-838a08072846",
+   "name": "킨키",
+   "norm_name": "킨키",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "6c210365-5b8b-420d-a0a9-1645fd054b3a",
+   "name": "(주)타입커뮤니케이션",
+   "norm_name": "타입커뮤니케이션",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "25a66272-c3fa-4702-a0ba-db105dd34707",
+   "name": "(주)터보제이케이컴퍼니",
+   "norm_name": "터보제이케이컴퍼니",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "c9e7f412-a274-4cf9-b71b-5bbd38f93af1",
+   "name": "통영국제음악당",
+   "norm_name": "통영국제음악당",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "3ecc43f9-bce5-4aa0-8a2b-2488cbfe8cd6",
+   "name": "(재) 통영국제음악재단",
+   "norm_name": "통영국제음악재단",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "ca9566b8-644d-4f6f-9e6b-117b44ea2337",
+   "name": "통영시민문화회관",
+   "norm_name": "통영시민문화회관",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 14
+  },
+  {
+   "id": "d60a9444-5f26-4216-9d35-2221687d4eef",
+   "name": "통영시청",
+   "norm_name": "통영시청",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 4
+  },
+  {
+   "id": "b9ff617f-038e-4645-8573-afc89385d421",
+   "name": "(주)트라이어스엔터테인먼트",
+   "norm_name": "트라이어스엔터테인먼트",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "8640f7d2-a8ff-4c75-9e3f-e95b16cc46e1",
+   "name": "파워엔터테인먼트(주)",
+   "norm_name": "파워엔터테인먼트",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "7f0853b0-2337-4458-9f2e-14a307f8a659",
+   "name": "파이오니아(주)",
+   "norm_name": "파이오니아",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "e7dba9fa-be58-4b43-acc4-e41f999d431a",
+   "name": "파파프로덕션",
+   "norm_name": "파파프로덕션",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "49b7750d-3f60-40ee-aa59-3d1330707d0c",
+   "name": "팍스뮤직엔터테인먼트",
+   "norm_name": "팍스뮤직엔터테인먼트",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "03c8c09a-7a52-446f-85ba-fdd49886cc9c",
+   "name": "(주) 퍼니플럭스(FunnyFlux)",
+   "norm_name": "퍼니플럭스funnyflux",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "dcc6a9a9-c5c0-4e96-a52c-c797d96ba56a",
+   "name": "(주)페포니뮤직",
+   "norm_name": "페포니뮤직",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "325f71a0-fca3-4d97-aefd-a49b6e9011c9",
+   "name": "폭스캄머앙상블(경상오페라단)",
+   "norm_name": "폭스캄머앙상블경상오페라단",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "6792ef73-3269-4dfc-8643-375c9390d69b",
+   "name": "(주)프로덕션이황",
+   "norm_name": "프로덕션이황",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "c9d8c763-6c47-49c8-b002-352adc140e06",
+   "name": "플러스 기획",
+   "norm_name": "플러스기획",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "2b3ad7ab-17b5-4d89-859d-34fd18a53ef0",
+   "name": "(주)플레이더부산",
+   "norm_name": "플레이더부산",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "49a03b69-74d2-421c-ba1b-d7342821cb7f",
+   "name": "피비컴퍼니",
+   "norm_name": "피비컴퍼니",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 2
+  },
+  {
+   "id": "21e05865-348a-4674-8021-c4ac7683dc4d",
+   "name": "(주)피엠씨프러덕션(PMC Production)",
+   "norm_name": "피엠씨프러덕션pmcproduction",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "52bc0874-8938-4613-bd8c-a204a07088e3",
+   "name": "핀(PIN)",
+   "norm_name": "핀pin",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "0909692d-6c4b-4807-aee9-67f882626d42",
+   "name": "필뮤직 컴퍼니",
+   "norm_name": "필뮤직컴퍼니",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 4
+  },
+  {
+   "id": "c9bec3a5-1757-40b1-860a-ff4530557d1d",
+   "name": "필슈파스 (viel SpaB)",
+   "norm_name": "필슈파스vielspab",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "9190ea4f-ea01-4e97-aad2-75f44ab91b44",
+   "name": "하우스 오브 베르(House of vert)",
+   "norm_name": "하우스오브베르houseofvert",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "d8721f97-ee67-4d76-933d-12d7f4ae97d5",
+   "name": "한국문화예술회관연합회(KoCACA)",
+   "norm_name": "한국문화예술회관연합회kocaca",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "e78ce94a-8ef2-4b01-9f38-3b4cab36c09e",
+   "name": "(재) 한국문화재단 유니버설발레단(구. (재) 효정한국문화재단)",
+   "norm_name": "한국문화재단유니버설발레단구효정한국문화재단",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "19fd0e6a-6d35-42c2-a0e7-ad29aeac57b7",
+   "name": "(주)한울엔터테인먼트",
+   "norm_name": "한울엔터테인먼트",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "eaeb5069-ade4-4b32-a710-2841dd187c0a",
+   "name": "함안군청",
+   "norm_name": "함안군청",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "67bc337e-d754-4c5e-ae1a-065185945f7d",
+   "name": "함안문화예술회관",
+   "norm_name": "함안문화예술회관",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 3
+  },
+  {
+   "id": "532837b4-157e-46d2-afbb-530a68f057c8",
+   "name": "함양군청",
+   "norm_name": "함양군청",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "f4c9839a-e888-4bee-b7e3-e7c336f95962",
+   "name": "함양문화예술회관",
+   "norm_name": "함양문화예술회관",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 4
+  },
+  {
+   "id": "37bd4ba1-69cc-49c2-a9e2-4e333fb2d613",
+   "name": "해마여행",
+   "norm_name": "해마여행",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "a5618429-8bb4-4442-b674-9b487a213753",
+   "name": "해밀턴문화산업전문회사",
+   "norm_name": "해밀턴문화산업전문회사",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "4ebf45c4-2998-44df-94dc-d9dd29b6718c",
+   "name": "해서웨이유니버스(Hathaw9yUniverse)",
+   "norm_name": "해서웨이유니버스hathaw9yuniverse",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  },
+  {
+   "id": "f7fe0316-87a1-4485-9da3-4e4eef792d25",
+   "name": "해운대문화회관",
+   "norm_name": "해운대문화회관",
+   "kind": "기관",
+   "insta_handle": null,
+   "small": false,
+   "events": 11
+  },
+  {
+   "id": "08c8fda7-dee7-4a78-b732-496fd928d095",
+   "name": "홀톤심포니오케스트라",
+   "norm_name": "홀톤심포니오케스트라",
+   "kind": "단체",
+   "insta_handle": null,
+   "small": false,
+   "events": 1
+  }
+ ]
+}

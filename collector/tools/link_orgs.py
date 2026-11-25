@@ -14,7 +14,8 @@
 
 쓰기는 collector/.env.local 의 service 키로 한다(RLS 우회).
 사용: python tools/link_orgs.py [--dry-run | --apply]   (collector 폴더에서. 기본 --dry-run. 마지막 줄이 한 줄 요약)
-검토 파일: collector/review/orgs_<오늘>.json (만든·만들 단체, 겹친 이름, 이상한 것)
+검토 파일: collector/review/orgs_<오늘>.json (--apply: 오늘 만든 단체, 겹친 이름, 이상한 것)
+          collector/review/orgs_<오늘>_dryrun.json (--dry-run: 만들 단체)
 """
 import collections
 import json
@@ -284,6 +285,15 @@ def main():
             content["ai_suggestion"] = sug
             sb.table("raw_posts").update({"content": content}).eq("id", raw["id"]).execute()
             written_raw += 1
+        if os.path.exists(CACHE):  # raw post 에 적었으니 임시 저장은 지운다
+            os.remove(CACHE)
+
+    # 오늘 만든 단체(다시 돌려도 목록이 비지 않게 DB 의 created_at 으로 가린다)
+    if apply:
+        made = page_all(lambda: sb.table("orgs").select("id,name,norm_name,kind,insta_handle,small,created_at")
+                        .gte("created_at", f"{today}T00:00:00+09:00").order("norm_name"))
+        created = [{**{k: m[k] for k in ("id", "name", "norm_name", "kind", "insta_handle", "small")},
+                    "events": len(orgs[m["norm_name"]]["events"]) if m["norm_name"] in orgs else 0} for m in made]
 
     top = sorted(orgs.items(), key=lambda kv: -len(kv[1]["events"]))[:15]
     review = {
@@ -301,7 +311,7 @@ def main():
         "created_orgs": created,
     }
     os.makedirs("review", exist_ok=True)
-    path = os.path.join("review", f"orgs_{today}.json")
+    path = os.path.join("review", f"orgs_{today}.json" if apply else f"orgs_{today}_dryrun.json")
     with open(path, "w", encoding="utf-8") as f:
         json.dump(review, f, ensure_ascii=False, indent=1)
 
