@@ -1,0 +1,258 @@
+<script type="application/json" id="meta-d08">
+{"name":"지도 먼저","bench":["카카오맵","네이버 지도","Citymapper"],
+ "concept":"첫 화면의 주인공이 목록이 아니라 지도다. 위쪽 40%에 장소별 핀이 먼저 보이고, 떠 있는 검색창과 칩 한 줄로 거르고, 아래에서 끌어올리는 시트로 그 장소의 행사를 고른다. 상세도 «어디서»부터: 작은 지도와 길찾기가 맨 위에 온다.",
+ "palette":[["#EEF0EB","지도 땅"],["#C4DAEE","물"],["#D6E6CF","공원"],["#FFFFFF","시트·검색창"],["#15181D","글자·주 버튼"],["#5A6370","보조 글자"],["#E8EEFF","길찾기 버튼 바탕"],["#1F3BA8","길찾기 글자"],["#D23F2B","공연 핀"],["#3550C8","전시"],["#0B7E6A","행사"],["#9A6400","축제"],["#7B47C2","체험·교육"]],
+ "fonts":["PT","SG"],
+ "notes":{"home":["첫 화면 위 40%를 도식 지도로 바꾸고, 김해 이번 주 장소 4곳을 좌표 비례로 핀을 꽂음 — 핀 옆에 장소 이름과 건수(참고: 지도 앱 장소 핀·이름표)","떠 있는 둥근 검색창과 칩 한 줄(필터·이번 주·김해·분야·아이와)이 넘겨도 위에 붙음 (D1 필터 한 줄 · 지도 앱 플로팅 검색바)","아래는 손잡이가 달린 바텀시트 목록, 넘기면 시트가 지도를 덮고 올라옴 (참고: 지도 앱 끌어올리는 시트)","목록 줄마다 오른쪽에 «길찾기» 버튼, 핀 색=분야 (참고: Citymapper·지도 앱 장소 목록)","거리 숫자 대신 «가까운 순»은 위치를 허락하면 켜지는 토글로만 둠 (피카 원칙: 거리 지어내지 않음)"],
+  "detail":["맨 위에 작은 지도와 장소 핀, 그 아래 시트처럼 겹친 정보 카드 (참고: 지도 앱 장소 상세)","제목 바로 밑에 «길찾기»·«공간 정보» 두 버튼 (참고: 지도 앱 장소 카드 행동 줄)","시각·관람료·관람 나이·출처를 아이콘 줄 목록으로 (참고: 지도 앱 장소 정보 줄)","포스터는 1:2 원본 비율 그대로, 아래 고정 막대의 주 버튼은 «원본 안내 페이지 열기» (D1)"]}}
+</script>
+<style>
+.d08{--land:#EEF0EB;--ink:#15181D;--sub:#5A6370;--line:#E6E8EC;--soft:#F2F3F5;--pf:#D23F2B;--ex:#3550C8;--ev:#0B7E6A;--fe:#9A6400;--ed:#7B47C2;background:#FFFFFF;color:var(--ink);font-family:"PT",sans-serif}
+.d08 .num{font-family:"SG","PT",sans-serif;font-feature-settings:"tnum"}
+.d08 svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* 위 고정: 떠 있는 검색창 + 칩 한 줄 */
+.d08 .fb{position:sticky;top:0;z-index:5;height:112px;padding:10px 0 0;pointer-events:none;background:rgba(255,255,255,.5);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-radius:0 0 18px 18px}
+.d08 .fb>*{pointer-events:auto}
+.d08 .srch{margin:0 12px;height:50px;border-radius:25px;background:#fff;box-shadow:0 2px 10px rgba(21,24,29,.16),0 0 0 1px rgba(21,24,29,.04);display:flex;align-items:center;gap:10px;padding:0 8px 0 18px}
+.d08 .logo{font-family:"SG",sans-serif;font-weight:700;font-size:19px;letter-spacing:-.5px;line-height:1}
+.d08 .srch .dv{width:1px;height:20px;background:var(--line)}
+.d08 .srch .ph-t{flex:1;color:var(--sub);font-size:15px}
+.d08 .srch .me{width:36px;height:36px;border-radius:50%;background:var(--soft);display:grid;place-items:center;color:var(--ink)}
+.d08 .chips{display:flex;gap:6px;overflow-x:auto;padding:8px 12px 8px;scrollbar-width:none}
+.d08 .chips::-webkit-scrollbar{display:none}
+.d08 .chip{flex:none;height:34px;border-radius:17px;background:#fff;box-shadow:0 1px 6px rgba(21,24,29,.16);display:flex;align-items:center;gap:4px;padding:0 13px;font-size:14px;font-weight:600;white-space:nowrap}
+.d08 .chip svg.i{width:15px;height:15px}
+.d08 .chip.on{background:var(--ink);color:#fff}
+
+/* 지도 */
+.d08 .map{position:sticky;top:0;z-index:1;margin-top:-112px;height:320px;overflow:hidden;background:var(--land)}
+.d08 .map>svg{position:absolute;inset:0;width:375px;height:320px}
+.d08 .pn{position:absolute;width:30px;height:30px;margin:-36px 0 0 -15px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--pf);border:2.5px solid #fff;box-shadow:0 2px 6px rgba(21,24,29,.3)}
+.d08 .pn::after{content:"";position:absolute;left:50%;top:50%;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:#fff}
+.d08 .lb{position:absolute;height:24px;display:flex;align-items:center;gap:6px;background:#fff;border-radius:12px;padding:0 4px 0 10px;font-size:12px;font-weight:700;white-space:nowrap;box-shadow:0 1px 5px rgba(21,24,29,.2)}
+.d08 .lb b{font-family:"SG",sans-serif;font-weight:700;font-size:12px;min-width:18px;height:18px;border-radius:9px;background:var(--ink);color:#fff;display:grid;place-items:center;padding:0 5px}
+.d08 .loc{position:absolute;right:12px;top:214px;width:44px;height:44px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(21,24,29,.2);display:grid;place-items:center}
+.d08 .loc svg.i{width:20px;height:20px}
+
+/* 바텀시트 */
+.d08 .sheet{position:relative;z-index:2;margin-top:-22px;background:#fff;border-radius:22px 22px 0 0;box-shadow:0 -4px 16px rgba(21,24,29,.12);min-height:900px;padding:0 16px 40px}
+.d08 .grab{display:block;width:40px;height:5px;border-radius:3px;background:#D3D7DD;margin:0 auto;position:relative;top:8px}
+.d08 .sh{padding:18px 0 8px;border-bottom:1px solid var(--line)}
+.d08 .sh .r1{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.d08 .sh h2{font-size:20px;font-weight:800;letter-spacing:-.4px;line-height:1.3;white-space:nowrap}
+.d08 .seg{display:flex;background:var(--soft);border-radius:10px;padding:3px;flex:none}
+.d08 .seg span{font-size:12.5px;font-weight:600;padding:5px 9px;border-radius:8px;color:var(--sub);display:flex;align-items:center;gap:3px;white-space:nowrap}
+.d08 .seg span.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(21,24,29,.15)}
+.d08 .seg svg.i{width:13px;height:13px}
+.d08 .sh .r2{display:flex;justify-content:space-between;align-items:center;margin-top:4px;font-size:13px;color:var(--sub)}
+.d08 .lg{display:flex;gap:8px;font-size:11px;color:var(--sub)}
+.d08 .lg i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:3px;vertical-align:0}
+
+.d08 .row{display:grid;grid-template-columns:56px 1fr 44px;grid-template-areas:"th d bt" "th t bt" "th v v" "th p p" "th y y";column-gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.d08 .row .th{grid-area:th;width:56px;height:70px;border-radius:8px;object-fit:cover;background:var(--soft)}
+.d08 .row .d{grid-area:d;font-family:"SG","PT",sans-serif;font-weight:600;font-size:13px;line-height:19px;color:var(--ink)}
+.d08 .row .t{grid-area:t;font-size:16px;font-weight:700;line-height:22px;letter-spacing:-.3px;margin-top:1px}
+.d08 .row .v{grid-area:v;display:flex;align-items:center;gap:5px;margin-top:5px;font-size:13px;color:var(--sub);line-height:20px}
+.d08 .row .p{grid-area:p;font-size:13px;font-weight:600;margin-top:2px;line-height:20px}
+.d08 .row .y{grid-area:y;margin-top:7px;background:var(--soft);border-radius:10px;padding:6px 10px;font-size:13px;line-height:18px}
+.d08 .row .y em{display:block;font-style:normal;font-size:11px;font-weight:700;color:var(--sub);margin-bottom:1px}
+.d08 .tg{display:inline-flex;align-items:center;height:20px;padding:0 6px;border-radius:5px;font-size:11px;font-weight:700;color:#fff;background:var(--pf);flex:none}
+.d08 .tg.kid{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px #C9CED6}
+.d08 .rt{grid-area:bt;justify-self:end;align-self:start}
+.d08 .rt span{width:38px;height:38px;border-radius:50%;background:var(--soft);display:grid;place-items:center;color:var(--ink)}
+.d08 .more{display:flex;align-items:center;justify-content:center;gap:6px;height:48px;margin-top:16px;border-radius:12px;background:var(--soft);font-size:15px;font-weight:700}
+.d08 .hint{margin-top:12px;font-size:13px;color:var(--sub);line-height:1.6;text-align:center}
+
+/* 상세 */
+.d08 .dmap{position:relative;height:216px;overflow:hidden;background:var(--land)}
+.d08 .dmap>svg{position:absolute;inset:0;width:375px;height:216px}
+.d08 .fl{position:absolute;top:12px;height:40px;border-radius:20px;background:#fff;box-shadow:0 2px 8px rgba(21,24,29,.2);display:flex;align-items:center;gap:6px;padding:0 12px;font-size:13px;font-weight:600}
+.d08 .fl.bk{left:12px;width:40px;padding:0;justify-content:center}
+.d08 .fl.big{right:12px}
+.d08 .info{position:relative;margin-top:-22px;background:#fff;border-radius:22px 22px 0 0;box-shadow:0 -4px 16px rgba(21,24,29,.12);padding:0 16px 28px}
+.d08 .tags{display:flex;gap:5px;padding-top:22px}
+.d08 .info h1{font-size:25px;font-weight:800;letter-spacing:-.6px;line-height:1.3;margin-top:8px}
+.d08 .when{margin-top:6px;font-size:15px;font-weight:600}
+.d08 .when .num{font-weight:600}
+.d08 .where{display:flex;align-items:center;gap:5px;margin-top:3px;font-size:15px;color:var(--sub)}
+.d08 .acts{display:flex;gap:8px;margin-top:16px}
+.d08 .acts a{flex:1;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:15px;font-weight:700;background:var(--soft)}
+.d08 .acts a.go{background:#E8EEFF;color:#1F3BA8}
+.d08 .slots{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap}
+.d08 .slots span{font-family:"SG",sans-serif;font-weight:600;font-size:14px;height:32px;padding:0 11px;border-radius:8px;background:var(--soft);display:inline-flex;align-items:center}
+.d08 .il{margin-top:18px;border-top:1px solid var(--line)}
+.d08 .il li{display:grid;grid-template-columns:22px 64px 1fr;gap:8px;align-items:start;padding:13px 0;border-bottom:1px solid var(--line);font-size:14.5px;line-height:1.55}
+.d08 .il li svg.i{margin-top:2px;color:var(--sub)}
+.d08 .il li .k{color:var(--sub);font-size:13.5px;padding-top:1px}
+.d08 .il li .s{display:block;font-size:13px;color:var(--sub)}
+.d08 .why{margin-top:18px;border-radius:14px;background:var(--soft);padding:14px 16px;font-size:15px;line-height:1.6}
+.d08 .why em{display:block;font-style:normal;font-size:12px;font-weight:700;color:var(--sub);margin-bottom:3px}
+.d08 .post{display:flex;gap:14px;margin-top:22px;align-items:flex-start}
+.d08 .post img{width:150px;height:300px;border-radius:10px;flex:none;background:var(--soft)}
+.d08 .post p{font-size:13.5px;line-height:1.65;color:var(--sub)}
+.d08 .post p b{display:block;color:var(--ink);font-size:14px;margin-bottom:6px}
+.d08 .post p a{display:inline-block;margin-top:8px;color:var(--ink);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.d08 .h3{font-size:17px;font-weight:800;margin-top:28px;letter-spacing:-.3px}
+.d08 .mini{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.d08 .mini img{width:44px;height:55px;border-radius:6px;object-fit:cover;flex:none}
+.d08 .mini .d{font-family:"SG","PT",sans-serif;font-weight:600;font-size:12.5px}
+.d08 .mini .t{font-size:14.5px;font-weight:700;line-height:1.4}
+.d08 .mini .v{font-size:12.5px;color:var(--sub)}
+.d08 .bar{position:sticky;bottom:0;z-index:6;display:flex;gap:8px;align-items:center;padding:10px 12px 12px;background:#fff;box-shadow:0 -1px 0 var(--line),0 -6px 14px rgba(21,24,29,.06)}
+.d08 .bar .ic{width:48px;height:48px;border-radius:12px;background:var(--soft);display:grid;place-items:center;flex:none}
+.d08 .bar .ic svg.i{width:20px;height:20px}
+.d08 .bar .go{flex:1;height:48px;border-radius:12px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;gap:7px;font-size:16px;font-weight:700}
+</style>
+
+<div class="ph d08" data-screen="d08-home">
+  <div class="fb">
+    <div class="srch">
+      <span class="logo">pica</span><span class="dv"></span>
+      <span class="ph-t">행사·장소 이름 찾기</span>
+      <span class="me" aria-label="찾기"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg></span>
+    </div>
+    <div class="chips">
+      <span class="chip"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>필터</span>
+      <span class="chip on">이번 주<svg class="i" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></span>
+      <span class="chip on">김해<svg class="i" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></span>
+      <span class="chip">분야<svg class="i" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></span>
+      <span class="chip">아이와</span>
+      <span class="chip">곧 끝남</span>
+    </div>
+  </div>
+
+  <div class="map">
+    <svg viewBox="0 0 375 330" aria-hidden="true">
+      <rect width="375" height="330" fill="#EEF0EB"/>
+      <path d="M0 30 C40 20 70 50 78 92 C84 126 40 140 0 134Z" fill="#D6E6CF"/>
+      <path d="M262 190 C300 176 350 186 362 214 C372 244 330 262 292 254 C262 248 246 214 262 190Z" fill="#D6E6CF"/>
+      <path d="M300 30 C330 18 375 22 375 22 L375 96 C346 100 306 84 300 60Z" fill="#D6E6CF"/>
+      <path d="M200 232 C214 224 232 232 230 248 C228 262 206 264 198 252Z" fill="#D6E6CF"/>
+      <path d="M-20 196 C30 204 64 236 104 254 C150 274 210 296 252 340" stroke="#C4DAEE" stroke-width="24" fill="none" stroke-linecap="round"/>
+      <path d="M330 120 C350 130 380 128 390 140" stroke="#C4DAEE" stroke-width="10" fill="none"/>
+      <g stroke="#FFFFFF" stroke-width="4" fill="none" stroke-linecap="round">
+        <path d="M-10 64 L390 54"/><path d="M-10 214 L250 196"/><path d="M40 -10 L60 340"/><path d="M244 -10 L262 190"/><path d="M300 110 L380 290"/><path d="M110 150 L250 168"/><path d="M190 60 L200 340"/><path d="M-10 270 L150 262"/><path d="M280 260 L390 250"/>
+      </g>
+      <g fill="none" stroke-linecap="round">
+        <path d="M-10 156 L390 128" stroke="#D2D7DD" stroke-width="12"/><path d="M-10 156 L390 128" stroke="#FFFFFF" stroke-width="9"/>
+        <path d="M118 -10 C130 90 150 160 176 230 C190 270 200 300 212 340" stroke="#D2D7DD" stroke-width="12"/><path d="M118 -10 C130 90 150 160 176 230 C190 270 200 300 212 340" stroke="#FFFFFF" stroke-width="9"/>
+        <path d="M-10 316 C110 300 220 238 390 224" stroke="#D2D7DD" stroke-width="12"/><path d="M-10 316 C110 300 220 238 390 224" stroke="#FFFFFF" stroke-width="9"/>
+      </g>
+      <path d="M-10 102 L390 86" stroke="#B9BFC7" stroke-width="2" stroke-dasharray="7 5" fill="none"/>
+    </svg>
+    <!-- 핀: 좌표 비례(시안용 도식, 18px/km). 끝점 = 장소 위치 -->
+    <i class="pn" style="left:150px;top:153px"></i>
+    <span class="lb" style="left:12px;top:122px">김해문화의전당 <b>3</b></span>
+    <i class="pn" style="left:217px;top:152px"></i>
+    <span class="lb" style="left:204px;top:158px">김해칠암문화센터 <b>1</b></span>
+    <i class="pn" style="left:159px;top:187px"></i>
+    <span class="lb" style="left:30px;top:160px">봉황예술극장 <b>2</b></span>
+    <i class="pn" style="left:70px;top:296px"></i>
+    <span class="lb" style="left:91px;top:266px">김해서부문화센터 <b>4</b></span>
+    <span class="loc" aria-label="내 위치"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></span>
+  </div>
+
+  <div class="sheet">
+    <span class="grab"></span>
+    <div class="sh">
+      <div class="r1">
+        <h2>김해 · 이번 주</h2>
+        <div class="seg"><span class="on">날짜순</span><span><svg class="i" viewBox="0 0 24 24"><path d="M12 21s-6-5.6-6-11a6 6 0 0 1 12 0c0 5.4-6 11-6 11z"/><circle cx="12" cy="10" r="2"/></svg>가까운 순</span></div>
+      </div>
+      <div class="r2"><span><span class="num">11.27–12.03</span> · <b class="num" style="color:var(--ink)">10</b>건 중 4건</span>
+        <span class="lg"><span><i style="background:var(--pf)"></i>공연</span><span><i style="background:var(--ex)"></i>전시</span><span><i style="background:var(--ev)"></i>행사</span></span></div>
+    </div>
+
+    <div class="row" data-card>
+      <img class="th" src="img/g3.webp" alt="어센트 밴드 라이브 공연 포스터">
+      <div class="d">금 11.27 · 19:30</div>
+      <div class="t">어센트 밴드 라이브 공연</div>
+      <a class="rt" aria-label="길찾기"><span><svg class="i" viewBox="0 0 24 24"><path d="M4 11l16-7-7 16-2-7z"/></svg></span></a>
+      <div class="v"><span class="tg">공연</span>봉황예술극장</div>
+      <div class="p">무료 · 사전 예약 가능</div>
+      <div class="y"><em>피카가 본 이유</em>봉황예술극장 전석 무료, 사전 예약도 받아요</div>
+    </div>
+    <div class="row" data-card>
+      <img class="th" src="img/w1.jpg" alt="어린이 서커스 쇼 포스터">
+      <div class="d">토 11.28 · 11:00 13:00 15:00</div>
+      <div class="t">어린이 서커스 쇼</div>
+      <a class="rt" aria-label="길찾기"><span><svg class="i" viewBox="0 0 24 24"><path d="M4 11l16-7-7 16-2-7z"/></svg></span></a>
+      <div class="v"><span class="tg">공연</span><span class="tg kid">아이와</span>김해칠암문화센터 공연장</div>
+      <div class="p">사전예약 12,000원 · 현장 35,000원</div>
+    </div>
+    <div class="row" data-card>
+      <img class="th" src="img/n2.jpg" alt="한웅원밴드 X 유태평양 포스터">
+      <div class="d">토 11.28 · 15:00</div>
+      <div class="t">한웅원밴드 X 유태평양: 그루브 in 판소리</div>
+      <a class="rt" aria-label="길찾기"><span><svg class="i" viewBox="0 0 24 24"><path d="M4 11l16-7-7 16-2-7z"/></svg></span></a>
+      <div class="v"><span class="tg">공연</span>김해문화의전당 누리홀</div>
+      <div class="p">전석 20,000원</div>
+    </div>
+    <div class="row" data-card>
+      <img class="th" src="img/v5.webp" alt="열린 음악회 포스터">
+      <div class="d">수 12.02</div>
+      <div class="t">따소미문화예술단과 함께하는 〈열린 음악회〉</div>
+      <a class="rt" aria-label="길찾기"><span><svg class="i" viewBox="0 0 24 24"><path d="M4 11l16-7-7 16-2-7z"/></svg></span></a>
+      <div class="v"><span class="tg">공연</span>김해서부문화센터</div>
+    </div>
+    <a class="more">김해 이번 주 나머지 6건 보기<svg class="i" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></a>
+    <p class="hint">«가까운 순»은 위치를 허락하면 켜져요.<br>위치는 순서를 정하는 데만 써요.</p>
+  </div>
+</div>
+
+<div class="ph d08" data-screen="d08-detail">
+  <div class="dmap">
+    <svg viewBox="0 0 375 216" aria-hidden="true">
+      <rect width="375" height="216" fill="#EEF0EB"/>
+      <path d="M250 0 C300 10 340 40 375 40 L375 0Z" fill="#D6E6CF"/>
+      <path d="M20 150 C60 136 110 150 120 180 C128 206 80 220 30 216 C0 214 -10 170 20 150Z" fill="#D6E6CF"/>
+      <path d="M260 216 C280 180 330 160 390 170" stroke="#C4DAEE" stroke-width="30" fill="none"/>
+      <g stroke="#FFFFFF" stroke-width="5" fill="none" stroke-linecap="round">
+        <path d="M-10 50 L390 64"/><path d="M90 -10 L110 230"/><path d="M270 -10 L250 230"/><path d="M-10 190 L250 176"/><path d="M150 100 L260 104"/>
+      </g>
+      <g fill="none" stroke-linecap="round">
+        <path d="M-10 118 C120 110 240 128 390 112" stroke="#D2D7DD" stroke-width="15"/><path d="M-10 118 C120 110 240 128 390 112" stroke="#FFFFFF" stroke-width="11"/>
+        <path d="M200 -10 C196 60 194 150 206 230" stroke="#D2D7DD" stroke-width="15"/><path d="M200 -10 C196 60 194 150 206 230" stroke="#FFFFFF" stroke-width="11"/>
+      </g>
+      <rect x="214" y="72" width="44" height="30" rx="4" fill="#E2E5DF"/>
+    </svg>
+    <i class="pn" style="left:236px;top:96px;width:36px;height:36px;margin:-43px 0 0 -18px"></i>
+    <span class="lb" style="left:186px;top:102px">김해칠암문화센터</span>
+    <a class="fl bk" aria-label="뒤로"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></a>
+    <a class="fl big"><svg class="i" viewBox="0 0 24 24"><path d="M4 9V4h5M20 15v5h-5M4 4l6 6M20 20l-6-6"/></svg>지도 크게</a>
+  </div>
+  <div class="info">
+    <span class="grab"></span>
+    <div class="tags"><span class="tg">공연</span><span class="tg kid">서커스/마술</span><span class="tg kid">아이와</span></div>
+    <h1 data-k="title">어린이 서커스 쇼</h1>
+    <p class="when" data-k="period"><span class="num">2026.11.28</span> 토요일 하루</p>
+    <p class="where" data-k="venue"><svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M12 21s-6-5.6-6-11a6 6 0 0 1 12 0c0 5.4-6 11-6 11z"/><circle cx="12" cy="10" r="2"/></svg>김해칠암문화센터 공연장</p>
+    <div class="acts">
+      <a class="go"><svg class="i" viewBox="0 0 24 24"><path d="M4 11l16-7-7 16-2-7z"/></svg>길찾기</a>
+      <a><svg class="i" viewBox="0 0 24 24"><path d="M4 20V9l8-5 8 5v11M9 20v-6h6v6"/></svg>공간 정보</a>
+    </div>
+    <ul class="il">
+      <li><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg><span class="k">시각</span>
+        <span><span class="slots"><span>11:00</span><span>13:00</span><span>15:00</span></span><span class="s" style="margin-top:4px">회마다 1시간</span></span></li>
+      <li><svg class="i" viewBox="0 0 24 24"><path d="M4 8h16v3a2 2 0 0 0 0 4v3H4v-3a2 2 0 0 0 0-4z"/></svg><span class="k">관람료</span>
+        <span>사전예약 <b>12,000</b>원<span class="s">현장판매 35,000원</span></span></li>
+      <li><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1-4 4-6 7-6s6 2 7 6"/></svg><span class="k">관람</span><span>만 2세 이상</span></li>
+      <li><svg class="i" viewBox="0 0 24 24"><path d="M4 20V9l8-5 8 5v11M9 20v-6h6v6"/></svg><span class="k">공간</span><span>김해칠암문화센터 공연장<span class="s">객석 306석 · 김해</span></span></li>
+      <li><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 11v5M12 8h.01"/></svg><span class="k">출처</span><span>공연예술통합전산망(KOPIS)<span class="s">피카가 확인한 날 11.26</span></span></li>
+    </ul>
+    <div class="why"><em>피카가 본 이유</em>사전예약하면 12,000원이에요. 현장에서 사면 35,000원입니다.</div>
+    <div class="post">
+      <img src="img/w1.jpg" alt="어린이 서커스 쇼 포스터 원본">
+      <p><b>포스터 원본</b>수집한 정보를 정리한 것이라 바뀔 수 있어요. 일정과 예매는 원본 안내 페이지에서 확인해 주세요.<br><a>피카가 고르는 기준</a></p>
+    </div>
+    <h3 class="h3">같은 주 김해 공연</h3>
+    <div class="mini"><img src="img/g3.webp" alt=""><div><p class="d">금 11.27 · 19:30</p><p class="t">어센트 밴드 라이브 공연</p><p class="v">봉황예술극장 · 무료</p></div></div>
+    <div class="mini"><img src="img/n2.jpg" alt=""><div><p class="d">토 11.28 · 15:00</p><p class="t">한웅원밴드 X 유태평양: 그루브 in 판소리</p><p class="v">김해문화의전당 누리홀 · 전석 20,000원</p></div></div>
+  </div>
+  <div class="bar">
+    <a class="ic" aria-label="찜"><svg class="i" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></a>
+    <a class="ic" aria-label="공유"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M8 8l4-4 4 4M5 13v6h14v-6"/></svg></a>
+    <a class="go">원본 안내 페이지 열기<svg class="i" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/></svg></a>
+  </div>
+</div>

@@ -1,0 +1,331 @@
+<script type="application/json" id="meta-d07">
+{"name":"매거진","bench":["29CM","Kinfolk"],
+ "concept":"행사 목록을 잡지 한 호처럼 엮어요. 흰 종이 위에 묶음마다 «머리 기사» 한 편을 큰 사진과 명조 제목으로 세우고, 나머지는 사진 두 장씩 짝지은 지면으로 이어요. 먹선 박스와 칩을 걷어내고 얇은 선·넓은 여백·작은 라틴 캡션으로 위계를 만들어요.",
+ "palette":[["#FFFFFF","종이(바탕)"],["#1C1C1A","먹(본문·주 버튼)"],["#6B6B66","캡션"],["#4D5A2E","올리브(라벨·현재 탭)"],["#E4E3DE","얇은 선"],["#F2F1EC","글자 포스터 면"]],
+ "fonts":["GB","PT","SG"],
+ "notes":{"home":["묶음 첫 행사를 «머리 기사»로: 포스터 원본 비율 + 오른쪽 세로 캡션 단(29CM 기획전 표지·잡지 펼침면)","나머지는 사진 두 장 짝 지면, 사진 아래 작은 No.·명조 제목·캡션(Kinfolk 사진+캡션)","필터 네 줄을 명조 목차 한 줄로, «필터 +»만 남겨 위에 붙임(D1 한 줄 필터·sticky)","«피카가 본 이유»를 인용구(pull quote)로 따로 세움(잡지 인용 박스)","칩·먹선 박스 없이 0.5px 선과 여백으로만 나눔(Kinfolk 여백 짜임)"],
+  "detail":["기사 첫머리처럼 라틴 키커 → 명조 큰 제목 → 때·곳 두 칸 표(D1 첫 화면 제목·기간·장소)","포스터를 «그림 1»로 원본 비율 그대로 크게, 옆 단에 캡션(잡지 도판+캡션)","관람료·나이·시간을 얇은 선 표로, 피카가 본 이유는 인용구(잡지 사이드바)","출처·확인한 날·바뀔 수 있다는 안내를 기사 끝 «편집자 주»로(D1 출처 안내)","아래 고정 막대: 먹색 «원본 안내 페이지 열기» 하나 + 찜·공유 보조(D1 주 버튼)"]}}
+</script>
+<style>
+.d07{--paper:#FFFFFF;--ink:#1C1C1A;--sub:#6B6B66;--olive:#4D5A2E;--line:#E4E3DE;--tint:#F2F1EC;background:var(--paper);color:var(--ink);font-family:"PT",sans-serif}
+.d07 .gb{font-family:"GB",serif}
+.d07 .sg{font-family:"SG",sans-serif;text-transform:uppercase;letter-spacing:.14em;font-size:11px;font-weight:500}
+.d07 .ico{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+/* 머리 */
+.d07 .mast{padding:4px 20px 0}
+.d07 .mast .r1{display:flex;align-items:center;justify-content:space-between;height:44px}
+.d07 .logo{font-family:"GB",serif;font-weight:700;font-size:27px;letter-spacing:-.01em;line-height:1}
+.d07 .mast .ic{display:flex;gap:4px}
+.d07 .mast .ic span{width:40px;height:40px;display:flex;align-items:center;justify-content:center}
+.d07 .mast .r2{display:flex;justify-content:space-between;align-items:baseline;padding:2px 0 8px;border-bottom:1px solid var(--ink)}
+.d07 .mast .r2 .n{font-size:12.5px;color:var(--sub)}
+.d07 .mast .r2 .n b{color:var(--ink);font-weight:600}
+/* 한 줄 목차 필터 */
+.d07 .fb{position:sticky;top:0;z-index:5;background:var(--paper);display:flex;align-items:stretch;height:46px;border-bottom:1px solid var(--line)}
+.d07 .fb .tabs{flex:1;display:flex;overflow-x:auto;scrollbar-width:none;padding-left:20px}
+.d07 .fb .tabs::-webkit-scrollbar{display:none}
+.d07 .fb .t{flex:none;display:flex;align-items:center;gap:6px;padding:0 13px 0 0;margin-right:13px;font-family:"GB",serif;font-size:15px;color:#767671;border-right:1px solid var(--line);height:20px;align-self:center}
+.d07 .fb .t:last-child{border-right:0}
+.d07 .fb .t.on{color:var(--ink);font-weight:700}
+.d07 .fb .t.on::before{content:"";width:6px;height:6px;border-radius:3px;background:var(--olive)}
+.d07 .fb .flt{flex:none;display:flex;align-items:center;gap:5px;padding:0 18px 0 14px;font-size:13.5px;font-weight:600;border-left:1px solid var(--line);background:var(--paper)}
+.d07 .fb .flt .ico{width:16px;height:16px}
+/* 묶음 머리 */
+.d07 .sec{padding:16px 20px 12px;display:flex;align-items:flex-end;justify-content:space-between}
+.d07 .sec h2{font-family:"GB",serif;font-weight:700;font-size:27px;line-height:1.1}
+.d07 .sec .sg{color:var(--olive);display:block;margin-bottom:6px}
+.d07 .sec .c{font-size:12.5px;color:var(--sub);text-align:right;line-height:1.45}
+.d07 .sec .c b{display:block;font-family:"SG",sans-serif;font-size:20px;font-weight:400;color:var(--ink);letter-spacing:-.01em}
+/* 머리 기사 */
+.d07 .lead{padding:0 20px}
+.d07 .lead .spread{display:grid;grid-template-columns:144px 1fr;gap:16px;align-items:start}
+.d07 .lead .spread img{width:144px;height:auto}
+.d07 .cap .no{color:var(--olive);display:block}
+.d07 .cap .cat{font-size:12px;color:var(--sub);margin-top:2px;display:block}
+.d07 .lead h3{font-family:"GB",serif;font-weight:700;font-size:18px;line-height:1.38;margin:8px 0 10px}
+.d07 .lead .tm{border-top:1px solid var(--line);padding-top:9px;display:flex;align-items:baseline;gap:8px}
+.d07 .lead .tm b{font-family:"SG",sans-serif;font-weight:400;font-size:21px;letter-spacing:-.01em}
+.d07 .lead .tm span{font-size:13px;font-weight:600}
+.d07 .lead .pl{font-size:12.5px;color:var(--sub);margin-top:4px;line-height:1.45}
+.d07 .quote{margin-top:12px;padding:8px 0 0;border-top:1px solid var(--line);display:grid;grid-template-columns:70px 1fr;gap:10px;align-items:baseline}
+.d07 .quote .lb{font-size:11.5px;color:var(--olive);font-weight:600;line-height:1.35}
+.d07 .quote p{font-family:"GB",serif;font-size:16px;line-height:1.5}
+/* 짝 지면 */
+.d07 .pair{display:grid;grid-template-columns:1fr 1fr;gap:15px;padding:0 20px;margin-top:18px}
+.d07 .pc .ph4{width:100%;aspect-ratio:4/5;object-fit:cover;display:block;background:var(--tint)}
+.d07 .pc .no{color:var(--olive);display:block;margin-top:7px}
+.d07 .pc h3{font-family:"GB",serif;font-weight:700;font-size:15px;line-height:1.4;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.d07 .pc .m{font-size:12.5px;font-weight:600;margin-top:3px}
+.d07 .pc .pl{font-size:12.5px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 글자 포스터 */
+.d07 .tp{background:var(--tint);padding:18px 18px 16px;display:flex;flex-direction:column;justify-content:space-between}
+.d07 .tp .k{font-size:12px;color:var(--olive);font-weight:600}
+.d07 .tp .d{font-family:"SG",sans-serif;font-size:24px;letter-spacing:-.02em;line-height:1.1;margin-top:8px}
+.d07 .tp .tt{font-family:"GB",serif;font-weight:700;font-size:19px;line-height:1.35;margin-top:12px}
+.d07 .tp .src{font-size:12px;color:var(--sub);margin-top:14px;border-top:1px solid #D8D7D0;padding-top:8px}
+.d07 .pc .tp{aspect-ratio:4/5;padding:14px 13px 12px}
+.d07 .pc .tp .d{font-size:19px}
+.d07 .pc .tp .tt{font-size:15px}
+.d07 .wide{margin:24px 20px 0;display:grid;grid-template-columns:1fr;}
+.d07 .wide .tp{min-height:170px}
+.d07 .wide .row{display:flex;justify-content:space-between;align-items:baseline;margin-top:9px}
+.d07 .wide .row .no{color:var(--olive)}
+.d07 .wide .row .m{font-size:12.5px;color:var(--sub)}
+.d07 .more{margin:28px 20px 0;padding:14px 0;border-top:1px solid var(--ink);display:flex;justify-content:space-between;font-size:13.5px}
+.d07 .more span:last-child{color:var(--sub)}
+.d07 .gap{height:40px}
+/* 상세 */
+.d07 .tb{position:sticky;top:0;z-index:5;background:var(--paper);display:flex;align-items:center;justify-content:space-between;height:50px;padding:0 10px;border-bottom:1px solid var(--line)}
+.d07 .tb .bk{display:flex;align-items:center;gap:4px;font-size:13.5px;height:44px;padding:0 6px}
+.d07 .tb .logo{font-size:21px}
+.d07 .tb .sp{width:76px;display:flex;justify-content:flex-end}
+.d07 .tb .sp span{width:44px;height:44px;display:flex;align-items:center;justify-content:center}
+.d07 .art{padding:26px 20px 0}
+.d07 .art .sg{color:var(--olive)}
+.d07 .art h1{font-family:"GB",serif;font-weight:700;font-size:33px;line-height:1.2;margin:10px 0 8px;letter-spacing:-.01em}
+.d07 .art .tags{font-size:13px;color:var(--sub)}
+.d07 .tw{display:grid;grid-template-columns:1fr 1fr;margin-top:20px;border-top:1px solid var(--ink);border-bottom:1px solid var(--line)}
+.d07 .tw > div{padding:12px 0 14px}
+.d07 .tw > div + div{border-left:1px solid var(--line);padding-left:14px}
+.d07 .tw .lb{font-size:11.5px;color:var(--sub);display:block;margin-bottom:4px}
+.d07 .tw .big{font-family:"GB",serif;font-weight:700;font-size:17px;line-height:1.35;display:block}
+.d07 .tw .sm{font-size:12.5px;color:var(--sub);display:block;margin-top:4px;line-height:1.45}
+.d07 .tw .sm u{text-decoration:none;color:var(--ink);border-bottom:1px solid var(--ink)}
+.d07 .fig{display:grid;grid-template-columns:236px 1fr;gap:14px;padding:30px 20px 0;align-items:end}
+.d07 .fig img{width:236px;height:472px;display:block}
+.d07 .fig .fc{font-size:12px;color:var(--sub);line-height:1.5;border-top:1px solid var(--line);padding-top:8px}
+.d07 .fig .fc .sg{color:var(--olive);display:block;margin-bottom:4px}
+.d07 .facts{margin:30px 20px 0}
+.d07 .facts h2,.d07 .rel h2{font-family:"SG",sans-serif;font-weight:500;font-size:11px;letter-spacing:.14em;color:var(--olive);text-transform:uppercase;padding-bottom:8px;border-bottom:1px solid var(--ink)}
+.d07 .facts dl{display:grid;grid-template-columns:84px 1fr}
+.d07 .facts dt,.d07 .facts dd{padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}
+.d07 .facts dt{color:var(--sub);font-size:13px}
+.d07 .facts dt:last-of-type,.d07 .facts dd:last-of-type{border-bottom:0}
+.d07 .facts dd .p{display:flex;justify-content:space-between}
+.d07 .facts dd .p + .p{margin-top:4px}
+.d07 .facts dd .p b{font-family:"SG",sans-serif;font-weight:500;font-size:15px}
+.d07 .pq{margin:34px 20px 0;padding:22px 0 20px;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink)}
+.d07 .pq .lb{font-size:12px;color:var(--olive);font-weight:600}
+.d07 .pq p{font-family:"GB",serif;font-size:21px;line-height:1.5;margin-top:8px}
+.d07 .ed{margin:26px 20px 0;font-size:13px;color:var(--sub);line-height:1.6}
+.d07 .ed b{color:var(--ink);font-weight:600}
+.d07 .ed p + p{margin-top:8px}
+.d07 .ed a{color:var(--ink);border-bottom:1px solid var(--ink)}
+.d07 .rel{margin:34px 0 0}
+.d07 .rel h2{margin:0 20px}
+.d07 .rel .sc{display:flex;gap:14px;overflow-x:auto;scrollbar-width:none;padding:14px 20px 0}
+.d07 .rel .sc::-webkit-scrollbar{display:none}
+.d07 .rel .it{flex:none;width:132px}
+.d07 .rel .it img{width:132px;height:165px;object-fit:cover}
+.d07 .rel .it h3{font-family:"GB",serif;font-weight:700;font-size:14px;line-height:1.4;margin-top:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.d07 .rel .it p{font-size:12px;color:var(--sub);margin-top:2px}
+.d07 .bar{position:sticky;bottom:0;z-index:6;background:var(--paper);border-top:1px solid var(--line);display:flex;gap:8px;padding:12px 16px 14px;margin-top:36px}
+.d07 .bar .go{flex:1;height:50px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15.5px;font-weight:600;border:0}
+.d07 .bar .go .ico{width:18px;height:18px}
+.d07 .bar .sb{width:50px;height:50px;border:1px solid var(--line);background:var(--paper);display:flex;align-items:center;justify-content:center}
+</style>
+
+<div class="ph d07" data-screen="d07-home">
+  <header class="mast">
+    <div class="r1">
+      <span class="logo">pica</span>
+      <div class="ic">
+        <span aria-label="내 주변"><svg class="ico" viewBox="0 0 24 24"><path d="M12 21s-6.5-6.2-6.5-11.3a6.5 6.5 0 0 1 13 0C18.5 14.8 12 21 12 21z"/><circle cx="12" cy="9.7" r="2.3"/></svg></span>
+        <span aria-label="찾기"><svg class="ico" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg></span>
+      </div>
+    </div>
+    <div class="r2"><span class="sg">Issue 11.26 · Thu</span><span class="n">지금 볼 수 있는 행사 <b>700건</b></span></div>
+  </header>
+
+  <nav class="fb">
+    <div class="tabs"><span class="t on">오늘</span><span class="t">이번 주</span><span class="t">이번 달</span><span class="t">곧 끝남</span><span class="t">전체</span></div>
+    <span class="flt"><svg class="ico" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>필터</span>
+  </nav>
+
+  <div class="sec">
+    <div><span class="sg">Today</span><h2>오늘</h2></div>
+    <div class="c"><b>64</b>11월 26일 목요일</div>
+  </div>
+
+  <article class="lead" data-card>
+    <div class="spread">
+      <img src="img/h2.png" alt="하우스 콘서트 포스터" width="144" height="205">
+      <div class="cap">
+        <span class="sg no">No. 01</span>
+        <span class="cat">공연 · 클래식</span>
+        <h3>하우스 콘서트, 김덕우 &amp; 이주은 (11월)</h3>
+        <div class="tm"><b>19:30</b><span>전석 5,000원</span></div>
+        <p class="pl">함안 · 함안문화예술회관 대공연장</p>
+      </div>
+    </div>
+    <div class="quote"><span class="lb">피카가<br>본 이유</span><p>목요일 저녁 한 시간, 5,000원 클래식</p></div>
+  </article>
+
+  <div class="pair">
+    <article class="pc" data-card>
+      <img class="ph4" src="img/h3.webp" alt="구석구석 문화가 있는 날 포스터">
+      <span class="sg no">No. 02 — 19:30</span>
+      <h3>금호 영뮤지션과 함께하는 ‘구석구석 문화가 있는 날’</h3>
+      <p class="m">무료 · 공연</p>
+      <p class="pl">하동 · 남부하동청년센터</p>
+    </article>
+    <article class="pc" data-card>
+      <img class="ph4" src="img/h1.webp" alt="개는 물지 않는다 포스터">
+      <span class="sg no">No. 03 — 19:30</span>
+      <h3>블랙코미디 연극 〈개는 물지 않는다〉</h3>
+      <p class="m">~11.28 · 무료 · 공연</p>
+      <p class="pl">진주 · 현장아트홀</p>
+    </article>
+  </div>
+
+  <div class="pair">
+    <article class="pc" data-card>
+      <img class="ph4" src="img/g1.jpg" alt="임윤찬 피아노 리사이틀 포스터">
+      <span class="sg no">No. 04 — 19:30</span>
+      <h3>임윤찬 피아노 리사이틀</h3>
+      <p class="m">90,000원부터 · 공연</p>
+      <p class="pl">김해 · 김해문화의전당 마루홀</p>
+    </article>
+    <article class="pc" data-card>
+      <img class="ph4" src="img/h5.jpg" alt="스카팽 포스터">
+      <span class="sg no">No. 05 — 19:30</span>
+      <h3>스카팽: 판을 뒤집는 여자</h3>
+      <p class="m">~11.29 · 전석 30,000원 · 연극</p>
+      <p class="pl">부산 · 나다소극장</p>
+    </article>
+  </div>
+
+  <article class="wide" data-card>
+    <div class="tp">
+      <div><span class="k">전시</span><div class="d">11.26 — 12.01</div><div class="tt">한땀, 시나브로-男맵시</div></div>
+      <div class="src">포스터 없음 · 정보: 창원문화재단</div>
+    </div>
+    <div class="row"><span class="sg no">No. 06</span><span class="m">무료 · 창원 · 3·15아트홀 제1전시실</span></div>
+  </article>
+
+  <a class="more"><span>오늘 64편 모두 보기</span><span>→</span></a>
+
+  <div class="sec" style="padding-top:40px">
+    <div><span class="sg">This week</span><h2>이번 주</h2></div>
+    <div class="c"><b>135</b>11.27 금 — 12.03 수</div>
+  </div>
+
+  <article class="lead">
+    <div class="spread">
+      <img src="img/g3.webp" alt="어센트 밴드 라이브 공연 포스터" width="144" height="180">
+      <div class="cap">
+        <span class="sg no">No. 01 — 11.27 Fri</span>
+        <span class="cat">공연 · 재즈</span>
+        <h3>어센트 밴드 라이브 공연</h3>
+        <div class="tm"><b>19:30</b><span>무료</span></div>
+        <p class="pl">김해 · 봉황예술극장</p>
+      </div>
+    </div>
+    <div class="quote"><span class="lb">피카가<br>본 이유</span><p>봉황예술극장 전석 무료, 사전 예약도 받아요</p></div>
+  </article>
+
+  <div class="pair">
+    <article class="pc">
+      <img class="ph4" src="img/w1.jpg" alt="어린이 서커스 쇼 포스터">
+      <span class="sg no">No. 02 — 11.28 Sat</span>
+      <h3>어린이 서커스 쇼</h3>
+      <p class="m">11:00·13:00·15:00 · 예약 12,000원</p>
+      <p class="pl">김해 · 김해칠암문화센터 공연장</p>
+    </article>
+    <article class="pc">
+      <img class="ph4" src="img/n2.jpg" alt="그루브 in 판소리 포스터">
+      <span class="sg no">No. 03 — 11.28 Sat</span>
+      <h3>한웅원밴드 X 유태평양: 그루브 in 판소리</h3>
+      <p class="m">15:00 · 전석 20,000원</p>
+      <p class="pl">김해 · 김해문화의전당 누리홀</p>
+    </article>
+  </div>
+
+  <div class="pair">
+    <article class="pc">
+      <img class="ph4" src="img/n1.webp" alt="봉황대길 GREEN DAY 포스터">
+      <span class="sg no">No. 04 — 11.29 Sun</span>
+      <h3>봉황대길 GREEN DAY</h3>
+      <p class="m">11:00–17:00 · 행사</p>
+      <p class="pl">김해 · 봉황대길 일원</p>
+    </article>
+    <article class="pc">
+      <div class="tp">
+        <div><span class="k">공연</span><div class="d">11.29 Sun</div><div class="tt">2026 아트포유 〈Re: 퀘렌시아〉</div></div>
+        <div class="src">정보: 인스타그램</div>
+      </div>
+      <span class="sg no">No. 05 — 11.29 Sun</span>
+      <p class="m">무료 · 공연</p>
+      <p class="pl">거제 · 리본플라자 소공연장</p>
+    </article>
+  </div>
+
+  <article class="wide">
+    <div class="tp">
+      <div><span class="k">공연</span><div class="d">11.29 Sun</div><div class="tt">제41회 솟대패사물놀이예술단 정기공연</div></div>
+      <div class="src">포스터 없음 · 정보: 창원문화재단</div>
+    </div>
+    <div class="row"><span class="sg no">No. 06</span><span class="m">창원 · 성산아트홀 대극장</span></div>
+  </article>
+
+  <a class="more"><span>이번 주 135편 모두 보기</span><span>→</span></a>
+  <div class="gap"></div>
+</div>
+
+<div class="ph d07" data-screen="d07-detail">
+  <header class="tb">
+    <span class="bk"><svg class="ico" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>목록</span>
+    <span class="logo">pica</span>
+    <span class="sp"></span>
+  </header>
+
+  <section class="art">
+    <span class="sg">This week · No. 02 — Kids</span>
+    <h1 data-k="title">어린이 서커스 쇼</h1>
+    <p class="tags">공연 · 서커스/마술 · 아이와 · 김해</p>
+    <div class="tw">
+      <div data-k="period"><span class="lb">때</span><span class="big">11월 28일 토요일 하루</span><span class="sm">11:00 · 13:00 · 15:00<br>공연 1시간</span></div>
+      <div data-k="venue"><span class="lb">곳</span><span class="big">김해칠암문화센터 공연장</span><span class="sm">306석 · <u>공간 보기</u></span></div>
+    </div>
+  </section>
+
+  <figure class="fig">
+    <img src="img/w1.jpg" alt="어린이 서커스 쇼 포스터" width="236" height="472">
+    <figcaption class="fc"><span class="sg">Fig. 1</span>포스터 원본<br>비율 그대로<br>출처 KOPIS</figcaption>
+  </figure>
+
+  <section class="facts">
+    <h2>Admission</h2>
+    <dl>
+      <dt>관람료</dt><dd><div class="p"><span>사전예약</span><b>12,000원</b></div><div class="p"><span>현장판매</span><b>35,000원</b></div></dd>
+      <dt>관람 나이</dt><dd>만 2세 이상</dd>
+      <dt>공연 시간</dt><dd>1시간 · 하루 3회</dd>
+      <dt>분야</dt><dd>공연 · 서커스/마술</dd>
+    </dl>
+  </section>
+
+  <blockquote class="pq">
+    <span class="lb">피카가 본 이유</span>
+    <p>사전예약하면 12,000원이에요. 현장에서 사면 35,000원입니다.</p>
+  </blockquote>
+
+  <section class="ed">
+    <p><b>출처</b> 공연예술통합전산망(KOPIS) · 피카가 확인한 날 11.26</p>
+    <p>수집한 정보를 정리한 것이라 바뀔 수 있어요. 일정과 예매는 원본 안내 페이지에서 확인해 주세요. <a>피카가 고르는 기준</a></p>
+  </section>
+
+  <section class="rel">
+    <h2>Also this week</h2>
+    <div class="sc">
+      <div class="it"><img src="img/g3.webp" alt="어센트 밴드 포스터"><h3>어센트 밴드 라이브 공연</h3><p>11.27 금 19:30 · 무료</p></div>
+      <div class="it"><img src="img/n2.jpg" alt="그루브 in 판소리 포스터"><h3>한웅원밴드 X 유태평양: 그루브 in 판소리</h3><p>11.28 토 15:00</p></div>
+      <div class="it"><img src="img/h1.webp" alt="개는 물지 않는다 포스터"><h3>블랙코미디 연극 〈개는 물지 않는다〉</h3><p>~11.28 · 무료</p></div>
+    </div>
+  </section>
+
+  <div class="bar">
+    <a class="go">원본 안내 페이지 열기<svg class="ico" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v6H4V6h6"/></svg></a>
+    <button class="sb" aria-label="찜"><svg class="ico" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.3a4.3 4.3 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20z"/></svg></button>
+    <button class="sb" aria-label="공유"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3v12M7.5 7.5L12 3l4.5 4.5"/><path d="M5 12v7.5h14V12"/></svg></button>
+  </div>
+</div>

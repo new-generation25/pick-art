@@ -1,0 +1,261 @@
+<script type="application/json" id="meta-d03">
+{"name":"포스터 벽","bench":["Pinterest"],
+ "concept":"상자·테두리·날짜 칸을 모두 걷어 내고 포스터를 원본 비율 그대로 두 줄로 엇갈려 쌓는다. 화면의 주인은 포스터이고 글은 그 아래 세 줄뿐이다. 색은 흰 바탕·먹색 칩·겨자색 하나로 줄였다.",
+ "palette":[["#FFFFFF","바탕"],["#111111","글·켜진 칩"],["#F1F0EC","칩·포스터 받침"],["#F2C230","강조(주 버튼·글자 포스터)"],["#6E5200","피카가 본 이유 글자"]],
+ "fonts":["PT","SG"],
+ "notes":{"home":["포스터를 자르지 않고 원본 비율 그대로 2열 엇갈림으로 쌓음, 카드 테두리·날짜 칸 없음 (참고: Pinterest 메이슨리 피드)","글은 포스터 아래 제목 두 줄·분야·때·값·장소만 작게 (참고: Pinterest 핀 아래 짧은 설명)","위쪽은 둥근 회색 검색창 한 개, 그 아래 필터 버튼 + 가로 칩 한 줄이 넘겨도 위에 붙음 (참고: Pinterest 검색·칩 줄, D1 필터 한 줄)","포스터 없는 행사는 같은 둥근 칸을 겨자·먹·회색 면으로 채운 글자 포스터 (D1 글자 포스터)","날짜 묶음 머리는 «오늘 11.26 목 · 64건» 한 줄, 묶음 안에서는 날짜를 반복하지 않음 (D1 큰 제목 한 줄)"],
+            "detail":["맨 위를 회색 받침 위 큰 포스터 카드로, 1:2 원본 비율 그대로 (참고: Pinterest 핀 상세 큰 이미지 카드)","포스터 바로 아래 분야·제목·기간·장소를 두어 첫 화면에 다 보임 (D1 상세 첫 화면)","시각·관람료·관람·출처를 선 없이 왼쪽 이름표 줄로, 피카가 본 이유는 겨자색 면 한 칸 (D1 상세 정보)","아래쪽에 같은 짜임의 «비슷한 행사» 벽을 이어 붙임 (참고: Pinterest «비슷한 핀 더 보기»)","아래 고정 막대: 겨자색 알약 «원본 안내 페이지 열기»가 주, 찜·공유는 동그란 보조 버튼 (D1 아래 고정 막대)"]}}
+</script>
+<style>
+.d03{--bg:#FFFFFF;--ink:#111111;--mut:#5C5B57;--sur:#F1F0EC;--acc:#F2C230;--accd:#6E5200;background:var(--bg);color:var(--ink)}
+.d03 svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.d03 .num{font-family:"SG","PT",sans-serif;font-feature-settings:"tnum"}
+
+/* 머리 */
+.d03 .hd{display:flex;align-items:center;gap:10px;padding:10px 12px 2px}
+.d03 .logo{font-family:"SG",sans-serif;font-weight:700;font-size:24px;letter-spacing:-.04em;line-height:1}
+.d03 .search{flex:1;display:flex;align-items:center;gap:8px;height:44px;border-radius:22px;background:var(--sur);padding:0 16px;color:var(--mut);font-size:15px}
+.d03 .search svg{color:var(--ink)}
+
+/* 위에 붙는 칩 한 줄 */
+.d03 .fb{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;gap:8px;padding:8px 12px;overflow-x:auto;scrollbar-width:none}
+.d03 .fb::-webkit-scrollbar{display:none}
+.d03 .chip{flex:none;height:40px;padding:0 16px;border-radius:20px;border:0;background:var(--sur);font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.d03 .chip.on{background:var(--ink);color:#fff}
+.d03 .chip.ft{padding:0 14px 0 12px}
+.d03 .chip.ft b{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:9px;background:var(--acc);color:var(--ink);font-size:11px;font-weight:700;padding:0 5px}
+
+/* 날짜 묶음 머리 */
+.d03 .gh{display:flex;align-items:baseline;gap:8px;padding:6px 14px 10px}
+.d03 .gh h2{font-size:22px;font-weight:800;letter-spacing:-.02em}
+.d03 .gh span{font-size:14px;color:var(--mut)}
+
+/* 포스터 벽 */
+.d03 .wall{display:flex;gap:10px;padding:0 12px;align-items:flex-start}
+.d03 .col{flex:1;min-width:0;display:flex;flex-direction:column;gap:16px}
+.d03 .pin{display:block}
+.d03 .pic{position:relative;border-radius:16px;overflow:hidden;background:var(--sur)}
+.d03 .pic img{width:100%;height:auto}
+.d03 .fav{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:16px;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center}
+.d03 .fav svg{width:17px;height:17px}
+.d03 .pin h3{margin:8px 2px 0;font-size:14.5px;font-weight:700;line-height:1.35;letter-spacing:-.01em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.d03 .pin .m{margin:3px 2px 0;font-size:13px;line-height:1.4;color:var(--ink)}
+.d03 .pin .m i{font-style:normal;color:var(--mut)}
+.d03 .pin .v{margin:1px 2px 0;font-size:13px;line-height:1.4;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.d03 .pin .why{margin:6px 2px 0;font-size:12.5px;line-height:1.4;color:var(--accd);display:flex;gap:5px}
+.d03 .pin .why::before{content:"";flex:none;width:6px;height:6px;border-radius:3px;background:var(--acc);margin-top:6px}
+
+/* 글자 포스터 */
+.d03 .tp{border-radius:16px;aspect-ratio:3/4;padding:14px 13px;display:flex;flex-direction:column;justify-content:space-between}
+.d03 .tp.y{background:var(--acc);color:var(--ink)}
+.d03 .tp.k{background:var(--ink);color:#fff}
+.d03 .tp.g{background:var(--sur);color:var(--ink)}
+.d03 .tp .t1{display:flex;justify-content:space-between;font-size:12px;font-weight:700}
+.d03 .tp .t1 .num{font-size:13px;font-weight:600}
+.d03 .tp .tt{font-size:19px;font-weight:800;line-height:1.25;letter-spacing:-.02em}
+.d03 .tp .src{font-size:11px;font-weight:600;opacity:.85}
+
+.d03 .more{display:flex;justify-content:center;padding:20px 0 8px}
+.d03 .more a{height:44px;padding:0 20px;border-radius:22px;background:var(--sur);font-size:14px;font-weight:600;display:flex;align-items:center}
+
+/* 상세 */
+.d03 .top{position:relative;margin:8px 12px 0}
+.d03 .board{border-radius:28px;background:var(--sur);height:452px;display:flex;align-items:center;justify-content:center}
+.d03 .board img{height:420px;width:auto;border-radius:14px}
+.d03 .back{position:absolute;top:12px;left:12px;width:40px;height:40px;border-radius:20px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.d03 .dh{padding:14px 18px 0}
+.d03 .tags{display:flex;gap:6px;font-size:13px;font-weight:600;color:var(--mut)}
+.d03 .tags span+span::before{content:"·";margin-right:6px}
+.d03 .dh h1{margin-top:4px;font-size:26px;font-weight:800;letter-spacing:-.03em;line-height:1.25}
+.d03 .dh .when{margin-top:6px;font-size:16px;font-weight:700}
+.d03 .dh .where{margin-top:2px;font-size:15px;color:var(--mut);display:flex;align-items:center;gap:4px}
+.d03 .dh .where svg{width:17px;height:17px}
+.d03 .dh .where u{text-decoration:none;color:var(--ink);font-weight:600}
+.d03 .rows{margin:18px 18px 0;display:grid;grid-template-columns:64px 1fr;row-gap:10px;font-size:15px}
+.d03 .rows dt{color:var(--mut);font-size:14px}
+.d03 .rows dd{font-weight:600}
+.d03 .rows dd small{display:block;font-weight:400;font-size:13px;color:var(--mut)}
+.d03 .note{margin:18px 12px 0;border-radius:20px;background:#FBF1CF;padding:14px 16px}
+.d03 .note b{display:block;font-size:13px;color:var(--accd);margin-bottom:3px}
+.d03 .note p{font-size:15px;line-height:1.5}
+.d03 .warn{margin:12px 18px 0;font-size:13px;line-height:1.5;color:var(--mut)}
+.d03 .warn a{color:var(--ink);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.d03 .sim{padding:28px 14px 10px;font-size:19px;font-weight:800;letter-spacing:-.02em}
+.d03 .bar{position:sticky;bottom:0;z-index:5;margin-top:20px;background:var(--bg);display:flex;align-items:center;gap:8px;padding:12px 12px 14px;box-shadow:0 -1px 0 #E6E5E0}
+.d03 .bar .go{flex:1;height:52px;border-radius:26px;border:0;background:var(--acc);color:var(--ink);font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:7px}
+.d03 .bar .ic{width:52px;height:52px;border-radius:26px;border:0;background:var(--sur);display:flex;align-items:center;justify-content:center}
+</style>
+
+<div class="ph d03" data-screen="d03-home">
+  <header class="hd">
+    <span class="logo">pica</span>
+    <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>행사·장소 찾기</div>
+  </header>
+  <nav class="fb">
+    <button class="chip ft"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>필터</button>
+    <button class="chip on">전체</button>
+    <button class="chip">오늘</button>
+    <button class="chip">이번 주</button>
+    <button class="chip">김해</button>
+    <button class="chip">공연</button>
+    <button class="chip">전시</button>
+    <button class="chip">아이와</button>
+  </nav>
+
+  <section>
+    <div class="gh"><h2>오늘</h2><span><span class="num">11.26</span> 목 · <span class="num">64</span>건</span></div>
+    <div class="wall">
+      <div class="col">
+        <a class="pin" data-card>
+          <div class="pic"><img src="img/h2.png" width="562" height="800" alt="하우스 콘서트 포스터"><span class="fav"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></span></div>
+          <h3>하우스 콘서트, 김덕우 &amp; 이주은 (11월)</h3>
+          <p class="m"><i>공연 ·</i> 19:30 · 5,000원</p>
+          <p class="v">함안 · 함안문화예술회관 대공연장</p>
+          <p class="why">목요일 저녁 한 시간, 5,000원 클래식</p>
+        </a>
+        <a class="pin" data-card>
+          <div class="pic"><img src="img/g1.jpg" width="430" height="602" alt="임윤찬 피아노 리사이틀 포스터"><span class="fav"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></span></div>
+          <h3>임윤찬 피아노 리사이틀</h3>
+          <p class="m"><i>공연 ·</i> 19:30 · 90,000원~</p>
+          <p class="v">김해 · 김해문화의전당 마루홀</p>
+        </a>
+        <a class="pin" data-card>
+          <div class="tp y"><p class="t1"><span>전시</span><span class="num">~12.01</span></p><p class="tt">한땀, 시나브로-男맵시</p><p class="src">정보: 창원문화재단</p></div>
+          <h3>한땀, 시나브로-男맵시</h3>
+          <p class="m"><i>전시 ·</i> 무료 · ~12.01</p>
+          <p class="v">창원 · 3·15아트홀 제1전시실</p>
+        </a>
+      </div>
+      <div class="col">
+        <a class="pin" data-card>
+          <div class="pic"><img src="img/h3.webp" width="1080" height="1350" alt="구석구석 문화가 있는 날 포스터"><span class="fav"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></span></div>
+          <h3>금호 영뮤지션과 함께하는 ‘구석구석 문화가 있는 날’</h3>
+          <p class="m"><i>공연 ·</i> 19:30 · 무료</p>
+          <p class="v">하동 · 남부하동청년센터</p>
+        </a>
+        <a class="pin" data-card>
+          <div class="pic"><img src="img/h1.webp" width="1080" height="1350" alt="개는 물지 않는다 포스터"><span class="fav"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></span></div>
+          <h3>블랙코미디 연극 〈개는 물지 않는다〉</h3>
+          <p class="m"><i>공연 ·</i> 19:30 · 무료 · ~11.28</p>
+          <p class="v">진주 · 현장아트홀</p>
+        </a>
+        <a class="pin" data-card>
+          <div class="pic"><img src="img/h5.jpg" width="430" height="602" alt="스카팽 포스터"><span class="fav"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></span></div>
+          <h3>스카팽: 판을 뒤집는 여자</h3>
+          <p class="m"><i>연극 ·</i> 19:30 · 30,000원 · ~11.29</p>
+          <p class="v">부산 · 나다소극장</p>
+        </a>
+      </div>
+    </div>
+    <div class="more"><a>오늘 64건 모두 보기</a></div>
+  </section>
+
+  <section>
+    <div class="gh"><h2>이번 주</h2><span><span class="num">11.27–12.03</span> · <span class="num">135</span>건</span></div>
+    <div class="wall">
+      <div class="col">
+        <a class="pin">
+          <div class="pic"><img src="img/g3.webp" width="1080" height="1350" alt="어센트 밴드 포스터"><span class="fav"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></span></div>
+          <h3>어센트 밴드 라이브 공연</h3>
+          <p class="m"><i>공연 ·</i> 금 19:30 · 무료</p>
+          <p class="v">김해 · 봉황예술극장</p>
+          <p class="why">봉황예술극장 전석 무료, 사전 예약도 받아요</p>
+        </a>
+        <a class="pin">
+          <div class="pic"><img src="img/n2.jpg" width="430" height="602" alt="그루브 in 판소리 포스터"><span class="fav"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></span></div>
+          <h3>한웅원밴드 X 유태평양: 그루브 in 판소리</h3>
+          <p class="m"><i>공연 ·</i> 토 15:00 · 20,000원</p>
+          <p class="v">김해 · 김해문화의전당 누리홀</p>
+        </a>
+        <a class="pin">
+          <div class="tp k"><p class="t1"><span>공연</span><span class="num">11.29</span></p><p class="tt">2026 아트포유 〈Re: 퀘렌시아〉</p><p class="src">정보: 인스타그램</p></div>
+          <h3>2026 아트포유 〈Re: 퀘렌시아〉</h3>
+          <p class="m"><i>공연 ·</i> 일 · 무료</p>
+          <p class="v">거제 · 리본플라자 소공연장</p>
+        </a>
+      </div>
+      <div class="col">
+        <a class="pin">
+          <div class="pic"><img src="img/w1.jpg" width="405" height="810" alt="어린이 서커스 쇼 포스터"><span class="fav"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></span></div>
+          <h3>어린이 서커스 쇼</h3>
+          <p class="m"><i>공연 ·</i> 토 11:00 외 · 12,000원~</p>
+          <p class="v">김해 · 김해칠암문화센터 공연장</p>
+          <p class="why">사전예약하면 12,000원, 현장은 35,000원</p>
+        </a>
+        <a class="pin">
+          <div class="pic"><img src="img/n1.webp" width="1080" height="1350" alt="봉황대길 GREEN DAY 포스터"><span class="fav"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></span></div>
+          <h3>봉황대길 GREEN DAY</h3>
+          <p class="m"><i>행사 ·</i> 일 11:00–17:00</p>
+          <p class="v">김해 · 봉황대길 일원</p>
+        </a>
+        <a class="pin">
+          <div class="tp g"><p class="t1"><span>공연</span><span class="num">11.29</span></p><p class="tt">제41회 솟대패사물놀이예술단 정기공연</p><p class="src">정보: 창원문화재단</p></div>
+          <h3>제41회 솟대패사물놀이예술단 정기공연</h3>
+          <p class="m"><i>공연 ·</i> 일</p>
+          <p class="v">창원 · 성산아트홀 대극장</p>
+        </a>
+      </div>
+    </div>
+    <div class="more"><a>이번 주 135건 모두 보기</a></div>
+  </section>
+</div>
+
+<div class="ph d03" data-screen="d03-detail">
+  <div class="top">
+    <div class="board"><img src="img/w1.jpg" width="405" height="810" alt="어린이 서커스 쇼 포스터"></div>
+    <a class="back" aria-label="뒤로"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></a>
+  </div>
+  <div class="dh">
+    <p class="tags"><span>공연</span><span>서커스/마술</span><span>아이와</span></p>
+    <h1 data-k="title">어린이 서커스 쇼</h1>
+    <p class="when" data-k="period"><span class="num">2026.11.28</span> 토요일 하루</p>
+    <p class="where" data-k="venue"><svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>김해 · <u>김해칠암문화센터 공연장</u></p>
+  </div>
+  <dl class="rows">
+    <dt>시각</dt><dd><span class="num">11:00 · 13:00 · 15:00</span><small>1시간</small></dd>
+    <dt>관람료</dt><dd>사전예약 12,000원<small>현장판매 35,000원</small></dd>
+    <dt>관람</dt><dd>만 2세 이상</dd>
+    <dt>장소</dt><dd>객석 306석<small>공간 페이지 보기</small></dd>
+    <dt>출처</dt><dd>공연예술통합전산망(KOPIS)<small>피카가 11.26에 확인</small></dd>
+  </dl>
+  <div class="note"><b>피카가 본 이유</b><p>사전예약하면 12,000원이에요. 현장에서 사면 35,000원입니다.</p></div>
+  <p class="warn">수집한 정보를 정리한 것이라 바뀔 수 있어요. 일정과 예매는 원본 안내 페이지에서 확인해 주세요. <a>피카가 고르는 기준</a></p>
+
+  <h2 class="sim">비슷한 행사</h2>
+  <div class="wall">
+    <div class="col">
+      <a class="pin">
+        <div class="pic"><img src="img/g3.webp" width="1080" height="1350" alt="어센트 밴드 포스터"></div>
+        <h3>어센트 밴드 라이브 공연</h3>
+        <p class="m"><i>공연 ·</i> 11.27 금 19:30 · 무료</p>
+        <p class="v">김해 · 봉황예술극장</p>
+      </a>
+      <a class="pin">
+        <div class="pic"><img src="img/v6.jpg" width="430" height="602" alt="리틀뮤지션 포스터"></div>
+        <h3>리틀뮤지션</h3>
+        <p class="m"><i>뮤지컬 ·</i> 12.05 토 11:00 · 15,000원~</p>
+        <p class="v">김해 · 김해서부문화센터 하늬홀</p>
+      </a>
+    </div>
+    <div class="col">
+      <a class="pin">
+        <div class="pic"><img src="img/n2.jpg" width="430" height="602" alt="그루브 in 판소리 포스터"></div>
+        <h3>한웅원밴드 X 유태평양: 그루브 in 판소리</h3>
+        <p class="m"><i>공연 ·</i> 11.28 토 15:00 · 20,000원</p>
+        <p class="v">김해 · 김해문화의전당 누리홀</p>
+      </a>
+      <a class="pin">
+        <div class="pic"><img src="img/v5.webp" width="1147" height="1600" alt="열린 음악회 포스터"></div>
+        <h3>따소미문화예술단과 함께하는 〈열린 음악회〉</h3>
+        <p class="m"><i>공연 ·</i> 12.02 수</p>
+        <p class="v">김해 · 김해서부문화센터</p>
+      </a>
+    </div>
+  </div>
+
+  <div class="bar">
+    <button class="ic" aria-label="찜"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></button>
+    <button class="ic" aria-label="공유"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5M5 14v6h14v-6"/></svg></button>
+    <button class="go"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/></svg>원본 안내 페이지 열기</button>
+  </div>
+</div>
