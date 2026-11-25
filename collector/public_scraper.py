@@ -84,7 +84,12 @@ class PublicScraper:
         found = 0
         expired = []
         print(f"[Scraper] 📐 Definition: {d['slug']} (verified_at {d.get('verified_at')})", flush=True)
-        for board in d["boards"]:
+        # 정의에 paused 가 있으면 그 누리집에 접속하지 않는다(예: 방화벽 차단 중). 지우면 다시 돈다
+        if d.get("paused"):
+            return {"name": target_name, "status": "SUCCESS", "summary": f"⏸️ 일시 중지: {d['paused']}"}
+        for bi, board in enumerate(d["boards"]):
+            if bi and d.get("board_delay"):  # 게시판(탭) 사이에 쉰다. 짧은 간격의 연속 요청을 막는 누리집용
+                await asyncio.sleep(d["board_delay"])
             items = await self._list_items(session, d, board)
             print(f"[Scraper] 📊 {board['category']} {board.get('api') and 'API' or board['url']} → {len(items)} items", flush=True)
             if len(items) < d["expect"]["min_rows"]:
