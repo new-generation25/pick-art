@@ -49,6 +49,22 @@ def city_of(*texts, sido="48") -> str:
     return "기타"
 
 
+# 상세 XML의 주최·주관·기획·제작 태그 → ai_suggestion 키 (specs/012)
+ORG_TAGS = (("host", "entrpsnmH"), ("organizer", "entrpsnmS"), ("planner", "entrpsnmA"), ("producer", "entrpsnmP"))
+
+
+def org_fields(d) -> dict:
+    """KOPIS 상세 <db> 요소에서 주최(host)·주관(organizer)·기획(planner)·제작(producer)을 뽑는다. 빈 값은 뺀다."""
+    out = {}
+    if d is None:
+        return out
+    for key, tag in ORG_TAGS:
+        v = (d.findtext(tag) or "").strip()
+        if v:
+            out[key] = v
+    return out
+
+
 def clean_venue(name):
     """KOPIS 공연장명이 '시설 (홀)' 꼴인데 홀 자리에 시설명이 또 들어간 경우를 줄인다: 'A (A )' -> 'A'"""
     name = (name or "").strip()
@@ -165,6 +181,7 @@ class KopisScraper:
                                 "poster_url": poster,
                                 "link_name": link_name,
                                 "extracted_by": "kopis_api",
+                                **org_fields(d),
                             },
                         },
                         "image_urls": [poster] if poster else [],
