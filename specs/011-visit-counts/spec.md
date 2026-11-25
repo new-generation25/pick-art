@@ -4,9 +4,10 @@
 
 **Input**: 시장조사 세션 요청(사용자 11/26 「앱 개선에 넘겨」). 지원금(로컬기업 육성사업 동남권)·문화재단 용역에 낼 실적 숫자(방문자)와, 단체에게 줄 «월간 노출·클릭 증빙»(specs/012)의 바탕. 조건: 쿠키 없음, 관객 개인 단위 기록 없음(«방문 수만 셉니다»).
 
-## 지금 상태 (2026-11-26 확인)
+## 지금 상태 (2026-11-26 확인, 정정)
 
-- 사이트에는 `<Analytics />`(@vercel/analytics)가 들어 있지만, Vercel API로 읽으면 «Web Analytics not found»(404) — 프로젝트에서 Web Analytics 수집이 켜져 있지 않아 쌓인 숫자가 없다.
+- Vercel Web Analytics는 켜져 있고 숫자가 쌓이고 있다(시장조사 세션이 운영자 Chrome으로 대시보드 확인: 팀 Pro, 최근 7일 방문자 28·페이지뷰 74, 커스텀 이벤트 없음).
+- 처음에 «켜져 있지 않다»고 적은 것은 틀렸다. 이 세션의 Vercel 연결(MCP)로는 같은 팀의 다른 프로젝트 3개만 보이고 pick-art가 보이지 않는다 — API 404는 이 연결의 권한 문제다.
 - 행사별 조회 수·«원본 안내 페이지 열기» 클릭 수는 어디에도 세지 않는다.
 
 ## User Stories
@@ -17,7 +18,7 @@
 
 ## 요구사항
 
-- FR-001 방문자 수는 Vercel Web Analytics(쿠키 없음, 개인 식별 저장 없음)로 센다. 수집기가 하루 한 번 API로 읽어 `ops_snapshots`(`site_visits`)에 올리고 대시보드가 읽는다.
+- FR-001 방문자 수는 Vercel Web Analytics(쿠키 없음, 개인 식별 저장 없음)로 센다. 수집기가 하루 한 번 API로 읽어 `ops_snapshots`(`site_visits`)에 올리고 대시보드가 읽는다. API로 읽으려면 pick-art를 볼 수 있는 Vercel 토큰이 필요하다(운영자가 만들어 `collector/.env.local`에 넣음).
 - FR-002 행사별 숫자는 자체 집계 표 `event_counts_daily(event_id, day, kind, n)` — kind: view · outbound · calendar · share. 화면이 `/api/count`로 한 번 보내면 서버가 `n`을 1 올린다. IP·기기·쿠키·로그인 정보를 저장하지 않는다. 봇(User-Agent)과 관리자 접속은 세지 않는다.
 - FR-003 공개 읽기 없음. 관리자만 읽기(RLS). 쓰기는 서버 함수(security definer)로만.
 - FR-004 개인정보처리방침에 «방문 수와 행사별 조회·클릭 수를 날짜별 숫자로만 센다, 개인을 알아볼 수 있는 정보는 남기지 않는다»를 넣는다.
@@ -31,6 +32,6 @@
 
 ## 정할 것 (운영자)
 
-1. Vercel 프로젝트에서 Web Analytics 켜기 — 프로젝트 설정 변경이라 운영자 몫. 요금제별 한도는 켜기 전에 Vercel 화면에서 확인해야 한다(확인하지 않았다).
+1. 방문자 숫자를 관리자 화면에 자동으로 올릴지 — 올리려면 pick-art를 읽을 수 있는 Vercel 토큰(읽기용)을 운영자가 만들어야 한다. 아니면 운영자가 Vercel 대시보드에서 직접 본다.
 2. 새 표 `event_counts_daily` 만들기(마이그레이션) 승인.
 3. 개인정보처리방침 문구 추가 승인.
