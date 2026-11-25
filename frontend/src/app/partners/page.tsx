@@ -16,12 +16,25 @@ function Tag({ soon }: { soon?: boolean }) {
     return <span className={`ml-2 inline-block px-2 py-[1px] align-middle text-[12px] font-bold ${soon ? SOON : NOW}`}>{soon ? "준비 중" : "지금"}</span>;
 }
 
-function Box({ title, soon, children }: { title: string; soon?: boolean; children: React.ReactNode }) {
+function Box({ title, soon, cta, children }: { title: string; soon?: boolean; cta?: { href: string; label: string }; children: React.ReactNode }) {
     return (
         <div className="border-[1.5px] border-line bg-[var(--pk-card)] p-4">
             <h3 className="text-[16px] font-bold text-ink">{title}<Tag soon={soon} /></h3>
             <ul className="mt-2 list-disc space-y-1 pl-5 text-[15px] leading-relaxed text-ink">{children}</ul>
+            {cta && <CtaLink href={cta.href} label={cta.label} />}
         </div>
+    );
+}
+
+/** 바로 쓸 수 있는 기능으로 가는 버튼 (사이트 강조색) */
+function CtaLink({ href, label, invert }: { href: string; label: string; invert?: boolean }) {
+    const color = invert
+        ? "bg-[var(--pk-paper)] text-ink"
+        : "bg-[var(--pk-accent)] text-[var(--pk-on-accent)]";
+    return (
+        <Link href={href} className={`mt-3 inline-block px-4 py-2.5 text-[15px] font-bold no-underline ${color}`}>
+            {label} →
+        </Link>
     );
 }
 
@@ -34,8 +47,9 @@ export default function PartnersPage() {
                     <h1 className="pica-display mt-2 text-[32px] leading-[1.2] text-ink sm:text-[40px]">공연·전시 정보를 보내 주시면, 날짜와 원본 링크 그대로 실어 드려요</h1>
                     <p className="mt-4 text-[16px] leading-relaxed text-ink">
                         피카는 가까운 공연·전시·축제를 공식 출처로 확인해 날짜순으로 알려 주는 서비스예요.
-                        소극장, 작은 극단, 동네 갤러리 행사도 큰 기관 행사와 같은 크기로 보여 드려요. 돈은 받지 않아요.
+                        소극장, 작은 극단, 동네 갤러리 행사도 큰 기관 행사와 같은 크기로 보여 드려요. 실어 드리는 데 돈은 받지 않아요.
                     </p>
+                    <CtaLink href="/tip/leaflet" label="리플렛 사진 한 장으로 등록하기" />
                 </header>
 
                 <section className="border-2 border-[var(--pk-ink)] bg-[var(--pk-card)] p-5">
@@ -65,7 +79,7 @@ export default function PartnersPage() {
                             <li>그 단체·공간 일정만 캘린더로 구독</li>
                             <li>행사 상세에 「주최·주관」으로 연결</li>
                         </Box>
-                        <Box title="리플렛 사진 한 장으로 등록">
+                        <Box title="리플렛 사진 한 장으로 등록" cta={{ href: "/tip/leaflet", label: "사진 한 장으로 등록하기" }}>
                             <li>리플렛·포스터 파일이나 휴대폰 사진을 올리면 피카가 글자를 읽어 정리해요</li>
                             <li>운영자가 확인한 뒤 실려요. 공식 페이지가 없으면 「단체 제공」으로 표시해요</li>
                             <li>로그인이 필요하고 하루 5장까지 올릴 수 있어요</li>
@@ -74,6 +88,12 @@ export default function PartnersPage() {
                             <li>우리 행사가 피카에서 몇 번 보였고, 원본 안내·캘린더 추가가 몇 번 눌렸는지 달마다 정리돼요</li>
                             <li>지금은 메일로 요청하시면 보내 드려요. 단체가 직접 받아 보는 화면은 준비 중이에요</li>
                             <li>예매·관람 수는 알 수 없어요. 노출과 클릭만 드려요</li>
+                        </Box>
+                        <Box title="예매·결제 대행" soon>
+                            <li>계좌이체·네이버 폼·현장 판매로 표를 파는 단체를 위해, 관객이 피카에서 카드·간편결제로 바로 예매하게 해요</li>
+                            <li>입금 확인·명단 정리를 피카가 대신하고, 판매 대금은 공연이 끝난 뒤 단체에 정산해요</li>
+                            <li>전산으로 판 표는 공연법에 따라 공연예술통합전산망(KOPIS)에 보내야 해요. 이 전송도 피카가 맡아요</li>
+                            <li>수수료와 정산 날짜는 정해지면 이 페이지에 먼저 알려 드릴게요</li>
                         </Box>
                         <Box title="맞춤 지원사업 알림" soon>
                             <li>단체 조건(지역·장르·고유번호 유무·활동 연수 등)에 맞을 수 있는 공고만</li>
@@ -105,8 +125,9 @@ export default function PartnersPage() {
                     <h2 className="pica-display text-[24px] leading-tight text-ink">자주 묻는 것</h2>
                     <div className="mt-3 divide-y divide-[var(--pk-line)] border-y border-line text-[15px] leading-relaxed">
                         {[
-                            ["돈이 드나요?", "들지 않아요. 게재, 정정, 단체·공간 페이지, 노출·클릭 정리 모두 무료예요."],
+                            ["돈이 드나요?", "게재, 정정, 단체·공간 페이지, 리플렛 등록, 노출·클릭 정리는 모두 무료예요. 준비 중인 예매·결제 대행만 결제 수수료가 생길 수 있고, 정해지면 미리 알려 드려요."],
                             ["홍보물도 만들어 주나요?", "피카는 홍보물을 만들지 않아요. 맡길 곳을 묻는 단체를 위해 추천 업체 목록을 준비하고 있어요(준비 중). 피카는 소개 수수료를 받지 않고, 계약과 품질은 단체와 업체가 직접 정해요."],
+                            ["예매·결제도 맡길 수 있나요?", "준비하고 있어요. 계좌이체나 네이버 폼으로 표를 파는 단체가 카드·간편결제로 받을 수 있게, 피카가 결제를 받고 공연 뒤에 정산하는 방식이에요. 수수료와 정산 날짜가 정해지면 이 페이지에 먼저 알려 드릴게요. 미리 써 보고 싶은 단체는 메일로 알려 주세요."],
                             ["이미 KOPIS에 올리는데 따로 알려야 하나요?", "KOPIS에 올린 공연은 피카가 자동으로 받아요. 전시나 무료 공연처럼 KOPIS에 안 들어가는 행사는 리플렛이나 제보로 알려 주세요."],
                             ["사진·포스터는 어떻게 쓰나요?", "단체가 허락한 범위에서 피카 사이트와 인스타그램 @picka.news 소개에만 써요. 휴대폰으로 찍은 사진은 포스터로 쓰지 않아요."],
                             ["내리고 싶으면요?", "메일 한 통이면 돼요. 7일 안에 단체 정보를 내려요."],
@@ -125,6 +146,7 @@ export default function PartnersPage() {
                         정보 제공 협약(동의서 한 장)을 맺고 싶으시면 단체 이름, 활동 지역, 공식 SNS 또는 누리집 주소를 메일로 보내 주세요. 신청 양식은 준비 중이에요.
                     </p>
                     <p className="mt-3 select-all font-mono text-[15px] font-bold">pick.art.pica@gmail.com</p>
+                    <CtaLink href="/tip/leaflet" label="지금 리플렛 사진으로 등록하기" invert />
                 </section>
 
                 <p className="text-[13px] text-ink-soft">
