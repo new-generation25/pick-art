@@ -32,8 +32,12 @@ ISO = re.compile(r"^20\d\d-\d\d-\d\d$")
 
 
 def norm(title: str) -> str:
-    t = re.sub(r"\[[^\]]*\]|\([^)]*\)|<|>|《|》|〈|〉|\"|'|‘|’|“|”", "", title or "")
-    return re.sub(r"[\s·,.:\-_~!?]", "", t).lower()
+    """중복 판정용 제목: [지역]·(괄호) 안을 빼고 한글·영문·숫자만 남긴다.
+    출처마다 기호가 달라도(쉼표·×·⨉·＜＞·〈〉 등) 같은 제목으로 본다(2026-11-26 「콘서트누리, 플라워」 vs 「콘서트누리 ⨉ 플라워」)."""
+    t = re.sub(r"\[[^\]]*\]|\([^)]*\)", "", title or "").lower()
+    t = re.sub(r"[×⨉✕]", "x", t)
+    t = re.sub(r"(?<=\s)x(?=\s)", " ", t)  # 「A x B」「A × B」처럼 띄어 쓴 x 는 기호로 본다
+    return re.sub(r"[^0-9a-z가-힣]", "", t)
 
 
 def loose(title: str) -> str:
