@@ -16,7 +16,8 @@
   runs.json      {"rows": [...], "meta": [...]}  runs.json 사본 + date·round(1차/2차/기타)·new_method
   metrics.json   {"rows": [...], "meta": [...]}  운영 지표. kind=summary(지표 하나 = 한 줄, 정의·현재 값·목표),
                  kind=day(날짜 하나 = 한 줄), kind=region·category(활성 행사 나눔). 공급 지표는 피카 DB events 를
-                 frontend/.env.local 의 anon 키로 읽기만 한다(쓰지 않는다)
+                 frontend/.env.local 의 anon 키로 읽기만 한다(쓰지 않는다). KOPIS 수집 건수는 collector/logs/scheduled_*.log
+                 (정기 수집 로그)의 「KOPIS 수집 완료: 경남 n · 부산 n건」 줄에서 읽는다(2026-11-26 추가)
 
 사용: python tools/insta_report.py   (collector 폴더에서)
 """
@@ -246,6 +247,8 @@ SMALL_POST_TARGET = 50   # 게시 소규모:공공 = 5:5 (운영매뉴얼 1.2)
 POSTS_PER_DAY_TARGET = 10  # 하루 게시 목표 10 (대시보드 「그날 활동」 게시 칸)
 PENDING_DAYS = 7         # 허락 댓글 7일 무응답 → none 으로 정리 (dm.json status 규칙)
 STANDING_VISIT_DAYS = 30  # 상시 동의 계정은 한 달에 한 번 찾아간다 (insta_state.py standing-due)
+LOGS = os.path.join(os.path.dirname(__file__), "..", "logs")  # 정기 수집 로그 scheduled_YYYYMMDD_HHMM.log
+KOPIS_ZERO_STOP = 3       # KOPIS 0건이 3일 이어지면 멈춤 조건(갈무리 add_finding) — 1차·2차 SKILL 「멈춤」
 
 # 지표 정의: id, 묶음, 이름, 무엇을 보나, 계산식, 출처, 좋은 방향, 목표·경고선(근거 없으면 「기준 정하기 필요」)
 METRIC_DEFS = [
@@ -258,6 +261,12 @@ METRIC_DEFS = [
      "소규모 활성 행사 수 ÷ 활성 행사 수 × 100", "피카 DB events", "높을수록", "기준 정하기 필요"),
     ("empty_regions", "공급", "행사 0건 시군 수", "소식이 하나도 없는 지역",
      "부산 + 경남 18 시군(19곳) 중 활성 행사가 0건인 곳의 수", "피카 DB events", "낮을수록", "기준 정하기 필요"),
+    ("kopis_today", "공급", "KOPIS 오늘 수집 건수", "KOPIS 수집이 살아 있나(11/19~25 0건 장애, 0630a16 수정)",
+     "오늘 정기 수집 로그의 「KOPIS 수집 완료: 경남 n · 부산 n건」 합(신규·중복 모두, 그날 마지막 실행). 로그가 없으면 빈 값",
+     "collector/logs/scheduled_*.log", "0보다 크게", "경고: 0건"),
+    ("kopis_zero_streak", "공급", "KOPIS 0건 연속 일수", "수집 장애가 이어지나",
+     "오늘부터 거슬러 KOPIS 수집 건수가 0인 날이 이어진 수(로그 없는 날에서 끊는다)", "collector/logs/scheduled_*.log",
+     "낮을수록", f"경고: {KOPIS_ZERO_STOP}일 이상(멈춤 조건 — 갈무리 add_finding)"),
     ("asks_7d", "깔때기", "허락 요청 수(7일)", "소규모 확보 깔때기의 입구",
      "최근 7일 dm.json 기록 수(허락 댓글 + DM, failed 제외)", "dm.json", "높을수록", "기준 정하기 필요"),
     ("reply_rate", "깔때기", "답 받은 비율(누적)", "허락 요청에 답이 오는가",
@@ -339,6 +348,25 @@ def _db_events():
         return None, f"DB 읽기 실패: {type(e).__name__}"
 
 
+def _kopis_by_day():
+    """정기 수집 로그에서 날짜별 KOPIS 수집 건수(경남+부산, 그날 마지막 실행 값). 로그가 없으면 {}."""
+    out = {}
+    try:
+        names = sorted(n for n in os.listdir(LOGS) if re.match(r"scheduled_\d{8}_\d{4}\.log$", n))
+    except OSError:
+        return out
+    pat = re.compile(r"KOPIS 수집 완료: 경남 (\d+) · 부산 (\d+)건")
+    for n in names:  # 이름 순 = 시각 순이라 같은 날 뒤 실행이 덮어쓴다
+        try:
+            with open(os.path.join(LOGS, n), encoding="utf-8-sig", errors="replace") as f:
+                m = pat.search(f.read())
+        except OSError:
+            continue
+        if m:
+            out[f"{n[10:14]}-{n[14:16]}-{n[16:18]}"] = int(m.group(1)) + int(m.group(2))
+    return out
+
+
 def _post_code(u):
     m = re.search(r"instagram\.com/(?:[^/?#]+/)?(?:p|reel)/([^/?#]+)", u or "")
     return m.group(1) if m else None
@@ -387,6 +415,7 @@ def build_metrics(runs):
         return {"active": len(act), "small": len(small), "empty": sum(1 for s in SIGUNGU if s not in regions), "act": act}
 
     sup_now = supply(T)
+    kopis = _kopis_by_day()
 
     # 날짜별
     dates = set(post_day.values()) | {s["date"][:10] for s in stats} | {(d.get("date") or "")[:10] for d in dm}
@@ -412,6 +441,7 @@ def build_metrics(runs):
             "kind": "day", "id": "day:" + d, "date": d,
             "active_events": sp["active"] if sp else None, "small_active": sp["small"] if sp else None,
             "small_supply_pct": _pct(sp["small"], sp["active"]) if sp else None, "empty_regions": sp["empty"] if sp else None,
+            "kopis": kopis.get(d),
             "posts": len(ks), "posts_small": sm, "posts_public": pu, "posts_unknown": len(ks) - sm - pu,
             "small_post_pct": _pct(sm, sm + pu),
             "asks": sum(1 for x in asks if (x.get("date") or "")[:10] == d),
@@ -433,6 +463,11 @@ def build_metrics(runs):
         v["active_events"], v["small_active"], v["empty_regions"] = sup_now["active"], sup_now["small"], sup_now["empty"]
         v["small_supply_pct"] = _pct(sup_now["small"], sup_now["active"])
         v["coverage"] = _pct(sum(1 for e in sup_now["act"] if e["id"] in posted_ids), sup_now["active"])
+    v["kopis_today"] = kopis.get(T)
+    streak, d_ = 0, today
+    while kopis.get(d_.isoformat()) == 0:
+        streak += 1; d_ -= timedelta(days=1)
+    v["kopis_zero_streak"] = streak if kopis else None
     v["asks_7d"] = sum(1 for x in asks if in7(x.get("date")))
     replied = [x for x in asks if x.get("status") in ("yes", "no", "posted")]  # reply 칸엔 확인 메모도 있다
     v["reply_rate"] = _pct(len(replied), len(asks))
@@ -497,7 +532,8 @@ def build_metrics(runs):
 
     units = {"small_supply_pct": "%", "reply_rate": "%", "permit_rate": "%", "small_post_pct": "%", "coverage": "%",
              "thanks_rate": "%", "permit_to_post_days": "일", "lead_days": "일", "min_per_run": "분",
-             "cache_per_run_m": "백만", "tokens_per_post_m": "백만", "posts_per_day": "건"}
+             "cache_per_run_m": "백만", "tokens_per_post_m": "백만", "posts_per_day": "건", "kopis_today": "건",
+             "kopis_zero_streak": "일"}
     windows = {"asks_7d": "7일", "posts_per_day": "7일", "small_post_pct": "7일", "lead_days": "7일",
                "followers_delta_7d": f"{stats_base}~{stats_last}", "interactions_per_post": "7일", "thanks_rate": "7일",
                "min_per_run": "7일", "cache_per_run_m": "7일", "tokens_per_post_m": "7일",
@@ -515,6 +551,10 @@ def build_metrics(runs):
             return "ok" if val >= POSTS_PER_DAY_TARGET else "warn"
         if mid in ("dup_posts", "record_missing", "pending_over7"):
             return "ok" if val == 0 else "warn"
+        if mid == "kopis_today":
+            return "ok" if val > 0 else "warn"
+        if mid == "kopis_zero_streak":
+            return "ok" if val < KOPIS_ZERO_STOP else "warn"
         return "none"  # 기준이 없는 지표는 칠하지 않는다
 
     summary = []
@@ -542,7 +582,7 @@ def build_metrics(runs):
         {"label": "만든 시각", "value": datetime.now().strftime("%Y-%m-%d %H:%M")},
         {"label": "기준일", "value": T},
         {"label": "최근 7일", "value": f"{w_from} ~ {T}"},
-        {"label": "원본", "value": "피카 DB events(anon 읽기) · docs/insta/posted · dm · engaged · feedback · stats · runs · standing_visits .json"},
+        {"label": "원본", "value": "피카 DB events(anon 읽기) · docs/insta/posted · dm · engaged · feedback · stats · runs · standing_visits .json · collector/logs/scheduled_*.log(KOPIS)"},
         {"label": "줄 종류", "value": "kind=summary 지표 하나 / kind=day 날짜 하나 / kind=region·category 활성 행사 나눔"},
         {"label": "날짜별 공급", "value": "그날까지 DB에 들어온(created_at) 행사 중 그날 끝나지 않은 것. 지운 행사는 빠진다"},
         {"label": "상태", "value": "ok/warn 은 근거 있는 목표·경고선이 있는 지표만. 나머지는 none"},
