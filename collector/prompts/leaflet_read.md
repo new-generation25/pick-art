@@ -1,0 +1,114 @@
+# 리플렛 읽기 — 클로드 예약작업 지시문
+
+명세: `specs/013-leaflet-intake/spec.md` (헌장 IV 예외의 범위, FR-010~013, 개인정보 FR-040·041).
+단체가 올린 리플렛·포스터 이미지에서 **인쇄된 글자만** 정해진 칸에 옮긴다. 공개·등록은 하지 않는다. 결과는 운영자가 검토한다.
+
+## 순서
+
+모든 명령은 `F:\projects\pick-art\collector` 폴더에서 `PYTHONIOENCODING=utf-8` 를 붙여 실행한다.
+
+1. `python tools/leaflet_queue.py --pending` 을 실행한다.
+   첫 줄은 JSON 배열이다. 항목마다 `id`, `file`(내려받은 이미지의 절대 경로), `image_kind`, `group_name`, `official_url`, `given`, `note` 가 있다.
+   배열이 `[]` 이면 4번으로 건너뛴다.
+2. 항목마다:
+   1. `file` 이 `null` 이면(내려받기 실패) `python tools/leaflet_queue.py --fail <id> --reason "내려받기 실패: <download_error>"` 를 실행하고 다음 항목으로 간다.
+   2. Read 도구로 `file` 이미지를 연다.
+   3. 아래 «칸»과 «규칙»대로 JSON 을 만들어 `.cache/leaflets/<id>.json` 에 UTF-8 로 쓴다(Write 도구).
+   4. `python tools/leaflet_queue.py --save <id> --file .cache/leaflets/<id>.json` 을 실행한다.
+      `❌ 검사 실패` 가 나오면 메시지대로 JSON 을 고쳐 한 번만 다시 `--save` 한다. 또 실패하면 `--fail <id> --reason "결과 검사 실패: <메시지>"`.
+      `⚠️ 저장 안 함`(이미 uploaded 가 아님)은 다른 쪽에서 처리한 것이므로 그대로 넘어간다.
+   5. 글자를 전혀 읽을 수 없는 이미지(너무 흐림, 빛 반사, 행사 안내가 아닌 이미지)는 3·4 대신
+      `python tools/leaflet_queue.py --fail <id> --reason "<무엇 때문에 못 읽었는지 한 줄>"` 을 실행한다.
+3. 다음 항목으로 넘어가 2를 되풀이한다.
+4. `python tools/leaflet_queue.py --cleanup --apply` 를 실행한다(1년 지난 이미지 삭제).
+5. 마지막에 한 줄로 끝낸다: `리플렛 읽기: 대기 N건 · 저장 N · 실패 N · 1년 지난 이미지 삭제 N`
+
+`given`(단체가 직접 적은 칸)과 `note` 는 참고만 한다. **이미지에 인쇄되지 않은 내용을 `given` 에서 옮겨 적지 않는다.** 칸은 이미지에서 읽은 것만 채운다.
+`image_kind` 가 `photo`(휴대폰으로 찍은 사진)여도 읽는 방법은 같다. 포스터로 쓸지는 이 작업이 정하지 않는다(사진은 포스터로 쓰지 않는다).
+
+## 칸
+
+JSON 맨 위 키는 아래 11개만 쓴다. 다른 키가 있으면 저장이 거절된다.
+
+| 키 | 옮길 글자 |
+|---|---|
+| `title` | 행사 이름 |
+| `date_text` | 날짜·기간 (인쇄된 그대로, 요일 포함) |
+| `time_text` | 시각·회차 (`12.5 19:30 / 12.6 15:00·19:00` 처럼 인쇄된 순서대로) |
+| `venue` | 장소 이름(인쇄된 주소가 있으면 함께) |
+| `region_hint` | 인쇄된 시·군·구 이름 (예: `김해`, `창원시 성산구`) |
+| `price_text` | 관람료 (`전석 무료`, `R석 30,000원` 등) |
+| `booking_text` | 예매 방법 (예매처 이름, 전화 예매, 현장 판매 등) |
+| `booking_url` | 인쇄된 예매·안내 주소 |
+| `organizer` | 주최·주관 단체 이름 |
+| `contact` | 문의 연락처 |
+| `multiple_events` | 한 장에 서로 다른 행사가 2개 이상이면 `true`, 아니면 `false` (true/false 만) |
+
+`multiple_events` 를 뺀 10칸은 모두 이 모양이다:
+
+```json
+{"raw": "인쇄된 글자 그대로", "value": "같은 글자를 정리한 것", "confidence": "high"}
+```
+
+- `raw`: 이미지에 인쇄된 글자를 **그대로** 옮긴다(띄어쓰기·기호·요일 포함). 줄바꿈은 빈칸 한 개로.
+- `value`: `raw` 와 **같은 글자**를 정리한 것. 꾸밈 기호·칸 이름표(`일시:`, `장소 |`)를 빼고 빈칸을 정리하는 정도만 한다. 새 정보를 더하지 않는다.
+- `confidence`: `high`(또렷이 읽음) · `low`(일부가 흐리거나 잘려 확실하지 않음) · `none`(그 칸의 글자가 없거나 못 읽음).
+- 인쇄돼 있지 않은 칸은 `{"raw": null, "value": null, "confidence": "none"}`.
+- 글자는 칸마다 300자 안. 넘는 것은 잘린다.
+
+## 규칙 (반드시)
+
+- **인쇄된 글자만 옮긴다.** 추측하지 않는다.
+  - 연도가 인쇄돼 있지 않으면 연도를 붙이지 않는다(`12.5(금)` 는 `12.5(금)` 그대로). 요일로 연도를 짐작하지 않는다.
+  - 종료일·관람료·장소 주소·시각이 인쇄돼 있지 않으면 `null`. «무료일 것 같다», «매일 같은 시각일 것 같다»를 쓰지 않는다.
+  - 날짜를 `YYYY-MM-DD` 로 바꾸지 않는다. 날짜 변환은 `--save` 가 수집기 규칙 파서로 한다(연도가 없으면 빈칸으로 남긴다).
+- **지어내지 않는다.** 소개 글·줄거리·설명을 쓰지 않는다. 출연진·장르를 이미지에 없는 내용으로 채우지 않는다.
+- **QR 코드는 읽지 않는다.** 링크를 따라가 내용을 가져오지 않는다. `booking_url` 은 인쇄된 주소 글자만 옮긴다. `http://`·`https://` 로 시작하지 않는 주소(`www.…`)는 `raw` 에 그대로 두고 `value` 는 `null`.
+- **개인정보를 옮기지 않는다.** 개인 휴대전화 번호(010·011·016·017·018·019)와 계좌번호(후원 안내)는 어느 칸에도 넣지 않는다 — 그 칸은 `null` 로 둔다. 단체 대표 유선번호(055-…, 1588-… 등)는 `contact` 에 옮긴다. `--save` 가 한 번 더 거른다.
+- 후원·협찬 기관 로고, 이미지 속 다른 광고 글자는 `organizer` 에 넣지 않는다(«주최»·«주관»으로 인쇄된 것만).
+- 행사가 여러 개(시리즈·축제 프로그램표)면 `multiple_events: true` 로 하고, 칸에는 리플렛 전체의 이름·장소처럼 **공통으로 인쇄된 것만** 넣는다. 여러 행사를 한 칸에 억지로 합치지 않는다.
+- 이미지를 고치거나 새로 그리지 않는다.
+
+## 예 1 — 연도가 인쇄된 리플렛
+
+인쇄된 글자: `극단 예시 정기공연 「작은 방」` / `2026. 12. 5(금) ~ 12. 7(일)` / `평일 19:30 주말 15:00` / `김해서부문화센터 하늘극장` / `전석 20,000원` / `예매: 놀티켓 · 문의 055-330-1234` / `주최: 극단 예시` / 아래에 QR 코드, 후원 로고
+
+```json
+{
+  "title": {"raw": "극단 예시 정기공연 「작은 방」", "value": "극단 예시 정기공연 「작은 방」", "confidence": "high"},
+  "date_text": {"raw": "2026. 12. 5(금) ~ 12. 7(일)", "value": "2026. 12. 5(금) ~ 12. 7(일)", "confidence": "high"},
+  "time_text": {"raw": "평일 19:30 주말 15:00", "value": "평일 19:30 주말 15:00", "confidence": "high"},
+  "venue": {"raw": "김해서부문화센터 하늘극장", "value": "김해서부문화센터 하늘극장", "confidence": "high"},
+  "region_hint": {"raw": "김해", "value": "김해", "confidence": "low"},
+  "price_text": {"raw": "전석 20,000원", "value": "전석 20,000원", "confidence": "high"},
+  "booking_text": {"raw": "예매: 놀티켓", "value": "놀티켓", "confidence": "high"},
+  "booking_url": {"raw": null, "value": null, "confidence": "none"},
+  "organizer": {"raw": "주최: 극단 예시", "value": "극단 예시", "confidence": "high"},
+  "contact": {"raw": "문의 055-330-1234", "value": "055-330-1234", "confidence": "high"},
+  "multiple_events": false
+}
+```
+
+`--save` 가 `date_text.raw` 를 `2026-12-05 ~ 2026-12-07` 로 바꾼다. QR·후원 로고는 옮기지 않았다.
+
+## 예 2 — 연도가 인쇄되지 않은 리플렛 (휴대폰 사진)
+
+인쇄된 글자: `마을 음악회 「가을 소리」` / `11.29(토) 오후 3시` / `장소 대동면 주민센터 2층` / `관람 무료` / `문의 010-1234-5678` (아래쪽 일부 잘림)
+
+```json
+{
+  "title": {"raw": "마을 음악회 「가을 소리」", "value": "마을 음악회 「가을 소리」", "confidence": "high"},
+  "date_text": {"raw": "11.29(토)", "value": "11.29(토)", "confidence": "high"},
+  "time_text": {"raw": "오후 3시", "value": "오후 3시", "confidence": "high"},
+  "venue": {"raw": "장소 대동면 주민센터 2층", "value": "대동면 주민센터 2층", "confidence": "high"},
+  "region_hint": {"raw": null, "value": null, "confidence": "none"},
+  "price_text": {"raw": "관람 무료", "value": "관람 무료", "confidence": "high"},
+  "booking_text": {"raw": null, "value": null, "confidence": "none"},
+  "booking_url": {"raw": null, "value": null, "confidence": "none"},
+  "organizer": {"raw": null, "value": null, "confidence": "none"},
+  "contact": {"raw": null, "value": null, "confidence": "none"},
+  "multiple_events": false
+}
+```
+
+연도 `2026` 을 붙이지 않았다(`--save` 가 날짜 칸을 비워 두고, 단체·운영자가 넣는다). 시·군 이름은 인쇄되지 않아 `region_hint` 를 비웠다(`대동면` 으로 김해를 짐작하지 않는다). 개인 휴대전화는 옮기지 않았다.
