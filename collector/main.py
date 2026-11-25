@@ -87,11 +87,11 @@ def mark_instagram_done(now=None, mark_path=INSTAGRAM_MARK):
         f.write((now or _kst_now()).date().isoformat())
 
 
-async def run_tool(script, timeout_min=60):
+async def run_tool(script, timeout_min=60, args=()):
     """collector/tools/<script> 를 별도 프로세스로 실행하고 결과 한 줄을 돌려준다."""
     here = os.path.dirname(os.path.abspath(__file__))
     proc = await asyncio.create_subprocess_exec(
-        sys.executable, "-u", os.path.join(here, "tools", script),
+        sys.executable, "-u", os.path.join(here, "tools", script), *args,
         cwd=here, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT,
         env={**os.environ, "PYTHONIOENCODING": "utf-8"})
     try:
@@ -213,6 +213,10 @@ async def run_crawlers(specific_target=None):
             # 피카 인스타에 소개한 행사 → events.insta_post_url·insta_posted_at (posted.json 을 읽기만 한다)
             synced = await run_tool("sync_insta_posts.py", timeout_min=10)
             backup_line += f"\n• 인스타 게시 반영: {synced['summary']}"
+
+            # 새로 공개된 행사에 주최·주관 기관·단체를 잇는다(specs/012, orgs·event_orgs). 실패해도 루틴은 계속한다
+            orgs = await run_tool("link_orgs.py", timeout_min=20, args=["--apply"])
+            backup_line += f"\n• 단체 연결: {orgs['summary']}"
 
             # 전체 종료 알림: 처리·실패·건너뜀을 숫자로 남긴다
             failed = [r for r in results if r['status'] != 'SUCCESS']
