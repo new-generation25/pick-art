@@ -54,6 +54,26 @@ def source_label(f) -> str:
     return f.get("source_name") or ""
 
 
+# 개인 휴대폰 번호(010 등)는 카드·캡션에 옮기지 않는다 — 주최 측 계정 DM 안내로 바꾼다(2026-11-26 운영자 결정).
+# 기관 대표번호(055-, 051-, 1588- 등)는 그대로 둔다.
+MOBILE = re.compile(r"(?<!\d)01[016789][-.\s]?\d{3,4}[-.\s]?\d{4}(?!\d)")
+
+
+def no_mobile(f: dict) -> list:
+    """contact·how·what·notice 의 휴대폰 번호를 「@계정 DM」으로 바꾼다. 계정이 없으면 「주최 측 안내 참고」. 바꾼 칸 이름을 돌려준다."""
+    ms = [m if m.startswith("@") else f"@{m}" for m in (f.get("mentions") or [])]
+    dm = f"{ms[0]} DM" if ms else "주최 측 안내 참고"
+    changed = []
+    if MOBILE.search(f.get("contact") or ""):
+        f["contact"] = MOBILE.sub(dm, f["contact"]); changed.append("contact")
+    for k in ("how", "what"):
+        if any(MOBILE.search(x or "") for x in f.get(k) or []):
+            f[k] = [MOBILE.sub(dm, x or "") for x in f[k]]; changed.append(k)
+    if MOBILE.search(f.get("notice") or ""):
+        f["notice"] = MOBILE.sub(dm, f["notice"]); changed.append("notice")
+    return changed
+
+
 def kdate(d: str) -> str:
     y, m, dd = map(int, d.split("-"))
     return f"{m}.{dd}({WEEK[date(y, m, dd).weekday()]})"
@@ -107,6 +127,9 @@ def build_facts(ev: dict, facts: dict) -> dict:
     if not f["poster_credit"]:
         f["poster_credit"] = f"포스터 출처: {f['source_name']}" if f["source_name"] else ""
     f["region"], f["category"] = region, cat
+    changed = no_mobile(f)
+    if changed:
+        print(f"[문의] 개인 휴대폰 번호를 계정 DM 안내로 바꿈: {', '.join(changed)}")
     return f
 
 

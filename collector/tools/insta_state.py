@@ -9,7 +9,7 @@
   python tools/insta_state.py candidates --n 12           안 쓴 ok 후보(오늘 다른 에이전트가 맡은 계정 제외)
   python tools/insta_state.py recent-texts --days 7       지난 n일 피카가 쓴 댓글·답글 문장(되풀이 방지)
   python tools/insta_state.py approved                    허락(yes)받고 아직 안 올린 행사
-  python tools/insta_state.py posted-ids                  올린 event_id 목록
+  python tools/insta_state.py posted-ids                  올린 event_id + 최근 7일 묶음·릴스에 든 event_id(게시 후보에서 뺀다)
   python tools/insta_state.py standing-due [--n 3]        한 달 넘게 안 가 본 상시 동의 계정(오래된 순)
   python tools/insta_state.py standing-visited @계정 --found n  상시 동의 계정을 다녀온 기록
   python tools/insta_state.py post-done <게시물 주소>       이미 댓글·허락 댓글을 달았거나 소개한 게시물인지(댓글 전에 부른다)
@@ -253,8 +253,20 @@ def cmd_standing_visited(a):
     out({"ok": True, "account": acc, "next_after": (date.today() + timedelta(days=30)).isoformat()})
 
 
+ROUNDUP_GAP_DAYS = 7  # 묶음(roundup)·릴스에 든 행사는 7일 지나야 단독으로 다시 올린다(2026-11-26 운영자 결정)
+
+
 def cmd_posted_ids(a):
-    out({"ids": [r["event_id"] for r in load("posted") if r.get("event_id")]})
+    """올린 event_id + 최근 7일 묶음·릴스(roundups.json)에 든 event_id. 게시 후보에서 뺄 목록이다."""
+    ids = [r["event_id"] for r in load("posted") if r.get("event_id")]
+    p = os.path.join(BASE, "roundups.json")
+    since = (date.today() - timedelta(days=ROUNDUP_GAP_DAYS - 1)).isoformat()
+    recent = []
+    if os.path.exists(p):
+        for r in json.load(open(p, encoding="utf-8")):
+            if (r.get("date") or (r.get("posted_at") or "")[:10]) >= since:
+                recent += [i for i in r.get("event_ids") or [] if i not in ids and i not in recent]
+    out({"ids": ids + recent, "roundup_recent": recent})
 
 
 def cmd_find_ask(a):
