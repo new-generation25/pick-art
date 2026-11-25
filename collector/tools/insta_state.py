@@ -28,6 +28,7 @@
 import argparse
 import json
 import os
+import re
 import sys
 import tempfile
 import time
@@ -251,6 +252,8 @@ def _check_new(file, rec, rows):
         rec["account"] = norm(rec["account"])
     if file in ("engaged", "dm", "feedback") and not rec.get("at"):
         rec["at"] = datetime.now().astimezone().isoformat(timespec="seconds")  # 리포트에 실제 시각이 나오게
+    if file == "posted" and not re.fullmatch(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", str(rec["event_id"])):
+        return "event_id 가 피카 DB 행사 번호(UUID)가 아니다 — 먼저 DB에 넣고 그 번호로 올린다"
     if file == "posted" and any(r.get("event_id") == rec["event_id"] for r in rows):
         return "이미 posted.json 에 있는 event_id"
     if file == "candidates" and any(norm(r.get("account")) == rec["account"] for r in rows):
