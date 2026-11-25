@@ -26,6 +26,9 @@ REGION_FILTER = [r for r in os.getenv("KOPIS_REGION_FILTER", "").split(",") if r
 
 CITIES = ["창원", "김해", "진주", "양산", "거제", "통영", "사천", "밀양", "거창", "함안",
           "창녕", "고성", "하동", "합천", "남해", "함양", "산청", "의령"]
+# KOPIS 방화벽이 aiohttp 기본 User-Agent(Python/x aiohttp/x)를 400 'Request Blocked' 로 막는다(2026-11-19부터).
+# 수집기 이름을 밝히는 User-Agent 로 보낸다
+KOPIS_HEADERS = {"User-Agent": "pick-art-collector/1.0"}
 TICKET_HINTS = ["인터파크", "놀유니버스", "예스24", "YES24", "티켓링크", "멜론", "네이버", "공식", "홈페이지"]
 
 
@@ -64,8 +67,10 @@ class KopisScraper:
 
     async def _xml(self, session, path, **params):
         params["service"] = API_KEY
-        async with session.get(f"{BASE}/{path}", params=params, timeout=aiohttp.ClientTimeout(total=30)) as r:
+        async with session.get(f"{BASE}/{path}", params=params, headers=KOPIS_HEADERS,
+                               timeout=aiohttp.ClientTimeout(total=30)) as r:
             if r.status != 200:
+                print(f"[KOPIS] ⚠️ {path} HTTP {r.status}", flush=True)
                 return None
             return ET.fromstring(await r.text())
 
