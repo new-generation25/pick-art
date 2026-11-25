@@ -219,8 +219,7 @@ body {
   transition: background-color .15s, border-color .15s, color .15s;
 }
 .pica-chip:hover { background: var(--pk-paper); }
-.pica-chip[aria-pressed="true"],
-.pica-chip[aria-current="page"] {
+.pica-chip[aria-pressed="true"] {
   background: var(--pk-mark);
   border-color: var(--pk-mark);
   color: var(--pk-on-mark);
