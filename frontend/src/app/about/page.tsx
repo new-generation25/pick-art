@@ -71,7 +71,7 @@ export default function AboutPage() {
                     <p className="text-[15px] font-bold leading-relaxed text-ink">돈을 받고 순서를 바꾸지 않아요. 목록은 날짜와 지역 규칙으로만 정렬해요.</p>
                     <p className="text-[15px] font-bold leading-relaxed text-ink">광고나 제휴가 생기면 「광고」·「제휴」라고 분명히 표시해요.</p>
                     <p className="text-[15px] font-bold leading-relaxed text-ink">방문과 클릭은 날짜별 숫자로만 세요. 누가 무엇을 봤는지는 기록하지 않아요.</p>
-                    <p className="text-[15px] font-bold leading-relaxed text-ink">확인 못 한 건 말하지 않아요. 요금이 공지에 없으면 「문의 필요」라고 적어요.</p>
+                    <p className="text-[15px] font-bold leading-relaxed text-ink">확인 못 한 건 말하지 않아요. 요금이 공지에 없으면 지어내지 않고 「정보 없음」으로 둬요.</p>
                 </section>
 
                 <section>
