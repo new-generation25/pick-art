@@ -6,11 +6,13 @@
 사용 (collector 폴더에서, PYTHONIOENCODING=utf-8. 마지막 줄이 한 줄 요약)
   python tools/leaflet_queue.py --pending [--limit 10]
       status='uploaded' 이고 image_path 가 있는 제출을 오래된 것부터. 비공개 버킷 leaflets 에서
-      .cache/leaflets/<id>.<확장자> 로 내려받고 JSON 배열(한 줄)을 찍는다
+      .cache/leaflets/<id>.<확장자> 로 내려받고, 작은 글씨용으로 위·아래 절반을 2배로 키운 조각
+      <id>.tile1.jpg·<id>.tile2.jpg 를 옆에 만들어(항목의 tiles) JSON 배열(한 줄)을 찍는다
   python tools/leaflet_queue.py --save <id> --file <result.json>
       예약작업이 쓴 JSON 을 엄격히 검사하고(칸 밖 키·틀린 모양이면 저장 안 함), 개인 휴대전화·계좌번호 칸을 비우고,
       date_text.raw 를 수집기 규칙 파서(rule_extractor.parse_period, 기본 연도 없음)로 date_start/date_end 로 바꿔
-      ai_result 에 넣는다. status='uploaded' 인 줄만 'read' 로 바꾼다. 내려받은 이미지는 지운다
+      ai_result 에 넣는다(줄임 표기 «2027년 1월 9일~10일» 은 끝날에 시작 월을 채워 읽고, multiple_events 면 날짜를
+      비운다). status='uploaded' 인 줄만 'read' 로 바꾼다. 내려받은 이미지·조각은 지운다
   python tools/leaflet_queue.py --fail <id> --reason "..."
       읽지 못함: ai_result={"error": 이유}, status='read'(운영자가 그래도 본다)
   python tools/leaflet_queue.py --cleanup [--apply]
@@ -53,6 +55,18 @@ BANK_WORDS = re.compile(r"계좌|예금주|입금|은행|농협|새마을금고|
 DIGIT_RUN = re.compile(r"\d(?:\d|[\s\-](?=\d))*")  # 숫자 묶음: 숫자 사이 하이픈·빈칸 한 개까지
 DATE_LIKE = re.compile(r"^20\d\d[\s\-]\d{1,2}[\s\-]\d{1,2}$")
 NO_ACCOUNT_CHECK = {"date_text", "time_text"}  # 날짜·시각은 숫자뿐이라 계좌 판정에서 뺀다(휴대전화 판정은 한다)
+# 대표·유선 전화 모양(계좌가 아님): 지역번호 02·031~064·070·080·050x 안심번호(0502~0508), 괄호 지역번호
+# «(055)864-6969»·«055)864-6969», 15xx·16xx·18xx-xxxx, 지역번호 없는 국번 «680-1051». 앞뒤로 숫자 묶음이
+# 하이픈·점으로 이어지면(«110-1234-5678-90» 같은 계좌) 전화로 보지 않는다. 빈칸으로 띄운 번호 두 개
+# («1599-1216 680-1051»)는 각각 전화다
+_NB = r"(?<!\d)(?<!\d[.\-])"       # 앞에 하이픈·점으로 붙은 숫자 묶음이 없음
+_NA = r"(?![.\-]?\d)"              # 뒤에 하이픈·점으로 붙은 숫자 묶음이 없음
+PHONE = re.compile(
+    _NB + r"(?:"
+    r"\(?0(?:2|[3-6][1-5]|70|80|50[2-8])\)?[\s.\-)]*\d{3,4}[\s.\-]*\d{4}"   # 지역번호·070·080·050x
+    r"|1[568]\d{2}[\s.\-]*\d{4}"                                           # 15xx·16xx·18xx 대표번호
+    r"|\d{3,4}[.\-]\d{4}"                                                  # 지역번호 없는 국번-번호
+    r")" + _NA)
 
 
 class ValidationError(ValueError):
@@ -126,16 +140,19 @@ def is_mobile(text):
 
 
 def looks_phone(digits):
-    """대표·유선 전화(0으로 시작 9~11자리, 15xx·16xx·18xx 8자리)."""
+    """대표·유선 전화(0으로 시작 9~11자리, 050x 안심번호 11~12자리, 15xx·16xx·18xx 8자리)."""
+    if digits[:4] in {f"050{i}" for i in range(2, 9)} and 11 <= len(digits) <= 12:
+        return True
     return (digits.startswith("0") and 9 <= len(digits) <= 11) or (len(digits) == 8 and digits[:2] in ("15", "16", "18"))
 
 
 def is_account(text):
     """계좌번호로 보이는 글자: 은행·계좌 낱말 + 8자리 이상 숫자 묶음, 또는 10~16자리 숫자 묶음.
-    전화번호·날짜 모양 묶음은 뺀다."""
+    전화번호(PHONE 모양을 먼저 지움)·날짜 모양 묶음은 뺀다."""
     if not text:
         return False
     bank = bool(BANK_WORDS.search(text))
+    text = PHONE.sub(" / ", text)  # 번호 두 개가 빈칸 하나로 이어져 긴 숫자 묶음이 되지 않게 끊는다
     for m in DIGIT_RUN.finditer(text):
         run = m.group(0)
         digits = re.sub(r"\D", "", run)
@@ -147,10 +164,11 @@ def is_account(text):
 
 
 def privacy_reason(name, field):
-    text = " ".join(x for x in (field.get("raw"), field.get("value")) if x)
-    if is_mobile(text):
+    """raw·value 를 따로 검사한다(이어 붙이면 raw 끝 번호와 value 앞 번호가 한 숫자 묶음이 돼 계좌로 오판한다)."""
+    texts = [x for x in (field.get("raw"), field.get("value")) if x]
+    if any(is_mobile(t) for t in texts):
         return "mobile"
-    if name not in NO_ACCOUNT_CHECK and is_account(text):
+    if name not in NO_ACCOUNT_CHECK and any(is_account(t) for t in texts):
         return "account"
     return None
 
@@ -201,12 +219,38 @@ def validate(data):
     return out, dropped
 
 
-def parse_dates(date_raw):
+# 끝날의 월이 빠진 줄임 표기(시작에 연도·월이 인쇄된 경우만). 끝날 뒤에 숫자·«:»·«시»·«월»이 오면
+# 월·시각일 수 있으므로 건드리지 않는다
+_WKDAY = r"(?:\s*\([^)\d]{1,4}\))?"
+_ABBR_KO = re.compile(r"(?P<y>20\d{2})\s*년\s*(?P<m>\d{1,2})\s*월\s*(?P<d>\d{1,2})\s*일" + _WKDAY +
+                      r"\s*[~∼–\-]\s*(?P<ed>\d{1,2})\s*일")
+_ABBR_DOT = re.compile(r"(?P<y>20\d{2})\s*\.\s*(?P<m>\d{1,2})\s*\.\s*(?P<d>\d{1,2})(?!\d)\.?" + _WKDAY +
+                       r"\s*[~∼–\-]\s*(?P<ed>\d{1,2})(?!\d)(?!\s*\.\s*\d)(?!\s*[:시월])")
+
+
+def normalize_abbrev_end(text):
+    """«2027년 1월 9일~10일» → «2027년 1월 9일 ~ 1월 10일», «2027. 1. 9 ~ 10»·«2027.1.9~10(일)» → «… ~ 1. 10…».
+    시작의 월을 끝날에 채울 뿐 연도는 넣지 않는다(연도는 인쇄된 것만). 줄임 표기가 아니면 그대로 돌려준다."""
+    if not text:
+        return text
+    m = _ABBR_KO.search(text)
+    if m:
+        return text[:m.end("d")] + text[m.end("d"):m.start("ed")].replace("-", "~") + f"{m['m']}월 " + text[m.start("ed"):]
+    m = _ABBR_DOT.search(text)
+    if m:
+        # 붙은 하이픈(«9-10»)은 parse_period 가 범위로 보지 않으므로 «~» 로 바꾼다
+        mid = re.sub(r"[~∼–\-]", "~", text[m.end("d"):m.start("ed")])
+        return text[:m.end("d")] + mid + f"{m['m']}. " + text[m.start("ed"):]
+    return text
+
+
+def parse_dates(date_raw, multiple_events=False):
     """date_text.raw → (date_start, date_end). 연도가 인쇄돼 있지 않거나 파서가 못 바꾸면 (None, None).
-    기본 연도를 주지 않으므로 연도 없는 날짜는 채우지 않는다. 끝이 시작보다 앞이면(연도 넘김을 추측해야 함) 비운다."""
-    if not date_raw:
+    기본 연도를 주지 않으므로 연도 없는 날짜는 채우지 않는다. 끝이 시작보다 앞이면(연도 넘김을 추측해야 함) 비운다.
+    한 장에 행사가 여럿(multiple_events)이면 날짜 목록이 첫 날짜 하루로 바뀌는 오답을 막으려고 파싱하지 않는다."""
+    if not date_raw or multiple_events:
         return None, None
-    p = parse_period(date_raw, None)
+    p = parse_period(normalize_abbrev_end(date_raw), None)
     if not p["parsed"] or not p["start"] or not p["end"] or p["end"] < p["start"]:
         return None, None
     return p["start"], p["end"]
@@ -214,7 +258,7 @@ def parse_dates(date_raw):
 
 def build_result(data):
     fields, dropped = validate(data)
-    start, end = parse_dates(fields["date_text"]["raw"])
+    start, end = parse_dates(fields["date_text"]["raw"], fields["multiple_events"])
     fields.update({"date_start": start, "date_end": end, "date_parser": "rule_extractor.parse_period",
                    "read_by": READ_BY, "privacy_dropped": dropped})
     return fields
@@ -249,12 +293,39 @@ def remove_cache(sid, cache_dir=CACHE_DIR, also=None):
     return gone
 
 
+TILE_SCALE = 2
+TILE_MAX_SIDE = 4000   # 큰 사진은 2배로 키우면 파일만 커진다 → 긴 변을 여기서 멈춘다(원본보다 작게 줄이지는 않는다)
+TILE_OVERLAP = 0.06    # 가운데 줄이 두 조각으로 잘리지 않게 위·아래 조각을 높이의 6%씩 겹친다
+
+
+def make_tiles(path, sid, cache_dir=CACHE_DIR):
+    """작은 글씨용 확대 조각: 위 절반·아래 절반을 2배로 키운 jpg 두 장(<id>.tile1.jpg·<id>.tile2.jpg).
+    원본과 같은 «<id>.*» 이름이라 --save·--fail 때 함께 지워진다. 경로 목록을 돌려준다."""
+    from PIL import Image, ImageOps
+    with Image.open(path) as im:
+        im.seek(0)  # 움직이는 gif 는 첫 장
+        im = ImageOps.exif_transpose(im).convert("RGB")
+        w, h = im.size
+        half, pad = h // 2, int(h * TILE_OVERLAP)
+        out = []
+        for i, box in enumerate(((0, 0, w, min(h, half + pad)), (0, max(0, half - pad), w, h)), 1):
+            tile = im.crop(box)
+            tw, th = tile.size
+            scale = max(1.0, min(TILE_SCALE, TILE_MAX_SIDE / max(tw, th)))
+            tile = tile.resize((round(tw * scale), round(th * scale)), Image.LANCZOS)
+            dest = os.path.join(cache_dir, f"{sid}.tile{i}.jpg")
+            tile.save(dest, "JPEG", quality=90)
+            out.append(os.path.abspath(dest))
+    return out
+
+
 def pending(store, limit, cache_dir=CACHE_DIR):
     os.makedirs(cache_dir, exist_ok=True)
     items = []
     for r in store.pending(limit):
-        item = {"id": r["id"], "file": None, "image_kind": r.get("image_kind"), "group_name": r.get("group_name"),
-                "official_url": r.get("official_url"), "given": r.get("given") or {}, "note": r.get("note")}
+        item = {"id": r["id"], "file": None, "tiles": [], "image_kind": r.get("image_kind"),
+                "group_name": r.get("group_name"), "official_url": r.get("official_url"),
+                "given": r.get("given") or {}, "note": r.get("note")}
         try:
             check_id(r["id"])
             dest = os.path.join(cache_dir, f"{r['id']}.{ext_of(r['image_path'])}")
@@ -263,6 +334,11 @@ def pending(store, limit, cache_dir=CACHE_DIR):
             item["file"] = os.path.abspath(dest)
         except Exception as e:  # 한 장이 실패해도 나머지는 넘긴다
             item["download_error"] = str(e)[:200]
+        if item["file"]:
+            try:
+                item["tiles"] = make_tiles(item["file"], r["id"], cache_dir)
+            except Exception as e:  # 조각을 못 만들어도(heic 등) 원본으로 읽는다
+                item["tiles_error"] = str(e)[:200]
         items.append(item)
     return items
 

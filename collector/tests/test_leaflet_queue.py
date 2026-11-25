@@ -123,15 +123,44 @@ def test_mobile_detected(text):
     assert lq.is_mobile(text)
 
 
-@pytest.mark.parametrize("text", ["055-123-4567", "02-1234-5678", "1588-1234", "070-1234-5678"])
+@pytest.mark.parametrize("text", ["055-123-4567", "02-1234-5678", "1588-1234", "070-1234-5678",
+                                  # 11/26 정확도 시험에서 계좌로 오판한 대표번호들
+                                  "0507-1446-6715", "문의 | 0507-1446-6715 카톡채널", "0505-123-4567",
+                                  "680-1051", "1599-1216", "1644-1234", "1800-1234", "055)864-6969",
+                                  "(055)864-6969", "055.864.6969", "02)123-4567",
+                                  "Tel. 673-0245 Tel. 674-7295", "673-0245 / 674-7295", "1599-1216 680-1051",
+                                  "055-123-4567 055-765-4321", "하나은행 고객센터 1588-1111"])
 def test_landline_not_mobile_nor_account(text):
     assert not lq.is_mobile(text) and not lq.is_account(text)
 
 
 @pytest.mark.parametrize("text", ["농협 301-1234-5678-91 (예금주 극단)", "후원계좌 국민은행 123456-01-234567",
-                                  "1002-123-456789", "입금 3333-01-2345678"])
+                                  "1002-123-456789", "입금 3333-01-2345678", "신한 110-123-456789",
+                                  "110-1234-5678",        # 전화 모양 같아도 지역번호·대표번호가 아니면 11자리 계좌
+                                  "02-1234-5678-901",     # 지역번호로 시작해도 하이픈으로 더 이어지면 계좌
+                                  "1234567890123"])
 def test_account_detected(text):
     assert lq.is_account(text)
+
+
+@pytest.mark.parametrize("raw,value", [("680-1051", "680-1051"), ("문의 : 1599-1216", "1599-1216"),
+                                       ("055)864-6969", "055)864-6969"),
+                                       ("문의 | 0507-1446-6715 카톡채널", "0507-1446-6715"),
+                                       ("Tel. 673-0245 Tel. 674-7295", "673-0245 / 674-7295")])
+def test_privacy_checks_raw_and_value_separately(raw, value):
+    # 예전에는 raw 와 value 를 빈칸으로 이어 붙여 «…1051 680…» 이 한 숫자 묶음(계좌)이 됐다
+    assert lq.privacy_reason("contact", {"raw": raw, "value": value}) is None
+    out, dropped = lq.validate(full(contact={"raw": raw, "value": value, "confidence": "high"}))
+    assert dropped == [] and out["contact"]["value"] == value and out["personal_info_visible"] is False
+
+
+@pytest.mark.parametrize("field,reason", [
+    ({"raw": "문의 055-123-4567", "value": "010-1234-5678"}, "mobile"),   # value 쪽만 휴대전화
+    ({"raw": "후원 농협 301-1234-5678-91", "value": "후원"}, "account"),  # raw 쪽만 계좌
+    ({"raw": "+82 10-1234-5678", "value": None}, "mobile"),
+])
+def test_privacy_still_blocks_mobile_and_account(field, reason):
+    assert lq.privacy_reason("contact", field) == reason
 
 
 @pytest.mark.parametrize("text", ["R석 50,000원 / S석 30,000원", "2026-12-05", "전석 무료", "우리 동네 음악회"])
@@ -169,13 +198,47 @@ def test_date_text_not_flagged_as_account():
     ("12.5(금)~12.7(일)", (None, None)),            # 연도 없음 → 추측하지 않는다
     ("12월 5일 19:30", (None, None)),
     ("2026.12.30 ~ 1.3", (None, None)),             # 끝이 앞섬(연도 넘김 추측 필요) → 비움
-    ("2026.12.5(금)~7(일)", (None, None)),           # 끝을 못 읽음 → 비움
+    ("2026.12.5(금)~7(일)", ("2026-12-05", "2026-12-07")),  # 끝날 월 생략 → 시작 월로 채움(11/26)
+    # 끝날의 월이 빠진 줄임 표기 (11/26 정확도 시험 4dd6c85e)
+    ("2027년 1월 9일~10일", ("2027-01-09", "2027-01-10")),
+    ("2027년 1월 9일(토) ~ 10일(일)", ("2027-01-09", "2027-01-10")),
+    ("2027. 1. 9 ~ 10", ("2027-01-09", "2027-01-10")),
+    ("2027.1.9~10(일)", ("2027-01-09", "2027-01-10")),
+    ("2027.1.9-10", ("2027-01-09", "2027-01-10")),
+    ("2027. 1. 9.(토) ~ 10.(일)", ("2027-01-09", "2027-01-10")),
+    ("2026. 9. 30 ~ 10. 1", ("2026-09-30", "2026-10-01")),   # 끝에 월이 있으면 그대로
+    ("2026. 11.6.(금) - 11.10.(화)", ("2026-11-06", "2026-11-10")),
+    ("2026년 12월 30일 ~ 3일", (None, None)),        # 채워도 끝이 앞섬 → 비움(연도 추측 안 함)
+    ("1월 9일~10일", (None, None)),                  # 연도 없음 → 채우지 않음
+    ("2026.12.15~17시", (None, None)),               # 시각 범위는 끝날로 늘리지 않음
+    ("예선: 12월 04일(금) 본선: 12월 11일(금)", (None, None)),
     ("상시", (None, None)),
     ("일정 추후 공지", (None, None)),
     (None, (None, None)),
 ])
 def test_parse_dates(raw, expected):
     assert lq.parse_dates(raw) == expected
+
+
+@pytest.mark.parametrize("raw,expected", [
+    ("2027년 1월 9일~10일", "2027년 1월 9일~1월 10일"),
+    ("2027. 1. 9 ~ 10", "2027. 1. 9 ~ 1. 10"),
+    ("2027.1.9~10(일)", "2027.1.9~1. 10(일)"),
+    ("2026.12.30 ~ 1.3", "2026.12.30 ~ 1.3"),        # 끝에 월이 있음 → 그대로
+    ("2026.12.15~17시", "2026.12.15~17시"),          # 시각 → 그대로
+    ("1월 9일~10일", "1월 9일~10일"),                # 연도 없음 → 그대로(연도를 넣지 않는다)
+])
+def test_normalize_abbrev_end(raw, expected):
+    assert lq.normalize_abbrev_end(raw) == expected
+
+
+def test_multiple_events_dates_not_parsed():
+    raw = "2026. 09. 10. 10. 15. 11. 12. 12. 03."
+    assert lq.parse_dates(raw) != (None, None)        # 그냥 파싱하면 첫날 하루로 바뀐다(오답)
+    assert lq.parse_dates(raw, multiple_events=True) == (None, None)
+    r = lq.build_result(full(multiple_events=True, date_text=f("2026.12.5(금)~12.7(일)")))
+    assert r["date_start"] is None and r["date_end"] is None
+    assert r["date_text"]["raw"] == "2026.12.5(금)~12.7(일)"   # 글자는 남긴다
 
 
 def test_build_result_uses_raw_not_value_for_dates():
@@ -206,7 +269,53 @@ def test_pending_downloads_into_cache(tmp_path):
 
 def test_pending_download_error_reported(tmp_path):
     items = lq.pending(FakeStore([row()]), 10, cache_dir=str(tmp_path))
-    assert items[0]["file"] is None and "download_error" in items[0]
+    assert items[0]["file"] is None and "download_error" in items[0] and items[0]["tiles"] == []
+
+
+def _png(w, h):
+    import io
+    from PIL import Image
+    buf = io.BytesIO()
+    im = Image.new("RGB", (w, h), "white")
+    im.paste((0, 0, 0), (0, 0, w, h // 4))          # 위쪽 검은 띠(위 조각에만 들어가야 함)
+    im.save(buf, "PNG")
+    return buf.getvalue()
+
+
+def test_pending_writes_zoom_tiles(tmp_path):
+    from PIL import Image
+    store = FakeStore([row(path=f"u1/{SID}.png")], {f"u1/{SID}.png": _png(300, 400)})
+    items = lq.pending(store, 10, cache_dir=str(tmp_path))
+    tiles = items[0]["tiles"]
+    assert tiles == [str(tmp_path / f"{SID}.tile1.jpg"), str(tmp_path / f"{SID}.tile2.jpg")]
+    with Image.open(tiles[0]) as top, Image.open(tiles[1]) as bottom:
+        assert top.width == 600 and bottom.width == 600          # 2배
+        assert 400 <= top.height <= 480 and 400 <= bottom.height <= 480   # 절반(+겹침) × 2
+        assert top.getpixel((300, 10))[0] < 50                   # 위 조각 = 위 절반
+        assert bottom.getpixel((300, bottom.height - 10))[0] > 200
+
+
+def test_pending_tile_error_does_not_block(tmp_path):
+    store = FakeStore([row()], {f"u1/{SID}.jpg": b"not an image"})
+    items = lq.pending(store, 10, cache_dir=str(tmp_path))
+    assert items[0]["file"] and items[0]["tiles"] == [] and "tiles_error" in items[0]
+
+
+def test_save_and_fail_remove_tiles(tmp_path):
+    store = FakeStore([row(path=f"u1/{SID}.png")], {f"u1/{SID}.png": _png(100, 120)})
+    lq.pending(store, 10, cache_dir=str(tmp_path))
+    assert len(list(tmp_path.glob(f"{SID}.*"))) == 3             # 원본 + 조각 2
+    res = tmp_path / f"{SID}.json"
+    res.write_text(json.dumps(full(title=f("작은 음악회"))), encoding="utf-8")
+    ok, _ = lq.save(store, SID, str(res), cache_dir=str(tmp_path))
+    assert ok and list(tmp_path.glob(f"{SID}.*")) == []
+
+    other = "dddddddd-2222-3333-4444-555555555555"
+    store = FakeStore([row(sid=other, path=f"u1/{other}.png")], {f"u1/{other}.png": _png(100, 120)})
+    lq.pending(store, 10, cache_dir=str(tmp_path))
+    assert len(list(tmp_path.glob(f"{other}.*"))) == 3
+    assert lq.fail(store, other, "흐림", cache_dir=str(tmp_path))
+    assert list(tmp_path.glob(f"{other}.*")) == []
 
 
 def test_save_marks_read_and_removes_cache(tmp_path):
@@ -284,3 +393,14 @@ def test_dropped_contact_sets_personal_info_visible():
     d["contact"] = {"raw": "문의 010-1234-5678", "value": "010-1234-5678", "confidence": "high"}
     out, dropped = lq.validate(d)
     assert dropped and out["personal_info_visible"] is True
+
+
+def test_representative_number_does_not_set_personal_info_visible():
+    # 대표번호만 있으면 칸도 남고 «포스터 공개 안 함»도 켜지지 않는다(11/26 오탐 4장)
+    for raw, value in [("680-1051", "680-1051"), ("문의 : 1599-1216", "1599-1216"),
+                       ("055)864-6969", "055)864-6969"), ("문의 | 0507-1446-6715", "0507-1446-6715")]:
+        out, dropped = lq.validate(full(contact={"raw": raw, "value": value, "confidence": "high"}))
+        assert dropped == [] and out["personal_info_visible"] is False and out["contact"]["value"] == value
+    # 예약작업이 직접 true 로 표시한 것은 그대로 둔다
+    out, _ = lq.validate(full(personal_info_visible=True, contact=f("055-123-4567")))
+    assert out["personal_info_visible"] is True
