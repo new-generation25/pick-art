@@ -39,6 +39,7 @@ type Ops = {
     inbox: number;
     review: number;
     venuesPending: number;
+    reportsNew: number;
     members: number;
     lastRawAt: string | null;
     snapshots: Record<string, Snapshot>;
@@ -76,7 +77,7 @@ async function loadOps(): Promise<Ops> {
     const safe = async <T,>(p: Promise<T>, fallback: T): Promise<T> => {
         try { return await p; } catch (e) { errors.push((e as Error).message); return fallback; }
     };
-    const [events, inbox, review, venuesPending, members, lastRaw, snaps] = await Promise.all([
+    const [events, inbox, review, venuesPending, members, lastRaw, snaps, reportsNew] = await Promise.all([
         safe(fetchAllEvents(), [] as OpsEvent[]),
         safe(countOf("raw_posts", "status", "COLLECTED"), 0),
         safe(countOf("raw_posts", "status", "REVIEW"), 0),
@@ -93,9 +94,10 @@ async function loadOps(): Promise<Ops> {
             if (error) throw new Error(`인스타 스냅숏: ${error.message}`);
             return (data || []) as Snapshot[];
         })(), [] as Snapshot[]),
+        safe(countOf("reports", "status", "new"), 0),
     ]);
     return {
-        loadedAt: new Date(), today: todayKST(), events, inbox, review, venuesPending, members,
+        loadedAt: new Date(), today: todayKST(), events, inbox, review, venuesPending, members, reportsNew,
         lastRawAt: lastRaw, snapshots: Object.fromEntries(snaps.map(s => [s.name, s])), errors,
     };
 }
@@ -137,6 +139,7 @@ function buildAlerts(ops: Ops, supply: ReturnType<typeof computeSupply>, lastNew
     }
     if (ops.inbox) a.push({ level: "info", text: `인박스 승인 대기 ${ops.inbox}건`, href: "/admin/inbox" });
     if (ops.review) a.push({ level: "info", text: `인스타 수집분 검토 대기 ${ops.review}건 (앱 화면 없음, 승인 대기함 통합은 다음 단계)` });
+    if (ops.reportsNew) a.push({ level: "info", text: `신고·제보 ${ops.reportsNew}건 확인 대기`, href: "/admin/reports" });
     if (ops.venuesPending) a.push({ level: "info", text: `장소 좌표 확인 대기 ${ops.venuesPending}곳`, href: "/admin/venues" });
     for (const e of ops.errors) a.push({ level: "bad", text: `읽기 실패 — ${e}` });
     return a;
@@ -322,6 +325,7 @@ export default function AdminDashboard() {
                             <Tile label="인박스 승인" value={ops.inbox} sub="수집분 COLLECTED → 인박스" href="/admin/inbox" />
                             <Tile label="인스타 수집분 검토" value={ops.review} sub="REVIEW · 앱 화면 없음" />
                             <Tile label="장소 좌표 확인" value={ops.venuesPending} sub="venues pending → 장소 확인" href="/admin/venues" />
+                            <Tile label="신고·제보" value={ops.reportsNew} sub="회원이 보낸 것 → 확인·반영" href="/admin/reports" />
                             <Tile label="인스타 허락 답 대기" value={summary.find(r => r.id === "pending")?.value ?? "—"}
                                 sub={summary.find(r => r.id === "pending_over7") ? `7일 넘은 것 ${summary.find(r => r.id === "pending_over7")?.value}건` : "인스타 숫자 없음"} />
                         </SimpleGrid>

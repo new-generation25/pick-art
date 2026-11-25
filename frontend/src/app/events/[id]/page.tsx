@@ -6,6 +6,7 @@ import { kidsInfo } from "@/lib/kids";
 import { splitDescription } from "@/lib/eventDetails";
 import { Clock } from "lucide-react";
 import { AdminKidsControl } from "@/components/ui/AdminKidsControl";
+import { ReportButton } from "@/components/ui/ReportButton";
 import { ShareButton } from "@/components/ui/ShareButton";
 import { PosterViewer } from "@/components/ui/PosterViewer";
 import Link from "next/link";
@@ -189,6 +190,10 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                                 <b>원본 안내 페이지</b>에서 확인해 주세요.
                             </span>
                         </p>
+                        {/* 오류 신고 (specs/007): 로그인 회원 → 관리자 확인 뒤 반영 */}
+                        <div className="mt-4">
+                            <ReportButton eventId={event.id} />
+                        </div>
                     </div>
                 </div>
 

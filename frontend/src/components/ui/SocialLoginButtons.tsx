@@ -19,9 +19,12 @@ export function SocialLoginButtons() {
         setPending(provider);
         setError(null);
         // prompt를 지정하지 않는다: 계정이 하나뿐인 사람에게 매번 선택 창을 띄우지 않기 위해 (봉황메모리즈와 같은 판단)
+        // /login?next=/events/… 로 왔으면 로그인 뒤 그 자리로 돌아간다(신고·제보 등). 같은 사이트 안 경로만 받는다
+        const next = new URLSearchParams(window.location.search).get("next");
+        const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : null;
         const { error } = await supabase.auth.signInWithOAuth({
             provider,
-            options: { redirectTo: `${window.location.origin}/auth/callback` },
+            options: { redirectTo: `${window.location.origin}/auth/callback${safeNext ? `?next=${encodeURIComponent(safeNext)}` : ""}` },
         });
         if (error) {
             setError(`${provider === "google" ? "구글" : "카카오"} 로그인을 시작하지 못했습니다: ${error.message}`);

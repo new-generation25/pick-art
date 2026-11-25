@@ -33,7 +33,10 @@ export default function AuthCallbackPage() {
                 .eq("id", session.user.id)
                 .maybeSingle();
 
-            router.replace(profile?.nickname ? "/" : "/welcome");
+            // 로그인 전에 있던 곳(?next=, 같은 사이트 경로만)으로 돌려보낸다. 첫 방문은 가입 화면이 먼저
+            const next = new URLSearchParams(window.location.search).get("next");
+            const back = next && next.startsWith("/") && !next.startsWith("//") ? next : "/";
+            router.replace(profile?.nickname ? back : "/welcome");
         };
         finish();
     }, [router]);

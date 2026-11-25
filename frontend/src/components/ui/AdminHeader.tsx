@@ -3,7 +3,7 @@
 import Link from "next/link";
 import {
     LogOut, LayoutDashboard, Settings, ChevronDown,
-    Inbox, PlusCircle, Database, Users, Sparkles, Home, BarChart3, HardDrive, MapPin } from "lucide-react";
+    Inbox, PlusCircle, Database, Users, Sparkles, Home, BarChart3, HardDrive, MapPin, Flag } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter, usePathname } from "next/navigation";
@@ -114,6 +114,13 @@ export function AdminHeader() {
                             color="indigo" size="xs" leftSection={<MapPin size={14} />}
                         >
                             장소 좌표
+                        </Button>
+                        <Button
+                            component={Link} href="/admin/reports"
+                            variant={isActive('/reports') ? "filled" : "subtle"}
+                            color="indigo" size="xs" leftSection={<Flag size={14} />}
+                        >
+                            신고·제보
                         </Button>
                         <Button
                             component={Link} href="/admin/storage"
