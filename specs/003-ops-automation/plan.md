@@ -118,5 +118,9 @@ _attic/                          # R5: 루트 일회성 스크립트
 ## 진행 (2026-11-26)
 
 - **R1 완료** — 수집기 `ops_log.py`·`rules/alerts.json`·웹 출처 네트워크 재시도 1회(8056dbc), 대시보드 «수집기 경고»·«출처별 최근 실행»·«실행 누락»(4b8e7df, picka.news/admin 확인). 지난 로그 24회를 채움, 켜진 경고 5건. 시험 모드로 켜짐·풀림 확인. 텔레그램은 `.env.local` 값이 예시값이라 꺼져 있음(운영자가 토큰을 넣어야 감). 정기 실행 연결 뒤 첫 실제 확인은 11/26 08:20 회차.
-- **R2 도구 완료, 적용은 승인 대기** — `tools/triage_review.py`(d4c1812). dry-run(11/26): REVIEW 813 → 만료 581 · 중복 0 · 동의 필요 25 · 공개 후보 46 · 사람 판단 161. 표: `collector/logs/triage/triage_2026-11-26.json`(git 밖). 인박스 탭과 정기 실행 연결은 적용 승인 뒤.
+- **R2 적용·연결 완료, 공개 1건 확인은 남음** — `tools/triage_review.py`(d4c1812). dry-run(11/26): REVIEW 813 → 만료 581 · 중복 0 · 동의 필요 25 · 공개 후보 46 · 사람 판단 161. 11/26 승인 뒤 적용: 581건 EXPIRED, REVIEW 232건에 무더기(되돌리기 목록 `collector/logs/triage/applied_2026-11-26_025302.json`, git 밖. 같은 폴더의 `triage_2026-11-26.json`은 적용 뒤 다시 돌린 dry-run으로 덮여 지금은 232건 모두 kept).
+  - 정기 실행(`main.py`, f35ec2b): 인스타 수집 블록 다음에 매 회차 `triage_review.py --apply` → `publish_verified.publish_approved`(승인된 공개 후보만, 오늘~60일, 날짜·링크·중복 검증). 보고에 «REVIEW 정리»·«승인 후보 공개» 줄. `AUTO_PUBLISH=off`면 승인 후보 공개도 멈춘다.
+  - `publish_verified --ids`(a2c3741): REVIEW는 `content.publish_approved_at`이 있을 때만 받는다(기본 실행은 예전대로 COLLECTED·PENDING만). 검증 실패(날짜 형식·공개 범위 밖·링크·저장 실패)는 REVIEW 유지 + `review_reason="publish_failed: …"`·`publish_failed_at`, 승인은 남아 다음 실행에서 다시 본다. 끝난 것 EXPIRED·이미 공개된 것 DUPLICATE는 다른 수집분과 같다. 인스타 포스터는 저장소에 올린 것만 쓴다. 중복 판정이 events를 1,000건까지만 읽던 것을 끝까지 읽게 고침(11/26 1,170건).
+  - 인박스(cb6c4e6): 탭 «인박스(COLLECTED)·공개 후보·동의 필요·사람 판단·현재 노출». 공개 후보는 골라서 «선택한 것 공개 승인»(`publish_approved_at`), 세 탭 모두 «반영 안 함»(REJECTED), 동의 필요·사람 판단은 «공개 후보로 옮기기». 휴지통에서 되돌리면 무더기가 있는 줄은 REVIEW로 간다. «장소 확인» 탭(FR-008)은 아직 없음.
+  - 남은 끝 조건: ③ 무작위 20건 눈 확인 ④ 공개 후보 1건 승인 → 다음 정기 실행에서 공개 피드 표시. 인박스 화면은 브라우저로 아직 열어 보지 않음.
 - **R4·R5 목록 완료, 이동은 승인 대기** — [docs/plan/cleanup_lists_2026-11-26.md](../../docs/plan/cleanup_lists_2026-11-26.md) 끝의 «승인에 필요한 선택» 9개.
