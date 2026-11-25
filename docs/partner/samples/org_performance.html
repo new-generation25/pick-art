@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>샘플 · 극단 바람길 | 피카 pica 단체 페이지</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+/* 샘플: 공연 단체 페이지를 랜딩페이지처럼. 색은 지금 사이트의 riso 테마(frontend/src/app/globals.css) 값 */
+:root { --paper:#ecede6; --card:#f7f7f2; --ink:#1a1a1a; --soft:#55554f; --blue:#2350d8; --pink:#ff4fa3; --line:#1a1a1a;
+  --display:"Black Han Sans","Pretendard Variable",Pretendard,sans-serif; --body:"Pretendard Variable",Pretendard,system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--paper); color:var(--ink); font-family:var(--body); font-size:16px; line-height:1.65; }
+a { color:inherit; }
+.sample { background:var(--pink); color:var(--ink); font-size:13px; font-weight:700; text-align:center; padding:7px 16px; }
+.bar { display:flex; justify-content:space-between; align-items:center; padding:12px max(16px,env(safe-area-inset-left)); border-bottom:1.5px solid var(--line); }
+.logo { font-family:var(--display); font-size:22px; }
+.bar small { font-size:13px; color:var(--soft); }
+.wrap { max-width:920px; margin:0 auto; padding:0 max(16px,env(safe-area-inset-right)) 64px max(16px,env(safe-area-inset-left)); }
+.hero { padding:36px 0 28px; border-bottom:1.5px solid var(--line); display:grid; gap:14px; }
+.kicker { font-family:var(--mono); font-size:13px; color:var(--soft); letter-spacing:.04em; }
+.hero h1 { font-family:var(--display); font-weight:400; font-size:clamp(44px,12vw,88px); line-height:1; margin:0; text-shadow:3px 2px 0 rgba(255,79,163,.85); }
+.hero p { margin:0; max-width:56ch; font-size:18px; }
+.chips { display:flex; flex-wrap:wrap; gap:8px; }
+.chip { border:1.5px solid var(--line); padding:3px 10px; font-size:13px; font-weight:700; background:var(--card); }
+.chip.ok { background:var(--ink); color:var(--paper); }
+/* 다음 공연 */
+.next { display:grid; grid-template-columns:minmax(0,1fr); gap:0; margin-top:28px; border:1.5px solid var(--line); background:var(--card); }
+@media (min-width:720px) { .next { grid-template-columns: 300px minmax(0,1fr); } }
+.poster { aspect-ratio:3/4; max-width:100%; background:repeating-linear-gradient(135deg,var(--paper) 0 10px,#e2e3db 10px 20px); display:grid; place-items:center; border-bottom:1.5px solid var(--line); font-family:var(--mono); font-size:13px; color:var(--soft); text-align:center; padding:16px; }
+@media (min-width:720px) { .poster { border-bottom:0; border-right:1.5px solid var(--line); } }
+.nx { padding:20px; display:grid; gap:12px; align-content:start; min-width:0; }
+.label { display:inline-block; background:var(--blue); color:#fff; font-size:12px; font-weight:700; padding:2px 8px; justify-self:start; }
+.date { font-family:var(--display); font-size:clamp(40px,10vw,60px); line-height:1; }
+.date small { font-family:var(--body); font-size:16px; font-weight:700; margin-left:6px; }
+.nx h2 { margin:0; font-size:24px; line-height:1.3; }
+.facts { display:grid; grid-template-columns:72px 1fr; gap:4px 10px; margin:0; font-size:15px; }
+.facts dt { color:var(--soft); font-weight:600; }
+.facts dd { margin:0; }
+.btns { display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; }
+.btn { border:1.5px solid var(--line); padding:9px 14px; font-weight:700; font-size:15px; text-decoration:none; background:var(--paper); }
+.btn.main { background:var(--blue); color:#fff; border-color:var(--blue); }
+.btn.soon { background:transparent; color:var(--soft); border-style:dashed; cursor:not-allowed; }
+.btn.soon em { font-style:normal; font-size:12px; margin-left:6px; border:1px solid var(--soft); padding:0 5px; }
+section { padding:36px 0 0; }
+section > h3 { font-family:var(--display); font-weight:400; font-size:28px; margin:0 0 14px; }
+/* 출연진 */
+.cast { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; }
+.person { border:1.5px solid var(--line); background:var(--card); padding:12px; }
+.person b { display:block; font-size:17px; }
+.person span { font-size:13px; color:var(--soft); }
+/* 일정 */
+.sched { border-top:1.5px solid var(--line); }
+.row { display:grid; grid-template-columns:110px 1fr auto; gap:12px; align-items:center; padding:12px 0; border-bottom:1px solid #c9cabf; }
+.row .d { font-family:var(--mono); font-size:15px; }
+.row .t b { display:block; }
+.row .t span { font-size:13px; color:var(--soft); }
+.row .p { font-size:13px; font-weight:700; }
+@media (max-width:520px) { .row { grid-template-columns: 88px 1fr; } .row .p { grid-column:2; } }
+/* 지난 공연 */
+.archive { display:grid; gap:0; border-left:3px solid var(--ink); margin-left:6px; }
+.arc { position:relative; padding:0 0 18px 20px; }
+.arc::before { content:""; position:absolute; left:-8px; top:6px; width:13px; height:13px; background:var(--pink); border:1.5px solid var(--ink); }
+.arc .y { font-family:var(--mono); font-size:13px; color:var(--soft); }
+.arc b { display:block; }
+.about { display:grid; gap:16px; }
+@media (min-width:720px) { .about { grid-template-columns: minmax(0,1.4fr) minmax(0,1fr); } }
+.about p { margin:0; }
+.side { border:1.5px solid var(--line); background:var(--card); padding:16px; display:grid; gap:8px; font-size:15px; }
+.side b { font-size:13px; color:var(--soft); display:block; }
+.sub { border:2px solid var(--ink); background:var(--blue); color:#fff; padding:22px 20px; display:grid; gap:10px; }
+.sub h3 { color:#fff; margin:0; font-family:var(--display); font-weight:400; font-size:26px; }
+.sub .btn { background:var(--paper); color:var(--ink); justify-self:start; }
+.src { font-size:13px; color:var(--soft); border-top:1.5px solid var(--line); padding-top:14px; margin-top:36px; display:grid; gap:4px; }
+.badge { display:inline-block; border:1.5px solid var(--ink); padding:0 6px; font-weight:700; color:var(--ink); font-size:12px; }
+</style>
+</head>
+<body>
+<div class="sample">샘플 페이지 · 가상의 단체와 공연이에요 · 실제 행사가 아니에요</div>
+<div class="bar"><span class="logo">pica</span><small>단체 페이지</small></div>
+<main class="wrap">
+
+  <header class="hero">
+    <div class="kicker">연극 · 김해 · 2017년부터</div>
+    <h1>극단 바람길</h1>
+    <p>동네 정류장, 오래된 시장, 문 닫은 목욕탕. 지나치던 장소에서 이웃의 이야기를 꺼내 무대에 올리는 6인 극단이에요.</p>
+    <div class="chips">
+      <span class="chip ok">피카 정보 제공 협약</span>
+      <span class="chip">공연 23편</span>
+      <span class="chip">인스타그램 @baramgil.example</span>
+    </div>
+  </header>
+
+  <div class="next">
+    <div class="poster">포스터 자리<br>(단체가 보낸 원본 파일)</div>
+    <div class="nx">
+      <span class="label">다음 공연 · D-17</span>
+      <div class="date">12.13–14<small>토·일</small></div>
+      <h2>겨울, 버스 정류장</h2>
+      <dl class="facts">
+        <dt>시간</dt><dd>토 19:30 · 일 15:00 (80분)</dd>
+        <dt>장소</dt><dd>김해서부문화센터 소공연장</dd>
+        <dt>요금</dt><dd>전석 20,000원 · 청소년 10,000원</dd>
+        <dt>관람</dt><dd>만 12세 이상</dd>
+      </dl>
+      <div class="btns">
+        <span class="btn main soon" aria-disabled="true">피카에서 예매하기<em>준비 중</em></span>
+        <a class="btn" href="#">원본 안내 보기</a>
+        <a class="btn" href="#">캘린더에 넣기</a>
+        <a class="btn" href="#">길찾기</a>
+      </div>
+      <p style="margin:0;font-size:13px;color:var(--soft)">지금은 단체 안내(네이버 폼)로 예약해요. 피카 예매·결제 대행이 열리면 이 버튼으로 바로 결제할 수 있어요.</p>
+    </div>
+  </div>
+
+  <section>
+    <h3>무대에 서는 사람들</h3>
+    <div class="cast">
+      <div class="person"><b>한도윤</b><span>연출 · 극작</span></div>
+      <div class="person"><b>서미래</b><span>배우 · 정류장 할머니</span></div>
+      <div class="person"><b>오지훈</b><span>배우 · 버스 기사</span></div>
+      <div class="person"><b>최나은</b><span>배우 · 막차 승객</span></div>
+      <div class="person"><b>강보람</b><span>무대 · 조명</span></div>
+      <div class="person"><b>임서진</b><span>음악</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h3>앞으로의 일정</h3>
+    <div class="sched">
+      <div class="row"><span class="d">12.13–14</span><span class="t"><b>겨울, 버스 정류장</b><span>김해서부문화센터 소공연장</span></span><span class="p">20,000원</span></div>
+      <div class="row"><span class="d">12.27</span><span class="t"><b>낭독회 「목욕탕 일지」</b><span>진영 마을책방 · 관객과의 대화</span></span><span class="p">무료</span></div>
+      <div class="row"><span class="d">2027.02.06</span><span class="t"><b>겨울, 버스 정류장 (창원 순회)</b><span>창원 소극장 · 회차 미정</span></span><span class="p">문의 필요</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h3>지금까지의 무대</h3>
+    <div class="archive">
+      <div class="arc"><span class="y">2026.06</span><b>시장 사람들</b>동상동 전통시장 골목 · 거리극</div>
+      <div class="arc"><span class="y">2025.10</span><b>문 닫은 목욕탕</b>김해문화의전당 누리홀</div>
+      <div class="arc"><span class="y">2024.11</span><b>정류장 3부작 1편 「첫차」</b>김해서부문화센터 소공연장</div>
+      <div class="arc"><span class="y">2017.05</span><b>창단 공연 「바람길」</b>봉황동 소극장</div>
+    </div>
+  </section>
+
+  <section>
+    <h3>단체 소개</h3>
+    <div class="about">
+      <p>2017년 김해에서 만든 극단이에요. 동네 사람들을 인터뷰해 대본을 쓰고, 그 동네 가까운 무대에서 먼저 공연해요. 해마다 정기 공연 1편과 마을 낭독회를 열어요.<br><br>이 소개 글은 단체가 직접 보낸 글이에요.</p>
+      <div class="side">
+        <div><b>활동 지역</b>김해 · 창원</div>
+        <div><b>장르</b>연극 · 거리극 · 낭독</div>
+        <div><b>주로 쓰는 공간</b>김해서부문화센터 소공연장</div>
+        <div><b>문의</b>단체 대표 메일 (공개 연락처만 표시)</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sub">
+      <h3>극단 바람길 공연 소식을 캘린더로</h3>
+      <p style="margin:0">구글·애플 캘린더에 한 번 넣어 두면 새 공연이 생길 때 자동으로 들어와요. 가입은 필요 없어요.</p>
+      <a class="btn" href="#">이 단체 일정 구독하기</a>
+    </div>
+  </section>
+
+  <div class="src">
+    <span><span class="badge">단체 제공</span> 정보 출처: 단체 인스타그램 공지·단체가 보낸 리플렛 · 피카 확인 2026-11-26</span>
+    <span>틀린 정보가 있으면 알려 주세요. 원본과 맞춰 고쳐요. · 피카는 돈을 받고 순서를 바꾸지 않아요.</span>
+  </div>
+</main>
+</body>
+</html>

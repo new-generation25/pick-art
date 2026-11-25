@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>샘플 · 갤러리 모래빛 | 피카 pica 공간 페이지</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+/* 샘플: 전시 공간 페이지를 랜딩페이지처럼. 색은 지금 사이트의 riso 테마 값 */
+:root { --paper:#ecede6; --card:#f7f7f2; --ink:#1a1a1a; --soft:#55554f; --blue:#2350d8; --pink:#ff4fa3; --line:#1a1a1a;
+  --display:"Black Han Sans","Pretendard Variable",Pretendard,sans-serif; --body:"Pretendard Variable",Pretendard,system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--paper); color:var(--ink); font-family:var(--body); font-size:16px; line-height:1.65; }
+a { color:inherit; }
+.sample { background:var(--pink); font-size:13px; font-weight:700; text-align:center; padding:7px 16px; }
+.bar { display:flex; justify-content:space-between; align-items:center; padding:12px max(16px,env(safe-area-inset-left)); border-bottom:1.5px solid var(--line); }
+.logo { font-family:var(--display); font-size:22px; }
+.bar small { font-size:13px; color:var(--soft); }
+.wrap { max-width:920px; margin:0 auto; padding:0 max(16px,env(safe-area-inset-right)) 64px max(16px,env(safe-area-inset-left)); }
+.hero { padding:36px 0 24px; display:grid; gap:12px; }
+.kicker { font-family:var(--mono); font-size:13px; color:var(--soft); }
+.hero h1 { font-family:var(--display); font-weight:400; font-size:clamp(44px,12vw,88px); line-height:1; margin:0; text-shadow:3px 2px 0 rgba(255,79,163,.85); }
+.hero p { margin:0; max-width:56ch; font-size:18px; }
+.visit { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); border:1.5px solid var(--line); background:var(--card); }
+.visit div { padding:12px 14px; border-right:1.5px solid var(--line); border-bottom:1.5px solid var(--line); margin:0 -1.5px -1.5px 0; }
+.visit b { display:block; font-size:12px; color:var(--soft); font-weight:700; }
+.visit span { font-weight:700; }
+/* 지금 전시 */
+.now { margin-top:28px; border:2px solid var(--ink); background:var(--card); }
+.now-head { display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; align-items:center; padding:12px 16px; background:var(--ink); color:var(--paper); }
+.now-head b { font-size:14px; }
+.ending { background:var(--pink); color:var(--ink); font-weight:700; font-size:12px; padding:2px 8px; }
+.now-body { padding:20px 16px; display:grid; gap:14px; }
+.now h2 { font-family:var(--display); font-weight:400; font-size:clamp(32px,8vw,48px); line-height:1.1; margin:0; }
+.artist { font-size:17px; font-weight:700; }
+.period { font-family:var(--mono); font-size:15px; }
+.track { height:10px; border:1.5px solid var(--ink); background:var(--paper); position:relative; }
+.track i { position:absolute; inset:0 auto 0 0; width:78%; background:var(--blue); }
+.track-l { display:flex; justify-content:space-between; font-size:12px; color:var(--soft); font-family:var(--mono); }
+.works { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+.work { aspect-ratio:1/1; max-width:100%; border:1.5px solid var(--line); background:repeating-linear-gradient(45deg,var(--paper) 0 8px,#e2e3db 8px 16px); display:grid; place-items:end start; padding:6px; font-size:11px; font-family:var(--mono); color:var(--soft); }
+.btns { display:flex; flex-wrap:wrap; gap:8px; }
+.btn { border:1.5px solid var(--line); padding:9px 14px; font-weight:700; font-size:15px; text-decoration:none; background:var(--paper); }
+.btn.main { background:var(--blue); color:#fff; border-color:var(--blue); }
+.note { margin:0; font-size:14px; }
+section { padding:36px 0 0; }
+section > h3 { font-family:var(--display); font-weight:400; font-size:28px; margin:0 0 14px; }
+.upcoming { display:grid; gap:0; border:1.5px solid var(--line); background:var(--card); }
+@media (min-width:720px) { .upcoming { grid-template-columns: 200px minmax(0,1fr); } }
+.upcoming .d { background:var(--blue); color:#fff; padding:16px; font-family:var(--display); font-size:34px; line-height:1.1; }
+.upcoming .d small { display:block; font-family:var(--mono); font-size:13px; margin-top:6px; }
+.upcoming .b { padding:16px; display:grid; gap:6px; min-width:0; }
+.upcoming .b b { font-size:20px; }
+.past { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px; }
+.card { border:1.5px solid var(--line); background:var(--card); padding:12px; display:grid; gap:4px; }
+.card .y { font-family:var(--mono); font-size:12px; color:var(--soft); }
+.card b { font-size:16px; }
+.card span { font-size:13px; color:var(--soft); }
+.place { display:grid; gap:16px; }
+@media (min-width:720px) { .place { grid-template-columns: minmax(0,1.3fr) minmax(0,1fr); } }
+.mapbox { border:1.5px solid var(--line); min-height:190px; background:linear-gradient(var(--paper),var(--paper)) padding-box, repeating-linear-gradient(0deg,transparent 0 23px,#d3d4cb 23px 24px), repeating-linear-gradient(90deg,transparent 0 23px,#d3d4cb 23px 24px); background-blend-mode:normal; display:grid; place-items:center; position:relative; }
+.mapbox .pin { width:22px; height:22px; background:var(--pink); border:2px solid var(--ink); transform:rotate(45deg); }
+.mapbox span { position:absolute; bottom:8px; left:10px; font-size:12px; font-family:var(--mono); color:var(--soft); }
+.side { border:1.5px solid var(--line); background:var(--card); padding:16px; display:grid; gap:8px; font-size:15px; }
+.side b { font-size:12px; color:var(--soft); display:block; }
+.sub { border:2px solid var(--ink); background:var(--blue); color:#fff; padding:22px 20px; display:grid; gap:10px; }
+.sub h3 { color:#fff; margin:0; font-family:var(--display); font-weight:400; font-size:26px; }
+.sub .btn { background:var(--paper); color:var(--ink); justify-self:start; }
+.src { font-size:13px; color:var(--soft); border-top:1.5px solid var(--line); padding-top:14px; margin-top:36px; display:grid; gap:4px; }
+</style>
+</head>
+<body>
+<div class="sample">샘플 페이지 · 가상의 전시 공간과 전시예요 · 실제 행사가 아니에요</div>
+<div class="bar"><span class="logo">pica</span><small>공간 페이지</small></div>
+<main class="wrap">
+
+  <header class="hero">
+    <div class="kicker">갤러리 · 부산 영도구 · 대평동</div>
+    <h1>갤러리 모래빛</h1>
+    <p>수리조선소 골목의 옛 창고를 고친 작은 전시 공간이에요. 바다와 노동, 동네의 시간을 다루는 작가를 한 해 여섯 번 소개해요.</p>
+    <div class="visit">
+      <div><b>관람</b><span>화–일 11:00–19:00</span></div>
+      <div><b>휴관</b><span>월요일 · 설·추석 당일</span></div>
+      <div><b>관람료</b><span>무료</span></div>
+      <div><b>찾아가기</b><span>버스 정류장에서 걸어서 6분</span></div>
+    </div>
+  </header>
+
+  <div class="now">
+    <div class="now-head"><b>지금 전시 중</b><span class="ending">곧 끝남 · 12.7까지</span></div>
+    <div class="now-body">
+      <h2>녹, 물때, 오후 세 시</h2>
+      <div class="artist">김하람 개인전 · 사진·설치</div>
+      <div class="period">2026.11.04 – 2026.12.07</div>
+      <div>
+        <div class="track"><i></i></div>
+        <div class="track-l"><span>11.04 시작</span><span>오늘 11.26</span><span>12.07 끝</span></div>
+      </div>
+      <div class="works">
+        <div class="work">작품 1</div><div class="work">작품 2</div><div class="work">작품 3</div>
+      </div>
+      <p class="note">조선소 노동자의 작업복과 녹슨 철판을 6개월 동안 찍은 사진 24점, 철판 설치 1점. 작가와의 대화는 11.29(토) 16:00, 예약 없이 와도 돼요.</p>
+      <div class="btns">
+        <a class="btn main" href="#">원본 안내 보기</a>
+        <a class="btn" href="#">캘린더에 넣기</a>
+        <a class="btn" href="#">길찾기</a>
+        <a class="btn" href="#">즐겨찾기</a>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <h3>다음 전시</h3>
+    <div class="upcoming">
+      <div class="d">12.16<small>– 2027.01.25</small></div>
+      <div class="b">
+        <b>그룹전 「겨울 항구 드로잉」</b>
+        <span>영도 작가 5인 · 드로잉·판화</span>
+        <span style="font-size:13px;color:var(--soft)">여는 날 12.16(수) 18:00, 누구나 와도 돼요.</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h3>지난 전시</h3>
+    <div class="past">
+      <div class="card"><span class="y">2026.09 – 10</span><b>바다를 꿰매는 사람</b><span>정소윤 · 섬유</span></div>
+      <div class="card"><span class="y">2026.07 – 08</span><b>대평동 지도 다시 그리기</b><span>주민 공동 작업</span></div>
+      <div class="card"><span class="y">2026.05 – 06</span><b>소금기</b><span>이태오 · 회화</span></div>
+      <div class="card"><span class="y">2026.03 – 04</span><b>창고의 봄</b><span>개관 1주년 그룹전</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h3>공간</h3>
+    <div class="place">
+      <div class="mapbox"><div class="pin"></div><span>지도 자리 · 네이버 지도 길찾기로 연결</span></div>
+      <div class="side">
+        <div><b>주소</b>부산 영도구 대평동 (예시 주소)</div>
+        <div><b>공간</b>1층 전시실 60㎡ · 계단 없음</div>
+        <div><b>주차</b>없음 · 공영주차장 이용</div>
+        <div><b>운영</b>개인 운영 공간 · 2025년 3월 개관</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sub">
+      <h3>모래빛의 새 전시를 캘린더로</h3>
+      <p style="margin:0">구글·애플 캘린더에 한 번 넣어 두면 새 전시가 열릴 때 자동으로 들어와요. 가입은 필요 없어요.</p>
+      <a class="btn" href="#">이 공간 일정 구독하기</a>
+    </div>
+  </section>
+
+  <div class="src">
+    <span>정보 출처: 공간 인스타그램 공지 · 피카 확인 2026-11-26</span>
+    <span>틀린 정보가 있으면 알려 주세요. 원본과 맞춰 고쳐요. · 피카는 돈을 받고 순서를 바꾸지 않아요.</span>
+  </div>
+</main>
+</body>
+</html>
