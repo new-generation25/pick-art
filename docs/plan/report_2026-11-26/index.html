@@ -1,0 +1,98 @@
+<title>피카 앱 보완 결과 11/26</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* 레이아웃: 운영자가 훑어보는 결과 보고 — 좁은 본문, 상태 표시(배포됨·대기·정할 것)를 줄머리 표로. 색은 피카 확정 팔레트(까치 우편) */
+:root {
+  --paper: #F6EFDF; --ink: #1C1C1C; --slate: #4F6272; --red: #D33A2C; --line: #d9cfb8; --card: #fbf7ee;
+  --ok: #3d6b4f;
+  --display: "Black Han Sans", "Noto Sans KR", sans-serif;
+  --body: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --paper:#1d1f22; --ink:#efe7d6; --slate:#9fb2c2; --red:#ef6a5c; --line:#3a3d42; --card:#25282c; --ok:#8fc0a0; color-scheme: dark } }
+:root[data-theme="dark"] { --paper:#1d1f22; --ink:#efe7d6; --slate:#9fb2c2; --red:#ef6a5c; --line:#3a3d42; --card:#25282c; --ok:#8fc0a0; color-scheme: dark }
+body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.7; }
+.wrap { max-width: 860px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 72px; }
+h1, h2 { font-family: var(--display); font-weight: 400; line-height: 1.25; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(30px, 6vw, 44px); color: var(--red); }
+h2 { font-size: 24px; margin-top: 48px; padding-top: 14px; border-top: 2px solid var(--ink); }
+.stamp { font-family: var(--mono); font-size: 13px; color: var(--slate); letter-spacing: .04em; }
+.lead { margin-top: 18px; padding: 16px 18px; border: 1.5px solid var(--ink); background: var(--card); display: grid; gap: 6px; }
+.lead p { margin: 0; }
+.tbl { overflow-x: auto; margin-top: 12px; }
+table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: 14.5px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { font-size: 13px; color: var(--slate); font-weight: 500; border-bottom: 1.5px solid var(--ink); }
+.tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 1px 7px; border: 1.5px solid currentColor; white-space: nowrap; }
+.tag.ok { color: var(--ok); }
+.tag.wait { color: var(--slate); }
+.tag.you { color: var(--red); }
+ul { padding-left: 1.2em; margin: 8px 0; } li { margin: 4px 0; max-width: 70ch; }
+code { font-family: var(--mono); font-size: 13px; }
+a { color: inherit; text-underline-offset: 3px; }
+.dec { margin-top: 14px; display: grid; gap: 10px; }
+.dec div { padding: 12px 14px; border: 1.5px solid var(--ink); }
+.dec b { display: block; }
+.dec span { font-size: 14.5px; color: var(--slate); }
+</style>
+
+<div class="wrap">
+  <p class="stamp">PICA · 2026.11.26 · 앱 개선 세션</p>
+  <h1>피카 앱 보완 결과 11/26</h1>
+  <div class="lead">
+    <p><b>결론:</b> 정해진 일은 모두 마쳤습니다. 운영 사이트에 나간 것은 아래 «배포됨», 마지막 묶음 하나는 배포 확인을 기다립니다(«배포 대기»).</p>
+    <p><b>남은 것:</b> 운영자가 고를 것 5가지와 직접 해 주셔야 할 것 3가지(맨 아래).</p>
+  </div>
+
+  <h2>한 일</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>상태</th><th>무엇</th><th>확인한 것</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag ok">배포됨</span></td><td>벤치마킹 로드맵 006~009: 상세 칸 정리·곧 끝남, 오류 신고·제보, 찜·캘린더, 내 주변 지도, 피카가 본 이유·휴관일·객석</td><td>picka.news 화면·DB</td></tr>
+      <tr><td><span class="tag ok">배포됨</span></td><td>운영 자동화 R1: 수집 실행 기록·경고·접속 재시도, 대시보드 «출처별 최근 실행»</td><td>시험 모드 켜짐·풀림, 관리자 화면</td></tr>
+      <tr><td><span class="tag ok">배포됨</span></td><td>지역 페이지 <code>/region/gimhae</code>, 부산 16개 구·군, 한글·옛 주소 308</td><td>제목·대표 주소·사이트맵 33건</td></tr>
+      <tr><td><span class="tag ok">배포됨</span></td><td>행사별 노출·클릭 집계, 관리자 «사이트 방문»(Vercel)</td><td>실제 조회 1건 쌓임 확인 뒤 지움, 7일 35명</td></tr>
+      <tr><td><span class="tag ok">배포됨</span></td><td>공간·단체 페이지, 상세 «주최·주관», 단체 333곳·연결 1,253건</td><td>KOPIS 주최 채움 94%</td></tr>
+      <tr><td><span class="tag ok">배포됨</span></td><td>리플렛 자동 등록(로그인 업로드 → 클로드 예약작업 읽기 → 관리자 등록 → «단체 제공»)</td><td>실사이트 시험 2장 끝까지, 시험 데이터 삭제</td></tr>
+      <tr><td><span class="tag ok">배포됨</span></td><td>개인 휴대전화 가리기(상세·공유·캘린더), 포스터 없는 상세 «포스터 없음»</td><td>휴대전화 든 행사 17건 중 확인</td></tr>
+      <tr><td><span class="tag ok">배포됨</span></td><td><code>/partners</code>·<code>/about</code>, 헌장 2.0.0(I 단체 제공 예외, IV AI 범위)</td><td>운영 화면</td></tr>
+      <tr><td><span class="tag ok">적용함</span></td><td>인스타 수집분 정리: REVIEW 813 → 만료 581, 남은 232(공개 후보 46·동의 필요 25·사람 판단 161). 되돌리기 목록 저장</td><td>DB 건수</td></tr>
+      <tr><td><span class="tag wait">배포 대기</span></td><td>인박스 탭(공개 후보·동의 필요·사람 판단, 묶음 승인), 카드 «포스터 없음»(임의 사진 제거), 공개 행사 1,000건 넘게 읽기, 리플렛 관리자 예매 주소 안내, 대시보드 문구</td><td>로컬 빌드·관리자 화면, 수집기 시험 140개</td></tr>
+      <tr><td><span class="tag ok">수집기 적용</span></td><td>정기 실행에 REVIEW 정리·승인 후보 공개·단체 연결·방문 수 올리기 연결. 리플렛 읽기 검사기 오탐 수정·날짜 줄임 표기·확대 조각</td><td>다음 정기 실행(08:20)부터. 실제 포스터 20장 시험: 날짜 오답 0·지어냄 0</td></tr>
+      <tr><td><span class="tag ok">완료</span></td><td>디자인 시안: 1차 3개 방향 + 2차 10개 방향(홈·상세)</td><td>375×812 점검 통과</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>배포 대기 묶음에 함께 있는 것</h2>
+  <ul>
+    <li>이 세션 코드: 인박스 탭, 카드 포스터 없음, 1,000건 읽기, 리플렛 관리자 안내, 대시보드 문구 — 로컬 빌드·화면 확인함.</li>
+    <li>시장조사 세션의 <code>/partners</code> 수정(1e58000): 리플렛 등록 버튼 3곳, <b>«예매·결제 대행(준비 중)»</b> 상자와 자주 묻는 것. 결제·정산·KOPIS 전송을 공개적으로 약속하는 문구라 운영자 확인이 필요합니다(그 세션의 «배포해» 원문은 기록 검색으로 찾지 못함).</li>
+    <li>나머지는 문서(디자인 시안·단체 샘플·계획서)입니다.</li>
+  </ul>
+
+  <h2>고를 것</h2>
+  <div class="dec">
+    <div><b>1. 배포 대기 묶음을 올릴지</b><span>특히 /partners의 «예매·결제 대행(준비 중)» 문구를 공개해도 되는지.</span></div>
+    <div><b>2. 디자인 방향</b><span>1차 3개(<a href="https://claude.ai/artifact/1hPVf8NTzZK9EYWAMNXjvL">비교</a>), 2차 10개(<a href="https://claude.ai/artifact/G95FVDcHBWyPzDW5a6YgBG">비교</a>) 중 하나 또는 섞기. 고르면 개선 계획 D1(첫 화면)·D2(브랜드 색)를 적용합니다.</span></div>
+    <div><b>3. 파일 정리(R4·R5)</b><span>수집기 37개·루트 34개를 <code>_attic</code>으로 옮기는 목록과 선택 9개(<code>docs/plan/cleanup_lists_2026-11-26.md</code>). 옮기기·지우기라 고르신 뒤에 합니다.</span></div>
+    <div><b>4. 공개 후보 46건 묶음 승인</b><span>인박스 «공개 후보» 탭(배포 뒤)에서 골라 승인하면 다음 정기 실행이 날짜·링크·중복을 확인해 공개합니다. 기관 공지(한파쉼터 안내 등)가 섞여 있어 골라 주셔야 합니다.</span></div>
+    <div><b>5. 헌장 IV 정기 실행 시각 문구</b><span>헌장에 «04:00·18:00»으로 적혀 있지만 실제는 08:20·15:00. 문구만 고치는 개정(PATCH)을 할지.</span></div>
+  </div>
+
+  <h2>직접 해 주셔야 할 것</h2>
+  <ul>
+    <li><span class="tag you">운영자</span> 텔레그램 실제 토큰을 <code>collector/.env.local</code>에 — 지금은 수집 경고가 알림으로 가지 않습니다.</li>
+    <li><span class="tag you">운영자</span> 카카오 로그인 키 등록(카카오 개발자 → Supabase).</li>
+    <li><span class="tag you">운영자</span> 구글 캘린더에서 <code>/calendar</code> 구독 한 번 눌러 실제로 받아지는지.</li>
+  </ul>
+
+  <h2>알아 둘 것</h2>
+  <ul>
+    <li>인박스 «공개 후보»의 인스타 포스터 썸네일은 «포스터 없음»으로 보입니다(인스타 이미지 주소가 만료·차단). 공개할 때는 저장소에 올린 포스터를 씁니다.</li>
+    <li>기관 누리집 출처 행사는 그 기관을 «주최»로 넣었습니다 — 대관 공연이면 실제 주최가 다를 수 있습니다. 철자만 다른 같은 단체(조이컬처·조이컬쳐) 합치기 화면은 없습니다.</li>
+    <li>리플렛 읽기는 클로드 예약작업(Opus 5.5, 하루 3회)입니다. 제목·장소 칸 정의를 바꾼 지시문 효과는 다음 실제 읽기에서 다시 잽니다.</li>
+  </ul>
+</div>
