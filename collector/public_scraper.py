@@ -28,6 +28,9 @@ def _pick(node, spec):
     return (el.get(attr) or "") if attr else el.get_text(" ", strip=True)
 
 
+RETRY_WAIT = 30  # 네트워크 오류 재시도 전 대기(초)
+
+
 class PublicScraper:
     def __init__(self, db: Database):
         self.db = db
@@ -49,14 +52,26 @@ class PublicScraper:
                 print(f"[Scraper] 📋 Log ID: {log_id}", flush=True)
                 print(f"{'='*60}", flush=True)
 
-                try:
-                    definition = find_for_url(target_url)
-                    if definition:
-                        result = await self._scrape_definition(session, definition, target_name)
-                    else:
-                        result = await self._scrape_generic(session, target_url, target_name)
-                except Exception as e:
-                    result = {"name": target_name, "status": "FAIL", "summary": f"❌ 사이트 오류: {str(e)}"}
+                # 네트워크 오류(접속 끊김·시간 초과)는 30초 쉬고 한 번 더 해 본다 (specs/003 R1). 그 밖의 오류는 바로 실패
+                for attempt in (1, 2):
+                    try:
+                        definition = find_for_url(target_url)
+                        if definition:
+                            result = await self._scrape_definition(session, definition, target_name)
+                        else:
+                            result = await self._scrape_generic(session, target_url, target_name)
+                        if attempt == 2:
+                            result["summary"] += " (재시도 1회 뒤 성공)"
+                        break
+                    except (aiohttp.ClientConnectionError, asyncio.TimeoutError) as e:
+                        if attempt == 1:
+                            print(f"[Scraper] ⚠️ 네트워크 오류, 30초 뒤 재시도: {e}", flush=True)
+                            await asyncio.sleep(RETRY_WAIT)
+                            continue
+                        result = {"name": target_name, "status": "FAIL", "summary": f"❌ 사이트 오류(재시도 1회): {str(e)}"}
+                    except Exception as e:
+                        result = {"name": target_name, "status": "FAIL", "summary": f"❌ 사이트 오류: {str(e)}"}
+                        break
 
                 print(f"\n{'='*60}\n[Scraper] {result['summary']}\n{'='*60}\n", flush=True)
                 self._update_log(log_id, result["summary"], result["status"])

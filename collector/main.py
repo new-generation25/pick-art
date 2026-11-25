@@ -106,10 +106,29 @@ async def run_tool(script, timeout_min=60):
     return {"name": script, "status": "SUCCESS", "summary": f"✅ {last}"}
 
 
+def quiet_runs(configs):
+    """원래 행사가 드문 출처: 정의의 expect.quiet_runs_ok, 없고 min_rows 0(빈 목록 허용)이면 6회(사흘)"""
+    from source_loader import find_for_url
+    out = {}
+    for c in configs:
+        if c['target_type'] != 'website':
+            continue
+        d = find_for_url(c['value'])
+        if not d:
+            continue
+        e = d.get('expect') or {}
+        n = e.get('quiet_runs_ok') or (6 if e.get('min_rows', 1) == 0 else None)
+        if n:
+            out[c['name']] = n
+    return out
+
+
 async def run_crawlers(specific_target=None):
     print(f"🚀 {'Manual request:' if specific_target else 'Routine'} crawler started at {datetime.now()}", flush=True)
     db = Database()
     start_time = datetime.now(timezone.utc).isoformat()
+    # 실행 기록(ops_log)의 run_at: 로그 파일 이름(scheduled_YYYYMMDD_HHmm)과 같은 분 단위 한국 시각
+    run_at = _kst_now().replace(second=0, microsecond=0).isoformat()
     
     try:
         configs = []
@@ -206,9 +225,29 @@ async def run_crawlers(specific_target=None):
             lines.append(geo_line)
             lines.append(backup_line)
             lines.append(f"• AI 추출: {'켜짐' if AIExtractor().enabled else '꺼짐 (기본값 사용)'}")
+
+            # 실행 기록·이상 판정(specs/003 R1): 출처별 숫자를 ops_snapshots 에 남기고 경고를 켜고 끈다.
+            # 텔레그램은 경고가 켜지거나 풀렸을 때와 그날 오후 첫 실행의 하루 요약만 보낸다.
+            # 판정이 실패하면 예전처럼 전체 보고를 그대로 보낸다
+            try:
+                import ops_log
+                blog_names = {c['name'] for c in configs if c['target_type'] == 'naver_blog'}
+                rows = ops_log.to_rows(results, run_at, blog_names, publish_line)
+                res = ops_log.record(db, rows, quiet=quiet_runs(configs))
+                lines.append("• 실행 기록: " + ops_log.summary_line(res))
+                outgoing = []
+                alert = ops_log.alert_message(res["opened"], res["resolved"])
+                if alert:
+                    outgoing.append(alert)
+                if ops_log.is_daily_summary_run(res["rows"], run_at):
+                    outgoing.append(ops_log.daily_message(rows, res["open"]))
+            except Exception as e:
+                lines.append(f"• 실행 기록 실패: {e}")
+                outgoing = None
             message = "\n".join(lines)
             print(message, flush=True)
-            await notifier.send_message(message)
+            for text in (outgoing if outgoing is not None else [message]):
+                await notifier.send_message(text)
         
     except Exception as e:
         print(f"Crawler error: {e}")

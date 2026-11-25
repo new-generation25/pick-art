@@ -1,0 +1,11 @@
+{
+  "zero_found":   {"level": "warn", "runs": 2, "kinds": ["website", "kopis", "blog"],
+                   "text": "{source} 발견 0건이 {n}회 연속입니다 ({since}부터)"},
+  "source_fail":  {"level": "bad",  "runs": 1,
+                   "text": "{source} 수집 실패: {note}"},
+  "def_expired":  {"level": "warn", "runs": 1, "kinds": ["website"],
+                   "text": "{source} 사이트 정의 만료 의심 — 정의 파일 수리 필요"},
+  "publish_zero": {"level": "warn", "runs": 3,
+                   "text": "자동 공개가 {n}회 연속 0건입니다 ({since}부터)"},
+  "kopis_override": {"zero_found_runs": 2, "level": "bad"}
+}
