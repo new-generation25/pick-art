@@ -379,7 +379,8 @@ def cmd_add_many(a):
 def cmd_withdraw(a):
     """허락 철회(「내려 주세요」 「이제 올리지 마세요」)를 그 계정의 dm 줄 모두에 적는다.
     standing=false, withdrawn=오늘, withdraw_reply=받은 글. 답 대기(sent)·허락(yes)은 no 로, 이미 올린 줄(posted)은 그대로 둔다.
-    게시물·앱 DB 행사를 내리는 일은 운영자 승인 뒤 따로 한다 — 결과에 내릴 게시물 주소를 돌려준다."""
+    결과에 내릴 게시물 주소(posts_to_review)와 앱에서 숨길 DB 행사 번호(events_to_hide)를 돌려준다.
+    앱 행사는 hide_events.py 로 숨기고(지우지 않음), 인스타 게시물은 운영자에게 알린 뒤 내린다(2026-11-26 운영자 결정)."""
     acc = norm(a.account)
     with lock():
         rows = load("dm")
@@ -393,10 +394,14 @@ def cmd_withdraw(a):
             if r.get("status") in ("sent", "yes"):
                 r["status"] = "no"
         save("dm", rows)
-    posts = sorted({r.get("post_url") for r in load("posted") if acc in (r.get("source") or "")} |
+    posted = load("posted")
+    posts = sorted({r.get("post_url") for r in posted if acc in (r.get("source") or "")} |
                    {r.get("posted_url") for r in hit if r.get("posted_url")})
-    out({"ok": True, "account": acc, "rows": len(hit), "posts_to_review": posts,
-         "next": "보고 맨 위에 계정·게시물 주소를 올린다. 게시물·앱 DB 행사 내림은 운영자 결정"})
+    # 그 계정 출처로 앱 DB 에 넣은 행사(게시물 기준). 2026-11-26 운영자 결정: 앱에서는 숨기고(hide_events.py), 게시물은 알린 뒤 내린다
+    events = sorted({r.get("event_id") for r in posted if r.get("post_url") in posts and r.get("event_id")})
+    out({"ok": True, "account": acc, "rows": len(hit), "posts_to_review": posts, "events_to_hide": events,
+         "next": "① events_to_hide 를 hide_events.py hide 로 숨긴다(백업 docs/insta/backup_<날짜>/withdraw_<계정>.json) "
+                 "② 보고 맨 위와 갈무리 add_finding 에 계정·게시물 주소를 올린다 — 인스타 게시물은 운영자에게 알린 뒤 내린다(자동 삭제 안 함)"})
 
 
 def cmd_liked_many(a):
