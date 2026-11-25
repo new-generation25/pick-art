@@ -52,3 +52,11 @@
 ## 남은 것
 
 - 개인정보처리방침은 «바꾸면 시행 7일 전부터 알린다»고 적혀 있다. 이번 줄은 사람을 알아볼 수 없는 숫자라 처리 범위가 바뀌지 않는다고 보고 이력에 적었다 — 운영자 확인 필요.
+
+## FR-001 방문자 자동 표시 (2026-11-26 추가)
+
+- 운영자 11/26 «네가 만들어 넣어»(시장조사 세션 입력, 기록 확인): 시장조사 세션이 pick-art 프로젝트만 읽는 Vercel 토큰(«pica collector visits», 2027-11-26 만료)을 `collector/.env.local`의 `VERCEL_TOKEN`에 넣음. 사이트(프론트)에는 두지 않는다.
+- `collector/tools/publish_site_visits.py`: Vercel Web Analytics API(`/v1/query/web-analytics/visits/count`·`aggregate`)로 7일·30일·이번 달 합계, 30일 날짜별, 6개월 월별, 30일 많이 본 페이지·들어온 곳·기기를 읽어 `ops_snapshots('site_visits')`에 올린다. 정기 실행(main.py)에서 하루 두 번. 날짜는 UTC 단위.
+- 관리자 대시보드 «사이트 방문» 칸(`components/admin/SiteVisitsPanel.tsx`).
+- 확인(11/26): 도구 실행 «7일 35명·94뷰 · 30일 39명·98뷰», 로컬 관리자 화면에 같은 숫자·페이지·유입·기기 표시.
+- 토큰이 만료되면(2027-11-26) 대시보드에 숫자가 멈추고 정기 실행 보고에 «Vercel 응답 401/403 — 토큰 만료·권한 확인»이 나온다.

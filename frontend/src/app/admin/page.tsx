@@ -6,6 +6,7 @@ import {
     Container, Title, Text, SimpleGrid, Paper, Group, Stack, Badge, Button, Progress, Anchor, Loader, Box, Tooltip, Table,
 } from "@mantine/core";
 import { RefreshCw, ExternalLink } from "lucide-react";
+import { SiteVisitsPanel, type SiteVisits } from "@/components/admin/SiteVisitsPanel";
 import { supabase } from "@/lib/supabase";
 import { GN_REGIONS } from "@/lib/regions";
 import {
@@ -398,6 +399,8 @@ export default function AdminDashboard() {
                         </Text>
                     </Paper>
                 </SimpleGrid>
+
+                <SiteVisitsPanel data={ops.snapshots["site_visits"]?.data as unknown as SiteVisits | undefined} updatedAt={ops.snapshots["site_visits"]?.updated_at} />
 
                 <Paper withBorder radius="md" p="md" id="collector-runs">
                     <Text fw={700}>출처별 최근 실행</Text>

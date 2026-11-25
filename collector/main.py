@@ -210,6 +210,10 @@ async def run_crawlers(specific_target=None):
             snap = await run_tool("publish_ops_snapshots.py", timeout_min=10)
             backup_line += f"\n• 대시보드 스냅숏: {snap['summary']}"
 
+            # 사이트 방문 수(Vercel Web Analytics 합계)를 대시보드용으로 올린다(specs/011). 실패해도 루틴은 계속한다
+            visits = await run_tool("publish_site_visits.py", timeout_min=5)
+            backup_line += f"\n• 사이트 방문: {visits['summary']}"
+
             # 피카 인스타에 소개한 행사 → events.insta_post_url·insta_posted_at (posted.json 을 읽기만 한다)
             synced = await run_tool("sync_insta_posts.py", timeout_min=10)
             backup_line += f"\n• 인스타 게시 반영: {synced['summary']}"
