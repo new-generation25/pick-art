@@ -406,7 +406,7 @@ def build_metrics(runs):
         cache = sum(r.get("cache_read") or 0 for r in rr)
         sp = supply(d)
         f_now = s.get("followers")
-        fbn = sum(1 for f in fb if (f.get("date") or "")[:10] == d and f.get("kind") not in ("맞팔로우", "follow"))
+        fbn = sum(1 for f in fb if (f.get("date") or "")[:10] == d and f.get("kind") not in ("맞팔로우", "새 팔로워", "follow"))
         th = sum(1 for e in eng if (e.get("date") or "")[:10] == d and e.get("type") in ("like_back", "reply", "comment_like"))
         rows.append({
             "kind": "day", "id": "day:" + d, "date": d,
@@ -486,7 +486,7 @@ def build_metrics(runs):
         stats_last, stats_base = last["date"][:10], earlier[-1]["date"][:10]
     else:
         stats_last = stats_base = ""
-    fb7 = sum(1 for f in fb if in7(f.get("date")) and f.get("kind") not in ("맞팔로우", "follow"))
+    fb7 = sum(1 for f in fb if in7(f.get("date")) and f.get("kind") not in ("맞팔로우", "새 팔로워", "follow"))
     th7 = sum(1 for e in eng if in7(e.get("date")) and e.get("type") in ("like_back", "reply", "comment_like"))
     v["thanks_rate"] = _pct(th7, fb7)
     r7 = [r for r in runs if in7(r["date"])]

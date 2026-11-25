@@ -25,6 +25,10 @@
   python tools/insta_state.py last-check [--set "11/24 2차"]  지난 반응 처리 시각(알림에서 이 뒤 것만 처리)
   python tools/insta_state.py mark-used @계정             candidates 의 used 를 오늘로
   python tools/insta_state.py update dm --match '{"account":"@x","post_url":"..."}' --set '{"status":"yes"}'
+  python tools/insta_state.py withdraw @계정 --reply "받은 글"  허락 철회: 상시 동의 해제, 다시 묻지 않음, 내릴 게시물 주소
+
+feedback.kind 는 맞팔로우·새 팔로워·댓글 답글·댓글 좋아요·게시물 좋아요·DM 답장·멘션·기타 중 하나(영어 값은 바꿔 넣는다).
+engaged 의 comment·reply 줄에는 liked(true|false)가 있어야 한다.
 
 데이터 폴더는 기본 docs/insta. 시험할 때는 환경변수 INSTA_DIR 로 사본 폴더를 가리킨다.
 """
@@ -54,6 +58,10 @@ REQUIRED = {
 }
 # 각 파일의 들여쓰기(기존 모양 유지)
 INDENT = {"feedback": 2}
+# feedback.kind 에 쓰는 값(2026-11-25 한국어로 통일). 영어 값은 더할 때 한국어로 바꾼다.
+FEEDBACK_KINDS = ["맞팔로우", "새 팔로워", "댓글 답글", "댓글 좋아요", "게시물 좋아요", "DM 답장", "멘션", "기타"]
+FEEDBACK_ALIAS = {"reply": "댓글 답글", "comment": "댓글 답글", "post_like": "게시물 좋아요",
+                  "comment_like": "댓글 좋아요", "dm": "DM 답장", "mention": "멘션", "other": "기타"}
 
 
 def today() -> str:
@@ -175,9 +183,10 @@ def cmd_recent_texts(a):
 
 def _approved(dm):
     posted_ids = {r.get("event_id") for r in load("posted")}
+    gone = _withdrawn_accounts(dm)
     rows = []
     for r in dm:
-        if r.get("status") == "yes" and not r.get("posted_url"):
+        if r.get("status") == "yes" and not r.get("posted_url") and norm(r.get("account")) not in gone:
             rows.append(r)
     return [r for r in rows if r.get("event_id") not in posted_ids or not r.get("event_id")]
 
@@ -187,13 +196,19 @@ def cmd_approved(a):
     out({"rows": [{k: r.get(k) for k in keep} for r in _approved(load("dm"))]})
 
 
+def _withdrawn_accounts(dm=None):
+    """허락을 철회한 계정(withdraw 로 적은 줄이 하나라도 있으면)."""
+    return {norm(r.get("account")) for r in (load("dm") if dm is None else dm) if r.get("withdrawn")}
+
+
 def cmd_standing(a):
-    """상시 동의(앞으로 올릴 소식까지 허락) 계정과, 아직 상시 동의를 묻지 않은 옛 허락 계정."""
+    """상시 동의(앞으로 올릴 소식까지 허락) 계정과, 아직 상시 동의를 묻지 않은 옛 허락 계정. 철회한 계정은 뺀다."""
     dm = load("dm")
-    yes = [r for r in dm if r.get("status") in ("yes", "posted")]
+    gone = _withdrawn_accounts(dm)
+    yes = [r for r in dm if r.get("status") in ("yes", "posted") and norm(r.get("account")) not in gone]
     standing = sorted({norm(r["account"]) for r in yes if r.get("standing")})
     to_ask = sorted({norm(r["account"]) for r in yes if not r.get("standing") and not r.get("standing_asked")} - set(standing))
-    out({"standing": standing, "to_ask": to_ask})
+    out({"standing": standing, "to_ask": to_ask, "withdrawn": sorted(gone)})
 
 
 def _short(u):
@@ -219,7 +234,8 @@ def _visits():
 def cmd_standing_due(a):
     """상시 동의 계정 중 마지막 방문 뒤 30일이 지난(또는 아직 안 간) 계정. 오래된 순."""
     dm = load("dm")
-    standing = sorted({norm(r["account"]) for r in dm if r.get("standing") and r.get("status") in ("yes", "posted")})
+    gone = _withdrawn_accounts(dm)
+    standing = sorted({norm(r["account"]) for r in dm if r.get("standing") and r.get("status") in ("yes", "posted")} - gone)
     v = _visits()
     cut = (date.today() - timedelta(days=a.days)).isoformat()
     due = sorted([acc for acc in standing if (v.get(acc, {}).get("at") or "") < cut], key=lambda x: v.get(x, {}).get("at") or "")
@@ -302,6 +318,19 @@ def _check_new(file, rec, rows):
         return "이미 posted.json 에 있는 event_id"
     if file == "candidates" and any(norm(r.get("account")) == rec["account"] for r in rows):
         return "이미 후보 목록에 있는 계정"
+    if file == "feedback":
+        k = FEEDBACK_ALIAS.get(rec["kind"], rec["kind"])
+        if k == "follow":  # 피카가 먼저 팔로우한 계정이면 맞팔로우, 아니면 새 팔로워
+            followed = {norm(r.get("account")) for r in load("engaged") if r.get("type") == "follow"}
+            k = "맞팔로우" if rec["account"] in followed else "새 팔로워"
+        if k not in FEEDBACK_KINDS:
+            return f"kind 는 {FEEDBACK_KINDS} 중 하나"
+        rec["kind"] = k
+    if file == "engaged" and rec.get("type") in ("comment", "reply") and not isinstance(rec.get("liked"), bool):
+        # 댓글 단 게시물·답글 단 댓글에는 좋아요(2026-11-21). 누른 뒤 하트 아이콘 aria-label 이 「좋아요 취소」로 바뀌었는지 본 값
+        return "liked 칸(true|false)이 없다 — 하트 aria-label 이 「좋아요 취소」인지 확인하고 넣는다"
+    if file == "dm" and rec["account"] in _withdrawn_accounts():
+        return "허락을 철회한 계정이다(withdraw) — 다시 묻지 않는다"
     if file == "feedback" and any(r.get("account") == rec["account"] and r.get("kind") == rec["kind"]
                                   and r.get("detail") == rec["detail"] for r in rows):
         return "이미 적힌 반응"
@@ -345,6 +374,29 @@ def cmd_add_many(a):
             rows.append(rec); added += 1
         save(a.file, rows)
     out({"ok": True, "file": a.file, "added": added, "skipped": skipped})
+
+
+def cmd_withdraw(a):
+    """허락 철회(「내려 주세요」 「이제 올리지 마세요」)를 그 계정의 dm 줄 모두에 적는다.
+    standing=false, withdrawn=오늘, withdraw_reply=받은 글. 답 대기(sent)·허락(yes)은 no 로, 이미 올린 줄(posted)은 그대로 둔다.
+    게시물·앱 DB 행사를 내리는 일은 운영자 승인 뒤 따로 한다 — 결과에 내릴 게시물 주소를 돌려준다."""
+    acc = norm(a.account)
+    with lock():
+        rows = load("dm")
+        hit = [r for r in rows if norm(r.get("account")) == acc]
+        if not hit:
+            fail(f"{acc} 는 dm.json 에 없다")
+        for r in hit:
+            r["standing"] = False
+            r["withdrawn"] = today()
+            r["withdraw_reply"] = a.reply
+            if r.get("status") in ("sent", "yes"):
+                r["status"] = "no"
+        save("dm", rows)
+    posts = sorted({r.get("post_url") for r in load("posted") if acc in (r.get("source") or "")} |
+                   {r.get("posted_url") for r in hit if r.get("posted_url")})
+    out({"ok": True, "account": acc, "rows": len(hit), "posts_to_review": posts,
+         "next": "보고 맨 위에 계정·게시물 주소를 올린다. 게시물·앱 DB 행사 내림은 운영자 결정"})
 
 
 def cmd_liked_many(a):
@@ -423,6 +475,8 @@ def main():
     p = sub.add_parser("add"); p.add_argument("file", choices=list(REQUIRED)); p.add_argument("record")
     p.set_defaults(f=cmd_add)
     p = sub.add_parser("mark-used"); p.add_argument("account"); p.set_defaults(f=cmd_mark_used)
+    p = sub.add_parser("withdraw"); p.add_argument("account"); p.add_argument("--reply", required=True, help="받은 철회 글")
+    p.set_defaults(f=cmd_withdraw)
     p = sub.add_parser("update"); p.add_argument("file", choices=["dm", "engaged", "candidates", "posted"])
     p.add_argument("--match", required=True); p.add_argument("--set", required=True); p.set_defaults(f=cmd_update)
     a = ap.parse_args()
