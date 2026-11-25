@@ -1,0 +1,62 @@
+{
+ "at": "2026-11-25T23:23:19+09:00",
+ "why": "같은 공연 중복 행(공다방 대조 11/26). 남긴 줄: 지금 우리는 1cff48d1 · A Child of Our Time 6197e969 · 용재오닐 f6219122 · 매직 프레젠트 7760910f(모두 KOPIS)",
+ "new_status": "HIDDEN",
+ "rows": [
+  {
+   "id": "02046f44-9185-4c86-85a3-b6a91cf57d50",
+   "title": "지금 우리는 [부산]",
+   "source": "KOPIS",
+   "region": "부산",
+   "venue": "가온아트홀 [부산] (2관)",
+   "event_date_start": "2026-11-05",
+   "event_date_end": "2026-12-27",
+   "status": "PUBLISHED",
+   "original_url": "http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GoodsCode=26014527"
+  },
+  {
+   "id": "67bd0d51-a076-48ed-8f31-0d27ecc45a79",
+   "title": "제21회 부산국제매직페스티벌 - 크리스마스 매직갈라쇼 <매직 프레젠트>",
+   "source": "영화의전당",
+   "region": "부산",
+   "venue": "영화의전당 하늘연극장",
+   "event_date_start": "2026-12-12",
+   "event_date_end": "2026-12-13",
+   "status": "PUBLISHED",
+   "original_url": "https://www.dureraum.org/bcc/ccontents/view.do?rbsIdx=40&contentsCode=20261102006"
+  },
+  {
+   "id": "964930c4-997c-4d00-8974-b02e875dd453",
+   "title": "리처드 용재 오닐 <바흐 소사이어티>",
+   "source": "부산문화회관·부산시민회관",
+   "region": "부산",
+   "venue": "부산시민회관 대극장",
+   "event_date_start": "2026-12-19",
+   "event_date_end": "2026-12-19",
+   "status": "PUBLISHED",
+   "original_url": "https://www.bscc.or.kr/citizen/01_perfor/?mcode=1001010200&mode=2&no=26474"
+  },
+  {
+   "id": "c3edba76-0058-4a49-ad50-4ef7035dc51f",
+   "title": "부산시립합창단 송년음악회 <마이클 티펫 - A Child of Our Time>",
+   "source": "부산문화회관·부산시민회관",
+   "region": "부산",
+   "venue": "부산콘서트홀 콘서트홀",
+   "event_date_start": "2026-12-03",
+   "event_date_end": "2026-12-03",
+   "status": "PUBLISHED",
+   "original_url": "https://www.bscc.or.kr/01_perfor/?mcode=0401010200&mode=2&no=26300"
+  },
+  {
+   "id": "e86dd957-e450-4c76-969c-703e0cf72e47",
+   "title": "제21회 부산국제매직페스티벌, 매직 프레젠트 [부산]",
+   "source": "KOPIS",
+   "region": "부산",
+   "venue": "(재) 영화의전당 (하늘연극장)",
+   "event_date_start": "2026-12-12",
+   "event_date_end": "2026-12-13",
+   "status": "PUBLISHED",
+   "original_url": "https://ticket.yes24.com/Perf/60782"
+  }
+ ]
+}
