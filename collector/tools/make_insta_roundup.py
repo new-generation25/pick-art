@@ -32,6 +32,9 @@ EXTRA_CSS = """
 .list { border: 4px solid %(ink)s; background: %(card)s; }
 .list .r { display: grid; grid-template-columns: 70px 1fr; align-items: center; border-top: 3px dotted %(ink)s; padding: 36px 26px; gap: 18px; }
 .list .r:first-child { border-top: none; }
+.list.tight .r { padding: 22px 26px; }
+.list.tight .t { font-size: 40px; }
+.list.tight .s { font-size: 28px; }
 .list .n { font-family: 'Black Han Sans', sans-serif; font-size: 52px; color: %(blue)s; }
 .list .t { font-size: 44px; font-weight: 800; line-height: 1.2; }
 .list .s { font-size: 31px; font-weight: 600; color: %(ink_soft)s; margin-top: 4px; }
@@ -94,7 +97,7 @@ def build(spec: dict) -> list:
     out.append(f"""
 <div class="slide">{top(2)}
   <div class="pad disp h2 print" style="top:170px">{esc(spec['summary_title'])} {len(items)}</div>
-  <div class="pad list" style="top:330px">{rows}</div>
+  <div class="pad list{' tight' if len(items) > 5 else ''}" style="top:{290 if len(items) > 5 else 330}px">{rows}</div>
   {credit('방문 전 공식 안내에서 변경 사항을 확인하세요')}
 </div>""")
 
@@ -117,7 +120,7 @@ def build(spec: dict) -> list:
                      for k, v in [("장소", it["venue"]), ("요금", it["price"]), ("한 줄", it.get("what", ""))] if v)
         out.append(f"""
 <div class="slide one">{top(i)}
-  <div class="pad" style="top:170px"><span class="chip pink">{esc(it['tag'])}</span> <span class="chip">오늘</span></div>
+  <div class="pad" style="top:170px"><span class="chip pink">{esc(it['tag'])}</span> <span class="chip">{esc(it.get('day', '오늘'))}</span></div>
   <div class="poster"><img src="{uri[it['poster']]}"></div>
   <div class="info">
     <div class="ti">{esc(it['title'])}</div>
