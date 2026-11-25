@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>피카 · 이번 주, 어디 가지? (서비스 소개 초안)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+/* 초안: 사이트 /about 으로 옮길 내용. 색·글꼴은 docs/BRAND_GUIDE.md 2·3절 */
+:root { --cream:#F6EFDF; --slate:#4F6272; --ink:#1C1C1C; --red:#D33A2C; --card:#FFFBF2; --line:#d9cfba;
+  --display:"Black Han Sans","Pretendard Variable",Pretendard,sans-serif; --body:"Pretendard Variable",Pretendard,system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace; }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--cream); color:var(--ink); font-family:var(--body); font-size:16px; line-height:1.7; }
+.draft { background:var(--ink); color:var(--cream); font-size:13px; text-align:center; padding:8px max(16px,env(safe-area-inset-left)); }
+main { max-width:760px; margin:0 auto; padding:40px max(16px,env(safe-area-inset-right)) 72px max(16px,env(safe-area-inset-left)); display:grid; gap:44px; }
+.stamp { font-family:var(--mono); color:var(--slate); font-size:13px; letter-spacing:.05em; }
+h1 { font-family:var(--display); font-weight:400; font-size:clamp(36px,9vw,56px); line-height:1.1; margin:6px 0 14px; }
+h2 { font-family:var(--display); font-weight:400; font-size:26px; line-height:1.2; margin:0 0 14px; }
+p { margin:0; } p + p { margin-top:10px; }
+.lead { font-size:18px; }
+.nums { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
+.num { border:1.5px solid var(--ink); background:var(--card); padding:12px 14px; }
+.num b { display:block; font-family:var(--display); font-weight:400; font-size:36px; line-height:1.1; }
+.num span { font-size:14px; color:var(--slate); }
+.rules { counter-reset:r; display:grid; gap:12px; }
+.rule { display:grid; grid-template-columns:44px 1fr; gap:12px; align-items:start; }
+.rule::before { counter-increment:r; content:counter(r); font-family:var(--display); font-size:30px; line-height:1; color:var(--red); }
+.cols { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; }
+.box { background:var(--card); border:1px solid var(--line); padding:16px 18px; display:grid; gap:8px; align-content:start; }
+.box h3 { margin:0; font-size:17px; }
+.tag { display:inline-block; font-size:12px; font-weight:700; padding:1px 8px; margin-left:6px; vertical-align:middle; }
+.tag.now { background:var(--ink); color:var(--cream); }
+.tag.soon { border:1.5px solid var(--slate); color:var(--slate); }
+ul { margin:0; padding-left:20px; display:grid; gap:6px; }
+.promise { border-left:4px solid var(--red); padding:4px 0 4px 16px; display:grid; gap:10px; }
+.promise p { font-weight:600; }
+.mail { font-family:var(--mono); font-size:15px; background:var(--card); border:1px solid var(--line); padding:2px 6px; user-select:all; }
+.foot { font-size:13px; color:var(--slate); border-top:1.5px solid var(--ink); padding-top:14px; }
+</style>
+</head>
+<body>
+<div class="draft">초안 · 2026-11-26 · 아직 사이트에 올리지 않음 · 「준비 중」 기능은 완성 뒤 문구를 다시 확인</div>
+<main>
+  <header>
+    <div class="stamp">pica · 서비스 소개</div>
+    <h1>이번 주, 어디 가지?</h1>
+    <p class="lead">피카는 가까운 공연·전시·축제를 공식 출처로 확인해서 날짜순으로 알려 줘요. 큰 공연장 공연부터 동네 소극장, 서점 갤러리 전시까지 같은 크기로 보여 줘요. 피카는 픽아트(pick-art)의 준말이에요.</p>
+  </header>
+
+  <section>
+    <h2>지금 실려 있는 것</h2>
+    <div class="nums">
+      <div class="num"><b>722</b><span>진행·예정 행사</span></div>
+      <div class="num"><b>126</b><span>그중 전시</span></div>
+      <div class="num"><b>19</b><span>부산과 18개 시군</span></div>
+    </div>
+    <p style="margin-top:10px;font-size:14px;color:var(--slate)">2026-11-25 기준. 부산, 창원, 김해, 진주, 통영, 거제, 양산, 밀양 등. 숫자는 매일 바뀌어요.</p>
+  </section>
+
+  <section>
+    <h2>이렇게 골라요</h2>
+    <div class="rules">
+      <div class="rule"><p><b>날짜가 있어야 실어요.</b> 시작일과 종료일을 확인 못 한 행사는 싣지 않아요.</p></div>
+      <div class="rule"><p><b>원본 링크가 열려야 실어요.</b> 모든 행사에 주최 측 공지·예매 페이지 링크를 달고, 링크가 열리는지 확인해요.</p></div>
+      <div class="rule"><p><b>같은 행사를 두 번 싣지 않아요.</b> 여러 곳에 올라온 같은 공연은 하나로 합쳐요.</p></div>
+    </div>
+    <p style="margin-top:14px">정보는 공연예술통합전산망(KOPIS), 문화재단·공연장·미술관 누리집 30여 곳, 단체와 공간의 공식 인스타그램에서 가져와요. 공공 데이터에 안 잡히는 작은 공연과 전시를 함께 찾는 게 피카가 하는 일이에요.</p>
+  </section>
+
+  <section>
+    <h2>이렇게 써요</h2>
+    <div class="cols">
+      <div class="box">
+        <h3>지금 되는 것 <span class="tag now">지금</span></h3>
+        <ul>
+          <li>날짜순 목록, 지역·분야 고르기</li>
+          <li>「내 주변」: 가까운 순으로 보기, 네이버 지도 길찾기</li>
+          <li>행사마다 원본 링크와 예매 방법</li>
+          <li>휴대폰 홈 화면에 앱처럼 설치</li>
+          <li>회원: 내 지역·관심 분야 먼저 보기, 소식 메일</li>
+        </ul>
+      </div>
+      <div class="box">
+        <h3>준비 중인 것 <span class="tag soon">준비 중</span></h3>
+        <ul>
+          <li>지도에서 보기</li>
+          <li>즐겨찾기, 내 캘린더에 넣기</li>
+          <li>틀린 정보 신고, 행사 제보</li>
+          <li>곧 끝나는 전시·공연 표시</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="promise">
+    <h2 style="margin:0">피카가 지키는 것</h2>
+    <p>돈을 받고 순서를 바꾸지 않아요. 목록은 날짜와 지역 규칙으로만 정렬해요.</p>
+    <p>광고나 제휴가 생기면 「광고」·「제휴」라고 분명히 표시해요.</p>
+    <p>방문 수는 쿠키 없이 세요. 누가 무엇을 봤는지는 기록하지 않아요.</p>
+    <p>확인 못 한 건 말하지 않아요. 요금이 공지에 없으면 「문의 필요」라고 적어요.</p>
+  </section>
+
+  <section>
+    <h2>틀린 정보를 봤다면</h2>
+    <p>일정이나 장소가 바뀌었는데 피카에 그대로라면 알려 주세요. 확인하고 바로 고칠게요. 신고 버튼은 준비 중이라, 지금은 메일이나 인스타그램 @picka.news 메시지로 받아요.</p>
+    <p><span class="mail">pick.art.pica@gmail.com</span></p>
+  </section>
+
+  <p class="foot">피카 pica · 가까운 공연·전시·축제 · 공연·전시를 여는 단체라면 단체 안내 페이지를 봐 주세요(준비 중).</p>
+</main>
+</body>
+</html>
