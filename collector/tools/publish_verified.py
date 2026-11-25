@@ -7,6 +7,9 @@
   2. 링크: source_url 이 지금 실제로 열린다(HTTP < 400)
   3. 중복: 제목(괄호·공백·[지역] 표기 제거)과 시작일이 같은 건은 하나만 발행한다.
      우선순위 KOPIS(가격·시간·예매처) > 기관 공식 게시판 > 큐레이션. 나머지는 raw_posts.status='DUPLICATE'
+  4. 이미 공개된 행사(events, 숨긴 행 포함): 위 제목+시작일이 같거나, 2026-11-26 보강 — 느슨한 제목
+     (대괄호 [지역]·연극/뮤지컬 접두·〈〉<> 기호·공백·연도 제거, ×→x)이 같거나 서로 포함 관계이고 시작일·지역이 같으면 중복으로 본다
+     (예: KOPIS 「더 드레서 [진주]」 ↔ 기관 「연극 <더 드레서>」). 순회공연은 날짜·지역이 달라 걸리지 않는다.
 발행한 raw_posts 는 status='PUBLISHED' 로 바꾼다. 결과 목록을 JSON으로 남긴다.
 """
 import asyncio
@@ -31,6 +34,28 @@ ISO = re.compile(r"^20\d\d-\d\d-\d\d$")
 def norm(title: str) -> str:
     t = re.sub(r"\[[^\]]*\]|\([^)]*\)|<|>|《|》|〈|〉|\"|'|‘|’|“|”", "", title or "")
     return re.sub(r"[\s·,.:\-_~!?]", "", t).lower()
+
+
+def loose(title: str) -> str:
+    """이미 공개된 행사와 견줄 느슨한 제목: [지역]·연극/뮤지컬 접두·〈〉<> 기호·공백을 뺀다(norm 위에).
+    덧붙여 연도(2026 등)를 빼고 ×를 x로 본다(11/26 중복 「한화클래식 2026: …」 「A × B」)."""
+    t = re.sub(r"\[[^\]]*\]", " ", title or "").strip()
+    t = re.sub(r"^(연극|뮤지컬)\s*", "", t)
+    t = re.sub(r"(?<!\d)20\d\d(?!\d)", "", t).replace("×", "x")
+    return norm(t)
+
+
+def same_as_published(title: str, start: str, region: str, by_day) -> bool:
+    """느슨한 제목이 같거나 서로 포함 관계 + 시작일·지역 같음.
+    포함은 짧은 쪽이 3글자 이상일 때만 본다(「쇼」 같은 한두 글자가 남의 제목에 들어가 걸리지 않게)."""
+    a = loose(title)
+    for b in by_day.get((start, region), ()):
+        if not a or not b:
+            continue
+        short, long_ = (a, b) if len(a) <= len(b) else (b, a)
+        if short == long_ or (len(short) >= 3 and short in long_):
+            return True
+    return False
 
 
 def rank(row) -> int:
@@ -66,8 +91,11 @@ async def main(date_from, date_to, dry):
         cands.append(r)
 
     # 이미 공개된 행사와 같은 것(제목+시작일)은 다시 공개하지 않는다 (정기 실행 때 다른 출처에서 같은 행사가 들어와도)
-    published = {(norm(e["title"]), e["event_date_start"]) for e in
-                 db.supabase.table("events").select("title,event_date_start").execute().data}
+    ev_rows = db.supabase.table("events").select("title,event_date_start,region").execute().data
+    published = {(norm(e["title"]), e["event_date_start"]) for e in ev_rows}
+    by_day = {}  # (시작일, 지역) → 느슨한 제목들 (2026-11-26: KOPIS 「제목 [지역]」 ↔ 기관 「연극 <제목>」 중복 15건)
+    for e in ev_rows:
+        by_day.setdefault((e["event_date_start"], e.get("region") or ""), []).append(loose(e["title"]))
 
     if expired_ids and not dry:
         for i in range(0, len(expired_ids), 100):
@@ -81,9 +109,13 @@ async def main(date_from, date_to, dry):
     report = {"published": [], "duplicates": [], "link_failed": [], "skipped": skipped}
     async with aiohttp.ClientSession() as session:
         for key, grp in groups.items():
-            if key in published:
+            a0 = grp[0]["content"]["ai_suggestion"]
+            loose_hit = key not in published and same_as_published(
+                grp[0]["content"]["title"], a0["date_start"], a0.get("region") or "경남", by_day)
+            if key in published or loose_hit:
                 for r in grp:
-                    report["duplicates"].append({"title": r["content"]["title"], "source": r["source"], "kept": "이미 공개됨"})
+                    report["duplicates"].append({"title": r["content"]["title"], "source": r["source"],
+                                                 "kept": "이미 공개됨(제목 포함·시작일·지역)" if loose_hit else "이미 공개됨"})
                     if not dry:
                         db.supabase.table("raw_posts").update({"status": "DUPLICATE"}).eq("id", r["id"]).execute()
                 continue
