@@ -44,4 +44,4 @@
 ## Phase 5: 검증·배포
 
 - [X] T014 형 검사·빌드, 화면·필터 건수 확인 (quickstart 5·6·8)
-- [ ] T015 015 커밋만 main에 올려 배포한다. 운영 화면을 확인하고 보고한다.
+- [X] T015 (11/26 main 6e9169c, 015 커밋만 옮겨 담음 · picka.news 확인 · 보고 https://claude.ai/artifact/PZTWszHpZ7Qwqhj7hvH3UE) 015 커밋만 main에 올려 배포한다. 운영 화면을 확인하고 보고한다.

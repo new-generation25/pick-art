@@ -53,10 +53,24 @@ a { color:inherit; text-underline-offset:3px; }
     </tbody>
   </table></div>
 
-  <h2>직접 확인해 주셔야 할 것</h2>
+  <h2>이어서 배포: 행사 분류 두 단계 (specs/015)</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>상태</th><th>무엇</th><th>확인한 것</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag ok">배포됨</span></td><td>분야를 고르면 세부 칩(공연: 연극·뮤지컬·클래식·오페라 …, 전시: 회화·사진·서예 …)이 건수와 함께. 꼬리표는 «공연 · 뮤지컬»</td><td>필터 건수 = DB 건수(주소 3곳), main <code>6e9169c</code></td></tr>
+      <tr><td><span class="tag ok">적용함</span></td><td>세부 자동 판정: KOPIS 장르 대응 + 제목 낱말 규칙(<code>collector/rules/genre_rules.json</code>). 애매한 것만 «판정 대기»</td><td>공개 1,107건 중 <span class="num">890</span>건(80%) 확정 · 대기 217건 · 표본 30건 중 의문 1건</td></tr>
+      <tr><td><span class="tag ok">적용함</span></td><td>«체험·교육» → «체험»으로 합침(행사·관심 분야·예전 주소·캘린더 구독)</td><td>체험·교육 0건, 체험 22건</td></tr>
+      <tr><td><span class="tag ok">적용함</span></td><td>극장 영화는 공개 검증에서 거르고, 소규모 상영회는 «행사 › 상영회»</td><td>지금 극장 영화 0건</td></tr>
+      <tr><td><span class="tag ok">적용함</span></td><td>정기 수집(08:20·15:00)이 새 행사의 세부를 매김</td><td>다시 돌려도 바뀜 0건</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>직접 해 주셔야 할 것</h2>
   <ul>
+    <li><span class="tag you">운영자</span> Chrome(MAX)에 열려 있는 Supabase SQL 편집기 탭 2개를 닫아 주세요 — X를 누르고 «나가기/Leave». 두 탭의 SQL은 이미 적용됐고, 제 도구로는 «저장하지 않은 변경» 확인창 때문에 닫히지 않습니다.</li>
     <li><span class="tag you">운영자</span> 로그인한 상태에서 <a href="https://picka.news/me">picka.news/me</a> — 내 지역·관심 분야를 바꿔 저장되는지, 찜한 행사가 보이는지.</li>
-    <li><span class="tag you">운영자</span> 관리자 대시보드의 «안내 그림 후보» 상자와, 행사 상세(관리자에게만 보임)의 «안내 그림으로 표시 / 풀기» 버튼.</li>
+    <li><span class="tag you">운영자</span> 관리자 대시보드에서 «세부 판정 대기»(지금 진행 중·예정 행사 중 단서 없는 것)를 시간 날 때 골라 주세요. 고르면 «운영자 확정»으로 남고 자동 판정이 덮어쓰지 않습니다.</li>
+    <li><span class="tag you">운영자</span> 같은 대시보드의 «안내 그림 후보»와 행사 상세의 «안내 그림으로 표시 / 풀기»·«세부 갈래» 칸이 보이는지 한 번 확인.</li>
     <li><span class="tag you">운영자</span> 공간·단체 페이지의 «협약 맺음» 버튼 — 실제 협약이 생기면 그때 누르면 됩니다.</li>
   </ul>
 
@@ -65,6 +79,7 @@ a { color:inherit; text-underline-offset:3px; }
     <li>바깥 주소(KOPIS 등) 포스터 413건은 그 서버가 요청을 거절해 그림 지문을 채우지 못했습니다. 지금까지 찾은 안내 그림은 모두 피카 저장소 쪽입니다.</li>
     <li>첫 화면 속도는 바꾸기 전 평균 1,144ms입니다. 바꾼 뒤 값은 다음에 같은 방법으로 잽니다.</li>
     <li>작업 브랜치와 main은 기록이 갈라졌습니다(main은 014만 옮겨 담음). 내용은 같고, 작업 브랜치에 main을 합쳐 다음 배포가 막히지 않게 했습니다. 사업 문서는 여전히 공개 저장소에 올라가지 않았습니다.</li>
-    <li>다음: 행사 분류 두 단계(대분류 › 세부) — 문화정보 수집 세션이 넘긴 확정안으로 명세 015부터 시작합니다.</li>
+    <li>세부 판정 규칙은 <code>collector/rules/genre_rules.json</code> 한 파일입니다. 낱말을 더하고 <code>python tools/classify_genre.py --apply</code>를 돌리면 다시 매깁니다(운영자가 고른 값은 그대로).</li>
+    <li>판정 대기 217건의 대부분은 «송년음악회», «○○ 개인전»처럼 제목에 갈래 단서가 없는 행사입니다. 일부러 추측하지 않았습니다(헌장 I).</li>
   </ul>
 </div>
