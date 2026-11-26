@@ -32,6 +32,7 @@ from dotenv import load_dotenv  # noqa: E402
 load_dotenv(".env.local")
 from database import Database  # noqa: E402
 from utils import check_link, process_and_upload_image  # noqa: E402
+from genre import is_theater_film, normalize_category  # noqa: E402
 
 ISO = re.compile(r"^20\d\d-\d\d-\d\d$")
 OUT_DIR = os.path.join("..", "docs")  # 결과 목록 JSON 자리(테스트는 임시 폴더로 바꾼다)
@@ -116,7 +117,7 @@ async def main(date_from, date_to, dry, ids=None):
         rows = db.supabase.table("raw_posts").select("*").in_("status", ["COLLECTED", "PENDING"]).execute().data
     if ONLY_URLS:  # --curated <json>: 그 큐레이션 파일로 넣은 수집분만 발행한다
         rows = [r for r in rows if r["source_url"] in ONLY_URLS]
-    cands, skipped = [], {"날짜없음/형식오류": 0, "기간밖": 0, "기간지남": 0}
+    cands, skipped = [], {"날짜없음/형식오류": 0, "기간밖": 0, "기간지남": 0, "극장영화": 0}
     # 오늘(한국 시간) 이전에 끝난 수집분은 '기간 지남'(EXPIRED)으로 돌려 인박스 검토 대기에서 뺀다.
     # 지우지 않으므로 같은 글을 다시 수집하지 않고 중복 판정에도 쓰인다. date_from 이 아니라 오늘 기준이다.
     today = datetime.now(timezone(timedelta(hours=9))).date().isoformat()
@@ -139,6 +140,13 @@ async def main(date_from, date_to, dry, ids=None):
             continue
         if e < today:
             skipped["기간지남"] += 1; expired_ids.append(r["id"]); continue
+        # 극장 영화(멀티플렉스·일반 개봉 상영)는 넣지 않는다(specs/015, 사용자 결정 2026-11-26)
+        if is_theater_film({"title": (r.get("content") or {}).get("title"), "venue": a.get("venue"),
+                            "description": (r.get("content") or {}).get("description")}):
+            skipped["극장영화"] += 1
+            if r["status"] == "REVIEW":
+                fail_review(r, "극장 영화(멀티플렉스·일반 개봉 상영)는 넣지 않음")
+            continue
         if s > date_to or e < date_from:
             skipped["기간밖"] += 1
             if r["status"] == "REVIEW":
@@ -221,7 +229,7 @@ async def main(date_from, date_to, dry, ids=None):
             event = {
                 "title": chosen["content"]["title"],
                 "description": "\n".join(p for p in desc_parts if p)[:4000],
-                "category": a.get("category") or "행사",
+                "category": normalize_category(a.get("category")) or "행사",  # 체험·교육 → 체험 (specs/015)
                 "region": a.get("region") or "경남",
                 "venue": a.get("venue") or "",
                 "event_date_start": a["date_start"],

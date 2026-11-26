@@ -221,6 +221,9 @@ async def run_crawlers(specific_target=None):
             # 포스터 지문(specs/014): 새 행사의 포스터 SHA-256 을 채운다. 안내 그림이면 DB 가 글자 포스터 표시를 켠다
             fp = await run_tool("poster_fingerprint.py", timeout_min=15, args=["--apply"])
             geo_line += f"\n• 포스터 지문: {fp['summary']}"
+            # 세부 갈래(specs/015): 새 행사·세부가 빈 행사를 규칙으로 판정. 애매한 것은 운영자 검토 대기로
+            gn = await run_tool("classify_genre.py", timeout_min=10, args=["--apply"])
+            geo_line += f"\n• 세부 갈래: {gn['summary']}"
 
             # 인스타 운영 기록(docs/insta, git 밖) 글 파일을 구글드라이브 폴더로 복사. 실패해도 루틴은 계속한다
             backup = await run_tool("backup_insta.py", timeout_min=10)
