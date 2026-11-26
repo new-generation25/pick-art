@@ -8,7 +8,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-export async function getPublishedEvents(filters?: { region?: string; category?: string; search?: string; date?: string; ended?: string }) {
+export async function getPublishedEvents(filters?: { region?: string; regions?: string[]; category?: string; categories?: string[]; search?: string; date?: string; ended?: string }) {
     // 기본은 끝나지 않은 행사만. ended=1 이면 종료 1개월 이내 행사도 맨 뒤에 붙인다.
     // 종료 1개월이 지난 행사는 공개 피드에 나오지 않는다 (3개월이 지나면 관리자 저장공간 화면에서 삭제 후보가 된다)
     const today = todayKST();
@@ -23,11 +23,16 @@ export async function getPublishedEvents(filters?: { region?: string; category?:
         query = query.neq('category', c);
     }
 
-    if (filters?.region && filters.region !== '전체') {
+    // 필터 창에서 여러 개 고르면 regions·categories 목록으로 온다 (2026-11-26)
+    if (filters?.regions?.length) {
+        query = query.in('region', filters.regions);
+    } else if (filters?.region && filters.region !== '전체') {
         query = query.eq('region', filters.region);
     }
 
-    if (filters?.category && filters.category !== '전체') {
+    if (filters?.categories?.length) {
+        query = query.in('category', filters.categories);
+    } else if (filters?.category && filters.category !== '전체') {
         query = query.eq('category', filters.category);
     }
 

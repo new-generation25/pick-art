@@ -57,3 +57,18 @@ export function regionFromPath(pathname: string | null | undefined): { region: s
     const district = region === "부산" && m[2] ? districtFromSlug(m[2]) : null;
     return { region, district };
 }
+
+/** 주소의 여러 값(«김해,양산»)을 목록으로. 빈 값·공백은 뺀다 (필터 창 여러 개 고르기, 2026-11-26) */
+export function splitList(v?: string | null): string[] {
+    return [...new Set((v || "").split(",").map(x => x.trim()).filter(Boolean))];
+}
+
+/** 주소의 region 값 → 알려진 지역만 (「전체」는 빠진다) */
+export function regionList(v?: string | null): string[] {
+    return splitList(v).filter(r => GN_REGIONS.includes(r));
+}
+
+/** 주소의 gu 값 → 부산 구·군 이름만 */
+export function guList(v?: string | null): string[] {
+    return splitList(v).filter(g => BUSAN_DISTRICTS.some(d => d.name === g));
+}

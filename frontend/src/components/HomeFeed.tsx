@@ -4,7 +4,7 @@ import { FeedSections } from "@/components/ui/FeedSections";
 import { FilterBar } from "@/components/ui/FilterBar";
 import { EventList } from "@/components/ui/EventList";
 import { MapButton } from "@/components/ui/MapButton";
-import { regionPath } from "@/lib/regions";
+import { guList, regionList, regionPath, splitList } from "@/lib/regions";
 import { SECTION_LABELS, type SectionKey } from "@/lib/feedOrder";
 import { Container, Title, Text, TextInput, Button, SimpleGrid, Group, Box, Alert, Stack } from "@mantine/core";
 import { ArrowLeft } from "lucide-react";
@@ -13,7 +13,7 @@ import { formatPeriod, todayKST } from "@/lib/utils";
 import { orderFeed } from "@/lib/feedOrder";
 import { ageLabel, fitsAge, kidsInfo, readKidsParam } from "@/lib/kids";
 import { isEndingSoon } from "@/lib/eventDetails";
-import { SUBCATEGORIES, normalizeCategory } from "@/lib/categories";
+import { CATEGORIES, SUBCATEGORIES, normalizeCategory } from "@/lib/categories";
 
 const DATE_LABEL: Record<string, string> = { today: "오늘", week: "이번 주", month: "이번 달", ending: "곧 끝남" };
 
@@ -27,21 +27,31 @@ export type HomeParams = {
   subscribed?: string;
   section?: string;
   sub?: string;
+  gu?: string;
 };
 
 /** 홈 목록 화면. 지역 페이지(/region/[name])는 region 을 고정해 같은 화면을 쓴다 */
 export async function HomeFeed({ params: resolvedParams, region, district }: { params: HomeParams; region?: string; district?: string }) {
+  // 지역·분야는 필터 창에서 여러 개 고를 수 있다(«김해,양산», «공연,전시»). 위쪽 칩은 하나씩 (2026-11-26)
+  const regions = region ? [region] : regionList(resolvedParams.region);
+  const gus = district ? [district] : guList(resolvedParams.gu);
+  if (gus.length && !regions.includes("부산")) regions.push("부산");
+  // 예전 «체험·교육» 주소도 «체험»으로 (specs/015)
+  const cats = [...new Set(splitList(resolvedParams.category).map(c => normalizeCategory(c)))].filter(c => (CATEGORIES as readonly string[]).includes(c));
   const filters = {
-    region: region ?? resolvedParams.region,
-    category: normalizeCategory(resolvedParams.category) ?? undefined, // 예전 «체험·교육» 주소도 «체험»으로 (specs/015)
+    region: regions.length === 1 ? regions[0] : undefined,
+    regions: regions.length > 1 ? regions : undefined,
+    category: cats.length === 1 ? cats[0] : undefined,
+    categories: cats.length > 1 ? cats : undefined,
     search: resolvedParams.q,
     date: resolvedParams.date,
     ended: resolvedParams.ended
   };
 
-  // 부산 구·군 페이지: 그 구에 있는 장소의 행사만 (장소를 모르는 행사는 «부산» 페이지에만 나온다)
-  const districtVenues = district ? await getDistrictVenueIds(district) : null;
-  const fetched = (await getPublishedEvents(filters)).filter((e: any) => !districtVenues || districtVenues.has(e.venue_id));
+  // 부산 구·군: 그 구에 있는 장소의 행사만 (장소를 모르는 행사는 «부산» 전체에만 나온다). 다른 지역 행사는 그대로
+  const guVenues = new Set<string>();
+  for (const g of gus) for (const id of await getDistrictVenueIds(g)) guVenues.add(id);
+  const fetched = (await getPublishedEvents(filters)).filter((e: any) => !gus.length || e.region !== "부산" || guVenues.has(e.venue_id));
   const isSubscribed = resolvedParams.subscribed === "true";
 
   // 아이와 같이 가기 좋은 곳(specs/004): 규칙·운영자 수정으로 행사마다 구분을 매기고, 「아이」 필터가 켜지면 맞는 것만 남긴다
@@ -117,8 +127,10 @@ export async function HomeFeed({ params: resolvedParams, region, district }: { p
   const one = sectionKey && SECTION_LABELS[sectionKey] ? ordered.find(s => s.key === sectionKey) : undefined;
 
   const paperInput = { input: { backgroundColor: 'var(--pk-card)', border: '1px solid var(--pk-line)', color: 'var(--pk-ink)' } };
-  const hasFilter = !!((filters.region && !region) || filters.category || sub || filters.search || filters.date || kids.on);
-  const place = region ? (district ? `${region} ${district}` : region) : null;
+  const hasFilter = !!((regions.length && !region) || cats.length || sub || filters.search || filters.date || kids.on);
+  const place = regions.length
+    ? regions.map(r => r === "부산" && gus.length ? `부산 ${gus.join("·")}` : r).join(" · ")
+    : null;
 
   return (
     <Box>
@@ -166,7 +178,7 @@ export async function HomeFeed({ params: resolvedParams, region, district }: { p
       {/* «지도» 버튼 (specs/014 US3): 누르면 지금 필터 결과의 장소를 지도 시트로 */}
       {!one && (
         <MapButton
-          summary={[DATE_LABEL[filters.date || ""] || "", place || "", filters.category ? (sub ? `${filters.category} · ${sub}` : filters.category) : "", kids.on ? "아이와" : ""].filter(Boolean).join(" · ")}
+          summary={[DATE_LABEL[filters.date || ""] || "", place || "", cats.length ? (sub ? `${cats[0]} · ${sub}` : cats.join("·")) : "", kids.on ? "아이와" : ""].filter(Boolean).join(" · ")}
           events={dbEvents.map((e: any) => ({ ...toShelf(e), venueId: e.venue_id ?? null, today: (e.event_date_start || e.event_date_end || today) <= today }))}
         />
       )}
