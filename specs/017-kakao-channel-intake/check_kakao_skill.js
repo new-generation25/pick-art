@@ -46,6 +46,9 @@ assert.ok(!k.parseSkillRequest(plain(T, '폴백 블록')).action.plugin);
 // 제보 메뉴(11/26 «제보는 메뉴형태로»)
 for (const w of ['행사 알리기', '제보', '리플렛 보내기']) assert.strictEqual(k.parseSkillRequest(plain(w, '폴백 블록')).action.kind, 'tip');
 assert.strictEqual(k.parseSkillRequest(plain('주차 되나요?', '폴백 블록')).action.kind, 'text');
+assert.strictEqual(k.parseSkillRequest(plain('사진 보내기', '폴백 블록')).action.kind, 'tip');
+assert.strictEqual(k.parseSkillRequest(plain('행사 올리고 싶어요', '행사 알리기')).action.kind, 'tip');   // 블록 이름으로
+assert.strictEqual(k.parseSkillRequest(plain(T, '행사 알리기')).action.kind, 'image');   // 사진 주소가 먼저
 // 웰컴·제보 시간 밖: 상담 연결 버튼 + 행사 알리기 버튼
 for (const card of [k.MSG.welcome(), k.MSG.notTip()]) {
   const tc = card.template.outputs[0].textCard;

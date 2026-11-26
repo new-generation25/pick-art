@@ -25,7 +25,9 @@ export const AGREE_TEXT = "동의하고 보내기";
 export const PHOTO_TEXT = "사진 보내기";
 /** 제보 메뉴. 웰컴 카드 버튼·채팅방 메뉴가 보내는 말 */
 export const TIP_TEXT = "행사 알리기";
-const TIP_WORDS = new Set([TIP_TEXT, "제보", "제보하기", "행사 제보", "리플렛 보내기", "포스터 보내기"]);
+const TIP_WORDS = new Set([TIP_TEXT, "제보", "제보하기", "행사 제보", PHOTO_TEXT, "리플렛 보내기", "포스터 보내기"]);
+/** 오픈빌더 «행사 알리기» 블록 이름. 이 블록에서 온 요청은 발화와 상관없이 제보 시작으로 읽는다 */
+export const TIP_BLOCK = "행사 알리기";
 /** 상담 연결 버튼 이름(스킬 응답 버튼 action "operator") */
 export const OPERATOR_LABEL = "운영자에게 문의";
 export const MAX_IMAGES = 10;
@@ -109,7 +111,7 @@ export function parseSkillRequest(body: unknown): SkillRequest | null {
         return { userKey, action: { kind: "image", urls: words } };
     }
     if (utterance === AGREE_TEXT) return { userKey, action: { kind: "agree" } };
-    if (TIP_WORDS.has(utterance)) return { userKey, action: { kind: "tip" } };
+    if (TIP_WORDS.has(utterance) || blockName === TIP_BLOCK) return { userKey, action: { kind: "tip" } };
     if (/웰컴|welcome/i.test(blockName) || !utterance) return { userKey, action: { kind: "welcome" } };
     return { userKey, action: { kind: "text", text: utterance.slice(0, 1000) } };
 }
