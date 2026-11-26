@@ -39,7 +39,7 @@ export function ShelfTile({ c, wide = false, priority = false }: { c: ShelfCard;
             </p>
             {c.endingSoon && !c.isEnded && <p className="text-[11.5px] font-bold text-ink">곧 끝남</p>}
             {c.isEnded && <p className="text-[11.5px] font-bold text-ink-soft">종료</p>}
-            <h3 className={`mt-0.5 text-[14px] font-bold leading-[1.3] ${wide ? "pica-clamp-2" : "pica-clamp-3"}`}>{c.title}</h3>
+            <h3 className={`mt-0.5 text-[14px] font-bold leading-[1.3] lg:text-[15.5px] ${wide ? "pica-clamp-2" : "pica-clamp-3"}`}>{c.title}</h3>
             {c.venue && <p className="pica-clamp-2 mt-0.5 text-[12px] leading-[1.35] text-ink-soft">{c.venue}</p>}
             {c.price && <p className="mt-0.5 truncate text-[12px] font-bold">{c.price}</p>}
             {c.note && (

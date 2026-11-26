@@ -114,7 +114,7 @@ export default function MapSheet({ events, summary, onClose }: { events: SheetEv
     return (
         <div className="pica-portal fixed inset-0 z-[1200]" role="dialog" aria-modal="true" aria-label="지도">
             <button type="button" aria-label="지도 닫기" onClick={close} className="absolute inset-0 bg-[rgba(30,26,21,.5)]" />
-            <div className="absolute inset-x-0 bottom-0 top-[58px] overflow-y-auto rounded-t-[22px] bg-paper pb-24 shadow-[0_-8px_24px_rgba(30,26,21,.25)] [scrollbar-width:none]">
+            <div className="absolute inset-x-0 bottom-0 top-[58px] overflow-y-auto rounded-t-[22px] bg-paper pb-24 shadow-[0_-8px_24px_rgba(30,26,21,.25)] [scrollbar-width:none] lg:left-auto lg:right-0 lg:top-[60px] lg:w-[560px] lg:rounded-none lg:rounded-tl-[22px]">
                 <span className="mx-auto mt-2 block h-[5px] w-10 rounded bg-[#CFC5B4]" aria-hidden />
                 <div className="flex items-center justify-between px-4 pb-2.5 pt-2">
                     <div>
@@ -129,7 +129,7 @@ export default function MapSheet({ events, summary, onClose }: { events: SheetEv
                     </button>
                 </div>
 
-                <div className="relative mx-3 h-[290px] overflow-hidden rounded-2xl bg-land">
+                <div className="relative mx-3 h-[290px] overflow-hidden rounded-2xl bg-land lg:h-[420px]">
                     {mapFailed ? (
                         <p className="grid h-full place-items-center px-6 text-center text-[14px] text-ink-soft">지도를 불러오지 못했어요. 아래 장소 목록은 그대로 볼 수 있어요.</p>
                     ) : <div ref={box} className="h-full w-full" />}
@@ -174,7 +174,7 @@ export default function MapSheet({ events, summary, onClose }: { events: SheetEv
                     {me ? "가까운 순으로 정렬했어요." : "«가까운 순»은 위치를 허락하면 켜져요."} 위치는 순서를 정하는 데만 써요.
                 </p>
             </div>
-            <button type="button" onClick={close} className="fixed bottom-[18px] left-1/2 z-[1201] flex h-[46px] -translate-x-1/2 items-center gap-[7px] rounded-full bg-ink pl-4 pr-5 text-[15px] font-bold text-white shadow-[0_6px_16px_rgba(20,23,28,.3)]">
+            <button type="button" onClick={close} className="fixed bottom-[18px] left-1/2 z-[1201] flex h-[46px] -translate-x-1/2 lg:left-auto lg:right-[280px] lg:translate-x-1/2 items-center gap-[7px] rounded-full bg-ink pl-4 pr-5 text-[15px] font-bold text-white shadow-[0_6px_16px_rgba(20,23,28,.3)]">
                 <List size={18} aria-hidden /> 목록
             </button>
         </div>

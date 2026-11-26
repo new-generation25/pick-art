@@ -55,7 +55,7 @@ export function PlacePage({ eyebrow, kindIcon = "venue", name, partnerSince, fac
         <main className="min-h-screen pb-16">
             {/* 머리 띠 */}
             <div className="bg-soft px-4 pb-[22px]">
-                <div className="mx-auto max-w-3xl">
+                <div className="mx-auto max-w-6xl">
                     <div className="-mx-2.5 flex h-[52px] items-center">
                         <Link href="/" className="inline-flex h-11 items-center gap-1 rounded-full px-2 text-[14px] font-semibold text-ink-soft hover:text-ink">
                             <ArrowLeft className="h-5 w-5" aria-hidden /> 행사 목록
@@ -84,7 +84,7 @@ export function PlacePage({ eyebrow, kindIcon = "venue", name, partnerSince, fac
                 </div>
             </div>
 
-            <div className="mx-auto max-w-3xl">
+            <div className="mx-auto max-w-6xl">
                 {/* 다가오는 행사 */}
                 <section className="pt-[22px]">
                     <div className="flex items-end justify-between px-4 pb-3">

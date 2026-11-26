@@ -201,6 +201,13 @@ body {
 .pica-shelf-row::-webkit-scrollbar { display: none; }
 .pica-shelf-row::after { content: ""; flex: none; width: 6px; }
 .pica-shelf-row > * { scroll-snap-align: start; }
+/* PC(1024px 이상): 좌우로 넘기지 않고 6칸 격자로 (2026-11-26 운영자 «pc화면 최적화») */
+@media (min-width: 1024px) {
+  .pica-shelf-row { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 22px 18px; overflow: visible; padding: 0 16px; }
+  .pica-shelf-row::after { display: none; }
+  .pica-shelf-row > * { width: auto !important; }
+  .pica-shelf-row[data-cols="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
 .pica-clamp-2, .pica-clamp-3 { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
 .pica-clamp-2 { -webkit-line-clamp: 2; }
 .pica-clamp-3 { -webkit-line-clamp: 3; }

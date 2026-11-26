@@ -142,8 +142,10 @@ export default async function EventDetailPage({ params }: EventPageProps) {
             {/* 조회 수 (specs/011): 날짜별 숫자만 센다 */}
             <EventViewCounter eventId={event.id} />
 
+            {/* PC(1024px 이상): 왼쪽 포스터 · 오른쪽 정보 두 칸. 휴대폰: 위 포스터 띠 + 겹쳐 올라오는 카드 (시안 f01) */}
+            <div className="lg:mx-auto lg:grid lg:max-w-6xl lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)] lg:items-start lg:gap-12 lg:px-6 lg:pt-6">
             {/* 맨 위 띠: 가운데 포스터 (시안 f01) */}
-            <div className="bg-soft pb-10">
+            <div className="bg-soft pb-10 lg:sticky lg:top-[84px] lg:rounded-2xl lg:pb-6">
                 <div className="mx-auto flex h-[52px] max-w-3xl items-center justify-between px-2">
                     <Link href="/" className="inline-flex h-11 items-center gap-1 rounded-full px-2 text-[14px] font-semibold text-ink-soft hover:text-ink">
                         <ArrowLeft className="h-5 w-5" aria-hidden /> 행사 목록
@@ -157,7 +159,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
             </div>
 
             {/* 겹쳐 올라오는 요약 카드 */}
-            <div className="relative mx-auto -mt-[22px] max-w-3xl rounded-t-[22px] bg-paper px-4 pb-2 pt-5 sm:px-6">
+            <div className="relative mx-auto -mt-[22px] max-w-3xl rounded-t-[22px] bg-paper px-4 pb-2 pt-5 sm:px-6 lg:mx-0 lg:mt-0 lg:max-w-none lg:rounded-none lg:px-0 lg:pt-2">
                 <div className="flex flex-wrap items-center gap-[5px]">
                     <span className="pica-cat" data-cat={event.category}>{event.category}</span>
                     {event.subcategory && <span className="pica-cat" data-cat={event.category}>{event.subcategory}</span>}
@@ -168,7 +170,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                         <span className="inline-flex h-[22px] items-center rounded-md px-[7px] text-[12px] font-bold text-ink shadow-[inset_0_0_0_1px_#CFC5B4]" title="단체가 피카에 리플렛으로 직접 알려 준 행사">단체 제공</span>
                     )}
                 </div>
-                <h1 className="pica-display mt-2 text-[26px] leading-[1.3] tracking-[-0.5px] text-ink sm:text-[32px]">{event.title}</h1>
+                <h1 className="pica-display mt-2 text-[26px] leading-[1.3] tracking-[-0.5px] text-ink sm:text-[32px] lg:text-[38px]">{event.title}</h1>
                 <p className="pica-num mt-1.5 text-[15.5px] font-semibold text-ink">{longDate}</p>
                 <p className="mt-0.5 flex items-center gap-1.5 text-[15px] text-ink-soft">
                     <MapPin className="h-4 w-4 shrink-0" aria-hidden />
@@ -260,6 +262,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
 
                 {/* 아래 고정 막대: 찜 · 공유 · 원본 안내 페이지 열기 */}
                 <StickyActions eventId={event.id} title={event.title} originalUrl={hasOriginal ? event.original_url : null} groupProvided={groupProvided} />
+            </div>
             </div>
         </main>
     );

@@ -11,7 +11,7 @@ export function PosterViewer({ src, alt, ended = false, event }: { src?: string 
     const [opened, setOpened] = useState(false);
     // 안내 그림·포스터 없음 → 글자 포스터 (specs/014). 상세 띠 가운데에 놓는다
     if (event && needsTextPoster(event)) {
-        return <PosterOrText event={event} size="detail" className={`mx-auto !w-[210px] shadow-[0_10px_26px_rgba(30,26,21,.24)] ${ended ? "grayscale" : ""}`} />;
+        return <PosterOrText event={event} size="detail" className={`mx-auto !w-[210px] lg:!w-[300px] shadow-[0_10px_26px_rgba(30,26,21,.24)] ${ended ? "grayscale" : ""}`} />;
     }
     const poster = posterSrc(src) || "/images/placeholder.webp";
     const canZoom = !!src;
@@ -31,7 +31,7 @@ export function PosterViewer({ src, alt, ended = false, event }: { src?: string 
             <button
                 type="button"
                 onClick={() => setOpened(true)}
-                className="group relative mx-auto block w-[180px] cursor-zoom-in overflow-hidden rounded-md shadow-[0_10px_26px_rgba(30,26,21,.24)] sm:w-[240px]"
+                className="group relative mx-auto block w-[180px] cursor-zoom-in overflow-hidden rounded-md shadow-[0_10px_26px_rgba(30,26,21,.24)] sm:w-[240px] lg:w-[320px]"
                 aria-label="포스터 크게 보기"
             >
                 {/* 원본 비율 그대로 (시안 f01: 상세 맨 위 띠 가운데에 포스터를 세운다) */}
