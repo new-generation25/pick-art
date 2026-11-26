@@ -26,18 +26,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function VenuePage({ params }: Props) {
     const page = await getVenuePage((await params).id);
     if (!page) notFound();
-    const { venue, upcoming, past } = page;
+    const { venue, upcoming, past, hosts } = page;
     const facts = [
-        { label: "지역", value: [venue.region, venue.district].filter(Boolean).join(" ") || "정보 없음" },
-        ...(venue.closed_days ? [{ label: "휴관일", value: venue.closed_days }] : []),
         ...(venue.capacity ? [{ label: "객석", value: `${venue.capacity.toLocaleString()}석` }] : []),
+        { label: "휴관일", value: venue.closed_days || "정보 없음" },
     ];
     return (
         <PlacePage
-            eyebrow="공간"
+            eyebrow={`공간 · ${[venue.region, venue.district].filter(Boolean).join(" ") || "지역 정보 없음"}`}
+            kindIcon="venue"
             name={venue.name}
+            partnerSince={venue.partner_since}
+            hosts={hosts}
+            admin={{ table: "venues", id: venue.id }}
             facts={facts}
-            actions={<VenueRoute name={venue.name} region={venue.region} lat={venue.lat} lng={venue.lng} appname={new URL(SITE_URL).host} />}
+            actions={<VenueRoute name={venue.name} region={venue.region} lat={venue.lat} lng={venue.lng} appname={new URL(SITE_URL).host} block />}
             calendarQuery={`venue=${venue.id}`}
             upcoming={upcoming}
             past={past}

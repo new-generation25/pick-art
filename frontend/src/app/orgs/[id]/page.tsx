@@ -31,7 +31,6 @@ export default async function OrgPage({ params }: Props) {
     if (!page) notFound();
     const { org, roles, upcoming, past } = page;
     const facts = [
-        { label: "구분", value: KIND_LABEL[org.kind] ?? org.kind },
         ...(roles.length ? [{ label: "맡은 일", value: roles.map(r => r === "게시" ? "소식 올림" : r).join(" · ") }] : []),
         ...(org.insta_handle ? [{
             label: "인스타그램",
@@ -40,8 +39,11 @@ export default async function OrgPage({ params }: Props) {
     ];
     return (
         <PlacePage
-            eyebrow={org.kind === "기관" ? "기관" : "단체"}
+            eyebrow={KIND_LABEL[org.kind] ?? org.kind}
+            kindIcon={org.kind === "기관" ? "기관" : "단체"}
             name={org.name}
+            partnerSince={org.partner_since ?? null}
+            admin={{ table: "orgs", id: org.id }}
             facts={facts}
             calendarQuery={`org=${org.id}`}
             upcoming={upcoming}

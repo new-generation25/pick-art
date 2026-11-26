@@ -24,21 +24,40 @@ async function splitEvents(filter: (q: any) => any): Promise<{ upcoming: PlaceEv
     return { upcoming: (u.data || []) as PlaceEvent[], past: (p.data || []) as PlaceEvent[] };
 }
 
-export type Venue = { id: string; name: string; region: string | null; district: string | null; lat: number; lng: number; closed_days: string | null; capacity: number | null };
+export type Venue = { id: string; name: string; region: string | null; district: string | null; lat: number; lng: number; closed_days: string | null; capacity: number | null; partner_since: string | null };
 
 export async function getVenuePage(id: string) {
     if (!UUID.test(id)) return null;
-    const { data: venue } = await supabase.from("public_venues").select("id,name,region,district,lat,lng,closed_days,capacity").eq("id", id).maybeSingle();
+    const { data: venue } = await supabase.from("public_venues").select("id,name,region,district,lat,lng,closed_days,capacity,partner_since").eq("id", id).maybeSingle();
     if (!venue) return null;
-    return { venue: venue as Venue, ...(await splitEvents(q => q.eq("venue_id", id))) };
+    const ev = await splitEvents(q => q.eq("venue_id", id));
+    return { venue: venue as Venue, ...ev, hosts: await getHosts([...ev.upcoming, ...ev.past].map(e => e.id)) };
 }
 
-export type Org = { id: string; name: string; kind: "기관" | "단체" | "계정"; insta_handle: string | null; small: boolean };
+/** «이곳 행사를 여는 곳» (specs/014 US5): 공간의 행사(다가오는·지난 1년)에 이어진 기관·단체, 맡은 일, 건수, 협약 여부 */
+export type Host = { org: Org; roles: string[]; count: number };
+async function getHosts(eventIds: string[]): Promise<Host[]> {
+    if (!eventIds.length) return [];
+    const { data } = await supabase.from("event_orgs").select("event_id, role, orgs(id,name,kind,insta_handle,small,partner_since)").in("event_id", eventIds.slice(0, 300));
+    const by = new Map<string, { org: Org; roles: Set<string>; events: Set<string> }>();
+    for (const r of (data || []) as any[]) {
+        if (!r.orgs || r.role === "게시") continue;
+        const h = by.get(r.orgs.id) ?? { org: r.orgs as Org, roles: new Set<string>(), events: new Set<string>() };
+        h.roles.add(r.role); h.events.add(r.event_id);
+        by.set(r.orgs.id, h);
+    }
+    return [...by.values()]
+        .map(h => ({ org: h.org, roles: [...h.roles].sort((a, b) => ROLE_ORDER.indexOf(a as any) - ROLE_ORDER.indexOf(b as any)), count: h.events.size }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 12);
+}
+
+export type Org = { id: string; name: string; kind: "기관" | "단체" | "계정"; insta_handle: string | null; small: boolean; partner_since?: string | null };
 export const ROLE_ORDER = ["주최", "주관", "기획", "제작", "게시"] as const;
 
 export async function getOrgPage(id: string) {
     if (!UUID.test(id)) return null;
-    const { data: org } = await supabase.from("orgs").select("id,name,kind,insta_handle,small").eq("id", id).maybeSingle();
+    const { data: org } = await supabase.from("orgs").select("id,name,kind,insta_handle,small,partner_since").eq("id", id).maybeSingle();
     if (!org) return null;
     const { data: links } = await supabase.from("event_orgs").select("event_id,role").eq("org_id", id).limit(2000);
     const ids = [...new Set((links || []).map(l => l.event_id as string))];

@@ -113,7 +113,7 @@
   - 닫는 방법: 내리기, «목록», 뒤로 가기(history state), 바깥 누르기.
 - [X] T029 [US3] 홈에 «지도» 버튼을 화면 아래 가운데에 띄운다. 시트에는 지금 필터 결과의 행사·장소를 넘긴다(장소 묶기는 `lib/mapGroups.ts` 재사용) (`frontend/src/components/HomeFeed.tsx`)
 - [X] T030 [US3] 지도를 불러오지 못하면 지도 자리에 «지도를 불러오지 못했어요»를 띄우고, 장소 목록은 그대로 둔다 (`frontend/src/components/ui/MapSheet.tsx`)
-- [ ] T031 [US3] `/nearby`는 지금 화면을 유지하고 새 색만 입었는지 확인한다 (`frontend/src/app/nearby/NearbyClient.tsx`)
+- [X] T031 [US3] `/nearby`는 지금 화면을 유지하고 새 색만 입었는지 확인한다 (`frontend/src/app/nearby/NearbyClient.tsx`)
 - [X] T032 [US3] 확인한다: quickstart 5단계(누르기 전 지도 요청 0건, 누른 뒤 숫자 일치). 맞으면 커밋한다
 
 ---
@@ -139,13 +139,13 @@
 
 **Independent Test**: quickstart 8단계.
 
-- [ ] T037 [US5] 공간·단체 데이터에 `partner_since`를 더한다. 공간의 «이곳 행사를 여는 곳»(`event_orgs` → 기관·단체, 맡은 일, 건수, 협약 여부)을 계산한다 (`frontend/src/lib/places.ts`, `frontend/src/app/venues/[id]/page.tsx`, `frontend/src/app/orgs/[id]/page.tsx`)
-- [ ] T038 [US5] `PlacePage`를 시안 구성으로 다시 짠다 (`frontend/src/components/PlacePage.tsx`).
+- [X] T037 [US5] 공간·단체 데이터에 `partner_since`를 더한다. 공간의 «이곳 행사를 여는 곳»(`event_orgs` → 기관·단체, 맡은 일, 건수, 협약 여부)을 계산한다 (`frontend/src/lib/places.ts`, `frontend/src/app/venues/[id]/page.tsx`, `frontend/src/app/orgs/[id]/page.tsx`)
+- [X] T038 [US5] `PlacePage`를 시안 구성으로 다시 짠다 (`frontend/src/components/PlacePage.tsx`).
   - 순서: 머리 띠(«공간 · 지역», 협약 배지, 명조 이름, 객석, 다가오는 행사 수, 휴관일) → «길찾기»(공간만)·«일정 캘린더로 받기» → 다가오는 행사 `Shelf` → 상시 한 줄씩 → 이곳 행사를 여는 곳(기관=건물 아이콘, 단체=사람 아이콘, 협약=초록 도장, 맡은 일·건수, 범례) → 지난 행사 최근 1년 → 안내 문구.
   - 작은 지도는 넣지 않는다.
-- [ ] T039 [US5] 관리자 장소 화면에 «협약 맺음(날짜) / 풀기»를 더한다. 풀면 `partner_since`를 비우고 `partner_note`에 「YYYY-MM-DD 해지」를 덧붙인다(≤200자) (`frontend/src/app/admin/venues/`)
-- [ ] T040 [US5] 단체 페이지에 관리자에게만 보이는 «협약 맺음 / 풀기» 컨트롤을 단다. 규칙은 T039와 같다 (`frontend/src/components/ui/AdminPartnerControl.tsx`, `frontend/src/app/orgs/[id]/page.tsx`)
-- [ ] T041 [US5] 확인한다: quickstart 8단계(시험 공간에 넣었다 풀기). 시험 값은 원래대로 되돌리고, 배포 직후 배지가 0곳인지 확인한다. 맞으면 커밋한다
+- [X] T039 [US5] (바꿈: 관리자 장소 목록 대신 공간 페이지 머리에 관리자만 보이는 «협약 맺음/풀기»를 단다 — T040과 같은 `AdminPartnerControl`) 관리자 장소 화면에 «협약 맺음(날짜) / 풀기»를 더한다. 풀면 `partner_since`를 비우고 `partner_note`에 「YYYY-MM-DD 해지」를 덧붙인다(≤200자) (`frontend/src/app/admin/venues/`)
+- [X] T040 [US5] 단체 페이지에 관리자에게만 보이는 «협약 맺음 / 풀기» 컨트롤을 단다. 규칙은 T039와 같다 (`frontend/src/components/ui/AdminPartnerControl.tsx`, `frontend/src/app/orgs/[id]/page.tsx`)
+- [X] T041 [US5] 확인한다: quickstart 8단계(시험 공간에 넣었다 풀기). 시험 값은 원래대로 되돌리고, 배포 직후 배지가 0곳인지 확인한다. 맞으면 커밋한다
 
 ---
 
