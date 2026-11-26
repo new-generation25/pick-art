@@ -67,6 +67,13 @@ export default function MapSheet({ events, summary, onClose }: { events: SheetEv
         return { places: list, noCoords: none };
     }, [events, venues, me]);
 
+    // 장소를 고르면(핀·목록) 배율은 그대로 두고 지도를 그 장소로 옮긴다. 고른 장소의 행사는 지도 아래에 나오므로 가운데로 옮기면 가리지 않는다
+    function pick(p: Place) {
+        setSelected(p.venue.id);
+        const map = mapRef.current;
+        if (map && window.naver?.maps) map.panTo(new window.naver.maps.LatLng(p.venue.lat, p.venue.lng));
+    }
+
     // 지도 만들기·핀 그리기
     useEffect(() => {
         if (!venues || !box.current || mapFailed) return;
@@ -94,7 +101,7 @@ export default function MapSheet({ events, summary, onClose }: { events: SheetEv
                     position: pos, map, title: `${p.venue.name} · 행사 ${p.events.length}건`,
                     icon: { content: `<div class="pica-pin" data-selected="${selected === p.venue.id}">${p.events.length}</div>`, anchor: new maps.Point(18, 18) },
                 });
-                maps.Event.addListener(m, "click", () => setSelected(p.venue.id));
+                maps.Event.addListener(m, "click", () => pick(p));
                 markers.current.push(m);
             }
             if (places.length > 1 && !selected) map.fitBounds(b, { top: 40, right: 40, bottom: 40, left: 40 });
@@ -156,7 +163,7 @@ export default function MapSheet({ events, summary, onClose }: { events: SheetEv
                 <ul className="mx-4 mt-3.5 border-t border-line">
                     {places.filter(p => p.venue.id !== selected).map(p => (
                         <li key={p.venue.id}>
-                            <button type="button" onClick={() => setSelected(p.venue.id)} className="flex h-[50px] w-full items-center gap-2.5 border-b border-line text-left text-[14.5px] font-semibold">
+                            <button type="button" onClick={() => pick(p)} className="flex h-[50px] w-full items-center gap-2.5 border-b border-line text-left text-[14.5px] font-semibold">
                                 <b className="pica-num grid h-[26px] min-w-[26px] place-items-center rounded-full bg-card px-1 text-[14px] shadow-[inset_0_0_0_1.5px_var(--pk-ink)]">{p.events.length}</b>
                                 <span className="flex-1 truncate">{p.venue.name}</span>
                                 <small className="text-[12.5px] font-medium text-ink-soft">{[p.today && `오늘 ${p.today}`, p.week && `예정 ${p.week}`].filter(Boolean).join(" · ")}</small>
