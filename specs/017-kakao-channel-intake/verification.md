@@ -89,3 +89,18 @@ anon list kakao folder: []
 - 버킷 `leaflets/kakao/` 파일 4개 삭제(1909afdf·715618ef·991ff5bb·647baebf) → 목록 비어 있음.
 - `kakao_senders` 시험 사용자 4줄 삭제, 운영자 줄 `cc440f3c…` 하나만 남김(다음에 보낼 때 동의 생략).
 - 운영자 PC `collector/.cache/leaflets/` 에 남은 시험 이미지·조각·JSON도 지움.
+
+## 2026-11-26 — 제보는 «행사 알리기» 메뉴로만, 일반 문의는 운영자 상담 연결 (T014)
+
+- 운영자(원문): «그런데 카카오톡 문의오는게 예술단체 제보만 있는게 아닌데, 일반 사용자들도 있잖아.» «제보는 메뉴형태로 들어오도록 해야되지 않겠어»
+- 근거(공식 문서, 11/26): 스킬 응답 버튼 action `operator` = "상담 연결 기능을 제공합니다"(answer_json_format.md, textCard·basicCard 버튼, 바로가기 응답 quickReplies 에는 없음). 상담 연결은 "채널관리자센터의 1:1 채팅 혹은 상담톡 기능을 사용할 경우" 가능(main_notions/plugin.md). 피카 채널은 1:1 채팅이 켜져 있다(대시보드 «채팅 상담중 09:00~18:00»). 상담 연결 뒤 챗봇으로 돌아오는 방법·시간은 문서에 없음 → 운영자 휴대폰 시험으로 확인.
+- 바뀐 흐름: 웰컴·제보 시간 밖의 글·사진 → **저장하지 않고** 카드 «운영자에게 문의»(operator) · «행사 알리기». «행사 알리기» → 동의 전이면 동의 안내, 동의했으면 30분 제보 시간(`kakao_senders.tip_until`). 동의·제보 저장 때마다 30분 연장. 보안 이미지 플러그인 블록(«사진 보내기»)으로 온 사진은 그 자체가 제보 뜻이라 제보 시간을 연다.
+- 운영 DB: `20261127080000_kakao_tip_menu.sql` SQL 편집기로 적용(«Success. No rows returned»). 익명 키 + 스킬 비밀값으로 시험(시험 사용자, 끝난 뒤 줄 삭제 확인):
+```
+동의 전 글: not_agreed (저장 안 함)     동의 전 start: ok, agreed=false
+동의: ok                                 제보 시간 안 글: ok → 제출 1건
+제보 시간 지난 글: not_tip (저장 안 함)  다시 start → 사진: ok → 제출 1건(image_path)
+틀린 비밀값: auth
+```
+- 코드: `kakaoSkill.ts`(TIP_TEXT «행사 알리기», MSG.welcome·notTip textCard), `route.ts`, `/partners` «카카오톡으로 보내기» 상자(«지금», 채팅방 링크 pf.kakao.com/_xoxdxkvX/chat). tsc·eslint·`check_kakao_skill.js` 통과. 커밋 3465208 → 배포 요청.
+- 남음: 배포 → 운영 주소 흉내 요청 → 운영자 휴대폰(문의 글 → 카드 → «운영자에게 문의» 연결, «행사 알리기» → 사진) → 채팅방 메뉴(커스텀 메뉴)에 «행사 알리기» 넣기.
