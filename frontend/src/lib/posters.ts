@@ -10,6 +10,15 @@ export type PosterInput = {
     poster_placeholder?: boolean | null;
 };
 
+/**
+ * 포스터 주소를 https 로 (2026-11-26). KOPIS 는 http://www.kopis.or.kr/... 로 주는데, https 페이지에서 http 그림은
+ * 휴대폰 브라우저(특히 아이폰 사파리)가 막아 «포스터 없음»으로 보였다. https://kopis.or.kr/... 는 같은 그림이 열린다.
+ */
+export function posterSrc(url?: string | null): string {
+    const u = (url || "").trim();
+    return u.replace(/^http:\/\/(www\.)?kopis\.or\.kr\//i, "https://kopis.or.kr/").replace(/^http:\/\//i, "https://");
+}
+
 /** 글자 포스터를 그려야 하는가 */
 export function needsTextPoster(e: PosterInput): boolean {
     const url = (e.poster_image_url || "").trim();

@@ -212,6 +212,9 @@ async def main(date_from, date_to, dry, ids=None):
                         db.supabase.table("raw_posts").update({"status": "DUPLICATE"}).eq("id", r["id"]).execute()
             a = chosen["content"]["ai_suggestion"]
             poster = (chosen.get("image_urls") or [None])[0] or a.get("poster_url")
+            # KOPIS 는 http://www.kopis.or.kr/... 를 준다. https 페이지에서 막히지 않게 https://kopis.or.kr/... 로 (같은 그림)
+            if poster and re.match(r"^http://(www\.)?kopis\.or\.kr/", poster):
+                poster = re.sub(r"^http://(www\.)?kopis\.or\.kr/", "https://kopis.or.kr/", poster)
             new_images = None
             if chosen["status"] == "REVIEW" and not chosen.get("image_urls"):
                 # 인스타 포스터 주소(instagram.com/p/…/media)는 오래 가지 않으므로 저장소에 올린 것만 쓴다(review_instagram 과 같다)

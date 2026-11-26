@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Modal } from "@mantine/core";
 import { Maximize2, X } from "lucide-react";
 import { PosterOrText, type PosterEvent } from "./PosterOrText";
-import { needsTextPoster } from "@/lib/posters";
+import { needsTextPoster, posterSrc } from "@/lib/posters";
 
 // 행사 상세의 포스터. 누르면 화면 가득 원본 비율로 크게 보여 준다 (Esc·바깥 누르기·닫기 버튼으로 닫힘)
 export function PosterViewer({ src, alt, ended = false, event }: { src?: string | null; alt: string; ended?: boolean; event?: PosterEvent }) {
@@ -13,7 +13,7 @@ export function PosterViewer({ src, alt, ended = false, event }: { src?: string 
     if (event && needsTextPoster(event)) {
         return <PosterOrText event={event} size="detail" className={`mx-auto !w-[210px] shadow-[0_10px_26px_rgba(30,26,21,.24)] ${ended ? "grayscale" : ""}`} />;
     }
-    const poster = src || "/images/placeholder.webp";
+    const poster = posterSrc(src) || "/images/placeholder.webp";
     const canZoom = !!src;
 
 

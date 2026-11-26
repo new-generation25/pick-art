@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { needsTextPoster, posterSourceName, shortPeriod } from "@/lib/posters";
+import { needsTextPoster, posterSourceName, posterSrc, shortPeriod } from "@/lib/posters";
 
 export type PosterEvent = {
     title: string;
@@ -23,7 +23,7 @@ export function PosterOrText({ event, size = "shelf", className = "", priority =
     className?: string;
     priority?: boolean;
 }) {
-    const url = (event.poster_image_url || "").trim();
+    const url = posterSrc(event.poster_image_url);
     const [failed, setFailed] = useState(false);
     useEffect(() => setFailed(false), [url]);
 

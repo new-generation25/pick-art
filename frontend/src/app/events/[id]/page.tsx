@@ -13,6 +13,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { PosterOrText } from "@/components/ui/PosterOrText";
+import { posterSrc } from "@/lib/posters";
 import { StickyActions } from "@/components/ui/StickyActions";
 import { RouteButtons } from "@/components/ui/RouteButtons";
 import { AdminPosterControl } from "@/components/ui/AdminPosterControl";
@@ -44,7 +45,7 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
     const url = `/events/${event.id}`;
     // 포스터가 없으면 기본 공유 이미지
     // 포스터가 없거나 안내 그림(specs/014)이면 기본 공유 이미지
-    const images = event.poster_image_url && !event.poster_placeholder ? [event.poster_image_url] : [DEFAULT_OG_IMAGE.url];
+    const images = event.poster_image_url && !event.poster_placeholder ? [posterSrc(event.poster_image_url)] : [DEFAULT_OG_IMAGE.url];
 
     return {
         title: `${event.title} | 피카 pica`,
