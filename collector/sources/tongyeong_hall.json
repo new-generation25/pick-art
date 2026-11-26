@@ -19,5 +19,6 @@
     "venue": ".di.location .dd",
     "image": "img@src"
   },
+  "detail": {"poster": ".p1 img[src*='ImagePrint']"},
   "expect": {"min_rows": 1, "required": ["title", "link", "period"]}
 }

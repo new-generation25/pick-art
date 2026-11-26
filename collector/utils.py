@@ -26,6 +26,18 @@ async def check_link(session: aiohttp.ClientSession, url: str) -> tuple:
     except Exception as e:
         return False, type(e).__name__, url
 
+def encode_poster(img_data: bytes) -> bytes:
+    """포스터 저장본 만들기: 긴 변 1600px로 줄인 WebP(quality 85). 저장소 파일과 지문(poster_sha256)은 이 결과로 정해진다.
+    공공기관 포스터는 수억 픽셀짜리도 있어 Pillow 픽셀 상한을 푼다."""
+    Image.MAX_IMAGE_PIXELS = None
+    img = Image.open(io.BytesIO(img_data))
+    img.draft("RGB", (1600, 1600))
+    img.thumbnail((1600, 1600))
+    out = io.BytesIO()
+    img.save(out, format="WEBP", quality=85)
+    return out.getvalue()
+
+
 async def process_and_upload_image(supabase: Client, img_url: str, storage_path: str) -> tuple:
     """
     이미지를 다운로드하여 원본과 썸네일(600px) WebP로 변환 후 업로드합니다.
@@ -49,12 +61,6 @@ async def process_and_upload_image(supabase: Client, img_url: str, storage_path:
                 return None, None, None
 
     try:
-        # 1. 이미지 처리 (Pillow). 공공기관 포스터는 수억 픽셀짜리도 있어 상한을 풀고 긴 변 1600px로 줄인다
-        Image.MAX_IMAGE_PIXELS = None
-        img = Image.open(io.BytesIO(img_data))
-        img.draft("RGB", (1600, 1600))
-        img.thumbnail((1600, 1600))
-        
         # 파일명 생성
         filename = os.path.basename(storage_path)
         name_only, _ = os.path.splitext(filename)
@@ -62,10 +68,7 @@ async def process_and_upload_image(supabase: Client, img_url: str, storage_path:
         
         orig_path = f"posters/{name_only}_orig.webp"
         
-        # 원본 (WebP 변환)
-        orig_io = io.BytesIO()
-        img.save(orig_io, format="WEBP", quality=85)
-        orig_data = orig_io.getvalue()
+        orig_data = encode_poster(img_data)
 
         # Supabase Upload (upsert=True)
         # 원본 업로드

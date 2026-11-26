@@ -30,7 +30,8 @@
     "image": "img@src"
   },
   "detail": {
-    "body": ".view_content"
+    "body": ".view_content",
+    "poster": ".page_detail .thumb img[src*='file/download']"
   },
   "expect": {
     "min_rows": 1,

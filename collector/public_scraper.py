@@ -13,6 +13,7 @@ from datetime import datetime, timezone, timedelta
 from source_loader import find_for_url
 from rule_extractor import parse_period
 from utils import check_link, process_and_upload_image
+from poster_finder import has_poster_rule, load_placeholders, poster_candidates
 
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
 
@@ -34,6 +35,7 @@ RETRY_WAIT = 30  # 네트워크 오류 재시도 전 대기(초)
 class PublicScraper:
     def __init__(self, db: Database):
         self.db = db
+        self._placeholders = None  # 안내 그림 지문(placeholder_images). 첫 쓰임에 한 번 읽는다
 
     async def scrape(self, dynamic_targets):
         """대상별 결과 [{name, status, summary}]를 돌려준다."""
@@ -134,6 +136,7 @@ class PublicScraper:
                     fail += 1
                     continue
                 description = ""
+                detail = None
                 body_sel = (d.get("detail") or {}).get("body")
                 title_sel = (d.get("detail") or {}).get("title")  # 목록 제목이 '..'로 잘리는 사이트
                 if body_sel or title_sel:
@@ -146,9 +149,12 @@ class PublicScraper:
                     except Exception:
                         pass
                 image = it["image"]
-                p_url = None
+                p_url = sha = None
                 if image:
-                    _, p_url, _ = await process_and_upload_image(self.db.supabase, image, f"{d['slug']}_{source_id}")
+                    _, p_url, sha = await process_and_upload_image(self.db.supabase, image, f"{d['slug']}_{source_id}")
+                # 목록 그림이 없거나 안내 그림이면 상세 페이지의 포스터 자리(정의 detail.poster·body)에서 다시 찾는다
+                if (not p_url or sha in self._placeholder_set()) and has_poster_rule(d.get("detail")):
+                    p_url = await self._detail_poster(session, d, board, link, detail, f"{d['slug']}_{source_id}") or p_url
                 post = {
                     "source": target_name,
                     "source_id": source_id,
@@ -174,6 +180,28 @@ class PublicScraper:
         warn = f" / 정의 만료 의심 게시판 {len(expired)}" if expired else ""
         return {"name": target_name, "status": status,
                 "summary": f"{mark} 수집 완료: 발견 {found}건 (신규 {new}, 중복 {dup}, 실패 {fail}{extra}){warn}"}
+
+    def _placeholder_set(self):
+        if self._placeholders is None:
+            try:
+                self._placeholders = load_placeholders(self.db.supabase)
+            except Exception:
+                self._placeholders = set()
+        return self._placeholders
+
+    async def _detail_poster(self, session, d, board, link, soup, key):
+        """상세 페이지 포스터 후보 가운데 안내 그림이 아닌 첫 그림을 올리고 주소를 돌려준다. 없으면 None"""
+        try:
+            if soup is None:
+                soup = BeautifulSoup(await self._fetch_text(session, link, d, board), "html.parser")
+            for img in poster_candidates(soup, link, d.get("detail")):
+                _, url, sha = await process_and_upload_image(self.db.supabase, img, key)
+                if url and sha not in self._placeholder_set():
+                    print(f"  🖼️ 상세 페이지 포스터: {img}", flush=True)
+                    return url
+        except Exception as e:
+            print(f"  ⚠️ 상세 포스터 찾기 실패: {type(e).__name__}", flush=True)
+        return None
 
     async def _fetch_text(self, session, url, d, board, headers=None):
         """정의의 encoding(예: euc-kr)을 따른다. 없으면 응답 헤더, 그다음 utf-8."""

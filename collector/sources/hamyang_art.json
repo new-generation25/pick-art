@@ -26,6 +26,7 @@
     "period": ".cp19info1 li.di:nth-of-type(1) .dd",
     "image": "img@src"
   },
+  "detail": {"poster": ".p1 img[src*='ImagePrint']"},
   "expect": {
     "min_rows": 1,
     "required": [
