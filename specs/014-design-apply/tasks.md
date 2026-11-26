@@ -155,12 +155,12 @@
 
 **Independent Test**: spec US6 Independent Test(찜 보기 → 지역 → 관심 분야 → 캘린더 → 알림 → 로그아웃, 다시 열어 값 유지).
 
-- [ ] T042 [US6] `/me` 화면을 만든다 (`frontend/src/app/me/page.tsx`).
+- [X] T042 [US6] `/me` 화면을 만든다 (`frontend/src/app/me/page.tsx`).
   - 순서: 프로필(닉네임·계정·«고치기») → 찜한 행사 `#saved`(`favorites` 선반 + «모두 보기») → 내 지역·«내 지역 먼저 보기» → 관심 분야 칩 → 캘린더로 받기(구글·애플, `/calendar.ics`) → 알림 `#settings`(새 행사·이메일) → 단체·공간 안내(`/partners`) → 피카가 고르는 기준(`/about`) → 계정 정보·약관·개인정보·로그아웃.
   - 저장은 지금 `app/settings/page.tsx`와 같은 `profiles` 칸에 한다.
   - 로그인 전이면 로그인 안내를 보인다.
-- [ ] T043 [US6] `/saved`는 `/me#saved`로, `/settings`는 `/me#settings`로 서버 리디렉트한다. `/calendar`는 그대로 두고 새 색만 입었는지 확인한다 (`frontend/src/app/saved/page.tsx`, `frontend/src/app/settings/page.tsx`, `frontend/src/app/calendar/page.tsx`)
-- [ ] T044 [US6] 확인한다: 로그인 계정으로 US6 시험을 하고, 예전 주소 3개를 연다. 맞으면 커밋한다
+- [X] T043 [US6] `/saved`는 `/me#saved`로, `/settings`는 `/me#settings`로 서버 리디렉트한다. `/calendar`는 그대로 두고 새 색만 입었는지 확인한다 (`frontend/src/app/saved/page.tsx`, `frontend/src/app/settings/page.tsx`, `frontend/src/app/calendar/page.tsx`)
+- [X] T044 [US6] (부분: 예전 주소 3개와 로그인 전 화면은 확인. 로그인한 화면은 미리보기 브라우저에 로그인이 없어 확인하지 못함 — 운영자 확인 필요) 확인한다: 로그인 계정으로 US6 시험을 하고, 예전 주소 3개를 연다. 맞으면 커밋한다
 
 ---
 

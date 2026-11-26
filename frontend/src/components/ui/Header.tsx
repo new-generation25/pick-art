@@ -82,8 +82,9 @@ export function Header() {
                             </Menu.Target>
                             <Menu.Dropdown>
                                 <Menu.Label>{nickname}님</Menu.Label>
-                                <Menu.Item leftSection={<Heart size={14} />} component={Link} href="/saved">찜한 행사</Menu.Item>
-                                <Menu.Item leftSection={<Settings size={14} />} component={Link} href="/settings">내 지역·관심 분야·알림</Menu.Item>
+                                <Menu.Item leftSection={<UserRound size={14} />} component={Link} href="/me">내 정보</Menu.Item>
+                                <Menu.Item leftSection={<Heart size={14} />} component={Link} href="/me#saved">찜한 행사</Menu.Item>
+                                <Menu.Item leftSection={<Settings size={14} />} component={Link} href="/me#settings">내 지역·관심 분야·알림</Menu.Item>
                                 <Menu.Item leftSection={<CalendarPlus size={14} />} component={Link} href="/calendar">캘린더로 받기</Menu.Item>
                                 <Menu.Item leftSection={<InstagramIcon size={14} />} component="a" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">인스타그램 @picka.news</Menu.Item>
                                 {isAdmin && (
