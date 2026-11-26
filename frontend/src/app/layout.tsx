@@ -46,8 +46,14 @@ export const metadata: Metadata = {
   },
 };
 
+// 휴대폰 맨 위(시간 표시줄)·사파리 주소줄 색: 다크 모드 휴대폰에서도 화면 바탕(종이 #F4EFE6)과 같게 (11/27 «앱 최상단이 검정»).
+// colorScheme light: 이 사이트는 밝은 화면 하나뿐이라 브라우저가 어두운 기본색을 쓰지 않게 한다
 export const viewport: Viewport = {
-  themeColor: "#F4EFE6",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F4EFE6" },
+    { media: "(prefers-color-scheme: dark)", color: "#F4EFE6" },
+  ],
+  colorScheme: "light",
 };
 
 const theme = createTheme({

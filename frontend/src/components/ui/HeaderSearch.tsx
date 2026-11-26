@@ -77,7 +77,7 @@ export function HeaderSearch({ open, setOpen }: { open: boolean; setOpen: (v: bo
 
     return (
         <form onSubmit={submit} role="search"
-            className="flex h-11 min-w-0 flex-1 items-center gap-2 rounded-full bg-card px-4 shadow-[0_1px_5px_rgba(30,26,21,.13)] sm:w-[360px] sm:flex-none">
+            className="pica-pop-in flex h-11 min-w-0 flex-1 items-center gap-2 rounded-full bg-card px-4 shadow-[0_1px_5px_rgba(30,26,21,.13)] sm:w-[360px] sm:flex-none">
             <Search size={18} className="shrink-0 text-ink-soft" aria-hidden />
             <input ref={input} name="q" type="search" enterKeyHint="search" value={value}
                 onChange={(e) => {

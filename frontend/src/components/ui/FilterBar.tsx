@@ -38,7 +38,7 @@ const Row = ({ label, children }: { label: string; children: React.ReactNode }) 
 // 칩 한 줄(시안 f01): 기간 · 지역 · 분야 · 아이와 + 오른쪽 «필터». 넘겨도 맨 위 줄 아래에 붙는다
 function Pick({ label, on, items, current, onPick }: { label: string; on: boolean; items: { label: string; value: string }[]; current: string; onPick: (v: string) => void }) {
     return (
-        <Menu shadow="md" width={200} position="bottom-start">
+        <Menu shadow="md" width={200} position="bottom-start" transitionProps={{ transition: "pop-top-left", duration: 220, timingFunction: "cubic-bezier(.2,.8,.2,1)" }}>
             <Menu.Target>
                 <button type="button" className="pica-chip" aria-pressed={on} aria-haspopup="menu">
                     {label}<ChevronDown size={15} aria-hidden />

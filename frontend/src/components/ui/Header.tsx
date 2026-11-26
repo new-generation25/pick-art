@@ -47,7 +47,7 @@ export function Header() {
     const iconBtn = "grid h-11 w-11 place-items-center rounded-full text-ink transition-colors hover:bg-soft";
 
     return (
-        <div className="fixed inset-x-0 top-0 z-[1000] h-[60px] border-b border-line bg-paper/95 backdrop-blur">
+        <div className="fixed inset-x-0 top-0 z-[1000] h-[60px] border-b border-line bg-paper">
             <div className="mx-auto flex h-full max-w-6xl items-center justify-between gap-2 pl-[18px] pr-[10px] sm:px-6">
                 {/* 찾는 중이면 휴대폰에서는 로고 자리까지 찾기 칸이 쓰고, PC에서는 로고를 두고 오른쪽에 적당한 길이로 연다 */}
                 <Link href="/" aria-label="pica 홈" className={`${searching ? "hidden sm:flex" : "flex"} shrink-0 items-baseline gap-2.5 no-underline`}>
@@ -60,7 +60,7 @@ export function Header() {
                         <HeaderSearch open={searching} setOpen={setSearching} />
                     </Suspense>
                     {user ? (
-                        <Menu shadow="md" width={210} position="bottom-end">
+                        <Menu shadow="md" width={210} position="bottom-end" transitionProps={{ transition: "pop-top-right", duration: 220, timingFunction: "cubic-bezier(.2,.8,.2,1)" }}>
                             <Menu.Target>
                                 <button type="button" className="grid h-11 w-11 place-items-center rounded-full bg-ink text-white" aria-label="내 정보">
                                     <UserRound size={20} />

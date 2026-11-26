@@ -81,6 +81,24 @@ function toCard(e: NearbyRow) {
     };
 }
 
+/** 거리순 목록에서 같은 장소(좌표가 같으면 같은 곳으로 본다)를 붙어 있는 대로 한 묶음으로 */
+function groupByPlace<T extends { id: string; venue_id?: string | null; coords?: { lat: number; lng: number } | null }>(items: T[]): { key: string; items: T[] }[] {
+    const out: { key: string; items: T[] }[] = [];
+    const keyOf = (e: T) => e.coords ? `${e.coords.lat.toFixed(5)},${e.coords.lng.toFixed(5)}` : (e.venue_id || e.id);
+    for (const e of items) {
+        const k = keyOf(e);
+        const last = out[out.length - 1];
+        if (last && last.key === k) last.items.push(e);
+        else out.push({ key: k, items: [e] });
+    }
+    return out;
+}
+
+/** 묶음 머리의 장소 이름: «김해문화의전당 (누리홀)» → «김해문화의전당» (같은 건물의 홀 이름은 카드에 남는다) */
+function placeName(venue: string): string {
+    return venue.replace(/\s*\([^)]*\)\s*$/, "").trim() || venue;
+}
+
 export function NearbyClient({ rows, today, appname }: { rows: NearbyRow[]; today: string; appname: string }) {
     const router = useRouter();
     const sp = useSearchParams();
@@ -249,12 +267,16 @@ export function NearbyClient({ rows, today, appname }: { rows: NearbyRow[]; toda
                             </div>
                         </div>
                     ) : (
-                        <ol className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                            {result.near.map((e, i) => (
-                                <li key={e.id} className="flex flex-col gap-2">
-                                    <p className="text-[15px] font-bold text-ink">{formatDistance(e.distanceM, origin.approx)}</p>
-                                    <EventCard event={toCard(e)} priority={i < 3} />
-                                    <RouteButtons e={e} appname={appname} />
+                        <ol className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                            {/* 같은 장소(좌표가 같음)의 행사는 한 묶음: 거리·장소 이름 한 번, 길찾기 한 번 (11/27 «김해문화의전당이 따로따로») */}
+                            {groupByPlace(result.near).map((g, gi) => (
+                                <li key={g.key} className="flex flex-col gap-2">
+                                    <p className="flex items-baseline gap-2 text-[15px] font-bold text-ink">
+                                        {formatDistance(g.items[0].distanceM, origin.approx)}
+                                        {g.items[0].venue && <span className="min-w-0 truncate text-[13.5px] font-semibold text-ink-soft">{placeName(g.items[0].venue)}{g.items.length > 1 ? ` · ${g.items.length}건` : ""}</span>}
+                                    </p>
+                                    {g.items.map((e, i) => <EventCard key={e.id} event={toCard(e)} priority={gi < 3 && i === 0} />)}
+                                    <RouteButtons e={g.items[0]} appname={appname} />
                                 </li>
                             ))}
                         </ol>

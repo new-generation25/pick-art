@@ -396,3 +396,14 @@ body {
   border: 3px solid #fff;
   box-shadow: 0 0 0 2px var(--pk-ink, #1e1a15);
 }
+
+/* 열림 애니메이션 (11/27 «필터 창처럼 부드럽게»): 지도 시트는 아래에서 올라오고, 뒤 배경은 서서히, 찾기 칸은 살짝 커지며 나타난다 */
+@keyframes pica-sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes pica-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pica-pop-in { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
+.pica-sheet-up { animation: pica-sheet-up .3s cubic-bezier(.2, .8, .2, 1) both; }
+.pica-fade-in { animation: pica-fade-in .25s ease both; }
+.pica-pop-in { animation: pica-pop-in .2s cubic-bezier(.2, .8, .2, 1) both; transform-origin: right center; }
+@media (prefers-reduced-motion: reduce) {
+  .pica-sheet-up, .pica-fade-in, .pica-pop-in { animation: none; }
+}

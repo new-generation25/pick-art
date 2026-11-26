@@ -154,8 +154,8 @@ export default function MapSheet({ events, summary, onClose }: { events: SheetEv
 
     return (
         <div className="pica-portal fixed inset-0 z-[1200]" role="dialog" aria-modal="true" aria-label="지도">
-            <button type="button" aria-label="지도 닫기" onClick={close} className="absolute inset-0 bg-[rgba(30,26,21,.5)]" />
-            <div className="absolute inset-x-0 bottom-0 top-[58px] overflow-y-auto rounded-t-[22px] bg-paper pb-24 shadow-[0_-8px_24px_rgba(30,26,21,.25)] [scrollbar-width:none] lg:left-auto lg:right-0 lg:top-[60px] lg:w-[560px] lg:rounded-none lg:rounded-tl-[22px]">
+            <button type="button" aria-label="지도 닫기" onClick={close} className="pica-fade-in absolute inset-0 bg-[rgba(30,26,21,.5)]" />
+            <div className="pica-sheet-up absolute inset-x-0 bottom-0 top-[58px] overflow-y-auto rounded-t-[22px] bg-paper pb-24 shadow-[0_-8px_24px_rgba(30,26,21,.25)] [scrollbar-width:none] lg:left-auto lg:right-0 lg:top-[60px] lg:w-[560px] lg:rounded-none lg:rounded-tl-[22px]">
                 <span className="mx-auto mt-2 block h-[5px] w-10 rounded bg-[#CFC5B4]" aria-hidden />
                 <div className="flex items-center justify-between px-4 pb-2.5 pt-2">
                     <div>
