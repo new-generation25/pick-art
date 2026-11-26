@@ -35,9 +35,18 @@ def test_start_only_and_one_day():
     assert k.judge_dates("2026-12-05", None, "2026-12-05", "2026-12-05") == "ok"
 
 
-def test_region_busan_gu():
-    assert k.judge_region("부산 해운대구", "부산") == "ok"
-    assert k.judge_region("부산광역시", "부산") == "ok"
+def test_region_from_text_like_admin():
+    assert k.region_from_text("부산 해운대구") == "부산"
+    assert k.region_from_text("부산광역시 중구") == "부산"
+    assert k.region_from_text("영도구") == "부산"
+    assert k.region_from_text("마산합포구") == "창원"
+    assert k.region_from_text("중구") is None        # 다른 도시에도 있는 구
+    assert k.region_from_text("김해시 동상동") == "김해"
+
+
+def test_title_tag_and_hangul_part():
+    assert k.judge_text("aboutTime 어바웃타임", "어바웃타임 [부산]") == "ok"
+    assert k.judge_text("열린음악회 The Jazz", "따소미문화예술단과 함께하는 <열린 음악회>") == "ok"
 
 
 def test_pending_and_failed():
@@ -71,3 +80,12 @@ def test_region_falls_back_to_venue_match():
     a = ai("각기사방 해치세", venue="진주성 공북문앞 중영")
     a["venue_match"] = {"venue_id": "v", "name": "진주성 중영", "region": "진주"}
     assert k.score_item(a, {**T, "region": "진주", "venue": "진주성 중영"})["region"] == "ok"
+
+
+def test_tiny_source_is_not_used():
+    from PIL import Image
+    def png(w, h):
+        b = io.BytesIO(); Image.new("RGB", (w, h)).save(b, "PNG"); return b.getvalue()
+    assert not k.readable_source(png(182, 258))
+    assert k.readable_source(png(700, 1000))
+    assert not k.readable_source(b"not an image")

@@ -26,6 +26,24 @@ export const BUSAN_DISTRICTS: { name: string; slug: string }[] = [
     { name: "기장군", slug: "gijang" },
 ];
 
+/** 시·군 이름 없이 구·옛 시 이름만 인쇄된 경우(«영도구», «마산») 그 지역. 다른 도시에도 있는 구 이름(중구·서구·동구·남구·북구·강서구)은
+ *  어느 도시인지 알 수 없어 넣지 않는다. 카카오 제보 읽기 검증(11/27)에서 «영도구»만 인쇄된 포스터가 지역을 못 채운 것을 보고 더함 */
+const DISTRICT_REGION: Record<string, string> = {
+    ...Object.fromEntries(BUSAN_DISTRICTS.filter(d => !["중구", "서구", "동구", "남구", "북구", "강서구"].includes(d.name)).map(d => [d.name, "부산"])),
+    "해운대": "부산", "기장": "부산",
+    "성산구": "창원", "의창구": "창원", "마산합포구": "창원", "마산회원구": "창원", "진해구": "창원", "마산": "창원", "진해": "창원",
+};
+
+/** 인쇄된 지역 글자(«김해시 동상동», «부산광역시 중구», «영도구») → 지역 이름. 못 찾으면 null */
+export function regionFromText(text?: string | null): string | null {
+    const t = (text || "").replace(/\s+/g, "");
+    if (!t) return null;
+    const direct = GN_REGIONS.find(r => t.includes(r));
+    if (direct) return direct;
+    const key = Object.keys(DISTRICT_REGION).sort((a, b) => b.length - a.length).find(k => t.includes(k));
+    return key ? DISTRICT_REGION[key] : null;
+}
+
 const safeDecode = (s: string) => { try { return decodeURIComponent(s); } catch { return s; } };
 
 /** 주소 조각(로마자 또는 한글) → 지역 이름. 목록에 없으면 null */

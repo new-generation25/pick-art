@@ -72,12 +72,23 @@ def similar(a, b, need=0.5):
     return len(A & B) / len(A | B) >= need
 
 
+TAG = re.compile(r"\s*\[[^\]]{1,10}\]\s*$")   # KOPIS 제목 끝의 «[부산]» 같은 지역 꼬리표
+
+
+def hangul(s):
+    return "".join(re.findall(r"[가-힣0-9]+", s or ""))
+
+
 def judge_text(ai_value, truth, need=0.5):
     if not ai_value:
         return "empty"
     if not truth:
         return "unknown"
-    return "ok" if similar(ai_value, truth, need) else "wrong"
+    truth = TAG.sub("", truth)
+    if similar(ai_value, truth, need):
+        return "ok"
+    ha, ht = hangul(ai_value), hangul(truth)   # «열린음악회 The Jazz» ↔ «<열린 음악회>»: 한글 부분끼리
+    return "ok" if len(ha) >= 3 and len(ht) >= 3 and (ha in ht or ht in ha) else "wrong"
 
 
 def judge_dates(ai_start, ai_end, t_start, t_end):
@@ -91,14 +102,34 @@ def judge_dates(ai_start, ai_end, t_start, t_end):
     return "wrong"
 
 
+REGIONS = ["창원", "김해", "진주", "통영", "거제", "양산", "밀양", "사천", "함안", "고성", "합천", "거창", "함양",
+           "창녕", "의령", "남해", "하동", "산청", "부산"]
+# frontend/src/lib/regions.ts regionFromText 와 같은 규칙(다른 도시에도 있는 구 이름은 뺌)
+DISTRICT_REGION = {**{d: "부산" for d in ["영도구", "부산진구", "동래구", "해운대구", "사하구", "금정구", "연제구", "수영구",
+                                          "사상구", "기장군", "해운대", "기장"]},
+                   **{d: "창원" for d in ["성산구", "의창구", "마산합포구", "마산회원구", "진해구", "마산", "진해"]}}
+
+
+def region_from_text(text):
+    t = re.sub(r"\s+", "", text or "")
+    if not t:
+        return None
+    for r in REGIONS:
+        if r in t:
+            return r
+    for k in sorted(DISTRICT_REGION, key=len, reverse=True):
+        if k in t:
+            return DISTRICT_REGION[k]
+    return None
+
+
 def judge_region(ai_value, truth):
+    """ai_value: 운영자 화면이 채우는 지역 이름(이미 region_from_text·장소 목록을 거친 값)"""
     if not ai_value:
         return "empty"
-    a, t = norm(ai_value), norm(truth)
-    if not t:
+    if not truth:
         return "unknown"
-    t = t.replace("특별시", "").replace("광역시", "")
-    return "ok" if (t[:2] in a or a[:2] in t) else "wrong"
+    return "ok" if ai_value == truth else "wrong"
 
 
 FIELDS = ("title", "dates", "venue", "region")
@@ -117,7 +148,7 @@ def score_item(ai, truth):
         "dates": judge_dates(ai.get("date_start"), ai.get("date_end"), truth["start"], truth["end"]),
         "venue": judge_text(v("venue"), truth["venue"], 0.4),
         # 지역은 운영자 화면이 채우는 값으로 본다: 인쇄된 시·군, 없으면 장소 목록에서 찾은 장소의 지역(venue_match)
-        "region": judge_region(v("region_hint") or ((ai.get("venue_match") or {}).get("region")), truth["region"]),
+        "region": judge_region(region_from_text(v("region_hint")) or ((ai.get("venue_match") or {}).get("region")), truth["region"]),
     }
 
 
@@ -156,13 +187,13 @@ def phone_photo(raw, variant, rnd):
         im = im.transform((W, H), Image.QUAD, quad, resample=Image.BICUBIC)
         im = ImageEnhance.Brightness(im).enhance(rnd.uniform(0.82, 1.05))
         q = 75
-    elif variant == "dim":       # 어두운 실내 + 살짝 흔들림
-        im = ImageEnhance.Brightness(im).enhance(rnd.uniform(0.6, 0.75))
-        im = ImageEnhance.Contrast(im).enhance(0.85)
-        im = im.filter(ImageFilter.GaussianBlur(rnd.uniform(0.8, 1.3)))
-        q = 70
-    elif variant == "small":     # 카카오톡 «저용량» 전송처럼 작게
-        im.thumbnail((900, 900), Image.LANCZOS)
+    elif variant == "dim":       # 실내 조명 + 살짝 흔들림. 사람이 읽을 수 있는 정도(11/27 운영자 «왜 보이지 않는 포스터로 테스트를 해»)
+        im = ImageEnhance.Brightness(im).enhance(rnd.uniform(0.85, 0.95))
+        im = ImageEnhance.Contrast(im).enhance(0.92)
+        im = im.filter(ImageFilter.GaussianBlur(rnd.uniform(0.3, 0.6)))
+        q = 75
+    elif variant == "small":     # 카카오톡 «저용량» 전송처럼 작게(긴 변 1280px)
+        im.thumbnail((1280, 1280), Image.LANCZOS)
         q = 65
     else:                        # clean: 다시 압축만
         q = 80
@@ -176,6 +207,17 @@ def phone_photo(raw, variant, rnd):
 
 
 VARIANTS = ("tilt", "dim", "small", "clean")
+MIN_SOURCE_EDGE = 800   # 원본 포스터 긴 변이 이보다 작으면 쓰지 않는다(KOPIS 썸네일 182px 같은 것은 휴대폰 사진과 거리가 멀다)
+
+
+def readable_source(raw, min_edge=MIN_SOURCE_EDGE):
+    """사람이 글자를 읽을 수 있을 만한 원본인가(긴 변 min_edge px 이상)"""
+    from PIL import Image
+    try:
+        im = Image.open(io.BytesIO(raw))
+        return max(im.size) >= min_edge
+    except Exception:
+        return False
 
 
 # ---------- DB ----------
@@ -232,7 +274,10 @@ def make(n, seed):
                                          "p_text": None, "p_rights": RIGHTS}).execute().data
 
     items = []
-    for k, ev in enumerate(pick_events(svc, n, rnd)):
+    for ev in pick_events(svc, n * 3, rnd):
+        if len(items) >= n:
+            break
+        k = len(items)
         if len(items) % PER_USER == 0 and len(users) <= len(items) // PER_USER:  # 보낸 사람당 하루 5건 제한(DB) → 4건마다 바꾼다
             users.append(f"pica-check-{run}-{uuid.uuid4().hex[:6]}")
             a = intake("agree")
@@ -243,7 +288,11 @@ def make(n, seed):
                  "end": (ev["event_date_end"] or "")[:10] or None, "venue": ev.get("venue"), "region": ev.get("region"),
                  "source": ev.get("source"), "poster": ev["poster_image_url"]}
         try:
-            img = phone_photo(fetch(ev["poster_image_url"]), variant, rnd)
+            raw = fetch(ev["poster_image_url"])
+            if not readable_source(raw):
+                print(f"  건너뜀(원본이 작아 글자를 알아볼 수 없음): {ev['title'][:30]}")
+                continue
+            img = phone_photo(raw, variant, rnd)
         except Exception as e:
             print(f"  건너뜀(포스터 못 받음): {ev['title'][:30]} — {str(e)[:80]}")
             continue

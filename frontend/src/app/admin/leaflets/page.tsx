@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Container, Title, Text, Paper, Group, Badge, Button, SegmentedControl, Stack, TextInput, Textarea, Select, Checkbox, Loader, Anchor, SimpleGrid } from "@mantine/core";
 import { supabase } from "@/lib/supabase";
-import { GN_REGIONS } from "@/lib/regions";
+import { GN_REGIONS, regionFromText } from "@/lib/regions";
 import { CATEGORIES } from "@/lib/categories";
 import { leafletSource, RIGHTS_CHECKS, RIGHTS_VERSION } from "@/lib/leaflets";
 import { shrink } from "@/app/tip/leaflet/LeafletForm";
@@ -37,7 +37,7 @@ function draftOf(s: Sub): Draft {
         title: s.given.title || v(a.title as Field),
         category: "",
         // 지역: 포스터에 인쇄된 시·군을 먼저, 없으면 장소 목록에서 찾은 장소의 지역(포스터에 지역 이름이 없는 일이 많다 — 11/27 검증 12건 중 3건)
-        region: GN_REGIONS.find(r => regionHint.includes(r)) ?? (GN_REGIONS.find(r => r === a.venue_match?.region) ?? ""),
+        region: regionFromText(regionHint) ?? (GN_REGIONS.find(r => r === a.venue_match?.region) ?? ""),
         venue: s.given.venue || v(a.venue as Field),
         date_start: (a.date_start as string) || "",
         date_end: (a.date_end as string) || (a.date_start as string) || "",
