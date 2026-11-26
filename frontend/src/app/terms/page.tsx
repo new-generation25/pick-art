@@ -12,7 +12,7 @@ export default function TermsPage() {
     return (
         <LegalDoc title="이용약관" effective="2026-11-02">
             <Section n={1} title="목적">
-                <p>이 약관은 피카(pica, 이하 &ldquo;서비스&rdquo;)를 이용하는 조건과 절차, 운영자와 이용자의 권리·의무를 정합니다.</p>
+                <p>이 약관은 릴로컬(이하 &ldquo;운영자&rdquo;)이 운영하는 피카(pica, 이하 &ldquo;서비스&rdquo;)를 이용하는 조건과 절차, 운영자와 이용자의 권리·의무를 정합니다.</p>
             </Section>
 
             <Section n={2} title="정의">
@@ -75,6 +75,7 @@ export default function TermsPage() {
                 <p>약관을 바꾸면 시행 7일 전부터 서비스 화면에 알립니다.</p>
                 <ul>
                     <li>2026-11-02: 처음 제정</li>
+                    <li>2026-11-27: 운영 주체(릴로컬)를 밝히고 회원가입에 카카오 로그인을 더함(이용 조건은 그대로)</li>
                 </ul>
             </Section>
         </LegalDoc>

@@ -13,7 +13,7 @@ export default function PrivacyPage() {
     return (
         <LegalDoc title="개인정보처리방침" effective="2026-11-02">
             <p>
-                피카(pica, 이하 &ldquo;서비스&rdquo;)는 「개인정보 보호법」에 따라 이용자의 개인정보를 보호하고, 관련 고충을
+                릴로컬이 운영하는 피카(pica, 이하 &ldquo;서비스&rdquo;)는 「개인정보 보호법」에 따라 이용자의 개인정보를 보호하고, 관련 고충을
                 신속하게 처리하기 위해 이 처리방침을 둡니다.
             </p>
 
@@ -107,7 +107,7 @@ export default function PrivacyPage() {
 
             <Section n={10} title="개인정보 보호책임자">
                 <p>
-                    책임자: pica 운영자<br />
+                    책임자: 릴로컬 (피카 운영)<br />
                     연락처: <a href={`mailto:${CONTACT}`} className="underline underline-offset-2">{CONTACT}</a>
                 </p>
                 <p>
@@ -124,6 +124,7 @@ export default function PrivacyPage() {
                     <li>2026-11-26: 정보 제공 동의(정식 협약) 받기(단체·활동 이름·담당 연락처 등, 협약 종료·철회 뒤 1년 보관)를 더함</li>
                     <li>2026-11-26: 카카오톡 채널로 리플렛·일정 받기(사진·글, 비식별 구분값, 보관 1년, 카카오 위탁)를 더함</li>
                     <li>2026-11-26: 카카오 계정 로그인(카카오 회원번호·닉네임, 선택 시 프로필 사진·이메일)을 더함</li>
+                    <li>2026-11-27: 운영 주체(릴로컬)를 밝힘(처리하는 개인정보 범위는 그대로)</li>
                 </ul>
             </Section>
         </LegalDoc>
