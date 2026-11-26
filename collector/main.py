@@ -227,6 +227,9 @@ async def run_crawlers(specific_target=None):
             # 세부 갈래(specs/015): 새 행사·세부가 빈 행사를 규칙으로 판정. 애매한 것은 운영자 검토 대기로
             gn = await run_tool("classify_genre.py", timeout_min=10, args=["--apply"])
             geo_line += f"\n• 세부 갈래: {gn['summary']}"
+            # 공개 후 중복 점검(2026-11-26): 공개 행 전체를 (시작일·지역)으로 묶어 견주고, 같은 행사면 순위 낮은 쪽을 백업 후 숨긴다
+            dd = await run_tool("dedupe_published.py", timeout_min=10, args=["--apply"])
+            geo_line += f"\n• 공개 후 중복 점검: {dd['summary']}"
 
             # 인스타 운영 기록(docs/insta, git 밖) 글 파일을 구글드라이브 폴더로 복사. 실패해도 루틴은 계속한다
             backup = await run_tool("backup_insta.py", timeout_min=10)

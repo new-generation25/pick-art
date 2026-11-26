@@ -33,40 +33,20 @@ load_dotenv(".env.local")
 from database import Database  # noqa: E402
 from utils import check_link, process_and_upload_image  # noqa: E402
 from genre import is_theater_film, normalize_category  # noqa: E402
+from dedupe import loose, norm, similar  # noqa: E402,F401
 
 ISO = re.compile(r"^20\d\d-\d\d-\d\d$")
 OUT_DIR = os.path.join("..", "docs")  # 결과 목록 JSON 자리(테스트는 임시 폴더로 바꾼다)
 
 
-def norm(title: str) -> str:
-    """중복 판정용 제목: [지역]·(괄호) 안을 빼고 한글·영문·숫자만 남긴다.
-    출처마다 기호가 달라도(쉼표·×·⨉·＜＞·〈〉 등) 같은 제목으로 본다(2026-11-26 「콘서트누리, 플라워」 vs 「콘서트누리 ⨉ 플라워」)."""
-    t = re.sub(r"\[[^\]]*\]|\([^)]*\)", "", title or "").lower()
-    t = re.sub(r"[×⨉✕]", "x", t)
-    t = re.sub(r"(?<=\s)x(?=\s)", " ", t)  # 「A x B」「A × B」처럼 띄어 쓴 x 는 기호로 본다
-    return re.sub(r"[^0-9a-z가-힣]", "", t)
-
-
-def loose(title: str) -> str:
-    """이미 공개된 행사와 견줄 느슨한 제목: [지역]·연극/뮤지컬 접두·〈〉<> 기호·공백을 뺀다(norm 위에).
-    덧붙여 연도(2026 등)를 빼고 ×를 x로 본다(11/26 중복 「한화클래식 2026: …」 「A × B」)."""
-    t = re.sub(r"\[[^\]]*\]", " ", title or "").strip()
-    t = re.sub(r"^(연극|뮤지컬)\s*", "", t)
-    t = re.sub(r"(?<!\d)20\d\d(?!\d)", "", t).replace("×", "x")
-    return norm(t)
+# norm·loose 는 collector/dedupe.py 로 옮겼다(2026-11-26 중복 검수 보완: [지역] 대괄호만 지우기). 여기서는 가져다 쓴다
 
 
 def same_as_published(title: str, start: str, region: str, by_day) -> bool:
     """느슨한 제목이 같거나 서로 포함 관계 + 시작일·지역 같음.
     포함은 짧은 쪽이 3글자 이상일 때만 본다(「쇼」 같은 한두 글자가 남의 제목에 들어가 걸리지 않게)."""
     a = loose(title)
-    for b in by_day.get((start, region), ()):
-        if not a or not b:
-            continue
-        short, long_ = (a, b) if len(a) <= len(b) else (b, a)
-        if short == long_ or (len(short) >= 3 and short in long_):
-            return True
-    return False
+    return any(similar(a, b) for b in by_day.get((start, region), ()))
 
 
 def rank(row) -> int:

@@ -293,6 +293,36 @@ def cmd_has_account(a):
 
 # ---------- 쓰기 ----------
 
+
+def _dup_posted(event_id, title=None, region=None):
+    """이미 올린 행사와 같은 행사인지(2026-11-26: 함안 「라 트라비아타」 KOPIS·누리집 두 행이 둘 다 게시됨).
+    posted.json 에서 느슨한 제목이 비슷한 줄을 고르고, DB 에서 시작일·지역을 맞춰 본다. 같으면 그 줄을, 아니면 None.
+    DB 를 못 읽으면 제목·지역만으로 판단한다(게시를 막는 쪽이 안전)."""
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from dedupe import loose, similar
+    rows = [r for r in load("posted") if r.get("event_id") and r.get("event_id") != event_id]
+    try:
+        from dotenv import load_dotenv
+        load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env.local"))
+        from database import Database
+        sb = Database().supabase
+        me = sb.table("events").select("title,region,event_date_start").eq("id", event_id).limit(1).execute().data
+        me = me[0] if me else {"title": title, "region": region, "event_date_start": None}
+    except Exception:
+        sb, me = None, {"title": title, "region": region, "event_date_start": None}
+    a = loose(me.get("title") or title or "")
+    cands = [r for r in rows if similar(a, loose(r.get("title") or "")) and (r.get("region") or "") == (me.get("region") or region or "")]
+    if not cands:
+        return None
+    if sb is None or not me.get("event_date_start"):
+        return cands[0]
+    ids = [r["event_id"] for r in cands]
+    starts = {e["id"]: e["event_date_start"] for e in sb.table("events").select("id,event_date_start").in_("id", ids).execute().data}
+    for r in cands:
+        if starts.get(r["event_id"]) == me["event_date_start"]:
+            return r
+    return None
+
 def cmd_claim(a):
     key = norm(a.key) if a.kind == "account" else a.key
     with lock():
@@ -307,6 +337,10 @@ def cmd_claim(a):
             fail(f"{key} 에는 오늘 이미 댓글·허락 댓글을 달았다")
         if a.kind == "event" and key in {r.get("event_id") for r in load("posted")}:
             fail(f"{key} 는 이미 올린 행사다")
+        if a.kind == "event":
+            dup = _dup_posted(key)
+            if dup:
+                fail(f"{key} 는 이미 올린 행사와 같은 행사다(제목·시작일·지역): {dup.get('title')} {dup.get('post_url')}")
         rows.append({"date": today(), "kind": a.kind, "key": key, "by": a.by,
                      "at": datetime.now().strftime("%H:%M")})
         save("claims", rows)
@@ -328,6 +362,10 @@ def _check_new(file, rec, rows):
         return "event_id 가 피카 DB 행사 번호(UUID)가 아니다 — 먼저 DB에 넣고 그 번호로 올린다"
     if file == "posted" and any(r.get("event_id") == rec["event_id"] for r in rows):
         return "이미 posted.json 에 있는 event_id"
+    if file == "posted":
+        dup = _dup_posted(rec["event_id"], rec.get("title"), rec.get("region"))
+        if dup:
+            return f"이미 올린 행사와 같은 행사다(제목·시작일·지역): {dup.get('title')} {dup.get('post_url')}"
     if file == "candidates" and any(norm(r.get("account")) == rec["account"] for r in rows):
         return "이미 후보 목록에 있는 계정"
     if file == "feedback":
