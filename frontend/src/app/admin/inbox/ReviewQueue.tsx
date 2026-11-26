@@ -21,6 +21,7 @@ export interface ReviewContent {
     review_bucket?: string;
     review_bucket_at?: string;
     review_reason?: string;
+    review_note?: string;
     publish_approved_at?: string;
     publish_failed_at?: string;
     ai_suggestion?: {
@@ -62,6 +63,7 @@ const BUCKET_NOTE: Record<ReviewBucket, string> = {
 const REASON_LABEL: Record<string, string> = {
     official_complete: "기관 계정 · 날짜·장소 있음",
     small_needs_consent: "작가·단체 계정 — 게시 동의 필요",
+    standing_consent: "작가·단체 계정 — 상시 동의(앞으로의 정보 게시)",
     informant: "제보 계정",
     no_date: "날짜 없음",
     image_only: "포스터만 있음",
@@ -293,6 +295,9 @@ export function ReviewQueue({ bucket, posts, loading, onChanged }: Props) {
                                             {account && <Text size="sm" fw={700}>{account}</Text>}
                                             {a.author && a.author !== a.account && <Text size="sm" c="dimmed">{a.author}</Text>}
                                             {a.role && <Badge variant="default" size="sm">{a.role}</Badge>}
+                                            {c.review_reason === "standing_consent" && (
+                                                <Badge color="teal" variant="light" size="sm" style={{ textTransform: "none" }}>{c.review_note || "상시 동의"}</Badge>
+                                            )}
                                         </Group>
                                         <Title order={4} size="h5" lineClamp={2}>{c.title || "제목 없음"}</Title>
                                         <Group gap="md" wrap="wrap">

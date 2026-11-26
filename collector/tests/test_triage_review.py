@@ -161,3 +161,47 @@ def test_apply_skips_row_changed_meanwhile(tmp_path):
     assert failed == 1
     assert s.rows["artist"]["status"] == "PUBLISHED"
     assert "artist" not in {i["id"] for i in json.load(open(path, encoding="utf-8"))}
+
+
+def test_standing_consent_goes_to_candidate():
+    def acc(rid, account, **kw):
+        r = row(rid, f"{rid} 공연", "2026-12-01", "2026-12-02", role=kw.pop("role", "artist"), **kw)
+        r["content"]["ai_suggestion"]["account"] = account
+        return r
+    rows = [
+        acc("st_new", "@Picka.Friend"),                       # 새 줄, 상시 동의 → 공개 후보
+        acc("st_old", "picka.friend", review_bucket="consent", review_reason="small_needs_consent"),  # 규칙이 보낸 줄 → 옮김
+        acc("st_human", "@picka.friend", review_bucket="consent", review_reason="admin"),  # 사람이 둔 줄 → 그대로
+        acc("withdrawn", "@gone.group", role="group"),        # 철회(standing 에 없음) → 동의 필요
+        acc("st_nodate", "@picka.friend", review_bucket="consent", review_reason="small_needs_consent"),
+    ]
+    rows[-1]["content"]["ai_suggestion"]["date_start"] = ""
+    standing = {"@picka.friend"}
+    got = {d["id"]: (d["rule"], d["bucket"], d.get("note")) for d in tr.plan(rows, [], TODAY, standing)}
+    assert got["st_new"] == ("standing_consent", "candidate", "상시 동의 @picka.friend")
+    assert got["st_old"][:2] == ("standing_consent", "candidate")
+    assert got["st_human"][:2] == ("kept", "consent")
+    assert got["withdrawn"][:2] == ("small_needs_consent", "consent")
+    assert got["st_nodate"][:2] == ("kept", "consent")
+
+    store = FakeStore(rows, [])
+    store.standing_accounts = lambda: standing
+    _, path, failed = tr.apply(store, TODAY, now=datetime(2026, 11, 26, 12, 0), log_dir=str(_tmp_dir()))
+    assert failed == 0
+    assert store.rows["st_new"]["content"]["review_note"] == "상시 동의 @picka.friend"
+    # 두 번째 실행은 바꿀 것이 없다
+    _, path2, _ = tr.apply(store, TODAY, now=datetime(2026, 11, 26, 12, 1), log_dir=str(_tmp_dir()))
+    assert path2 == ""
+    # 되돌리면 옮긴 줄이 동의 필요로, 메모는 사라진다
+    tr.undo(store, path)
+    c = store.rows["st_old"]["content"]
+    assert c["review_bucket"] == "consent" and c["review_reason"] == "small_needs_consent" and "review_note" not in c
+
+
+def _tmp_dir():
+    import tempfile
+    return tempfile.mkdtemp()
+
+
+def test_acc_key():
+    assert tr.acc_key("Foo.Bar") == "@foo.bar" and tr.acc_key("@X") == "@x" and tr.acc_key(None) == ""

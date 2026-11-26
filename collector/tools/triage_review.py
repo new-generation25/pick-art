@@ -6,6 +6,9 @@
   2. 공개된 행사와 같음(시작일 같고 제목 한쪽이 다른 쪽을 포함,
      review_instagram.py --export 와 같은 판정)        → status DUPLICATE    review_reason published_same
   3. role artist·group                                 → bucket consent      small_needs_consent
+     단, 출처 계정이 상시 동의(whitelist.score_detail 「상시동의:」 꼬리, 철회 계정 제외)이고 날짜가 있으면
+                                                        → bucket candidate    standing_consent (review_note «상시 동의 @계정»)
+     (2026-11-26 사용자 «앞으로의 정보제공 항목에 동의 체크해놔». 이미 small_needs_consent 로 동의 필요에 간 줄도 옮긴다)
   4. role official + 날짜 + 장소                        → bucket candidate    official_complete
   5. 그 밖                                             → bucket human        informant · no_date · image_only · no_venue
   이미 review_bucket 이 있는 줄은 1·2만 다시 본다(사람이 바꾼 무더기를 덮어쓰지 않는다). 지우지 않는다.
@@ -58,6 +61,21 @@ class Store:
     def events(self):
         return self._all(self.sb.table("events").select("id,title,event_date_start").order("id"))
 
+    def standing_accounts(self):
+        """상시 동의 계정(@계정 소문자). whitelist.score_detail 에 「상시동의:」 꼬리가 있는 인스타 출처 − 철회 계정(docs/insta/dm.json withdrawn)"""
+        out = set()
+        for w in self._all(self.sb.table("whitelist").select("value,score_detail").order("id")):
+            if "상시동의:" in (w.get("score_detail") or ""):
+                m = re.search(r"instagram\.com/([A-Za-z0-9._]+)", w.get("value") or "", re.I)
+                if m:
+                    out.add("@" + m.group(1).lower())
+        dm_path = os.path.join(HERE, "..", "docs", "insta", "dm.json")
+        if os.path.exists(dm_path):
+            for r in json.load(open(dm_path, encoding="utf-8")):
+                if r.get("withdrawn"):
+                    out.discard(acc_key(r.get("account")))
+        return out
+
     def get(self, rid):
         d = self.sb.table("raw_posts").select("id,status,content").eq("id", rid).execute().data
         return d[0] if d else None
@@ -101,7 +119,13 @@ def same_as_published(title, start, by_day):
     return ""
 
 
-def classify(row, today, by_day):
+def acc_key(v):
+    """계정 비교용: @ 붙이고 소문자"""
+    v = (v or "").strip().lower()
+    return v if not v or v.startswith("@") else "@" + v
+
+
+def classify(row, today, by_day, standing=frozenset()):
     """한 줄 판정 → dict(rule, result, status, bucket, dup_of). result 가 None 이면 바꾸지 않는다."""
     c = row.get("content") or {}
     a = c.get("ai_suggestion") or {}
@@ -112,11 +136,17 @@ def classify(row, today, by_day):
     dup = same_as_published(c.get("title"), start, by_day)
     if dup:
         return {"rule": "published_same", "result": "DUPLICATE", "status": "DUPLICATE", "bucket": None, "dup_of": dup}
-    if c.get("review_bucket"):  # 이미 무더기가 있으면(사람이 바꿨을 수 있음) 그대로 둔다
+    account = acc_key(a.get("account"))
+    moved_by_rule = c.get("review_bucket") == "consent" and c.get("review_reason") == "small_needs_consent"
+    if c.get("review_bucket") and not (moved_by_rule and account in standing and start):
+        # 이미 무더기가 있으면(사람이 바꿨을 수 있음) 그대로 둔다. 규칙이 «동의 필요»로 보냈는데 상시 동의 계정이면 다시 본다
         return {"rule": "kept", "result": None, "status": "REVIEW", "bucket": c["review_bucket"]}
     role = (a.get("role") or "").strip().lower()
     venue = (a.get("venue") or "").strip()
     has_venue = bool(venue) and venue.replace(" ", "") not in VENUE_PLACEHOLDERS
+    if role in ("artist", "group") and account in standing and start:
+        return {"rule": "standing_consent", "result": "candidate", "status": "REVIEW", "bucket": "candidate",
+                "note": f"상시 동의 {account}"}
     if role in ("artist", "group"):
         rule, bucket = "small_needs_consent", "consent"
     elif role == "official" and start and has_venue:
@@ -136,11 +166,11 @@ def classify(row, today, by_day):
     return {"rule": rule, "result": bucket, "status": "REVIEW", "bucket": bucket}
 
 
-def plan(rows, events, today):
+def plan(rows, events, today, standing=frozenset()):
     by_day = published_index(events)
     out = []
     for r in rows:
-        d = classify(r, today, by_day)
+        d = classify(r, today, by_day, standing)
         d.update(id=r["id"], title=(r.get("content") or {}).get("title") or "", row=r)
         out.append(d)
     return out
@@ -181,7 +211,7 @@ def dump_lines(path, items):
 # ---------- 실행 ----------
 
 def dry_run(store, today, log_dir=LOG_DIR):
-    decisions = plan(store.review_rows(), store.events(), today)
+    decisions = plan(store.review_rows(), store.events(), today, getattr(store, "standing_accounts", lambda: set())())
     items = []
     for d in decisions:
         it = {"id": d["id"], "title": d["title"], "rule": d["rule"], "result": d["result"] or "kept"}
@@ -196,6 +226,8 @@ def dry_run(store, today, log_dir=LOG_DIR):
 def new_content(row, d, now):
     c = json.loads(json.dumps(row.get("content") or {}))  # 깊은 복사
     c["review_reason"] = d["rule"]
+    if d.get("note"):
+        c["review_note"] = d["note"]
     if d["bucket"]:
         c["review_bucket"] = d["bucket"]
         c["review_bucket_at"] = now
@@ -204,7 +236,7 @@ def new_content(row, d, now):
 
 def apply(store, today, now=None, log_dir=LOG_DIR):
     now = now or datetime.now(KST)
-    decisions = plan(store.review_rows(), store.events(), today)
+    decisions = plan(store.review_rows(), store.events(), today, getattr(store, "standing_accounts", lambda: set())())
     path = os.path.join(log_dir, f"applied_{now.strftime('%Y-%m-%d_%H%M%S')}.json")
     done, failed = [], 0
     try:
@@ -219,7 +251,8 @@ def apply(store, today, now=None, log_dir=LOG_DIR):
                 done.append({"id": d["id"], "prev_status": row.get("status") or "REVIEW",
                              "prev_bucket": c0.get("review_bucket"), "new_status": d["status"],
                              "new_bucket": c1.get("review_bucket"), "prev_reason": c0.get("review_reason"),
-                             "new_reason": d["rule"]})
+                             "new_reason": d["rule"], "prev_note": c0.get("review_note"),
+                             "prev_bucket_at": c0.get("review_bucket_at")})
             else:
                 failed += 1
                 d["status"], d["bucket"] = "REVIEW", c0.get("review_bucket")  # 요약에는 바뀌지 않은 대로
@@ -243,13 +276,16 @@ def undo(store, path):
                 or ("new_reason" in it and c.get("review_reason") != it["new_reason"]):
             skipped += 1  # 그사이 사람이나 다른 도구가 바꾼 줄
             continue
-        for key, prev in (("review_bucket", it.get("prev_bucket")), ("review_reason", it.get("prev_reason"))):
+        for key, prev in (("review_bucket", it.get("prev_bucket")), ("review_reason", it.get("prev_reason")),
+                          ("review_note", it.get("prev_note"))):
             if prev is None:
                 c.pop(key, None)
             else:
                 c[key] = prev
         if it.get("prev_bucket") is None:
             c.pop("review_bucket_at", None)
+        elif it.get("prev_bucket_at"):
+            c["review_bucket_at"] = it["prev_bucket_at"]
         if store.update(it["id"], it["new_status"], it["prev_status"], c):
             back += 1
         else:
