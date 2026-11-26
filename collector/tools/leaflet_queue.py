@@ -5,7 +5,8 @@
 
 사용 (collector 폴더에서, PYTHONIOENCODING=utf-8. 마지막 줄이 한 줄 요약)
   python tools/leaflet_queue.py --pending [--limit 10]
-      status='uploaded' 이고 image_path 가 있는 제출을 오래된 것부터. 비공개 버킷 leaflets 에서
+      status='uploaded' 이고 image_path 가 있는 제출을 오래된 것부터(카카오 챗봇으로 «글만» 온 제출도 — specs/017,
+      항목의 source="text", file=null, text=보낸 글. 이미지 대신 글에서 칸을 옮긴다). 비공개 버킷 leaflets 에서
       .cache/leaflets/<id>.<확장자> 로 내려받고, 작은 글씨용으로 위·아래 절반을 2배로 키운 조각
       <id>.tile1.jpg·<id>.tile2.jpg 를 옆에 만들어(항목의 tiles) JSON 배열(한 줄)을 찍는다
   python tools/leaflet_queue.py --save <id> --file <result.json>
@@ -16,7 +17,8 @@
   python tools/leaflet_queue.py --fail <id> --reason "..."
       읽지 못함: ai_result={"error": 이유}, status='read'(운영자가 그래도 본다)
   python tools/leaflet_queue.py --cleanup [--apply]
-      올린 지 365일 지난 제출의 버킷 파일을 지우고 image_path 를 NULL 로. --apply 없으면 세기만 한다
+      올린 지 365일 지난 제출의 버킷 파일을 지우고 image_path 를 NULL 로. 카카오톡 채널(specs/017)의 보낸 사람 구분값도
+      1년 지난 것은 지운다(kakao_senders 동의 기록 삭제, 제출의 sender_key NULL). --apply 없으면 세기만 한다
 """
 import argparse
 import contextlib
@@ -81,8 +83,9 @@ class Store:
 
     def pending(self, limit):
         return (self.sb.table("leaflet_submissions")
-                .select("id,image_path,image_kind,group_name,official_url,given,note,created_at")
-                .eq("status", "uploaded").not_.is_("image_path", "null")
+                .select("id,image_path,image_kind,group_name,official_url,given,note,created_at,channel")
+                .eq("status", "uploaded")
+                .or_("image_path.not.is.null,and(channel.eq.kakao_bot,note.not.is.null)")
                 .order("created_at").limit(limit).execute().data or [])
 
     def _bucket(self):
@@ -117,6 +120,20 @@ class Store:
 
     def remove_files(self, paths):
         return self._bucket().remove(paths)
+
+    def expire_kakao(self, before_iso, apply):
+        """1년 지난 카카오 보낸 사람 구분값: (동의 기록 수, 제출 줄 수). apply 면 지운다"""
+        senders = (self.sb.table("kakao_senders").select("sender_key", count="exact")
+                   .lt("agreed_at", before_iso).limit(1).execute().count or 0)
+        rows = (self.sb.table("leaflet_submissions").select("id", count="exact")
+                .lt("created_at", before_iso).not_.is_("sender_key", "null").limit(1).execute().count or 0)
+        if apply:
+            if senders:
+                self.sb.table("kakao_senders").delete().lt("agreed_at", before_iso).execute()
+            if rows:
+                (self.sb.table("leaflet_submissions").update({"sender_key": None})
+                 .lt("created_at", before_iso).not_.is_("sender_key", "null").execute())
+        return senders, rows
 
     def clear_image_path(self, sid, path):
         res = (self.sb.table("leaflet_submissions").update({"image_path": None})
@@ -323,9 +340,13 @@ def pending(store, limit, cache_dir=CACHE_DIR):
     os.makedirs(cache_dir, exist_ok=True)
     items = []
     for r in store.pending(limit):
-        item = {"id": r["id"], "file": None, "tiles": [], "image_kind": r.get("image_kind"),
+        item = {"id": r["id"], "source": "image", "file": None, "tiles": [], "image_kind": r.get("image_kind"),
                 "group_name": r.get("group_name"), "official_url": r.get("official_url"),
-                "given": r.get("given") or {}, "note": r.get("note")}
+                "given": r.get("given") or {}, "note": r.get("note"), "channel": r.get("channel") or "web"}
+        if not r.get("image_path"):  # 카카오 챗봇으로 글만 보낸 제출(specs/017): 읽을 것은 글
+            item.update({"source": "text", "text": r.get("note") or ""})
+            items.append(item)
+            continue
         try:
             check_id(r["id"])
             dest = os.path.join(cache_dir, f"{r['id']}.{ext_of(r['image_path'])}")
@@ -366,7 +387,12 @@ def fail(store, sid, reason, cache_dir=CACHE_DIR):
 def cleanup(store, apply, now=None):
     before = ((now or datetime.now(timezone.utc)) - timedelta(days=KEEP_DAYS)).isoformat(timespec="seconds")
     rows = store.expired(before)
-    out = {"expired": len(rows), "files_removed": 0, "rows_cleared": 0, "errors": [], "apply": apply}
+    out = {"expired": len(rows), "files_removed": 0, "rows_cleared": 0, "errors": [], "apply": apply,
+           "kakao_senders": 0, "kakao_sender_keys": 0}
+    try:
+        out["kakao_senders"], out["kakao_sender_keys"] = store.expire_kakao(before, apply)
+    except Exception as e:  # 017 마이그레이션 전 DB 등: 이미지 정리는 계속한다
+        out["errors"].append(f"kakao: {str(e)[:180]}")
     if not apply:
         return out
     for i in range(0, len(rows), 100):
@@ -402,7 +428,7 @@ def main(argv):
         if a.pending:
             items = pending(store, max(1, min(a.limit, 50)))
             print(json.dumps(items, ensure_ascii=False))
-            bad = sum(1 for x in items if not x["file"])
+            bad = sum(1 for x in items if x["source"] == "image" and not x["file"])
             print(f"리플렛 대기 {len(items)}건 내려받음" + (f" · 내려받기 실패 {bad}건" if bad else "")
                   + f" ({os.path.relpath(CACHE_DIR, HERE)})")
             return 0
@@ -425,7 +451,8 @@ def main(argv):
         print(json.dumps(out, ensure_ascii=False))
         verb = "지움" if a.apply else "지울 대상(dry-run, --apply 로 적용)"
         print(f"1년 지난 리플렛 이미지 {out['expired']}건 {verb} · 파일 {out['files_removed']} · 경로 비움 "
-              f"{out['rows_cleared']}" + (f" · 오류 {len(out['errors'])}" if out["errors"] else ""))
+              f"{out['rows_cleared']} · 카카오 구분값 동의 {out['kakao_senders']}·제출 {out['kakao_sender_keys']}"
+              + (f" · 오류 {len(out['errors'])}" if out["errors"] else ""))
         return 1 if out["errors"] else 0
     except ValidationError as e:
         print(f"❌ 검사 실패(저장 안 함): {e}")

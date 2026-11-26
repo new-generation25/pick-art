@@ -35,7 +35,8 @@ class FakeStore:
         self.removed = []
 
     def pending(self, limit):
-        rs = [r for r in self.rows.values() if r["status"] == "uploaded" and r.get("image_path")]
+        rs = [r for r in self.rows.values() if r["status"] == "uploaded"
+              and (r.get("image_path") or (r.get("channel") == "kakao_bot" and r.get("note")))]
         return sorted(rs, key=lambda r: r["created_at"])[:limit]
 
     def download(self, path):
@@ -61,6 +62,19 @@ class FakeStore:
         self.removed += paths
         for p in paths:
             self.files.pop(p, None)
+
+    senders = None  # {sender_key: agreed_at}
+
+    def expire_kakao(self, before_iso, apply):
+        senders = self.senders or {}
+        old = [k for k, t in senders.items() if t < before_iso]
+        rows = [r for r in self.rows.values() if r.get("sender_key") and r["created_at"] < before_iso]
+        if apply:
+            for k in old:
+                senders.pop(k)
+            for r in rows:
+                r["sender_key"] = None
+        return len(old), len(rows)
 
     def clear_image_path(self, sid, path):
         r = self.rows.get(sid)
@@ -404,3 +418,32 @@ def test_representative_number_does_not_set_personal_info_visible():
     # 예약작업이 직접 true 로 표시한 것은 그대로 둔다
     out, _ = lq.validate(full(personal_info_visible=True, contact=f("055-123-4567")))
     assert out["personal_info_visible"] is True
+
+
+def test_pending_kakao_text_only_row(tmp_path):
+    """specs/017: 카카오 챗봇으로 글만 보낸 제출은 내려받지 않고 source=text 로 넘긴다. 사이트 제출의 빈 경로는 넘기지 않는다"""
+    tid = "cccccccc-2222-3333-4444-555555555555"
+    r = row(sid=tid, path=None)
+    r.update(channel="kakao_bot", note="12월 5일 저녁 7시 김해문화의전당 연극 «겨울 손님»")
+    web_empty = row(sid="dddddddd-2222-3333-4444-555555555555", path=None)
+    items = lq.pending(FakeStore([r, web_empty]), 10, cache_dir=str(tmp_path))
+    assert [x["id"] for x in items] == [tid]
+    assert items[0]["source"] == "text" and items[0]["file"] is None and "download_error" not in items[0]
+    assert items[0]["text"].startswith("12월 5일") and items[0]["channel"] == "kakao_bot"
+
+
+def test_cleanup_expires_kakao_sender_keys():
+    """specs/017: 1년 지난 카카오 보낸 사람 구분값(동의 기록·제출의 sender_key)도 지운다"""
+    old = row(sid="eeeeeeee-2222-3333-4444-555555555555", path=None)
+    old.update(channel="kakao_bot", sender_key="a" * 64, created_at="2025-01-01T00:00:00+00:00")
+    new = row(sid="ffffffff-2222-3333-4444-555555555555", path=None)
+    new.update(channel="kakao_bot", sender_key="b" * 64, created_at="2026-11-20T00:00:00+00:00")
+    store = FakeStore([old, new])
+    store.senders = {"a" * 64: "2025-01-01T00:00:00+00:00", "b" * 64: "2026-11-20T00:00:00+00:00"}
+    now = lq.datetime(2026, 11, 26, tzinfo=lq.timezone.utc)
+    dry = lq.cleanup(store, False, now=now)
+    assert (dry["kakao_senders"], dry["kakao_sender_keys"]) == (1, 1) and store.rows[old["id"]]["sender_key"]
+    out = lq.cleanup(store, True, now=now)
+    assert (out["kakao_senders"], out["kakao_sender_keys"]) == (1, 1)
+    assert store.rows[old["id"]]["sender_key"] is None and store.rows[new["id"]]["sender_key"] == "b" * 64
+    assert list(store.senders) == ["b" * 64]

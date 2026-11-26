@@ -1,0 +1,134 @@
+/**
+ * 카카오톡 채널로 행사 정보 받기 (specs/017). 카카오 i 오픈빌더(챗봇 관리자센터) 스킬 요청을 읽고 답을 만든다.
+ * 화면·DB 없이 시험할 수 있게 순수 함수만 둔다. 실제 저장은 app/api/kakao/skill/route.ts → DB 함수 kakao_intake().
+ *
+ * 공식 문서(2026-11-26 확인): 요청은 POST JSON, 응답은 version "2.0" + template.outputs, 5초 안에 답하라고 권장.
+ * 사진은 «이미지 보안전송 플러그인»(sys.plugin.secureimage)으로만 받는다 — 한 번에 최대 10장, 주소는 최대 10분 유지.
+ * 플러그인 값은 JSON 글자: {"privacyAgreement":"Y","imageQuantity":"1","secureUrls":"List(http://secure.kakaocdn.net/…)","expire":"…"}
+ * https://kakaobusiness.gitbook.io/main/tool/chatbot/skill_guide/apply_skill_to_plugin.md
+ * https://kakaobusiness.gitbook.io/main/tool/chatbot/skill_guide/answer_json_format.md
+ */
+import { RIGHTS_CHECKS, RIGHTS_VERSION, PRIVACY_NOTE } from "./leaflets";
+
+export const SKILL_KEY_HEADER = "x-pica-skill-key";
+/** 동의 버튼이 보내는 말. 오픈빌더 «제보 동의» 블록의 발화와 같아야 한다 */
+export const AGREE_TEXT = "동의하고 보내기";
+/** 사진 받기 버튼이 보내는 말. 오픈빌더 «사진 보내기» 블록(보안 이미지 파라미터)의 발화와 같아야 한다 */
+export const PHOTO_TEXT = "사진 보내기";
+export const MAX_IMAGES = 10;
+export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+
+export type SkillAction =
+    | { kind: "welcome" }
+    | { kind: "agree" }
+    | { kind: "image"; urls: string[] }
+    | { kind: "text"; text: string };
+
+export type SkillRequest = { userKey: string; action: SkillAction };
+
+type Json = Record<string, unknown>;
+const obj = (v: unknown): Json => (v && typeof v === "object" && !Array.isArray(v) ? (v as Json) : {});
+const str = (v: unknown): string => (typeof v === "string" ? v : "");
+
+/** 카카오 이미지 주소만 받는다(다른 곳 주소를 서버가 대신 내려받지 않게) */
+export function isKakaoImageUrl(u: string): boolean {
+    try {
+        const url = new URL(u);
+        return (url.protocol === "https:" || url.protocol === "http:") && /(^|\.)kakaocdn\.net$/i.test(url.hostname);
+    } catch {
+        return false;
+    }
+}
+
+/** «List(url1, url2)» 또는 배열 → 주소 목록. 여러 장일 때 구분 기호는 문서에 없어 «, http» 앞에서 나눈다 */
+export function parseSecureUrls(v: unknown): string[] {
+    let list: string[] = [];
+    if (Array.isArray(v)) list = v.map(str);
+    else {
+        const s = str(v).trim();
+        const inner = s.replace(/^List\(/, "").replace(/\)$/, "");
+        list = inner.split(/,\s*(?=https?:\/\/)/);
+    }
+    return list.map(x => x.trim()).filter(isKakaoImageUrl).slice(0, MAX_IMAGES);
+}
+
+/** 파라미터 값 하나가 보안 이미지 플러그인 값이면 주소 목록, 아니면 null */
+function secureImageUrls(v: unknown): string[] | null {
+    let o: Json | null = null;
+    if (typeof v === "string" && v.includes("secureUrls")) {
+        try { o = obj(JSON.parse(v)); } catch { o = null; }
+    } else if (v && typeof v === "object") {
+        const vo = obj(v);
+        if ("secureUrls" in vo) o = vo;
+        else if (typeof vo.value === "string" && vo.value.includes("secureUrls")) {
+            try { o = obj(JSON.parse(vo.value)); } catch { o = null; }
+        }
+    }
+    if (!o || !("secureUrls" in o)) return null;
+    if (str(o.privacyAgreement) && str(o.privacyAgreement) !== "Y") return [];
+    return parseSecureUrls(o.secureUrls);
+}
+
+/** 스킬 요청 → 보낸 사람 식별값(botUserKey)과 할 일. 모양이 틀리면 null */
+export function parseSkillRequest(body: unknown): SkillRequest | null {
+    const b = obj(body);
+    const ur = obj(b.userRequest);
+    const user = obj(ur.user);
+    const props = obj(user.properties);
+    const userKey = str(user.id) || str(props.botUserKey) || str(props.plusfriendUserKey);
+    if (!userKey || userKey.length > 200) return null;
+
+    const action = obj(b.action);
+    for (const bag of [obj(action.params), obj(action.detailParams)]) {
+        for (const v of Object.values(bag)) {
+            const urls = secureImageUrls(v);
+            if (urls) return { userKey, action: { kind: "image", urls } };
+        }
+    }
+    const utterance = str(ur.utterance).trim();
+    const blockName = str(obj(ur.block).name);
+    if (utterance === AGREE_TEXT) return { userKey, action: { kind: "agree" } };
+    if (/웰컴|welcome/i.test(blockName) || !utterance) return { userKey, action: { kind: "welcome" } };
+    return { userKey, action: { kind: "text", text: utterance.slice(0, 1000) } };
+}
+
+// ---------- 답 ----------
+
+type QuickReply = { label: string; action: "message"; messageText: string };
+export type SkillResponse = { version: "2.0"; template: { outputs: { simpleText: { text: string } }[]; quickReplies?: QuickReply[] } };
+
+const qr = (label: string): QuickReply => ({ label, action: "message", messageText: label });
+
+export function reply(texts: string[], quick: string[] = []): SkillResponse {
+    return {
+        version: "2.0",
+        template: {
+            outputs: texts.slice(0, 3).map(t => ({ simpleText: { text: t.slice(0, 1000) } })),
+            ...(quick.length ? { quickReplies: quick.map(qr) } : {}),
+        },
+    };
+}
+
+export const MSG = {
+    consent: () => reply([
+        "피카(picka.news)는 경남·부산의 공연·전시·축제를 날짜순으로 알려 드려요.\n리플렛·포스터 사진이나 일정 글을 보내 주시면 운영자가 확인한 뒤에 피카에 올립니다. 자동으로 올라가지 않아요.",
+        `보내기 전에 아래 두 가지에 동의해 주세요.\n\n1. ${RIGHTS_CHECKS[0]}\n\n2. ${RIGHTS_CHECKS[1]}\n\n${PRIVACY_NOTE} 사진은 1년 동안 보관한 뒤 지웁니다. 카카오 이름·전화번호는 받지 않아요. 자세한 내용: picka.news/privacy`,
+    ], [AGREE_TEXT]),
+    ready: () => reply([
+        "리플렛·포스터 사진은 아래 «사진 보내기»를 눌러 보내 주세요(한 번에 10장까지).\n단체 이름·행사 이름·날짜 같은 내용은 글로 보내 주셔도 돼요. 사진 바로 뒤 10분 안에 보낸 글은 같은 제보로 묶어요.",
+    ], [PHOTO_TEXT]),
+    agreed: () => reply(["동의해 주셔서 고맙습니다. 이제 사진이나 글을 보내 주세요."], [PHOTO_TEXT]),
+    gotImages: (n: number, refused: number) => reply([
+        `사진 ${n}장 받았어요. 운영자가 확인한 뒤에 피카에 올립니다.` +
+        (refused ? `\n하루 5장까지 받아서 ${refused}장은 받지 못했어요. 내일 다시 보내 주세요.` : "") +
+        "\n단체 이름이 사진에 없으면 지금 글로 보내 주세요.",
+    ]),
+    gotText: (attached: boolean) => reply([
+        attached ? "방금 보낸 사진과 함께 받았어요. 운영자가 확인한 뒤에 피카에 올립니다." : "글로 받았어요. 운영자가 확인한 뒤에 피카에 올립니다. 리플렛·포스터 사진이 있으면 함께 보내 주세요.",
+    ], attached ? [] : [PHOTO_TEXT]),
+    noImage: () => reply(["사진을 받지 못했어요. «사진 보내기»를 눌러 다시 보내 주세요."], [PHOTO_TEXT]),
+    limit: () => reply(["오늘은 더 받을 수 없어요(하루 5건까지). 내일 다시 보내 주세요."]),
+    error: () => reply(["지금은 받지 못했어요. 잠시 뒤에 다시 보내 주세요."]),
+};
+
+export { RIGHTS_VERSION };

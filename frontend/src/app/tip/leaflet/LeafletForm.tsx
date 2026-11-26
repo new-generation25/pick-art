@@ -14,7 +14,7 @@ type Mine = { id: string; status: "uploaded" | "read" | "published" | "rejected"
 const STATUS = { uploaded: "올림 — 글자 읽기 기다리는 중", read: "읽음 — 운영자 확인 중", published: "피카에 올라감", rejected: "반영하지 않음" } as const;
 
 /** 이미지를 긴 변 2048px 안으로 줄여 JPEG로 다시 저장한다. 다시 그리면서 사진 위치(EXIF) 같은 정보가 빠진다 */
-async function shrink(file: File): Promise<Blob> {
+export async function shrink(file: File): Promise<Blob> {
     const bitmap = await createImageBitmap(file).catch(() => null);
     if (!bitmap) throw new Error("decode");
     const scale = Math.min(1, 2048 / Math.max(bitmap.width, bitmap.height));

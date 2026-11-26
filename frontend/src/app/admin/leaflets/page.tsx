@@ -6,19 +6,24 @@ import { Container, Title, Text, Paper, Group, Badge, Button, SegmentedControl, 
 import { supabase } from "@/lib/supabase";
 import { GN_REGIONS } from "@/lib/regions";
 import { CATEGORIES } from "@/lib/categories";
-import { leafletSource } from "@/lib/leaflets";
+import { leafletSource, RIGHTS_CHECKS, RIGHTS_VERSION } from "@/lib/leaflets";
+import { shrink } from "@/app/tip/leaflet/LeafletForm";
 
 // 리플렛 제출 검토·등록 (specs/013). 클로드 예약작업이 읽은 칸(ai_result)과 단체가 적은 칸(given)을 보고 운영자가 고쳐 등록한다.
 // 공개는 이 화면의 «등록»으로만(헌장 I — 운영자 확인이 검증). 공식 안내 주소가 있으면 원본으로 잇고, 출처는 «단체 제공 · 단체 이름»
 // 포스터: 리플렛·포스터 «파일»만 공개 버킷(event-images)으로 복사해 쓴다. 휴대폰 사진은 포스터로 쓰지 않는다(운영자 11/26)
+// 카카오톡 채널(specs/017): 챗봇으로 들어온 것(kakao_bot)과 운영자가 1:1 채팅에서 옮겨 올린 것(kakao_chat)도 같은 목록에 온다.
+//   카카오로 받은 사진은 휴대폰 사진(photo)으로 다뤄 포스터로 쓰지 않는다. 글만 온 제보는 이미지 없이 글(«더 알려 준 것»)을 보고 칸을 채운다
 type Field = { raw?: string | null; value?: string | null; confidence?: "high" | "low" | "none" };
 type Sub = {
     id: string; user_id: string; image_path: string | null; image_kind: "file" | "photo"; official_url: string | null; group_name: string | null;
     given: Record<string, string>; note: string | null; rights_version: string; ai_result: (Record<string, Field> & { date_start?: string | null; date_end?: string | null; error?: string; personal_info_visible?: boolean }) | null;
     status: "uploaded" | "read" | "published" | "rejected"; admin_note: string | null; event_id: string | null; created_at: string;
+    channel: "web" | "kakao_bot" | "kakao_chat";
 };
-type Draft = { title: string; category: string; region: string; venue: string; date_start: string; date_end: string; price_info: string; is_free: boolean; original_url: string; description: string; use_poster: boolean };
+type Draft = { group_name: string; title: string; category: string; region: string; venue: string; date_start: string; date_end: string; price_info: string; is_free: boolean; original_url: string; description: string; use_poster: boolean };
 
+const CHANNEL = { web: "사이트", kakao_bot: "카카오 챗봇", kakao_chat: "카카오 채팅(운영자가 옮김)" } as const;
 const STATUS = { uploaded: { label: "읽기 전", color: "gray" }, read: { label: "읽음", color: "blue" }, published: { label: "등록함", color: "teal" }, rejected: { label: "반영 안 함", color: "red" } } as const;
 const v = (f?: Field) => (f && f.confidence !== "none" ? f.value ?? "" : "");
 
@@ -26,6 +31,7 @@ function draftOf(s: Sub): Draft {
     const a = s.ai_result || {};
     const regionHint = v(a.region_hint as Field);
     return {
+        group_name: s.group_name || v(a.organizer as Field),
         title: s.given.title || v(a.title as Field),
         category: "",
         region: GN_REGIONS.find(r => regionHint.includes(r)) ?? "",
@@ -39,6 +45,54 @@ function draftOf(s: Sub): Draft {
         // 휴대폰 사진, 개인 연락처가 보이는 이미지는 포스터로 쓰지 않는다(운영자 11/26, FR-042)
         use_poster: s.image_kind === "file" && !s.ai_result?.personal_info_visible,
     };
+}
+
+/** 카카오톡 채널 1:1 채팅으로 받은 사진을 운영자가 옮겨 올린다(specs/017, 챗봇이 아닌 길). 저장은 013과 같은 버킷·표, channel=kakao_chat */
+function KakaoChatUpload({ onDone }: { onDone: () => void }) {
+    const [open, setOpen] = useState(false);
+    const [file, setFile] = useState<File | null>(null);
+    const [group, setGroup] = useState("");
+    const [note, setNote] = useState("");
+    const [consent, setConsent] = useState(false);
+    const [state, setState] = useState("");
+    const send = async () => {
+        if (!file || !group.trim() || !consent) { setState("사진·단체 이름·동의 확인을 채워 주세요"); return; }
+        setState("올리는 중…");
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) throw new Error("로그인이 필요합니다");
+            const blob = await shrink(file);
+            const id = crypto.randomUUID();
+            const path = `${session.user.id}/${id}.jpg`;
+            const up = await supabase.storage.from("leaflets").upload(path, blob, { contentType: "image/jpeg", upsert: false });
+            if (up.error) throw new Error(up.error.message);
+            const { error } = await supabase.from("leaflet_submissions").insert({
+                id, user_id: session.user.id, channel: "kakao_chat", image_path: path, image_kind: "photo",
+                group_name: group.trim().slice(0, 80), note: note.trim().slice(0, 1000) || null, given: {},
+                rights_version: `chat-${RIGHTS_VERSION}`,
+            });
+            if (error) throw new Error(error.message);
+            setFile(null); setGroup(""); setNote(""); setConsent(false);
+            setState("올렸습니다 — 예약작업이 읽으면 «읽음»으로 바뀝니다");
+            onDone();
+        } catch (e) {
+            setState(`올리지 못했습니다: ${e instanceof Error ? e.message : ""}`);
+        }
+    };
+    if (!open) return <Button variant="light" color="yellow" mb="md" onClick={() => setOpen(true)}>카카오톡 채팅으로 받은 사진 올리기</Button>;
+    return (
+        <Paper withBorder p="md" mb="lg">
+            <Text fw={700} mb={4}>카카오톡 채널 1:1 채팅으로 받은 사진 옮겨 올리기</Text>
+            <Text size="xs" c="dimmed" mb="sm">채팅에서 사진을 내려받아 고릅니다. 카카오로 받은 사진은 포스터로 쓰지 않습니다(휴대폰 사진과 같음). 보낸 사람의 카카오 이름·전화번호는 적지 않습니다.</Text>
+            <Stack gap={6}>
+                <input type="file" accept="image/*" onChange={e => setFile(e.currentTarget.files?.[0] ?? null)} />
+                <TextInput label="단체 이름" value={group} onChange={e => setGroup(e.currentTarget.value)} maxLength={80} />
+                <Textarea label="채팅에 함께 온 글(행사 내용만, 연락처는 빼고)" value={note} autosize minRows={2} onChange={e => setNote(e.currentTarget.value)} maxLength={1000} />
+                <Checkbox label={`채팅에서 권리 확인 두 문장(«${RIGHTS_CHECKS[0].slice(0, 18)}…» 등, ${RIGHTS_VERSION})을 보내고 «동의» 답을 받았습니다`} checked={consent} onChange={e => setConsent(e.currentTarget.checked)} />
+                <Group><Button onClick={send}>올리기</Button><Button variant="subtle" onClick={() => setOpen(false)}>닫기</Button>{state && <Text size="sm">{state}</Text>}</Group>
+            </Stack>
+        </Paper>
+    );
 }
 
 export default function AdminLeafletsPage() {
@@ -69,7 +123,7 @@ export default function AdminLeafletsPage() {
 
     const publish = async (s: Sub) => {
         const d = drafts[s.id];
-        const missing = [!d.title.trim() && "제목", !d.category && "분야", !d.region && "지역", !d.date_start && "시작일"].filter(Boolean);
+        const missing = [!d.group_name.trim() && "단체 이름", !d.title.trim() && "제목", !d.category && "분야", !d.region && "지역", !d.date_start && "시작일"].filter(Boolean);
         if (missing.length) { setMsg(m => ({ ...m, [s.id]: `${missing.join("·")}을(를) 채워 주세요` })); return; }
         if (d.original_url && !/^https?:\/\//.test(d.original_url)) { setMsg(m => ({ ...m, [s.id]: "원본 주소는 http로 시작해야 합니다" })); return; }
         setMsg(m => ({ ...m, [s.id]: "등록 중…" }));
@@ -87,11 +141,11 @@ export default function AdminLeafletsPage() {
             title: d.title.trim(), category: d.category, region: d.region, venue: d.venue.trim() || null,
             event_date_start: d.date_start, event_date_end: d.date_end || d.date_start,
             price_info: d.price_info.trim() || null, is_free: d.is_free, description: d.description.trim() || null,
-            poster_image_url: poster || null, source: leafletSource(s.group_name || "단체"), original_url: d.original_url.trim() || null,
+            poster_image_url: poster || null, source: leafletSource(d.group_name), original_url: d.original_url.trim() || null,
             status: "PUBLISHED", published_at: new Date().toISOString(),
         }).select("id").single();
         if (error || !ev) { setMsg(m => ({ ...m, [s.id]: `등록하지 못했습니다: ${error?.message ?? ""}` })); return; }
-        await supabase.from("leaflet_submissions").update({ status: "published", event_id: ev.id, handled_at: new Date().toISOString() }).eq("id", s.id);
+        await supabase.from("leaflet_submissions").update({ status: "published", event_id: ev.id, group_name: d.group_name.trim().slice(0, 80), handled_at: new Date().toISOString() }).eq("id", s.id);
         setMsg(m => ({ ...m, [s.id]: "등록했습니다" }));
         load();
     };
@@ -106,10 +160,11 @@ export default function AdminLeafletsPage() {
             <Group justify="space-between" align="flex-end" mb="lg">
                 <div>
                     <Title order={1} fw={900}>리플렛 제출</Title>
-                    <Text c="dimmed" size="sm">단체가 올린 리플렛. 클로드 예약작업이 글자를 읽어 칸을 채웁니다(«읽음»). 이미지와 맞춰 보고 고친 뒤 등록하면 바로 공개됩니다. 적혀 있지 않은 것은 채우지 않습니다.</Text>
+                    <Text c="dimmed" size="sm">단체가 올린 리플렛(사이트·카카오톡 채널). 클로드 예약작업이 글자를 읽어 칸을 채웁니다(«읽음»). 이미지와 맞춰 보고 고친 뒤 등록하면 바로 공개됩니다. 적혀 있지 않은 것은 채우지 않습니다.</Text>
                 </div>
                 <SegmentedControl value={filter} onChange={x => setFilter(x as "todo" | "all")} data={[{ label: "처리할 것", value: "todo" }, { label: "전체", value: "all" }]} />
             </Group>
+            <KakaoChatUpload onDone={load} />
             {rows === null ? <Loader size="sm" /> : rows.length === 0 ? <Text c="dimmed">처리할 리플렛이 없습니다.</Text> : (
                 <Stack gap="lg">
                     {rows.map(s => {
@@ -120,14 +175,15 @@ export default function AdminLeafletsPage() {
                                 <Group justify="space-between" mb="xs">
                                     <Group gap="xs">
                                         <Badge color={STATUS[s.status].color}>{STATUS[s.status].label}</Badge>
-                                        <Badge variant="outline">{s.image_kind === "file" ? "리플렛·포스터 파일" : "휴대폰 사진(포스터로 안 씀)"}</Badge>
+                                        {s.channel !== "web" && <Badge color="yellow" variant="light">{CHANNEL[s.channel]}</Badge>}
+                                        <Badge variant="outline">{!s.image_path && s.channel === "kakao_bot" && !s.ai_result?.error ? "글만 보냄" : s.image_kind === "file" ? "리플렛·포스터 파일" : "휴대폰 사진(포스터로 안 씀)"}</Badge>
                                         <Text size="sm" fw={700}>{s.group_name}</Text>
                                     </Group>
                                     <Text size="xs" c="dimmed">{new Date(s.created_at).toLocaleString("ko-KR")} · 권리 확인 {s.rights_version}</Text>
                                 </Group>
                                 <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
                                     <div>
-                                        {urls[s.id] ? <a href={urls[s.id]} target="_blank" rel="noopener noreferrer"><img src={urls[s.id]} alt={`${s.group_name ?? ""} 리플렛`} style={{ maxWidth: "100%", maxHeight: 520, border: "1px solid #ccc" }} /></a> : <Text c="dimmed" size="sm">이미지 없음(1년이 지나 지웠거나 못 읽음)</Text>}
+                                        {urls[s.id] ? <a href={urls[s.id]} target="_blank" rel="noopener noreferrer"><img src={urls[s.id]} alt={`${s.group_name ?? ""} 리플렛`} style={{ maxWidth: "100%", maxHeight: 520, border: "1px solid #ccc" }} /></a> : <Text c="dimmed" size="sm">{s.channel === "kakao_bot" && !a.error ? "사진 없이 글로 받은 제보(아래 «더 알려 준 것»)" : "이미지 없음(1년이 지나 지웠거나 못 읽음)"}</Text>}
                                         {s.official_url && <Text size="sm" mt={6}>공식 안내: <Anchor href={s.official_url} target="_blank" rel="noopener noreferrer">{s.official_url}</Anchor></Text>}
                                         {Object.keys(s.given).length > 0 && <Text size="sm" mt={6}>단체가 적은 것: {Object.entries(s.given).map(([k, x]) => `${k} «${x}»`).join(" · ")}</Text>}
                                         {s.note && <Text size="sm" mt={6}>더 알려 준 것: {s.note}</Text>}
@@ -143,6 +199,7 @@ export default function AdminLeafletsPage() {
                                     </div>
                                     {d && s.status !== "published" && s.status !== "rejected" ? (
                                         <Stack gap={6}>
+                                            <TextInput label="단체 이름(출처 «단체 제공 · 이름»)" value={d.group_name} onChange={e => setD(s.id, "group_name", e.currentTarget.value)} />
                                             <TextInput label="제목" value={d.title} onChange={e => setD(s.id, "title", e.currentTarget.value)} />
                                             <Group grow>
                                                 <Select label="분야" data={CATEGORIES} value={d.category || null} onChange={x => setD(s.id, "category", x ?? "")} />

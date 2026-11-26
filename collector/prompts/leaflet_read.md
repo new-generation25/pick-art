@@ -8,9 +8,13 @@
 모든 명령은 `F:\projects\pick-art\collector` 폴더에서 `PYTHONIOENCODING=utf-8` 를 붙여 실행한다.
 
 1. `python tools/leaflet_queue.py --pending` 을 실행한다.
-   첫 줄은 JSON 배열이다. 항목마다 `id`, `file`(내려받은 이미지의 절대 경로), `tiles`(확대 조각 2장의 절대 경로: 위 절반·아래 절반을 2배로 키운 것. 못 만들었으면 `[]`), `image_kind`, `group_name`, `official_url`, `given`, `note` 가 있다.
+   첫 줄은 JSON 배열이다. 항목마다 `id`, `source`(`image` 또는 `text`), `file`(내려받은 이미지의 절대 경로), `tiles`(확대 조각 2장의 절대 경로: 위 절반·아래 절반을 2배로 키운 것. 못 만들었으면 `[]`), `image_kind`, `group_name`, `official_url`, `given`, `note` 가 있다.
    배열이 `[]` 이면 4번으로 건너뛴다.
 2. 항목마다:
+   0. `source` 가 `text` 이면(카카오톡 채널 챗봇으로 **글만** 보낸 제보, specs/017) 이미지 대신 `text`(보낸 글)를 읽는다.
+      아래 «칸»과 «규칙»을 그대로 쓰되 «인쇄된 글자»를 «보낸 글에 적힌 글자»로 바꿔 읽는다. 글에 없는 것은 채우지 않는다(연도가 없으면 날짜 칸 `raw`만).
+      `personal_info_visible` 은 `false`. 그다음 4·5번(JSON 쓰기 → `--save`)으로 간다. 행사 안내가 아닌 글(인사·질문뿐)이면
+      `--fail <id> --reason "행사 안내 글이 아님: <한 줄>"`.
    1. `file` 이 `null` 이면(내려받기 실패) `python tools/leaflet_queue.py --fail <id> --reason "내려받기 실패: <download_error>"` 를 실행하고 다음 항목으로 간다.
    2. Read 도구로 `file` 이미지를 연다.
    3. 주최·문의·가격·장소 줄처럼 **글씨가 작거나 흐린 부분이 있으면, 칸을 쓰기 전에** `tiles` 의 두 조각을 Read 도구로 열어 그 부분을 다시 읽는다. 원본과 조각이 다르게 읽히면 조각 쪽을 따른다. 조각으로도 확실하지 않으면 `confidence: "low"`.
