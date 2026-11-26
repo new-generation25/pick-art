@@ -5,8 +5,9 @@ import { supabase } from "@/lib/supabase";
 
 type Provider = "google" | "kakao";
 
-// 카카오 로그인: Kakao Developers 앱 «피카»(ID 1668029, 사업자 없는 앱이라 이메일은 받지 않음 — 닉네임 필수·프로필 사진 선택)
-// + Supabase Kakao 공급자(«Allow users without an email» 켬). 2026-11-26 켰다.
+// 카카오 로그인: Kakao Developers 앱 «피카»(ID 1668029, 비즈 앱 — 닉네임 필수, 프로필 사진·이메일 선택)
+// + Supabase Kakao 공급자(이메일 없이도 로그인 허용). Supabase는 account_email 을 항상 요청하므로
+// 앱에서 이메일 동의항목이 꺼져 있으면 카카오가 KOE205 로 막는다(2026-11-26 확인). 2026-11-26 켰다.
 // 문제가 생기면 NEXT_PUBLIC_KAKAO_LOGIN=off 로 버튼만 숨긴다.
 const KAKAO_ENABLED = process.env.NEXT_PUBLIC_KAKAO_LOGIN !== "off";
 
