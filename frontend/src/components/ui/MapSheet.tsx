@@ -25,6 +25,11 @@ export default function MapSheet({ events, summary, onClose }: { events: SheetEv
     const box = useRef<HTMLDivElement>(null);
     const mapRef = useRef<any>(null);
     const markers = useRef<any[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- naver maps 타입 없음(위와 같음)
+    const meMarker = useRef<any>(null);
+    // 처음 그릴 때만 장소들이 다 보이게 맞춘다. 그 뒤(내 위치로 순서가 바뀌는 등)에는 사용자가 맞춘 배율을 건드리지 않는다
+    const fitted = useRef(false);
+    const [mapReady, setMapReady] = useState(false);
 
     // 뒤로 가기 = 시트 닫기
     useEffect(() => {
@@ -90,6 +95,7 @@ export default function MapSheet({ events, summary, onClose }: { events: SheetEv
                 });
             }
             const map = mapRef.current;
+            setMapReady(true);
             markers.current.forEach(m => m.setMap(null));
             markers.current = [];
             const b = new maps.LatLngBounds();
@@ -99,17 +105,38 @@ export default function MapSheet({ events, summary, onClose }: { events: SheetEv
                 // 핀 안 글자는 숫자뿐 (데이터를 HTML 로 넣지 않는다)
                 const m = new maps.Marker({
                     position: pos, map, title: `${p.venue.name} · 행사 ${p.events.length}건`,
-                    icon: { content: `<div class="pica-pin" data-selected="${selected === p.venue.id}">${p.events.length}</div>`, anchor: new maps.Point(18, 18) },
+                    icon: { content: `<div class="pica-pin" data-selected="${selected === p.venue.id}">${p.events.length}</div>`, anchor: new maps.Point(13, 13) },
+                    zIndex: selected === p.venue.id ? 40 : undefined,
                 });
                 maps.Event.addListener(m, "click", () => pick(p));
                 markers.current.push(m);
             }
-            if (places.length > 1 && !selected) map.fitBounds(b, { top: 40, right: 40, bottom: 40, left: 40 });
-            else if (places.length === 1 && !selected) map.setCenter(new maps.LatLng(places[0].venue.lat, places[0].venue.lng));
+            if (!fitted.current && places.length > 0) {
+                fitted.current = true;
+                if (places.length > 1 && !selected) map.fitBounds(b, { top: 40, right: 40, bottom: 40, left: 40 });
+                else if (places.length === 1 && !selected) map.setCenter(new maps.LatLng(places[0].venue.lat, places[0].venue.lng));
+            }
             window.clearTimeout(guard);
         }).catch(() => { if (!cancelled) setMapFailed(true); });
         return () => { cancelled = true; window.clearTimeout(guard); };
     }, [venues, places, selected, mapFailed]);
+
+    // 위치를 허락하면 지도에 내 위치 점을 찍고, 지금 배율 그대로 내 위치로 옮긴다(위치는 이 화면에서만 쓰고 보내지 않는다)
+    useEffect(() => {
+        const map = mapRef.current;
+        if (!me || !map || !window.naver?.maps) return;
+        const { maps } = window.naver;
+        const at = new maps.LatLng(me.lat, me.lng);
+        if (!meMarker.current) {
+            meMarker.current = new maps.Marker({
+                position: at, map, title: "내 위치", zIndex: 50,
+                icon: { content: '<div class="pica-origin" aria-hidden="true"></div>', anchor: new maps.Point(9, 9) },
+            });
+        } else {
+            meMarker.current.setPosition(at);
+        }
+        map.panTo(at);
+    }, [me, mapReady]);
 
     const sel = places.find(p => p.venue.id === selected) || null;
     const askLocation = () => navigator.geolocation?.getCurrentPosition(
@@ -117,6 +144,13 @@ export default function MapSheet({ events, summary, onClose }: { events: SheetEv
         () => { /* 거절하면 행사 수 순 그대로 */ },
         { maximumAge: 600000, timeout: 8000 },
     );
+    // 이미 위치를 허락한 사람은 지도를 열 때 바로 내 위치를 보여 준다(묻는 창은 띄우지 않는다)
+    useEffect(() => {
+        if (!venues || mapFailed) return;
+        navigator.permissions?.query({ name: "geolocation" as PermissionName })
+            .then(st => { if (st.state === "granted") askLocation(); })
+            .catch(() => { /* 지원하지 않는 브라우저는 버튼으로만 */ });
+    }, [venues, mapFailed]);
 
     return (
         <div className="pica-portal fixed inset-0 z-[1200]" role="dialog" aria-modal="true" aria-label="지도">

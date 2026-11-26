@@ -118,12 +118,14 @@ export function NearbyMap({ items, origin, originLabel, range, appname, onFail }
         for (const c of clusterGroups(groups, zoom)) {
             const many = c.groups.length > 1;
             // 표시 안 글자는 숫자뿐이다(행사 이름 같은 데이터는 HTML 로 넣지 않는다)
-            const html = `<div class="pica-pin${many ? " pica-pin-cluster" : ""}">${countLabel(c.count)}</div>`;
+            const isSel = !many && !!selected && c.groups[0].key === selected.key;
+            const html = `<div class="pica-pin${many ? " pica-pin-cluster" : ""}" data-selected="${isSel}">${countLabel(c.count)}</div>`;
             const m = new maps.Marker({
                 position: new maps.LatLng(c.lat, c.lng),
                 map,
+                zIndex: isSel ? 40 : undefined,
                 title: many ? `장소 ${c.groups.length}곳 · 행사 ${c.count}건` : `${c.groups[0].venue} · 행사 ${c.count}건`,
-                icon: { content: html, anchor: new maps.Point(18, 18) },
+                icon: { content: html, anchor: new maps.Point(13, 13) },
             });
             maps.Event.addListener(m, "click", () => {
                 if (many) {
@@ -147,7 +149,7 @@ export function NearbyMap({ items, origin, originLabel, range, appname, onFail }
             });
             markers.current.push(m);
         }
-    }, [ready, groups, zoom]);
+    }, [ready, groups, zoom, selected]);
 
     // 고른 장소가 조건 변경으로 사라지면 닫는다
     useEffect(() => {

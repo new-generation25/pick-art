@@ -11,6 +11,7 @@ import { BUSAN_DISTRICTS, GN_REGIONS, guList, regionFromPath, regionList, region
 import { CATEGORIES as FEED_CATEGORIES, normalizeCategory } from "@/lib/categories";
 
 const REGIONS = ["전체", ...GN_REGIONS];
+const GN_ONLY = GN_REGIONS.filter(r => r !== "부산"); // 경남 18개 시군
 const CATEGORIES = ["전체", ...FEED_CATEGORIES];
 // 아이와 같이 가기 좋은 곳(specs/004). 값은 주소의 kids (lib/kids.ts readKidsParam)
 const KIDS_FILTERS = [
@@ -153,7 +154,20 @@ export function FilterBar({ subs = [], total }: { subs?: { name: string; n: numb
         const rs = toggle(dr.r, r);
         setDraft({ ...dr, r: rs, g: rs.includes("부산") ? dr.g : [] });
     };
-    const toggleGu = (g: string) => setDraft({ ...dr, g: toggle(dr.g, g) });
+    // 경남 전체: 18개 시군을 한꺼번에 넣거나 뺀다
+    const allGn = GN_ONLY.every(r => dr.r.includes(r));
+    const toggleAllGn = () => setDraft({ ...dr, r: allGn ? dr.r.filter(r => !GN_ONLY.includes(r)) : [...new Set([...dr.r, ...GN_ONLY])] });
+    // 부산 전체: 부산(구 제한 없음). 이미 «부산 전체»면 부산을 뺀다
+    const busanAll = dr.r.includes("부산") && dr.g.length === 0;
+    const toggleBusanAll = () => busanAll
+        ? setDraft({ ...dr, r: dr.r.filter(r => r !== "부산"), g: [] })
+        : setDraft({ ...dr, r: dr.r.includes("부산") ? dr.r : [...dr.r, "부산"], g: [] });
+    // 구·군을 고르면 부산도 같이 들어가고, 마지막 구를 빼면 부산도 뺀다
+    const toggleGu = (g: string) => {
+        const gs = toggle(dr.g, g);
+        const rs = gs.length ? (dr.r.includes("부산") ? dr.r : [...dr.r, "부산"]) : dr.r.filter(r => r !== "부산");
+        setDraft({ ...dr, r: rs, g: gs });
+    };
     const toggleCategory = (c: string) => setDraft({ ...dr, c: toggle(dr.c, c) });
     function same(a: string[], b: string[]) { return a.length === b.length && a.every(x => b.includes(x)); }
     const draftChanged = !!draft && !(same(draft.r, regions) && same(draft.g, gus) && same(draft.c, cats));
@@ -182,7 +196,7 @@ export function FilterBar({ subs = [], total }: { subs?: { name: string; n: numb
             <div className="flex items-center gap-1.5 py-1.5 pr-2.5 sm:pr-0">
                 <div className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto py-1 pl-3 [scrollbar-width:none] sm:pl-0" role="group" aria-label="필터">
                     <Pick label={currentDate === "all" ? "기간" : dateLabel || "기간"} on={currentDate !== "all"} items={DATE_FILTERS} current={currentDate} onPick={v => updateFilters("date", v)} />
-                    <Pick label={regions.length === 0 ? "지역" : regions.length > 1 ? `${regions[0]} 외 ${regions.length - 1}` : gus.length === 1 ? `${regions[0]} ${gus[0]}` : gus.length > 1 ? `${regions[0]} ${gus[0]} 외 ${gus.length - 1}` : regions[0]} on={regions.length > 0}
+                    <Pick label={regions.length === 0 ? "지역" : GN_ONLY.every(r => regions.includes(r)) && regions.length === GN_ONLY.length ? "경남 전체" : regions.length > 1 ? `${regions[0]} 외 ${regions.length - 1}` : gus.length === 1 ? `${regions[0]} ${gus[0]}` : gus.length > 1 ? `${regions[0]} ${gus[0]} 외 ${gus.length - 1}` : regions[0]} on={regions.length > 0}
                         items={REGIONS.map(r => ({ label: r, value: r }))} current={currentRegion} onPick={v => updateFilters("region", v)} />
                     <Pick label={cats.length === 0 ? "분야" : cats.length > 1 ? `${cats[0]} 외 ${cats.length - 1}` : cats[0]} on={cats.length > 0}
                         items={CATEGORIES.map(c => ({ label: c, value: c }))} current={currentCategory} onPick={v => updateFilters("category", v)} />
@@ -218,37 +232,33 @@ export function FilterBar({ subs = [], total }: { subs?: { name: string; n: numb
             )}
 
             {/* «필터»: 모든 조건 (언제·지역·구·군·분야·아이 나이·끝난 행사) */}
-            <Drawer opened={opened} onClose={applyAndClose} position="bottom" size={440} title="필터" radius="lg" classNames={{ content: "pica-portal" }}
-                styles={{ title: { fontWeight: 700, fontSize: 18 }, body: { paddingBottom: 24 } }}>
-                <div className="flex flex-col gap-3">
-                    <Link href="/nearby" className="pica-chip w-max" onClick={() => { setDraft(null); close(); }}>
-                        <LocateFixed size={14} aria-hidden />내 주변 가까운 순으로 보기
-                    </Link>
+            <Drawer opened={opened} onClose={applyAndClose} position="bottom" size={340} title={<>필터 <span className="ml-1 text-[12px] font-medium text-ink-soft">지역·분야는 여러 개 고를 수 있어요</span></>} radius="lg" classNames={{ content: "pica-portal pica-filter-drawer" }}
+                styles={{ header: { paddingTop: 10, paddingBottom: 6, minHeight: 0 }, title: { fontWeight: 700, fontSize: 16 }, body: { paddingBottom: 14 } }}>
+                <div className="flex flex-col gap-1.5">
                     <Row label="언제">
                         {DATE_FILTERS.map(f => (
                             <button key={f.value} type="button" className="pica-chip" aria-pressed={currentDate === f.value} onClick={() => updateFilters("date", f.value)}>{f.label}</button>
                         ))}
                     </Row>
-                    {/* 지역·분야는 여러 개 고를 수 있다(누르면 넣고 다시 누르면 뺀다) */}
-                    <Row label="지역">
-                        {REGIONS.map(r => (
-                            <button key={r} type="button" className="pica-chip" aria-pressed={r === "전체" ? dr.r.length === 0 : dr.r.includes(r)} onClick={() => toggleRegion(r)}>{r}</button>
+                    {/* 지역·분야는 여러 개 고를 수 있다(누르면 넣고 다시 누르면 뺀다). 아무것도 안 고르면 모든 지역 */}
+                    <Row label="경남">
+                        <button type="button" className="pica-chip" aria-pressed={allGn} onClick={toggleAllGn}>경남 전체</button>
+                        {GN_ONLY.map(r => (
+                            <button key={r} type="button" className="pica-chip" aria-pressed={dr.r.includes(r)} onClick={() => toggleRegion(r)}>{r}</button>
                         ))}
                     </Row>
-                    {/* 부산을 고르면 구·군 (2단계, specs/010). 장소 주소로 가른 것이라 장소를 모르는 행사는 «부산 전체»에만 나온다 */}
-                    {dr.r.includes("부산") && (
-                        <Row label="부산">
-                            {[{ name: "전체" }, ...BUSAN_DISTRICTS].map(d => (
-                                <button key={d.name} type="button" className="pica-chip" aria-pressed={d.name === "전체" ? dr.g.length === 0 : dr.g.includes(d.name)} onClick={() => toggleGu(d.name)}>{d.name}</button>
-                            ))}
-                        </Row>
-                    )}
+                    {/* 부산은 구·군까지 (specs/010). 장소 주소로 가른 것이라 장소를 모르는 행사는 «부산 전체»에만 나온다 */}
+                    <Row label="부산">
+                        <button type="button" className="pica-chip" aria-pressed={busanAll} onClick={toggleBusanAll}>부산 전체</button>
+                        {BUSAN_DISTRICTS.map(d => (
+                            <button key={d.name} type="button" className="pica-chip" aria-pressed={dr.g.includes(d.name)} onClick={() => toggleGu(d.name)}>{d.name}</button>
+                        ))}
+                    </Row>
                     <Row label="분야">
                         {CATEGORIES.map(c => (
                             <button key={c} type="button" className="pica-chip" aria-pressed={c === "전체" ? dr.c.length === 0 : dr.c.includes(c)} onClick={() => toggleCategory(c)}>{c}</button>
                         ))}
                     </Row>
-                    <p className="-mt-1 text-[12px] text-ink-soft">지역·분야는 여러 개 고를 수 있어요.</p>
                     <Row label="아이">
                         {KIDS_FILTERS.map(k => (
                             <button key={k.value} type="button" className="pica-chip" aria-pressed={currentKids === k.value} onClick={() => updateFilters("kids", k.value)}>{k.label}</button>
@@ -263,10 +273,17 @@ export function FilterBar({ subs = [], total }: { subs?: { name: string; n: numb
                         size="sm"
                         styles={{ label: { color: 'var(--pk-ink-soft)', fontWeight: 500 } }}
                     />
-                    <button type="button" onClick={applyAndClose}
-                        className="mt-1 h-12 w-full rounded-full bg-accent text-[15px] font-bold text-on-accent">
-                        {draftChanged ? "고른 조건으로 보기" : "닫기"}
-                    </button>
+                    {/* 맨 아래 한 줄: 내 주변(가까운 순) · 적용 */}
+                    <div className="mt-0.5 flex gap-2">
+                        <Link href="/nearby" onClick={() => { setDraft(null); close(); }}
+                            className="flex h-11 shrink-0 items-center gap-1 rounded-full px-3.5 text-[13.5px] font-bold text-ink shadow-[inset_0_0_0_1.5px_var(--pk-ink)]">
+                            <LocateFixed size={15} aria-hidden />내 주변
+                        </Link>
+                        <button type="button" onClick={applyAndClose}
+                            className="h-11 flex-1 rounded-full bg-accent text-[15px] font-bold text-on-accent">
+                            {draftChanged ? "고른 조건으로 보기" : "닫기"}
+                        </button>
+                    </div>
                 </div>
             </Drawer>
         </>
