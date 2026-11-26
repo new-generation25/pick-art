@@ -3,8 +3,12 @@
  * 화면·DB 없이 시험할 수 있게 순수 함수만 둔다. 실제 저장은 app/api/kakao/skill/route.ts → DB 함수 kakao_intake().
  *
  * 공식 문서(2026-11-26 확인): 요청은 POST JSON, 응답은 version "2.0" + template.outputs, 5초 안에 답하라고 권장.
- * 사진은 «이미지 보안전송 플러그인»(sys.plugin.secureimage)으로만 받는다 — 한 번에 최대 10장, 주소는 최대 10분 유지.
- * 플러그인 값은 JSON 글자: {"privacyAgreement":"Y","imageQuantity":"1","secureUrls":"List(http://secure.kakaocdn.net/…)","expire":"…"}
+ * 사진은 두 길로 온다.
+ *  1) 채팅창에 그냥 보낸 사진: 폴백 블록에 발화(utterance)로 사진 주소(https://talk.kakaocdn.net/dna/…)가 온다.
+ *     공식 문서에는 없고 2026-11-26 운영자 PC 시험에서 확인(보낸 지 15분 뒤에도 200 image/png). 운영자 요청(«일반 채팅하듯이»)으로 이 길을 안내한다
+ *  2) «이미지 보안전송 플러그인»(sys.plugin.secureimage): 최대 10장, 주소 최대 10분 유지. 값은 JSON 글자
+ *     {"privacyAgreement":"Y","imageQuantity":"1","secureUrls":"List(http://secure.kakaocdn.net/…)","expire":"…"}
+ *     보낸 사진이 채팅방에 보이지 않아(운영자 시험) 안내하지 않지만, 블록은 남겨 둔다
  * https://kakaobusiness.gitbook.io/main/tool/chatbot/skill_guide/apply_skill_to_plugin.md
  * https://kakaobusiness.gitbook.io/main/tool/chatbot/skill_guide/answer_json_format.md
  */
@@ -16,7 +20,8 @@ export const AGREE_TEXT = "동의하고 보내기";
 /** 사진 받기 버튼이 보내는 말. 오픈빌더 «사진 보내기» 블록(보안 이미지 파라미터)의 발화와 같아야 한다 */
 export const PHOTO_TEXT = "사진 보내기";
 export const MAX_IMAGES = 10;
-export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+/** 카카오에서 내려받을 때 상한(PC에서 보낸 원본 PNG 7.5MB 확인). 저장 전에 긴 변 2048px JPEG 로 줄인다 */
+export const MAX_IMAGE_BYTES = 25 * 1024 * 1024;
 
 export type SkillAction =
     | { kind: "welcome" }
@@ -87,6 +92,11 @@ export function parseSkillRequest(body: unknown): SkillRequest | null {
     }
     const utterance = str(ur.utterance).trim();
     const blockName = str(obj(ur.block).name);
+    // 채팅창에 그냥 보낸 사진: 발화가 카카오 사진 주소뿐이면 사진으로 받는다
+    const words = utterance.split(/\s+/).filter(Boolean);
+    if (words.length > 0 && words.length <= MAX_IMAGES && words.every(isKakaoImageUrl)) {
+        return { userKey, action: { kind: "image", urls: words } };
+    }
     if (utterance === AGREE_TEXT) return { userKey, action: { kind: "agree" } };
     if (/웰컴|welcome/i.test(blockName) || !utterance) return { userKey, action: { kind: "welcome" } };
     return { userKey, action: { kind: "text", text: utterance.slice(0, 1000) } };
@@ -115,18 +125,18 @@ export const MSG = {
         `보내기 전에 아래 두 가지에 동의해 주세요.\n\n1. ${RIGHTS_CHECKS[0]}\n\n2. ${RIGHTS_CHECKS[1]}\n\n${PRIVACY_NOTE} 사진은 1년 동안 보관한 뒤 지웁니다. 카카오 이름·전화번호는 받지 않아요. 자세한 내용: picka.news/privacy`,
     ], [AGREE_TEXT]),
     ready: () => reply([
-        "리플렛·포스터 사진은 아래 «사진 보내기»를 눌러 보내 주세요(한 번에 10장까지).\n단체 이름·행사 이름·날짜 같은 내용은 글로 보내 주셔도 돼요. 사진 바로 뒤 10분 안에 보낸 글은 같은 제보로 묶어요.",
-    ], [PHOTO_TEXT]),
-    agreed: () => reply(["동의해 주셔서 고맙습니다. 이제 사진이나 글을 보내 주세요."], [PHOTO_TEXT]),
+        "리플렛·포스터 사진을 이 채팅창에 그냥 보내 주세요(여러 장도 돼요).\n단체 이름·행사 이름·날짜 같은 내용은 글로 보내 주셔도 돼요. 사진 바로 뒤 10분 안에 보낸 글은 같은 제보로 묶어요.",
+    ]),
+    agreed: () => reply(["동의해 주셔서 고맙습니다. 이제 리플렛·포스터 사진이나 일정 글을 이 채팅창에 보내 주세요.\n동의 전에 보낸 사진은 저장하지 않았으니 한 번 더 보내 주세요."]),
     gotImages: (n: number, refused: number) => reply([
         `사진 ${n}장 받았어요. 운영자가 확인한 뒤에 피카에 올립니다.` +
         (refused ? `\n하루 5장까지 받아서 ${refused}장은 받지 못했어요. 내일 다시 보내 주세요.` : "") +
         "\n단체 이름이 사진에 없으면 지금 글로 보내 주세요.",
     ]),
     gotText: (attached: boolean) => reply([
-        attached ? "방금 보낸 사진과 함께 받았어요. 운영자가 확인한 뒤에 피카에 올립니다." : "글로 받았어요. 운영자가 확인한 뒤에 피카에 올립니다. 리플렛·포스터 사진이 있으면 함께 보내 주세요.",
-    ], attached ? [] : [PHOTO_TEXT]),
-    noImage: () => reply(["사진을 받지 못했어요. «사진 보내기»를 눌러 다시 보내 주세요."], [PHOTO_TEXT]),
+        attached ? "방금 보낸 사진과 함께 받았어요. 운영자가 확인한 뒤에 피카에 올립니다." : "글로 받았어요. 운영자가 확인한 뒤에 피카에 올립니다. 리플렛·포스터 사진이 있으면 이 채팅창에 함께 보내 주세요.",
+    ]),
+    noImage: () => reply(["사진을 받지 못했어요. 이 채팅창에 사진을 다시 보내 주세요."]),
     limit: () => reply(["오늘은 더 받을 수 없어요(하루 5건까지). 내일 다시 보내 주세요."]),
     error: () => reply(["지금은 받지 못했어요. 잠시 뒤에 다시 보내 주세요."]),
 };

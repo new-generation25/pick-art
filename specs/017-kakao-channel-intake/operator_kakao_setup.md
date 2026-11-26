@@ -34,7 +34,7 @@
 
 ## 4. 시험 (✋ 운영자 휴대폰)
 1. 카카오톡에서 `pickanews` 검색 또는 https://pf.kakao.com/_xoxdxkvX/chat → 채팅방
-2. «동의하고 보내기» → «사진 보내기» → 리플렛 사진 한 장(시험용이면 `specs/017-kakao-channel-intake/captures/test_leaflet.jpg`)
+2. 아무 글 → «동의하고 보내기» → 리플렛 사진을 채팅창에 그냥 보내기(시험용이면 `specs/017-kakao-channel-intake/captures/test_leaflet.jpg`). 채널이 비공개면 «찾을 수 없는 채널» — 파트너센터 대시보드에서 공개·채팅 사용을 켠다
 3. «사진 1장 받았어요» 답이 오면 Claude에게 알려 주기 → Claude가 검토함(https://picka.news/admin/leaflets)·버킷을 확인하고 verification.md 에 기록, 시험 데이터 삭제
 
 ## 5. 되돌리기

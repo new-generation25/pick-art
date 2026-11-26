@@ -30,6 +30,14 @@ assert.strictEqual(k.parseSkillRequest(plain('동의하고 보내기', '제보 �
 assert.strictEqual(k.parseSkillRequest(plain('안녕', '웰컴 블록')).action.kind, 'welcome');
 const t = k.parseSkillRequest(plain('극단 해연 «겨울» 12.5~7 김해', '폴백 블록')).action;
 assert.strictEqual(t.kind, 'text'); assert.ok(t.text.startsWith('극단 해연'));
+// 채팅창에 그냥 보낸 사진(폴백 발화로 주소가 옴, 11/26 운영자 시험)
+const T = 'https://talk.kakaocdn.net/dna/bgZY8n/dJMcboYyCIV/abc/i_x.png?credential=a&expires=1&allow_ip=&allow_referer=&signature=b';
+let p = k.parseSkillRequest(plain(T, '폴백 블록')).action;
+assert.deepStrictEqual(p, { kind: 'image', urls: [T] });
+p = k.parseSkillRequest(plain(T + ' ' + T.replace('i_x', 'i_y'), '폴백 블록')).action;
+assert.strictEqual(p.kind, 'image'); assert.strictEqual(p.urls.length, 2);
+assert.strictEqual(k.parseSkillRequest(plain('포스터 ' + T, '폴백 블록')).action.kind, 'text');   // 글이 섞이면 글
+assert.strictEqual(k.parseSkillRequest(plain('https://evil.example/a.png', '폴백 블록')).action.kind, 'text');
 assert.strictEqual(k.parseSkillRequest({ userRequest: { user: {} } }), null);
 assert.strictEqual(k.parseSkillRequest(null), null);
 // 답 모양

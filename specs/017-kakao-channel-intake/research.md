@@ -42,7 +42,7 @@
 - 최대 10장, 이미지는 카카오 보안 정책으로 보관, **URL은 최대 10분 유지**, 사용자가 플러그인 개인정보 수집 항목에 동의하지 않으면 보낼 수 없음.
 - 스킬에 오는 값: `action.params.<파라미터>` = JSON 글자 `{"privacyAgreement":"Y","imageQuantity":"1","secureUrls":"List(http://secure.kakaocdn.net/…)","expire":"…"}`, `detailParams.<파라미터>` = `{origin, value, groupName}`.
 - 여러 장일 때 `List(...)` 안 구분 기호, 파일 크기·형식 제한: 문서에 없음 → 코드는 «, http» 앞에서 나누고, `*.kakaocdn.net` 주소만, jpeg·png·webp, 10MB까지 받는다.
-- 플러그인 없이 그냥 보낸 사진이 스킬에 오는지: 확인 못 함 → 블록 안내로 «사진 보내기» 버튼을 누르게 한다.
+- 플러그인 없이 그냥 보낸 사진이 스킬에 오는지: 공식 문서에는 없음. **11/26 운영자 PC 시험에서 확인** — 폴백 블록에 발화로 `https://talk.kakaocdn.net/dna/…` 주소가 오고, 15분 뒤에도 내려받힘(200 image/png). 운영자 요청으로 이 길을 기본 안내로 바꿈. 플러그인으로 보낸 사진은 채팅방에 보이지 않는다(운영자 시험).
 
 ## 5. 보낸 사람 식별값
 - `userRequest.user.id`(최대 70자, type 은 현재 botUserKey만), «동일한 사용자더라도 봇이 다르면 다른 id», `plusfriendUserKey`·`botUserKey`는 문서가 «비식별» 구분키라고 부름, `appUserId`는 앱키를 설정한 경우에만, 전화번호·이름은 필드에 없음 — https://kakaobusiness.gitbook.io/main/tool/chatbot/skill_guide/answer_json_format.md

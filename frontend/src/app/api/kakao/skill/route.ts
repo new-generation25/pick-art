@@ -25,6 +25,19 @@ async function intake(secret: string, userKey: string, action: string, text?: st
     return (data ?? { ok: false, error: "db" }) as Intake;
 }
 
+/** 긴 변 2048px JPEG 로 다시 저장한다(사이트 올리기와 같음): 용량을 줄이고 사진 위치(EXIF) 같은 정보를 지운다.
+ *  sharp 는 next 의 선택 의존성이라 없으면 원본 그대로 둔다(버킷 상한 10MB를 넘으면 올리기가 실패해 «읽지 못함»으로 남는다) */
+async function toJpeg(buf: ArrayBuffer, type: string): Promise<{ body: ArrayBuffer | Buffer; contentType: string }> {
+    try {
+        const sharp = (await import("sharp")).default;
+        const out = await sharp(Buffer.from(buf)).rotate().resize(2048, 2048, { fit: "inside", withoutEnlargement: true }).jpeg({ quality: 88 }).toBuffer();
+        return { body: out, contentType: "image/jpeg" };
+    } catch (e) {
+        console.error("kakao image resize skipped", e instanceof Error ? e.message : e);
+        return { body: buf, contentType: type };
+    }
+}
+
 async function storeImage(secret: string, id: string, path: string, url: string): Promise<void> {
     try {
         const res = await fetch(url, { signal: AbortSignal.timeout(20_000) });
@@ -33,7 +46,8 @@ async function storeImage(secret: string, id: string, path: string, url: string)
         if (!res.ok || !/^image\/(jpeg|png|webp)$/.test(type)) throw new Error(`fetch ${res.status} ${type}`);
         const buf = await res.arrayBuffer();
         if (buf.byteLength === 0 || buf.byteLength > MAX_IMAGE_BYTES) throw new Error(`size ${buf.byteLength}`);
-        const up = await supabase.storage.from("leaflets").upload(path, buf, { contentType: type, upsert: false });
+        const { body, contentType } = await toJpeg(buf, type);
+        const up = await supabase.storage.from("leaflets").upload(path, body, { contentType, upsert: false });
         if (up.error) throw new Error(`upload ${up.error.message}`);
     } catch (e) {
         console.error("kakao image store failed", id, e instanceof Error ? e.message : e);
