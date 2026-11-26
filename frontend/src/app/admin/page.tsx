@@ -7,6 +7,7 @@ import {
 } from "@mantine/core";
 import { RefreshCw, ExternalLink } from "lucide-react";
 import { SiteVisitsPanel, type SiteVisits } from "@/components/admin/SiteVisitsPanel";
+import { PlaceholderCandidates } from "@/components/admin/PlaceholderCandidates";
 import { supabase } from "@/lib/supabase";
 import { GN_REGIONS } from "@/lib/regions";
 import {
@@ -399,6 +400,9 @@ export default function AdminDashboard() {
                         </Text>
                     </Paper>
                 </SimpleGrid>
+
+                {/* 안내 그림 후보 (specs/014) */}
+                <PlaceholderCandidates />
 
                 <SiteVisitsPanel data={ops.snapshots["site_visits"]?.data as unknown as SiteVisits | undefined} updatedAt={ops.snapshots["site_visits"]?.updated_at} />
 
