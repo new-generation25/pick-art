@@ -27,7 +27,7 @@ def test_performance_rules():
 def test_ambiguous_goes_pending():
     cat, sub, by, ev, pending = c("2026 송년음악회", "공연")
     assert sub is None and pending is True and by is None
-    assert c("2026 정기전", "전시")[4] is True
+    assert c("심연, 그리고 다시 봄", "전시")[4] is True  # «정기전»은 이제 여러 갈래(11/26)
 
 
 def test_exhibition_rules():
@@ -66,3 +66,11 @@ def test_screening_moves_to_event():
 def test_theater_film():
     assert is_theater_film({"title": "신작 개봉작 상영", "venue": "CGV 김해"})
     assert not is_theater_film({"title": "독립영화 상영회", "venue": "김해문화의전당"})
+
+
+def test_exhibition_multi_genre():
+    assert c("제64회 마산미술협회전", "전시")[1] == "여러 갈래"
+    assert c("2026 제49회 경상남도미술대전 입상작 전시", "전시")[1] == "여러 갈래"
+    # 매체가 분명하면 매체가 이긴다
+    assert c("해운대사진가회 제25회 회원전", "전시")[1] == "사진"
+    assert c("제14회 진주수채화협회전", "전시")[1] == "회화·드로잉"

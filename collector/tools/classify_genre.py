@@ -86,7 +86,8 @@ def main():
     stats = collections.defaultdict(collections.Counter)
     changes, sample_pool, pend = [], [], []
     for r in rows:
-        if r.get("subcategory_by") == "admin":
+        # 운영자 값과, 다른 세션이 원문을 읽고 정한 값(evidence 「… Claude 판정: …」)은 덮어쓰지 않는다
+        if r.get("subcategory_by") == "admin" or "Claude 판정" in (r.get("subcategory_evidence") or ""):
             stats[r["category"]]["운영자"] += 1
             continue
         cat, sub, by, ev, pending = classify(r)
