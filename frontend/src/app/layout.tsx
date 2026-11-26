@@ -40,6 +40,10 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     images: [DEFAULT_OG_IMAGE.url],
   },
+  // 검색엔진 소유 확인. 구글은 DNS TXT(picka.news)로 확인해 여기에 없다
+  verification: {
+    other: { "naver-site-verification": "d77666d31e3b3ea3e9c7e14019b583d47830e180" },
+  },
 };
 
 export const viewport: Viewport = {
