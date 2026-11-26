@@ -44,6 +44,7 @@ type Ops = {
     review: number;
     venuesPending: number;
     reportsNew: number;
+    partnersNew: number;
     members: number;
     lastRawAt: string | null;
     snapshots: Record<string, Snapshot>;
@@ -81,7 +82,7 @@ async function loadOps(): Promise<Ops> {
     const safe = async <T,>(p: Promise<T>, fallback: T): Promise<T> => {
         try { return await p; } catch (e) { errors.push((e as Error).message); return fallback; }
     };
-    const [events, inbox, review, venuesPending, members, lastRaw, snaps, reportsNew] = await Promise.all([
+    const [events, inbox, review, venuesPending, members, lastRaw, snaps, reportsNew, partnersNew] = await Promise.all([
         safe(fetchAllEvents(), [] as OpsEvent[]),
         safe(countOf("raw_posts", "status", "COLLECTED"), 0),
         safe(countOf("raw_posts", "status", "REVIEW"), 0),
@@ -99,9 +100,15 @@ async function loadOps(): Promise<Ops> {
             return (data || []) as Snapshot[];
         })(), [] as Snapshot[]),
         safe(countOf("reports", "status", "new"), 0),
+        safe((async () => {  // 협약 신청 검토 대기 + 철회 요청(처리 전)
+            const { count, error } = await supabase.from("partner_agreements").select("id", { count: "exact", head: true })
+                .or("status.eq.new,and(withdraw_requested_at.not.is.null,status.neq.withdrawn)");
+            if (error) throw new Error(`협약 신청: ${error.message}`);
+            return count || 0;
+        })(), 0),
     ]);
     return {
-        loadedAt: new Date(), today: todayKST(), events, inbox, review, venuesPending, members, reportsNew,
+        loadedAt: new Date(), today: todayKST(), events, inbox, review, venuesPending, members, reportsNew, partnersNew,
         lastRawAt: lastRaw, snapshots: Object.fromEntries(snaps.map(s => [s.name, s])), errors,
     };
 }
@@ -144,6 +151,7 @@ function buildAlerts(ops: Ops, supply: ReturnType<typeof computeSupply>, lastNew
     if (ops.inbox) a.push({ level: "info", text: `인박스 승인 대기 ${ops.inbox}건`, href: "/admin/inbox" });
     if (ops.review) a.push({ level: "info", text: `인스타 수집분 검토 대기 ${ops.review}건 — 인박스의 «공개 후보·동의 필요·사람 판단» 탭`, href: "/admin/inbox" });
     if (ops.reportsNew) a.push({ level: "info", text: `신고·제보 ${ops.reportsNew}건 확인 대기`, href: "/admin/reports" });
+    if (ops.partnersNew) a.push({ level: "info", text: `협약 신청·철회 요청 ${ops.partnersNew}건 확인 대기`, href: "/admin/partners" });
     if (ops.venuesPending) a.push({ level: "info", text: `장소 좌표 확인 대기 ${ops.venuesPending}곳`, href: "/admin/venues" });
     for (const e of ops.errors) a.push({ level: "bad", text: `읽기 실패 — ${e}` });
     return a;
