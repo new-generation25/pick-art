@@ -95,7 +95,7 @@
   - 지문이 없는 행사는 버튼을 막고 «지문 없음(채움 도구 실행 필요)»을 적는다.
 - [X] T025 [US2] 관리자 대시보드에 «안내 그림 후보» 상자를 더한다 (`frontend/src/app/admin/page.tsx`). 같은 지문을 3개 넘는 공개 행사가 쓰는 그림을 보여 주는데, 썸네일 · 행사 수 · 표시 버튼으로 구성한다
 - [X] T026 [US2] 공유 미리보기(OG 이미지)는 `poster_placeholder`이면 기본 OG 이미지를 쓴다 (`frontend/src/app/events/[id]/page.tsx`의 `generateMetadata`)
-- [ ] T027 [US2] 확인한다: quickstart 6단계(4개 행사 × 홈·상세·공간, 표시를 풀었다가 다시 표시). 맞으면 커밋한다
+- [X] T027 [US2] (부분: 도구 `--mark`로 표시해 43건이 바뀐 것과 홈·상세·공간 화면을 확인. 관리자 버튼은 관리자 로그인이 없어 화면으로 눌러 보지 못함) 확인한다: quickstart 6단계(4개 행사 × 홈·상세·공간, 표시를 풀었다가 다시 표시). 맞으면 커밋한다
 
 ---
 
@@ -166,10 +166,10 @@
 
 ## Phase 9: Polish & 전체 검증
 
-- [ ] T045 [P] 나머지 공개 화면(`/about`, `/partners`, `/tip`, `/login`, `/signup`, `/welcome`, `/privacy`, `/terms`, `not-found`, `error`)에서 리소 색과 읽기 어려운 곳이 있는지 375px로 훑어 고친다 (`frontend/src/app/*`)
-- [ ] T046 [P] 관리자 화면이 새 색·글꼴 때문에 읽기 어려워진 곳이 없는지 확인한다. 관리자 화면은 `.pica-public` 밖이라 영향이 없어야 한다 (`frontend/src/app/admin/*`)
-- [ ] T047 [P] 한눈에 보기 페이지에 화면 팔레트를 더한다 (`docs/brand/brand-guide.html`)
-- [ ] T048 quickstart 1~10단계를 전부 돌리고, 결과(숫자·스크린숏 경로)를 적는다 (`specs/014-design-apply/verification.md`)
+- [X] T045 [P] 나머지 공개 화면(`/about`, `/partners`, `/tip`, `/login`, `/signup`, `/welcome`, `/privacy`, `/terms`, `not-found`, `error`)에서 리소 색과 읽기 어려운 곳이 있는지 375px로 훑어 고친다 (`frontend/src/app/*`)
+- [X] T046 [P] 관리자 화면이 새 색·글꼴 때문에 읽기 어려워진 곳이 없는지 확인한다. 관리자 화면은 `.pica-public` 밖이라 영향이 없어야 한다 (`frontend/src/app/admin/*`)
+- [X] T047 [P] 한눈에 보기 페이지에 화면 팔레트를 더한다 (`docs/brand/brand-guide.html`)
+- [X] T048 (결과: verification.md — 10단계 중 8 통과, 7 대부분, 10 미확인) quickstart 1~10단계를 전부 돌리고, 결과(숫자·스크린숏 경로)를 적는다 (`specs/014-design-apply/verification.md`)
 - [ ] T049 `/speckit-converge`로 명세 대비 빠진 일을 찾고, 남은 것을 처리한다
 - [ ] T050 운영자에게 결과 보고 아티팩트와 배포 승인 요청을 보낸다. `main` 합치기는 승인 뒤에 한다
 
