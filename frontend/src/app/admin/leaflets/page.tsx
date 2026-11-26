@@ -17,10 +17,12 @@ import { shrink } from "@/app/tip/leaflet/LeafletForm";
 type Field = { raw?: string | null; value?: string | null; confidence?: "high" | "low" | "none" };
 type Sub = {
     id: string; user_id: string; image_path: string | null; image_kind: "file" | "photo"; official_url: string | null; group_name: string | null;
-    given: Record<string, string>; note: string | null; rights_version: string; ai_result: (Record<string, Field> & { date_start?: string | null; date_end?: string | null; error?: string; personal_info_visible?: boolean }) | null;
+    given: Record<string, string>; note: string | null; rights_version: string; ai_result: (Record<string, Field> & { date_start?: string | null; date_end?: string | null; error?: string; personal_info_visible?: boolean; venue_match?: VenueMatch | null }) | null;
     status: "uploaded" | "read" | "published" | "rejected"; admin_note: string | null; event_id: string | null; created_at: string;
     channel: "web" | "kakao_bot" | "kakao_chat";
 };
+/** 읽은 장소 글자를 확인된 장소 목록(venues)과 맞춘 결과(collector leaflet_queue.match_venue, 11/27 검증에서 더함) */
+type VenueMatch = { venue_id: string; name: string; region: string };
 type Draft = { group_name: string; title: string; category: string; region: string; venue: string; date_start: string; date_end: string; price_info: string; is_free: boolean; original_url: string; description: string; use_poster: boolean };
 
 const CHANNEL = { web: "사이트", kakao_bot: "카카오 챗봇", kakao_chat: "카카오 채팅(운영자가 옮김)" } as const;
@@ -34,7 +36,8 @@ function draftOf(s: Sub): Draft {
         group_name: s.group_name || v(a.organizer as Field),
         title: s.given.title || v(a.title as Field),
         category: "",
-        region: GN_REGIONS.find(r => regionHint.includes(r)) ?? "",
+        // 지역: 포스터에 인쇄된 시·군을 먼저, 없으면 장소 목록에서 찾은 장소의 지역(포스터에 지역 이름이 없는 일이 많다 — 11/27 검증 12건 중 3건)
+        region: GN_REGIONS.find(r => regionHint.includes(r)) ?? (GN_REGIONS.find(r => r === a.venue_match?.region) ?? ""),
         venue: s.given.venue || v(a.venue as Field),
         date_start: (a.date_start as string) || "",
         date_end: (a.date_end as string) || (a.date_start as string) || "",
@@ -195,6 +198,9 @@ export default function AdminLeafletsPage() {
                                                     return f?.raw ? `${k}: «${f.raw}»${f.confidence === "low" ? "(확신 낮음)" : ""}` : null;
                                                 }).filter(Boolean).join(" · ") || "없음"}
                                             </Text>
+                                        )}
+                                        {s.ai_result?.venue_match && (
+                                            <Text size="xs" c="dimmed" mt={4}>장소 목록에서 찾음: {s.ai_result.venue_match.name} ({s.ai_result.venue_match.region}) — 포스터에 지역이 없으면 이 지역을 미리 채웁니다</Text>
                                         )}
                                     </div>
                                     {d && s.status !== "published" && s.status !== "rejected" ? (

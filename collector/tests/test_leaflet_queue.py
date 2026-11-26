@@ -447,3 +447,42 @@ def test_cleanup_expires_kakao_sender_keys():
     assert (out["kakao_senders"], out["kakao_sender_keys"]) == (1, 1)
     assert store.rows[old["id"]]["sender_key"] is None and store.rows[new["id"]]["sender_key"] == "b" * 64
     assert list(store.senders) == ["b" * 64]
+
+
+# ---------- 장소 목록 맞추기 (11/27 카카오 제보 읽기 검증에서 더함) ----------
+
+VENUES = [
+    {"id": "v1", "name": "진해아트홀", "aliases": [], "region": "창원"},
+    {"id": "v2", "name": "진주성 중영", "aliases": ["진주성 내 중영"], "region": "진주"},
+    {"id": "v3", "name": "경상남도문화예술회관", "aliases": [], "region": "진주"},
+    {"id": "v4", "name": "김해문화의전당", "aliases": [], "region": "김해"},
+    {"id": "v5", "name": "영화의전당", "aliases": [], "region": "부산"},
+    {"id": "v6", "name": "대공연장", "aliases": [], "region": "통영"},
+    {"id": "v7", "name": "문화회관", "aliases": [], "region": "거제"},
+    {"id": "v8", "name": "문화회관", "aliases": [], "region": "밀양"},
+]
+
+
+def test_match_venue_tokens_and_spacing():
+    assert lq.match_venue("진해아트홀 공연장 (충장로 653)", VENUES)["region"] == "창원"
+    assert lq.match_venue("진주성 공북문앞 중영", VENUES)["region"] == "진주"      # 낱말이 떨어져 있어도
+    assert lq.match_venue("부산 영화의 전당 하늘연극장", VENUES)["region"] == "부산"  # 띄어 쓴 이름도
+    assert lq.match_venue("김해문화의전당 마루홀", VENUES)["venue_id"] == "v4"
+
+
+def test_match_venue_refuses_ambiguous_or_bare():
+    assert lq.match_venue("대공연장", VENUES)["venue_id"] == "v6"   # 목록에 같은 이름이 있으면 맞는다(4자 이상)
+    assert lq.match_venue("문화회관 소공연장", VENUES) is None       # 같은 이름이 두 지역 → 고르지 않음
+    assert lq.match_venue("소향씨어터", VENUES) is None              # 목록에 없음
+    assert lq.match_venue("", VENUES) is None
+
+
+def test_save_adds_venue_match(tmp_path):
+    class S(FakeStore):
+        def venues(self):
+            return VENUES
+    store = S([row()])
+    p = tmp_path / "r.json"
+    p.write_text(json.dumps(full(venue=f("진해아트홀 공연장")), ensure_ascii=False), encoding="utf-8")
+    ok, result = lq.save(store, SID, str(p), cache_dir=str(tmp_path))
+    assert ok and result["venue_match"] == {"venue_id": "v1", "name": "진해아트홀", "region": "창원"}

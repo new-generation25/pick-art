@@ -140,6 +140,10 @@ class Store:
                .eq("id", sid).eq("image_path", path).execute())
         return bool(res.data)
 
+    def venues(self):
+        """확인된 장소 목록(이름·별칭·지역). 읽은 장소 칸을 맞춰 볼 때만 쓴다"""
+        return self.sb.table("venues").select("id,name,aliases,region").limit(2000).execute().data or []
+
 
 # ---------- 검사 ----------
 
@@ -273,6 +277,43 @@ def parse_dates(date_raw, multiple_events=False):
     return p["start"], p["end"]
 
 
+_VTOK = re.compile(r"[0-9A-Za-z가-힣]+")
+
+
+def _vtokens(s):
+    return [t.lower() for t in _VTOK.findall(s or "")]
+
+
+def match_venue(text, venues):
+    """읽은 장소 글자 → 확인된 장소 목록(venues)의 한 곳. 못 찾거나 여러 지역에 걸치면 None.
+    장소 이름(또는 별칭)의 낱말이 모두 읽은 글자에 들어 있어야 맞은 것으로 본다(«진주성 공북문앞 중영» ⊇ «진주성 중영»).
+    이름이 너무 짧으면(붙인 글자 4자 미만) 쓰지 않는다 — «대공연장»만 읽힌 것으로 아무 회관이나 고르지 않게.
+    포스터 글자를 바꾸지 않는다: 지역이 인쇄돼 있지 않을 때 운영자 화면에 지역을 미리 채워 줄 근거로만 쓴다(검증 11/27)."""
+    toks = set(_vtokens(text))
+    if not toks:
+        return None
+    flat = "".join(_vtokens(text))
+    best = []
+    for v in venues or []:
+        for name in [v.get("name")] + list(v.get("aliases") or []):
+            nt = _vtokens(name)
+            joined = "".join(nt)
+            if len(joined) < 4:
+                continue
+            if all(t in toks or t in flat for t in nt):
+                best.append((len(joined), v))
+                break
+    if not best:
+        return None
+    top = max(n for n, _ in best)
+    hits = [v for n, v in best if n == top]
+    regions = {v.get("region") for v in hits}
+    if len(regions) != 1 or not hits[0].get("region"):
+        return None
+    v = hits[0]
+    return {"venue_id": v.get("id"), "name": v.get("name"), "region": v.get("region")}
+
+
 def build_result(data):
     fields, dropped = validate(data)
     start, end = parse_dates(fields["date_text"]["raw"], fields["multiple_events"])
@@ -369,6 +410,12 @@ def save(store, sid, result_path, cache_dir=CACHE_DIR):
     with open(result_path, encoding="utf-8") as fh:
         data = json.load(fh)
     result = build_result(data)
+    venue_text = result["venue"]["raw"] or result["venue"]["value"]
+    if venue_text:
+        try:
+            result["venue_match"] = match_venue(venue_text, store.venues())
+        except Exception:  # 장소 목록을 못 읽어도 읽은 결과는 저장한다
+            result["venue_match"] = None
     ok = store.mark_read(sid, result, now_iso())
     if ok:
         remove_cache(sid, cache_dir, also=result_path)
