@@ -1,4 +1,3 @@
-import { Header } from "@/components/ui/Header";
 import { formatPeriod, todayKST } from "@/lib/utils";
 import { getEventById, getPublishedEvents } from "@/lib/supabase";
 import { Calendar, MapPin, ExternalLink, ArrowLeft, Info, Ticket, Baby } from "lucide-react";
@@ -9,21 +8,22 @@ import { AdminNoteControl } from "@/components/ui/AdminNoteControl";
 import { getVenueInfo } from "@/lib/supabase";
 import { AdminKidsControl } from "@/components/ui/AdminKidsControl";
 import { ReportButton } from "@/components/ui/ReportButton";
-import { ShareButton } from "@/components/ui/ShareButton";
 import { PosterViewer } from "@/components/ui/PosterViewer";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
-import { EventCard } from "@/components/ui/EventCard";
+import { PosterOrText } from "@/components/ui/PosterOrText";
+import { StickyActions } from "@/components/ui/StickyActions";
+import { RouteButtons } from "@/components/ui/RouteButtons";
+import { AdminPosterControl } from "@/components/ui/AdminPosterControl";
 import { DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/site";
-import { FavoriteButton } from "@/components/ui/FavoriteButton";
 import { AddToCalendar } from "@/components/ui/AddToCalendar";
 import { AdminInstaMark } from "@/components/ui/AdminInstaMark";
 import { CountedLink, EventViewCounter } from "@/components/ui/EventCounter";
 import { getEventOrgs } from "@/lib/places";
 import { isGroupProvided } from "@/lib/leaflets";
 import { maskPersonalPhones } from "@/lib/privacy";
-import { Users } from "lucide-react";
+import { Users, Building2 } from "lucide-react";
 
 interface EventPageProps {
     params: Promise<{
@@ -42,7 +42,8 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
         || `${formatPeriod(event.event_date_start, event.event_date_end)}${where ? ` · ${where}` : ""}`;
     const url = `/events/${event.id}`;
     // 포스터가 없으면 기본 공유 이미지
-    const images = event.poster_image_url ? [event.poster_image_url] : [DEFAULT_OG_IMAGE.url];
+    // 포스터가 없거나 안내 그림(specs/014)이면 기본 공유 이미지
+    const images = event.poster_image_url && !event.poster_placeholder ? [event.poster_image_url] : [DEFAULT_OG_IMAGE.url];
 
     return {
         title: `${event.title} | 피카 pica`,
@@ -73,22 +74,14 @@ export default async function EventDetailPage({ params }: EventPageProps) {
     // 없는 행사·비공개 행사(RLS로 익명 조회 결과 없음) 모두 404
     if (!event) notFound();
 
-    // Related Events (Same category or region, excluding current)
-    const allRelated = await getPublishedEvents({ category: event.category });
-    const suggestions = allRelated
-        .filter(e => e.id !== event.id)
-        .slice(0, 3)
-        .map(e => ({
-            id: e.id,
-            title: e.title,
-            category: e.category,
-            date: formatPeriod(e.event_date_start, e.event_date_end),
-            location: e.venue || e.region,
-            imageUrl: e.poster_image_url,
-            posterPlaceholder: e.poster_placeholder,
-            source: e.source,
-            isFree: e.is_free,
-        }));
+    // 같은 지역에서 이 행사와 가까운 날에 시작하는 행사 4건 (시안 f01 «같은 주 ○○ 행사»)
+    const sameRegion = event.region ? await getPublishedEvents({ region: event.region }) : [];
+    const pivot = event.event_date_start || event.event_date_end || todayKST();
+    const dayNum = (d: string) => Date.UTC(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8, 10)) / 86400000;
+    const nearby = sameRegion
+        .filter((e: any) => e.id !== event.id && e.event_date_start && Math.abs(dayNum(e.event_date_start) - dayNum(pivot)) <= 7)
+        .sort((a: any, b: any) => Math.abs(dayNum(a.event_date_start) - dayNum(pivot)) - Math.abs(dayNum(b.event_date_start) - dayNum(pivot)))
+        .slice(0, 4);
 
     const isEnded = !!event.event_date_end && event.event_date_end < todayKST();
     // 원본 안내 주소가 있는 행사만 «원본 안내 페이지 열기». 단체 제공(specs/013)은 공식 페이지가 없을 수 있다
@@ -125,155 +118,155 @@ export default async function EventDetailPage({ params }: EventPageProps) {
     if (postOrgs.length) orgRows.push({ label: "올린 곳", orgs: orgLinks(postOrgs) });
     const hasVenuePage = !!venueInfo && !!event.venue_id;
 
+    const timeRow = detail.rows.find(r => r.label === "공연 시각");
+    const infoRows = facts.filter(f => f.label !== "기간" && f.label !== "장소" && f.label !== "공연 시각");
+    const where = event.venue || event.region || "장소 정보 없음";
+    const posterEvent = {
+        title: event.title, event_date_start: event.event_date_start, event_date_end: event.event_date_end,
+        poster_image_url: event.poster_image_url, poster_placeholder: event.poster_placeholder, venue: event.venue, source: event.source,
+    };
+    const longDate = (() => {
+        const W = ["일", "월", "화", "수", "목", "금", "토"];
+        const s0 = event.event_date_start || event.event_date_end;
+        const e0 = event.event_date_end || s0;
+        if (!s0) return "일정 미정";
+        const wd = (d: string) => W[new Date(d + "T00:00:00Z").getUTCDay()];
+        const f = (d: string) => d.replace(/-/g, ".");
+        return s0 === e0 ? `${f(s0)} ${wd(s0)}요일` : `${f(s0)} ~ ${e0.slice(0, 4) === s0.slice(0, 4) ? f(e0).slice(5) : f(e0)}`;
+    })();
+
     return (
-        <main className="min-h-screen pb-20">
+        <main className="min-h-screen">
             {/* 조회 수 (specs/011): 날짜별 숫자만 센다 */}
             <EventViewCounter eventId={event.id} />
-            {/* layout.tsx에 이미 Header가 있으므로 여기서 제거합니다. */}
-            <div className="mx-auto max-w-6xl px-4 pt-20 sm:px-6 sm:pt-24">
-                <Link
-                    href="/"
-                    className="inline-flex items-center gap-1.5 rounded-md py-1 text-[14px] font-semibold text-ink-soft hover:text-ink"
-                >
-                    <ArrowLeft className="h-4 w-4" aria-hidden />
-                    행사 목록
-                </Link>
 
-                <div className="mt-4 grid gap-8 lg:grid-cols-[400px_minmax(0,1fr)] lg:gap-12">
-                    {/* 포스터 + 바로가기 */}
-                    <div>
-                        <div className="lg:sticky lg:top-24">
-                            <PosterViewer src={event.poster_image_url} alt={event.title} ended={isEnded} />
+            {/* 맨 위 띠: 가운데 포스터 (시안 f01) */}
+            <div className="bg-soft pb-10">
+                <div className="mx-auto flex h-[52px] max-w-3xl items-center justify-between px-2">
+                    <Link href="/" className="inline-flex h-11 items-center gap-1 rounded-full px-2 text-[14px] font-semibold text-ink-soft hover:text-ink">
+                        <ArrowLeft className="h-5 w-5" aria-hidden /> 행사 목록
+                    </Link>
+                    <span className="pr-3 text-[13px] font-semibold text-ink-soft">{event.region}</span>
+                </div>
+                <PosterViewer src={event.poster_image_url} alt={event.title} ended={isEnded} event={posterEvent} />
+                <div className="mx-auto max-w-[400px] px-4">
+                    <AdminPosterControl sha256={event.poster_sha256 ?? null} placeholder={!!event.poster_placeholder} />
+                </div>
+            </div>
 
-                            <div className="mx-auto mt-4 flex max-w-[400px] gap-2">
-                                {hasOriginal ? (
-                                    <CountedLink
-                                        eventId={event.id}
-                                        kind="outbound"
-                                        href={event.original_url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex h-12 flex-1 items-center justify-center gap-2 border-[1.5px] border-ink bg-accent px-5 text-[15px] font-bold text-on-accent transition-colors hover:bg-ink"
-                                    >
-                                        <ExternalLink className="h-4 w-4" aria-hidden />
-                                        원본 안내 페이지 열기
-                                    </CountedLink>
-                                ) : (
-                                    // 단체가 리플렛으로 직접 알려 준 행사(specs/013): 따로 공식 페이지가 없다
-                                    <span className="inline-flex h-12 flex-1 items-center justify-center border-[1.5px] border-dashed border-ink px-5 text-[14px] font-bold text-ink">
-                                        {groupProvided ? "단체가 직접 알려 준 행사" : "원본 안내 없음"}
-                                    </span>
-                                )}
-                                <FavoriteButton eventId={event.id} />
-                                <ShareButton title={event.title} eventId={event.id} />
-                            </div>
-                            <AddToCalendar event={{ ...event, url: `${SITE_URL}/events/${event.id}` }} />
-                        </div>
-                    </div>
+            {/* 겹쳐 올라오는 요약 카드 */}
+            <div className="relative mx-auto -mt-[22px] max-w-3xl rounded-t-[22px] bg-paper px-4 pb-2 pt-5 sm:px-6">
+                <div className="flex flex-wrap items-center gap-[5px]">
+                    <span className="pica-cat" data-cat={event.category}>{event.category}</span>
+                    {kids.group === "target" && <span className="pica-cat" data-cat={event.category}>아이와</span>}
+                    {event.is_free && <span className="inline-flex h-[22px] items-center rounded-md px-[7px] text-[12px] font-bold text-ink shadow-[inset_0_0_0_1px_#CFC5B4]">무료</span>}
+                    {isEnded && <span className="inline-flex h-[22px] items-center rounded-md bg-ink px-[7px] text-[12px] font-bold text-white">종료</span>}
+                    {groupProvided && (
+                        <span className="inline-flex h-[22px] items-center rounded-md px-[7px] text-[12px] font-bold text-ink shadow-[inset_0_0_0_1px_#CFC5B4]" title="단체가 피카에 리플렛으로 직접 알려 준 행사">단체 제공</span>
+                    )}
+                </div>
+                <h1 className="pica-display mt-2 text-[26px] leading-[1.3] tracking-[-0.5px] text-ink sm:text-[32px]">{event.title}</h1>
+                <p className="pica-num mt-1.5 text-[15.5px] font-semibold text-ink">{longDate}</p>
+                <p className="mt-0.5 flex items-center gap-1.5 text-[15px] text-ink-soft">
+                    <MapPin className="h-4 w-4 shrink-0" aria-hidden />
+                    {hasVenuePage ? <Link href={`/venues/${event.venue_id}`} className="hover:text-ink hover:underline">{where}</Link> : where}
+                </p>
 
-                    {/* 행사 정보 */}
-                    <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2 text-[14px] font-semibold">
-                            <span className="pica-cat" data-cat={event.category}>{event.category}</span>
-                            <span className="text-ink-soft">{event.region}</span>
-                            {event.is_free && (
-                                <span className="pica-cat text-ink" style={{ borderColor: "currentColor" }}>무료</span>
-                            )}
-                            {isEnded && (
-                                <span className="bg-ink px-2 py-0.5 text-[13px] font-bold text-paper">종료</span>
-                            )}
-                            {groupProvided && (
-                                <span className="border-[1.5px] border-ink px-2 py-0.5 text-[13px] font-bold text-ink" title="단체가 피카에 리플렛으로 직접 알려 준 행사">단체 제공</span>
-                            )}
-                        </div>
-
-                        <h1 className="pica-display mt-3 text-[30px] leading-[1.2] text-ink sm:text-[44px]">
-                            {event.title}
-                        </h1>
-
-                        {/* 피카가 본 이유 (specs/009): 관리자가 쓴 한 줄. 없으면 보이지 않는다 */}
-                        {typeof event.pica_note === "string" && event.pica_note.trim() && (
-                            <p className="mt-4 border-l-[3px] border-accent pl-3 text-[16px] leading-relaxed text-ink">
-                                <span className="mr-2 text-[13px] font-bold text-accent">피카가 본 이유</span>
-                                {event.pica_note}
-                            </p>
-                        )}
-                        <AdminNoteControl eventId={event.id} note={event.pica_note ?? null} />
-
-                        {/* 기간, 장소, 관람료, 출처 */}
-                        <dl className="pica-box mt-6 divide-y divide-line">
-                            {[...facts, ...orgRows.map(r => ({ icon: Users, label: r.label, value: "" }))].map(({ icon: Icon, label, value }) => (
-                                <div key={label} className="grid grid-cols-[88px_minmax(0,1fr)] items-start gap-3 px-4 py-3.5 sm:grid-cols-[110px_minmax(0,1fr)] sm:px-5">
-                                    <dt className="flex items-center gap-2 text-[14px] font-semibold text-ink-soft">
-                                        <Icon className="h-4 w-4 shrink-0" aria-hidden />
-                                        {label}
-                                    </dt>
-                                    <dd
-                                        className={[
-                                            "min-w-0",
-                                            label === "기간" ? "pica-display text-[22px] text-accent tabular-nums" : "text-[15px] font-semibold text-ink",
-                                        ].join(" ")}
-                                    >
-                                        {orgRows.some(r => r.label === label) ? (
-                                            <span className="flex flex-wrap gap-x-3 gap-y-1">
-                                                {orgRows.find(r => r.label === label)!.orgs.map(o => (
-                                                    <Link key={o.id} href={`/orgs/${o.id}`} className="underline underline-offset-4 hover:text-accent">{o.name}</Link>
-                                                ))}
-                                            </span>
-                                        ) : label === "장소" && hasVenuePage ? (
-                                            <Link href={`/venues/${event.venue_id}`} className="underline underline-offset-4 hover:text-accent">{value}</Link>
-                                        ) : label === "출처" && typeof event.original_url === "string" && /^https?:\/\//.test(event.original_url) ? (
-                                            <CountedLink eventId={event.id} kind="outbound" href={event.original_url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-accent">
-                                                {value}
-                                            </CountedLink>
-                                        ) : value}
-                                        {/* 피카 인스타에 소개한 행사: 관리자에게만 아이콘 (events.insta_post_url) */}
-                                        {label === "출처" && typeof event.insta_post_url === "string" && (
-                                            <AdminInstaMark url={event.insta_post_url} postedAt={event.insta_posted_at} />
-                                        )}
-                                    </dd>
-                                </div>
-                            ))}
-                        </dl>
-                        <AdminKidsControl eventId={event.id} override={event.kids_override ?? null} ruleGroup={ruleKids.group} />
-
-                        {/* 상세 안내: 설명이 전부 정보 표 칸으로 옮겨졌으면(KOPIS) 따로 두지 않는다 */}
-                        {(detail.rest || detail.rows.length === 0) && (
-                            <section className="mt-10">
-                                <h2 className="pica-display text-[24px] text-ink">상세 안내</h2>
-                                <div className="mt-3 max-w-[68ch] whitespace-pre-wrap text-[16px] leading-[1.85] text-ink sm:text-[17px]">
-                                    {detail.rest || (hasOriginal ? "상세 안내가 없습니다. 원본 안내 페이지에서 확인해 주세요." : "상세 안내가 없습니다.")}
-                                </div>
-                            </section>
-                        )}
-
-                        <p className="mt-10 flex gap-2.5 border-[1.5px] border-dashed border-line px-4 py-3.5 text-[14px] leading-relaxed text-ink">
-                            <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-                            <span>
-                                수집한 정보를 정리한 것이라 주최 측 사정으로 바뀔 수 있습니다. 일정과 예매는{" "}
-                                <b>원본 안내 페이지</b>에서 확인해 주세요.
-                            </span>
-                        </p>
-                        {/* 오류 신고 (specs/007): 로그인 회원 → 관리자 확인 뒤 반영 */}
-                        <div className="mt-4">
-                            <ReportButton eventId={event.id} />
-                        </div>
-                    </div>
+                {/* 길찾기 · 공간 정보 (작은 지도는 두지 않는다 — 운영자 11/26 «그냥 버튼») */}
+                <div className="mt-3.5 flex gap-2">
+                    {(event.venue || venueInfo?.name) && (
+                        <RouteButtons block appname={new URL(SITE_URL).host}
+                            e={{ venue: venueInfo?.name || event.venue, title: event.title, region: event.region, coords: venueInfo?.lat && venueInfo?.lng ? { lat: venueInfo.lat, lng: venueInfo.lng } : null }} />
+                    )}
+                    {hasVenuePage && (
+                        <Link href={`/venues/${event.venue_id}`} className="flex h-[46px] flex-1 items-center justify-center gap-1.5 rounded-xl bg-card text-[15px] font-bold text-ink shadow-[0_0_0_1px_var(--pk-line)]">
+                            <Building2 className="h-[18px] w-[18px]" aria-hidden /> 공간 정보
+                        </Link>
+                    )}
                 </div>
 
-                {/* Suggestions Section */}
-                {suggestions.length > 0 && (
-                    <section className="mt-16 border-t-2 border-line pt-10">
-                        <h2 className="pica-display text-[26px] text-ink">같은 분야의 다른 행사</h2>
-                        <p className="mt-1 text-[14px] text-ink-soft">가까운 곳에서 열리는 {event.category} 행사를 더 골랐습니다.</p>
-                        <div className="mt-6 grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
-                            {suggestions.map((suggestion) => (
-                                <EventCard key={suggestion.id} event={suggestion} />
-                            ))}
+                {/* 정보 줄: 시각 · 관람료 · 관람 · 공간 · 출처 · 주최·주관 */}
+                <ul className="mt-4 border-t border-line">
+                    {timeRow && <InfoRow icon={Clock} label="시각" value={timeRow.value} />}
+                    {infoRows.map(f => (
+                        <InfoRow key={f.label} icon={f.icon} label={f.label === "관람 연령" ? "관람" : f.label}
+                            value={f.label === "출처" && hasOriginal ? (
+                                <CountedLink eventId={event.id} kind="outbound" href={event.original_url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-accent">{f.value}</CountedLink>
+                            ) : f.value}
+                            extra={f.label === "출처" && typeof event.insta_post_url === "string" ? <AdminInstaMark url={event.insta_post_url} postedAt={event.insta_posted_at} /> : null} />
+                    ))}
+                    {orgRows.map(r => (
+                        <InfoRow key={r.label} icon={Users} label={r.label} value={
+                            <span className="flex flex-wrap gap-x-3 gap-y-1">
+                                {r.orgs.map(o => <Link key={o.id} href={`/orgs/${o.id}`} className="underline underline-offset-4 hover:text-accent">{o.name}</Link>)}
+                            </span>
+                        } />
+                    ))}
+                </ul>
+                <AdminKidsControl eventId={event.id} override={event.kids_override ?? null} ruleGroup={ruleKids.group} />
+
+                {/* 피카가 본 이유 (specs/009): 사람이 쓴 한 줄. 없으면 보이지 않는다 */}
+                {typeof event.pica_note === "string" && event.pica_note.trim() && (
+                    <p className="mt-4 rounded-[14px] bg-[#F8FBF9] px-4 py-3.5 text-[15px] leading-[1.6] text-ink shadow-[inset_0_0_0_1.5px_var(--pk-accent)]">
+                        <em className="mb-[3px] block text-[12px] font-bold not-italic text-accent">피카가 본 이유</em>
+                        {event.pica_note}
+                    </p>
+                )}
+                <AdminNoteControl eventId={event.id} note={event.pica_note ?? null} />
+
+                <p className="mt-3 text-[13px] leading-[1.6] text-ink-soft">
+                    수집한 정보를 정리한 것이라 바뀔 수 있어요. 일정과 예매는 원본 안내 페이지에서 확인해 주세요.{" "}
+                    <Link href="/about" className="font-bold text-ink underline underline-offset-[3px]">피카가 고르는 기준</Link>
+                </p>
+
+                {/* 상세 안내: 설명이 전부 정보 칸으로 옮겨졌으면(KOPIS) 따로 두지 않는다. 개인 휴대전화는 가림 */}
+                {(detail.rest || detail.rows.length === 0) && (
+                    <section className="mt-7">
+                        <h2 className="pica-display text-[19px] tracking-[-0.3px] text-ink">상세 안내</h2>
+                        <div className="mt-2 max-w-[68ch] whitespace-pre-wrap text-[15.5px] leading-[1.8] text-ink">
+                            {detail.rest || (hasOriginal ? "상세 안내가 없습니다. 원본 안내 페이지에서 확인해 주세요." : "상세 안내가 없습니다.")}
                         </div>
                     </section>
                 )}
+
+                {/* 같은 주 같은 지역 행사 */}
+                {nearby.length > 0 && (
+                    <section className="mt-7">
+                        <h2 className="pica-display text-[19px] tracking-[-0.3px] text-ink">같은 주 {event.region} 행사</h2>
+                        <ul className="mt-1">
+                            {nearby.map((e: any) => (
+                                <li key={e.id}>
+                                    <Link href={`/events/${e.id}`} className="flex items-center gap-3 border-b border-line py-3 text-ink no-underline">
+                                        <PosterOrText event={e} size="row" className="!w-[44px] flex-none !rounded-md" />
+                                        <span className="min-w-0">
+                                            <span className="pica-num block text-[12.5px] font-semibold text-accent">{formatPeriod(e.event_date_start, e.event_date_end)}</span>
+                                            <span className="block truncate text-[14.5px] font-bold leading-[1.4]">{e.title}</span>
+                                            <span className="block truncate text-[12.5px] text-ink-soft">{[e.venue, e.is_free ? "무료" : e.price_info].filter(Boolean).join(" · ")}</span>
+                                        </span>
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </section>
+                )}
+
+                {/* 캘린더 추가 · 오류 신고 (specs/008·007) */}
+                <div className="mt-6"><AddToCalendar event={{ ...event, url: `${SITE_URL}/events/${event.id}` }} /></div>
+                <div className="mt-3"><ReportButton eventId={event.id} /></div>
+
+                {/* 아래 고정 막대: 찜 · 공유 · 원본 안내 페이지 열기 */}
+                <StickyActions eventId={event.id} title={event.title} originalUrl={hasOriginal ? event.original_url : null} groupProvided={groupProvided} />
             </div>
         </main>
+    );
+}
+
+function InfoRow({ icon: Icon, label, value, extra }: { icon: typeof Calendar; label: string; value: React.ReactNode; extra?: React.ReactNode }) {
+    return (
+        <li className="grid grid-cols-[22px_58px_minmax(0,1fr)] items-start gap-2 border-b border-line py-[13px] text-[14.5px] leading-[1.55]">
+            <Icon className="mt-0.5 h-[18px] w-[18px] text-ink-soft" aria-hidden />
+            <span className="pt-px text-[13.5px] text-ink-soft">{label}</span>
+            <span className="min-w-0 font-semibold text-ink">{value}{extra}</span>
+        </li>
     );
 }

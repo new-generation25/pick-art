@@ -1,27 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { Modal } from "@mantine/core";
 import { Maximize2, X } from "lucide-react";
+import { PosterOrText, type PosterEvent } from "./PosterOrText";
+import { needsTextPoster } from "@/lib/posters";
 
 // 행사 상세의 포스터. 누르면 화면 가득 원본 비율로 크게 보여 준다 (Esc·바깥 누르기·닫기 버튼으로 닫힘)
-export function PosterViewer({ src, alt, ended = false }: { src?: string | null; alt: string; ended?: boolean }) {
+export function PosterViewer({ src, alt, ended = false, event }: { src?: string | null; alt: string; ended?: boolean; event?: PosterEvent }) {
     const [opened, setOpened] = useState(false);
+    // 안내 그림·포스터 없음 → 글자 포스터 (specs/014). 상세 띠 가운데에 놓는다
+    if (event && needsTextPoster(event)) {
+        return <PosterOrText event={event} size="detail" className={`mx-auto !w-[210px] shadow-[0_10px_26px_rgba(30,26,21,.24)] ${ended ? "grayscale" : ""}`} />;
+    }
     const poster = src || "/images/placeholder.webp";
     const canZoom = !!src;
 
-    const thumb = (
-        <Image
-            src={poster}
-            alt={alt}
-            fill
-            className={ended ? "object-cover grayscale" : "object-cover"}
-            priority
-            sizes="(max-width: 768px) 100vw, 400px"
-            unoptimized={poster.startsWith("http")}
-        />
-    );
 
     // 포스터가 없으면 그림 대신 «포스터 없음» 칸 (예전 대체 파일 /images/placeholder.webp 는 저장소에 없어 깨진 그림이 보였다)
     if (!canZoom) {
@@ -37,11 +31,13 @@ export function PosterViewer({ src, alt, ended = false }: { src?: string | null;
             <button
                 type="button"
                 onClick={() => setOpened(true)}
-                className="pica-box group relative mx-auto block aspect-[3/4] w-full max-w-[400px] cursor-zoom-in overflow-hidden"
+                className="group relative mx-auto block w-[180px] cursor-zoom-in overflow-hidden rounded-md shadow-[0_10px_26px_rgba(30,26,21,.24)] sm:w-[240px]"
                 aria-label="포스터 크게 보기"
             >
-                {thumb}
-                <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 bg-ink px-2 py-1 text-[12px] font-bold text-paper">
+                {/* 원본 비율 그대로 (시안 f01: 상세 맨 위 띠 가운데에 포스터를 세운다) */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={poster} alt={alt} className={`block h-auto w-full ${ended ? "grayscale" : ""}`} />
+                <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-md bg-ink/80 px-2 py-1 text-[12px] font-bold text-white">
                     <Maximize2 size={13} aria-hidden />
                     크게 보기
                 </span>

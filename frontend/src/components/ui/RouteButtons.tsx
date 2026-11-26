@@ -7,7 +7,7 @@ type Place = { venue: string | null; title: string; region: string | null; coord
 
 // 길찾기 버튼 하나. 이동수단(대중교통·자동차·도보)은 네이버지도 길찾기 화면에서 고른다(2026-11-21 운영자 결정)
 // (specs/002 목록과 specs/005 지도가 같이 쓴다)
-export function RouteButtons({ e, appname }: { e: Place; appname: string }) {
+export function RouteButtons({ e, appname, block = false }: { e: Place; appname: string; block?: boolean }) {
     const links = () => naverRouteLinks({
         name: e.venue || e.title,
         region: e.region,
@@ -28,6 +28,15 @@ export function RouteButtons({ e, appname }: { e: Place; appname: string }) {
         ev.preventDefault();
         window.open(links().fallback, "_blank", "noopener");
     };
+    // 상세·공간 머리의 큰 버튼 (specs/014 시안 f01: «길찾기» 한 칸)
+    if (block) {
+        return (
+            <button type="button" onClick={open}
+                className="flex h-[46px] flex-1 items-center justify-center gap-1.5 rounded-xl bg-accent-soft text-[15px] font-bold text-accent">
+                <Navigation size={18} aria-hidden /> 길찾기
+            </button>
+        );
+    }
     return (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <button type="button" className="pica-chip" onClick={open}>
