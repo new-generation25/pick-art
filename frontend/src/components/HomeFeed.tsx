@@ -3,6 +3,7 @@ import { getDistrictVenueIds, getPublishedEvents } from "@/lib/supabase";
 import { FeedSections } from "@/components/ui/FeedSections";
 import { FilterBar } from "@/components/ui/FilterBar";
 import { EventList } from "@/components/ui/EventList";
+import { MapButton } from "@/components/ui/MapButton";
 import { regionPath } from "@/lib/regions";
 import { SECTION_LABELS, type SectionKey } from "@/lib/feedOrder";
 import { Container, Title, Text, TextInput, Button, SimpleGrid, Group, Box, Alert, Stack } from "@mantine/core";
@@ -12,6 +13,8 @@ import { formatPeriod, todayKST } from "@/lib/utils";
 import { orderFeed } from "@/lib/feedOrder";
 import { ageLabel, fitsAge, kidsInfo, readKidsParam } from "@/lib/kids";
 import { isEndingSoon } from "@/lib/eventDetails";
+
+const DATE_LABEL: Record<string, string> = { today: "오늘", week: "이번 주", month: "이번 달", ending: "곧 끝남" };
 
 export type HomeParams = {
   region?: string;
@@ -150,6 +153,14 @@ export async function HomeFeed({ params: resolvedParams, region, district }: { p
           <FeedSections sections={sections} moreBase={moreBase} />
         )}
       </div>
+
+      {/* «지도» 버튼 (specs/014 US3): 누르면 지금 필터 결과의 장소를 지도 시트로 */}
+      {!one && (
+        <MapButton
+          summary={[DATE_LABEL[filters.date || ""] || "", place || "", filters.category || "", kids.on ? "아이와" : ""].filter(Boolean).join(" · ")}
+          events={dbEvents.map((e: any) => ({ ...toShelf(e), venueId: e.venue_id ?? null, today: (e.event_date_start || e.event_date_end || today) <= today }))}
+        />
+      )}
 
       {/* 소식 받기: 뉴스레터 + 키워드 알림 */}
       <Box component="section" bg="var(--pk-soft)" c="var(--pk-ink)" mt={24}>

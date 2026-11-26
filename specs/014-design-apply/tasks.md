@@ -89,12 +89,12 @@
 
 **Independent Test**: quickstart 6단계.
 
-- [ ] T024 [US2] 관리자용 포스터 표시 버튼을 만들고 행사 상세(관리자에게만 보임)에 단다 (`frontend/src/components/ui/AdminPosterControl.tsx`).
+- [X] T024 [US2] 관리자용 포스터 표시 버튼을 만들고 행사 상세(관리자에게만 보임)에 단다 (`frontend/src/components/ui/AdminPosterControl.tsx`).
   - 버튼은 «안내 그림으로 표시 / 풀기»다. 같은 지문을 쓰는 공개 행사 수를 함께 보인다.
   - 표시하면 `placeholder_images`에 넣거나 빼고, `note`는 ≤120자다.
   - 지문이 없는 행사는 버튼을 막고 «지문 없음(채움 도구 실행 필요)»을 적는다.
-- [ ] T025 [US2] 관리자 대시보드에 «안내 그림 후보» 상자를 더한다 (`frontend/src/app/admin/page.tsx`). 같은 지문을 3개 넘는 공개 행사가 쓰는 그림을 보여 주는데, 썸네일 · 행사 수 · 표시 버튼으로 구성한다
-- [ ] T026 [US2] 공유 미리보기(OG 이미지)는 `poster_placeholder`이면 기본 OG 이미지를 쓴다 (`frontend/src/app/events/[id]/page.tsx`의 `generateMetadata`)
+- [X] T025 [US2] 관리자 대시보드에 «안내 그림 후보» 상자를 더한다 (`frontend/src/app/admin/page.tsx`). 같은 지문을 3개 넘는 공개 행사가 쓰는 그림을 보여 주는데, 썸네일 · 행사 수 · 표시 버튼으로 구성한다
+- [X] T026 [US2] 공유 미리보기(OG 이미지)는 `poster_placeholder`이면 기본 OG 이미지를 쓴다 (`frontend/src/app/events/[id]/page.tsx`의 `generateMetadata`)
 - [ ] T027 [US2] 확인한다: quickstart 6단계(4개 행사 × 홈·상세·공간, 표시를 풀었다가 다시 표시). 맞으면 커밋한다
 
 ---
@@ -105,16 +105,16 @@
 
 **Independent Test**: quickstart 5단계.
 
-- [ ] T028 [US3] 지도 시트를 만든다 (`frontend/src/components/ui/MapSheet.tsx`).
+- [X] T028 [US3] 지도 시트를 만든다 (`frontend/src/components/ui/MapSheet.tsx`).
   - 아래에서 올라와 화면을 덮고, 뒤 화면은 어둡게 한다.
   - 머리: 켠 필터 요약 · «N건 · 장소 N곳» · 내리기.
   - 지도는 `next/dynamic`으로 `app/nearby/NearbyMap.tsx`를 불러온다.
   - 핀을 누르면 그 장소 행사의 작은 선반과 «공간 정보 ›»가 나온다. 그 아래는 장소 목록(위치를 허락하면 가까운 순, 아니면 행사 수 순)이고, 맨 아래가 «위치 정보 없음»이다.
   - 닫는 방법: 내리기, «목록», 뒤로 가기(history state), 바깥 누르기.
-- [ ] T029 [US3] 홈에 «지도» 버튼을 화면 아래 가운데에 띄운다. 시트에는 지금 필터 결과의 행사·장소를 넘긴다(장소 묶기는 `lib/mapGroups.ts` 재사용) (`frontend/src/components/HomeFeed.tsx`)
-- [ ] T030 [US3] 지도를 불러오지 못하면 지도 자리에 «지도를 불러오지 못했어요»를 띄우고, 장소 목록은 그대로 둔다 (`frontend/src/components/ui/MapSheet.tsx`)
+- [X] T029 [US3] 홈에 «지도» 버튼을 화면 아래 가운데에 띄운다. 시트에는 지금 필터 결과의 행사·장소를 넘긴다(장소 묶기는 `lib/mapGroups.ts` 재사용) (`frontend/src/components/HomeFeed.tsx`)
+- [X] T030 [US3] 지도를 불러오지 못하면 지도 자리에 «지도를 불러오지 못했어요»를 띄우고, 장소 목록은 그대로 둔다 (`frontend/src/components/ui/MapSheet.tsx`)
 - [ ] T031 [US3] `/nearby`는 지금 화면을 유지하고 새 색만 입었는지 확인한다 (`frontend/src/app/nearby/NearbyClient.tsx`)
-- [ ] T032 [US3] 확인한다: quickstart 5단계(누르기 전 지도 요청 0건, 누른 뒤 숫자 일치). 맞으면 커밋한다
+- [X] T032 [US3] 확인한다: quickstart 5단계(누르기 전 지도 요청 0건, 누른 뒤 숫자 일치). 맞으면 커밋한다
 
 ---
 
@@ -124,12 +124,12 @@
 
 **Independent Test**: quickstart 7단계의 상세 항목. 칸이 많은 행사(어린이 서커스 쇼)와 칸이 적은 행사를 함께 본다.
 
-- [ ] T033 [P] [US4] 상세 아래 고정 막대를 만든다: 찜 · 공유 · «원본 안내 페이지 열기». 원본 주소가 없으면 «단체 제공 — 원본 안내 없음»을 보인다. 지금 `outbound` 세기도 유지한다 (`frontend/src/components/ui/StickyActions.tsx`)
-- [ ] T034 [US4] 상세를 시안 순서로 다시 짠다 (`frontend/src/app/events/[id]/page.tsx`).
+- [X] T033 [P] [US4] 상세 아래 고정 막대를 만든다: 찜 · 공유 · «원본 안내 페이지 열기». 원본 주소가 없으면 «단체 제공 — 원본 안내 없음»을 보인다. 지금 `outbound` 세기도 유지한다 (`frontend/src/components/ui/StickyActions.tsx`)
+- [X] T034 [US4] 상세를 시안 순서로 다시 짠다 (`frontend/src/app/events/[id]/page.tsx`).
   - 순서: 포스터 띠(`#EBE4D7`, `PosterOrText size="detail"`, 누르면 `PosterViewer`) → 겹친 요약 카드 → «길찾기»(`RouteButtons`/`VenueRoute`)·«공간 정보» → 정보 줄(시각·관람료·관람·공간·출처·확인한 날·주최·주관·단체 제공) → «피카가 본 이유» 초록 테두리 → 안내 문구와 «피카가 고르는 기준» 링크 → 상세 안내(지금 조건, 휴대전화 가림 유지) → 같은 주 같은 지역 행사 → 오류 신고·캘린더 추가.
   - 작은 지도는 넣지 않는다.
-- [ ] T035 [US4] 관리자 컨트롤(`AdminNoteControl`·`AdminKidsControl`·`AdminInstaMark`·`AdminPosterControl`)은 관리자에게만 보이고, 새 배치에서도 그대로 작동하는지 확인한다 (`frontend/src/app/events/[id]/page.tsx`)
-- [ ] T036 [US4] 확인한다: 행사 3건(칸 많음 · 칸 적음 · 단체 제공)의 상세에서 contracts/screens.md 상세 표의 항목을 ✓/✗로 적는다. ✗가 0이면 커밋한다
+- [X] T035 [US4] 관리자 컨트롤(`AdminNoteControl`·`AdminKidsControl`·`AdminInstaMark`·`AdminPosterControl`)은 관리자에게만 보이고, 새 배치에서도 그대로 작동하는지 확인한다 (`frontend/src/app/events/[id]/page.tsx`)
+- [X] T036 [US4] 확인한다: 행사 3건(칸 많음 · 칸 적음 · 단체 제공)의 상세에서 contracts/screens.md 상세 표의 항목을 ✓/✗로 적는다. ✗가 0이면 커밋한다
 
 ---
 

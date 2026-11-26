@@ -23,7 +23,7 @@ declare global {
 const KEY = process.env.NEXT_PUBLIC_NAVER_MAP_KEY_ID || "";
 let loading: Promise<void> | null = null;
 
-function loadNaverMaps(): Promise<void> {
+export function loadNaverMaps(): Promise<void> {
     if (window.naver?.maps) return Promise.resolve();
     if (loading) return loading;
     loading = new Promise((resolve, reject) => {
