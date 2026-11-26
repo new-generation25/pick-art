@@ -498,3 +498,15 @@ def test_save_adds_venue_match(tmp_path):
 ])
 def test_long_dash_period_keeps_end(raw, expect):
     assert lq.parse_dates(raw) == expect
+
+
+@pytest.mark.parametrize("raw,expect", [
+    ("2026. 11. 27. (금) | 28. (토)", ("2026-11-27", "2026-11-28")),   # 검증 11/27에서 나온 것
+    ("2026. 12. 5(토), 6(일)", ("2026-12-05", "2026-12-06")),
+    ("2026.12.30(수) / 1.2(토)", ("2026-12-30", "2027-01-02")),         # 해 넘김 나열
+    ("2026. 12. 6.[일]", ("2026-12-06", "2026-12-06")),                 # 하루짜리는 그대로
+    ("2026. 12. 6.(일) 19:30", ("2026-12-06", "2026-12-06")),           # 시각은 나열이 아님
+    ("2026.4.13.(월) ~ 예산 소진 시까지", (None, None)),                  # 끝이 날짜가 아니면 비움(원래대로)
+])
+def test_listed_dates_keep_last_day(raw, expect):
+    assert lq.parse_dates(raw) == expect

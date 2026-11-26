@@ -280,7 +280,35 @@ def parse_dates(date_raw, multiple_events=False):
     p = parse_period(normalize_abbrev_end(date_raw), None)
     if not p["parsed"] or not p["start"] or not p["end"] or p["end"] < p["start"]:
         return None, None
+    if p["start"] == p["end"]:   # «2026. 11. 27.(금) | 28.(토)» 처럼 나열한 공연일은 마지막 날까지(검증 11/27: 27일 하루로 줄었다)
+        return p["start"], list_last_day(date_raw, p["start"]) or p["end"]
     return p["start"], p["end"]
+
+
+# 나열 구분자(| , / · &) 뒤의 «28.(토)»·«12. 6(일)»·«6일» — 시각(19:30)은 구분자 뒤에 오지 않는다고 본다
+_LIST_TAIL = re.compile(r"[|,/·&]\s*(?:(?P<m>\d{1,2})\s*[.월]\s*)?(?P<d>\d{1,2})(?!\s*:)\s*[.일]?\s*(?:\([^)]{1,4}\)|\[[^\]]{1,4}\])?")
+
+
+def list_last_day(text, start_iso):
+    """시작일 하루로 읽힌 날짜 글자에 나열된 날짜가 더 있으면 그 마지막 날(ISO). 없거나 이상하면 None"""
+    from datetime import date
+    try:
+        y, m0, d0 = (int(x) for x in start_iso.split("-"))
+        start = date(y, m0, d0)
+    except Exception:
+        return None
+    last = None
+    for mt in _LIST_TAIL.finditer(text or ""):
+        m = int(mt["m"]) if mt["m"] else (last.month if last else m0)
+        try:
+            cand = date(y + (1 if m < m0 else 0), m, int(mt["d"]))
+        except ValueError:
+            continue
+        if cand > (last or start):
+            last = cand
+    if not last or (last - start).days > 62:   # 두 달 넘게 벌어지면 나열이 아닐 수 있다 → 손대지 않는다
+        return None
+    return last.isoformat()
 
 
 _VTOK = re.compile(r"[0-9A-Za-z가-힣]+")
