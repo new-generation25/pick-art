@@ -170,8 +170,8 @@
 - [X] T046 [P] 관리자 화면이 새 색·글꼴 때문에 읽기 어려워진 곳이 없는지 확인한다. 관리자 화면은 `.pica-public` 밖이라 영향이 없어야 한다 (`frontend/src/app/admin/*`)
 - [X] T047 [P] 한눈에 보기 페이지에 화면 팔레트를 더한다 (`docs/brand/brand-guide.html`)
 - [X] T048 (결과: verification.md — 10단계 중 8 통과, 7 대부분, 10 미확인) quickstart 1~10단계를 전부 돌리고, 결과(숫자·스크린숏 경로)를 적는다 (`specs/014-design-apply/verification.md`)
-- [ ] T049 `/speckit-converge`로 명세 대비 빠진 일을 찾고, 남은 것을 처리한다
-- [ ] T050 운영자에게 결과 보고 아티팩트와 배포 승인 요청을 보낸다. `main` 합치기는 승인 뒤에 한다
+- [ ] T049 (남음: 다음 세션 차례에 converge) `/speckit-converge`로 명세 대비 빠진 일을 찾고, 남은 것을 처리한다
+- [X] T050 (11/26 운영자 «배포해» → 공개 범위 «014만 배포»: 014 커밋 17개만 origin/main 위로 옮겨 main 686bf5d, picka.news 반영 확인. 보고 https://claude.ai/artifact/PZTWszHpZ7Qwqhj7hvH3UE) 운영자에게 결과 보고 아티팩트와 배포 승인 요청을 보낸다. `main` 합치기는 승인 뒤에 한다
 
 ---
 
