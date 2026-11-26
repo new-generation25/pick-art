@@ -33,3 +33,21 @@
 - `events.poster_sha256`, `events.poster_placeholder`: 읽힘(null / false)
 - `public_venues.partner_since`, `orgs.partner_since`: 읽힘(null)
 - `placeholder_images`: 401(권한 없음). 관리자 전용 정책대로다.
+
+## US1 확인 (T023, 2026-11-26 로컬 개발 서버)
+
+묶음별 건수를 기준값과 비교한 결과, 모두 같다(SC-004).
+
+| 주소 | 기준값 | 새 홈 |
+|---|---|---|
+| `/` (지역 전체) | 64·137·131·302·69 | 64·137·131·302·69 |
+| `/?category=공연` | 26·104·105·279·20 | 26·104·105·279·20 |
+| `/region/gimhae` | 6·11·12·26·16 | 6·11·12·26·16 |
+| `/region/gimhae?date=week` | 6·11·15 | 6·11·15 |
+
+- 375×812 첫 화면에 칩 줄과 «오늘» 포스터 3장이 함께 보인다(SC-001). 글꼴 Pretendard·Gowun Batang·Space Grotesk가 불러와졌다.
+- «모두 보기» `?section=week`는 11건 세로 목록이고, «전체 묶음으로»는 `/region/gimhae?date=week`로 간다.
+- 칩 «분야 → 공연»을 누르면 `/region/gimhae?date=week&category=공연`으로 가고, 결과는 오늘 1·이번 주 8건이다.
+- «필터» 서랍(언제·지역·분야·아이·끝난 행사)과 칩 메뉴는 새 색으로 보인다. 몸통 밖으로 띄우는 서랍·메뉴에는 `.pica-portal` 클래스를 붙였다.
+- 다시 불러온 뒤 콘솔 오류는 0건이다.
+- 덧붙임: 같은 localhost:3000에서 예전에 띄운 운영 빌드의 서비스 워커가 개발 화면에 옛 코드를 보여 주고 있었다. 그 워커를 등록 해제했다. 개발 모드에서는 등록되지 않으므로 운영에는 영향이 없다.

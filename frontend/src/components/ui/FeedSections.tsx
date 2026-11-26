@@ -1,33 +1,31 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { EventList } from "./EventList";
+import { useEffect, useState } from "react";
+import { ChevronDown } from "lucide-react";
+import Link from "next/link";
+import { Shelf, ShelfTile, type ShelfCard } from "./Shelf";
 import { supabase } from "@/lib/supabase";
 import { SECTION_LABELS, SectionKey } from "@/lib/feedOrder";
 
-const PAGE = 20;
+export type FeedCard = ShelfCard & { kidRank?: number };
 
-interface Card {
-    id: string;
-    title: string;
-    category: string;
-    date: string;
-    location: string;
-    imageUrl: string;
-    isFree: boolean;
-    isEnded?: boolean;
-    kidMark?: boolean;
-    endingSoon?: boolean;
-    ageBadge?: string;
-    kidRank?: number;
-}
+/** 묶음 머리 아래 정렬 기준 (시안 f01: «끝나는 날이 가까운 순», «시작하는 날 순») */
+const SORT_NOTE: Record<SectionKey, string> = {
+    today: "끝나는 날이 가까운 순",
+    week: "내일부터 7일 안에 시작 · 시작하는 날 순",
+    next: "8~14일 뒤에 시작 · 시작하는 날 순",
+    later: "보름 뒤부터 시작 · 시작하는 날 순",
+    long: "한 달 넘게 하는 전시·행사 · 곧 끝나는 것부터",
+    ended: "종료 1개월 이내 · 최근에 끝난 순",
+};
 
 /**
- * 날짜 묶음별 목록. 순서는 서버(lib/feedOrder.ts)가 정하고,
+ * 날짜 묶음별 선반 (specs/014 US1). 묶음과 순서는 서버(lib/feedOrder.ts)가 정하고,
  * 로그인 사용자가 관심 분야를 골라 두었으면 묶음 안에서 그 분야를 앞으로 당긴다.
  * 포스터 없는 행사가 뒤에 있는 규칙은 지킨다: [포스터·관심] [포스터·그 외] [무포스터·관심] [무포스터·그 외]
+ * «상시·장기»는 접힌 한 줄로 두고 누르면 펼친다. 묶음마다 앞 12장만 그리고 나머지는 «모두 보기»(?section=)로 보낸다.
  */
-export function FeedSections({ sections, filters }: { sections: { key: SectionKey; cards: Card[] }[]; filters: any }) {
+export function FeedSections({ sections, moreBase }: { sections: { key: SectionKey; cards: FeedCard[] }[]; moreBase: string }) {
     const [interests, setInterests] = useState<string[]>([]);
 
     useEffect(() => {
@@ -42,68 +40,53 @@ export function FeedSections({ sections, filters }: { sections: { key: SectionKe
     }, []);
 
     // 「아이」 필터가 켜졌으면 «아이 대상»(kidRank 0)이 늘 먼저다. 그다음 포스터·관심 분야 규칙
-    const rank = (c: Card) => (c.kidRank ?? 0) * 4 + (c.imageUrl ? 0 : 2) + (interests.includes(c.category) ? 0 : 1);
+    const rank = (c: FeedCard) => (c.kidRank ?? 0) * 4 + (c.imageUrl ? 0 : 2) + (interests.includes(c.category) ? 0 : 1);
     const ordered = sections.map(s => ({
         ...s,
         // Array.sort 는 안정 정렬이라 같은 순위 안에서는 서버가 정한 순서가 그대로 남는다
         cards: interests.length ? [...s.cards].sort((a, b) => rank(a) - rank(b)) : s.cards,
     }));
 
-    // 처음에는 묶음 순서대로 PAGE 건만 그리고, 목록 끝이 보이면 PAGE 건씩 더 그린다.
-    // (행사 470여 건을 한 번에 그리면 HTML 1.7MB·화면 요소 1만 개라 첫 화면이 늦었다)
-    const total = ordered.reduce((n, s) => n + s.cards.length, 0);
-    const [shown, setShown] = useState(PAGE);
-    const sentinel = useRef<HTMLDivElement>(null);
-
-    useEffect(() => { setShown(PAGE); }, [sections]); // 필터가 바뀌면 처음부터
-
-    useEffect(() => {
-        const el = sentinel.current;
-        if (!el || shown >= total) return;
-        const io = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting) setShown(n => Math.min(n + PAGE, total));
-        }, { rootMargin: "600px 0px" }); // 끝에 닿기 조금 전에 미리 붙인다
-        io.observe(el);
-        return () => io.disconnect();
-    }, [shown, total]);
-
-    let budget = shown;
-    const visible = ordered
-        .map(s => {
-            const cards = s.cards.slice(0, Math.max(0, budget));
-            budget -= cards.length;
-            return { ...s, visibleCards: cards };
-        })
-        .filter(s => s.visibleCards.length > 0);
-
-    if (ordered.length === 0) return <EventList initialEvents={[]} filters={filters} />;
+    const more = (key: SectionKey) => `${moreBase}${moreBase.includes("?") ? "&" : "?"}section=${key}`;
+    const firstKey = ordered.find(s => s.key !== "long")?.key;
 
     return (
         <>
-            {interests.length > 0 && !filters?.category && (
-                <p className="mb-6 text-[13px] text-ink-soft">
-                    관심 분야(<b className="text-ink">{interests.join("·")}</b>)를 묶음마다 먼저 보여 줍니다. 설정에서 바꿀 수 있습니다.
+            {interests.length > 0 && (
+                <p className="mb-2 px-4 text-[12.5px] text-ink-soft">
+                    관심 분야(<b className="text-ink">{interests.join("·")}</b>)를 묶음마다 먼저 보여 줍니다.
                 </p>
             )}
-            {visible.map(s => (
-                <section key={s.key} className="mb-12 last:mb-0" aria-labelledby={`sec-${s.key}`}>
-                    <div className="mb-4 flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b-2 border-line pb-2">
-                        <h2 id={`sec-${s.key}`} className="pica-display text-[24px] leading-none text-ink sm:text-[28px]">
-                            {SECTION_LABELS[s.key].title}
-                        </h2>
-                        <span className="text-[14px] font-bold text-ink">{s.cards.length}건</span>
-                        <span className="text-[13px] text-ink-soft">{SECTION_LABELS[s.key].note}</span>
+            {ordered.map(s => s.key === "long" ? (
+                <details key={s.key} className="group mx-4 mt-4 border-t border-line">
+                    <summary className="flex h-[54px] cursor-pointer list-none items-center justify-between border-b border-line [&::-webkit-details-marker]:hidden">
+                        <span className="flex items-baseline gap-[7px]">
+                            <span className="pica-display text-[18px] text-ink">{SECTION_LABELS.long.title}</span>
+                            <span className="pica-num text-[16px] font-semibold text-accent">{s.cards.length}</span>
+                            <small className="text-[12.5px] font-medium text-ink-soft">곧 끝나는 것부터</small>
+                        </span>
+                        <ChevronDown size={20} className="text-ink-soft transition-transform group-open:rotate-180" aria-hidden />
+                    </summary>
+                    <div className="-mx-4 pb-2 pt-3">
+                        <div className="pica-shelf-row">
+                            {s.cards.slice(0, 12).map(c => <ShelfTile key={c.id} c={c} wide />)}
+                        </div>
+                        <Link href={more(s.key)} className="mx-4 mt-3 inline-block text-[13px] font-semibold text-ink-soft hover:text-ink">상시·장기 모두 보기 ({s.cards.length}건)</Link>
                     </div>
-                    <EventList initialEvents={s.visibleCards} filters={filters} showEndNote={false} />
-                </section>
-            ))}
-            {shown < total ? (
-                <div ref={sentinel} className="py-8 text-center text-[13px] text-ink-soft">
-                    {total - shown}건 더 불러오는 중...
-                </div>
+                </details>
             ) : (
-                <p className="py-8 text-center text-[13px] text-ink-soft">모든 행사를 보여 드렸습니다 ({total}건)</p>
-            )}
+                <Shelf
+                    key={s.key}
+                    id={s.key}
+                    title={SECTION_LABELS[s.key].title}
+                    count={s.cards.length}
+                    sub={SORT_NOTE[s.key]}
+                    moreHref={more(s.key)}
+                    cards={s.cards}
+                    wide={s.key !== firstKey}
+                    firstShelf={s.key === firstKey}
+                />
+            ))}
         </>
     );
 }

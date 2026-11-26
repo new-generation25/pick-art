@@ -141,7 +141,8 @@ body {
 
 /* D. 확정 화면 팔레트(specs/014, 2026-11-26 운영자 확정 «이시안 확정», BRAND_GUIDE 2절 «화면 팔레트»):
    종이색 바탕, 짙은 초록 강조, 명조 제목(Gowun Batang), 숫자 Space Grotesk. 시안 docs/design/mockups_2026-11-26_v4/dirs/f01.html */
-.pica-public[data-pica-theme="paper"] {
+.pica-public[data-pica-theme="paper"],
+.pica-portal {
   --pk-paper: #f4efe6;
   --pk-card: #ffffff;
   --pk-soft: #ebe4d7;          /* 상세·공간 머리 띠 */
@@ -172,6 +173,11 @@ body {
   --pk-display-weight: 700;
   --pk-font-num: "Space Grotesk", "Pretendard Variable", Pretendard, sans-serif;
 }
+/* 몸통(.pica-public) 밖으로 띄우는 서랍·메뉴(Mantine Portal)도 같은 색·글꼴 */
+.pica-portal { color: var(--pk-ink); font-family: "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", sans-serif; word-break: keep-all; }
+.pica-portal.mantine-Drawer-content, .pica-portal.mantine-Menu-dropdown { background: var(--pk-paper); color: var(--pk-ink); }
+.pica-portal .pica-chip { border: 0; box-shadow: 0 1px 5px rgba(30, 26, 21, 0.13); height: 36px; padding: 0 12px; font-size: 13.5px; }
+.pica-portal .pica-chip[aria-pressed="true"] { box-shadow: none; }
 .pica-public[data-pica-theme="paper"] .pica-cat { border-radius: 6px; height: 22px; padding: 0 7px; }
 .pica-public[data-pica-theme="paper"] .pica-cat[data-cat="행사"] { border-color: transparent; }
 .pica-public[data-pica-theme="paper"] .pica-chip { border: 0; box-shadow: 0 1px 5px rgba(30, 26, 21, 0.13); height: 36px; padding: 0 12px; font-size: 13.5px; }
@@ -188,6 +194,7 @@ body {
   overflow-x: auto;
   scrollbar-width: none;
   scroll-snap-type: x proximity;
+  scroll-padding-inline: 16px;   /* 끌어 맞춤이 왼쪽 여백을 먹지 않게 */
   padding: 0 16px;
   align-items: flex-start;
 }
@@ -328,7 +335,7 @@ body {
   font-variant-numeric: tabular-nums;
 }
 .pica-stub-num {
-  font-family: var(--pk-font-display);
+  font-family: var(--pk-font-num, var(--pk-font-display));
   font-weight: var(--pk-display-weight);
   color: var(--pk-accent);
   text-shadow: var(--pk-print-sm);

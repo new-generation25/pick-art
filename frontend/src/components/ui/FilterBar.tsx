@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Checkbox } from "@mantine/core";
-import { Calendar, LocateFixed } from "lucide-react";
+import { Checkbox, Drawer, Menu } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import { ChevronDown, LocateFixed, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { BUSAN_DISTRICTS, GN_REGIONS, regionFromPath, regionPath } from "@/lib/regions";
@@ -27,11 +28,32 @@ const DATE_FILTERS = [
 ];
 
 const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
-    <div className="grid grid-cols-[40px_minmax(0,1fr)] items-center gap-2 md:grid-cols-[48px_minmax(0,1fr)] md:items-start">
-        <span className="text-[13px] font-semibold text-ink-soft md:pt-2">{label}</span>
+    <div className="grid grid-cols-[40px_minmax(0,1fr)] items-center gap-2">
+        <span className="text-[13px] font-semibold text-ink-soft">{label}</span>
         <div className="pica-chiprow" role="group" aria-label={label}>{children}</div>
     </div>
 );
+
+// 칩 한 줄(시안 f01): 기간 · 지역 · 분야 · 아이와 + 오른쪽 «필터». 넘겨도 맨 위 줄 아래에 붙는다
+function Pick({ label, on, items, current, onPick }: { label: string; on: boolean; items: { label: string; value: string }[]; current: string; onPick: (v: string) => void }) {
+    return (
+        <Menu shadow="md" width={200} position="bottom-start">
+            <Menu.Target>
+                <button type="button" className="pica-chip" aria-pressed={on} aria-haspopup="menu">
+                    {label}<ChevronDown size={15} aria-hidden />
+                </button>
+            </Menu.Target>
+            <Menu.Dropdown className="pica-portal" mah={360} style={{ overflowY: "auto" }}>
+                {items.map(it => (
+                    <Menu.Item key={it.value} onClick={() => onPick(it.value)} fw={it.value === current ? 700 : 500}
+                        c={it.value === current ? "var(--pk-accent)" : undefined}>
+                        {it.label}
+                    </Menu.Item>
+                ))}
+            </Menu.Dropdown>
+        </Menu>
+    );
+}
 
 export function FilterBar() {
     const router = useRouter();
@@ -46,6 +68,7 @@ export function FilterBar() {
     const currentKids = searchParams.get("kids") || "전체";
     const showEnded = searchParams.get("ended") === "1";
     const [myRegion, setMyRegion] = useState<string | null>(null);
+    const [opened, { open, close }] = useDisclosure(false);
 
     // 설정의 "내 지역 자동 적용"이 켜진 로그인 사용자: 주소에 지역이 없으면 거주 지역을 건다.
     // 사용자가 '전체'를 고르면 주소에 region=전체 가 남아 다시 걸지 않는다.
@@ -93,105 +116,83 @@ export function FilterBar() {
         router.push(`${region === "전체" ? "/" : regionPath(region, district)}${qs ? `?${qs}` : ""}`);
     };
 
+    const dateLabel = DATE_FILTERS.find(f => f.value === currentDate)?.label;
+    const kidsOn = currentKids !== "전체";
+    const extraOn = showEnded || (kidsOn && currentKids !== "any") || !!pathDistrict;
+
+
     return (
-        <div className="flex flex-col gap-2.5">
-            <div className="pl-0 md:pl-[56px]">
-                <Link href="/nearby" className="pica-chip" aria-pressed>
-                    <LocateFixed size={14} aria-hidden />
-                    내 주변 가까운 순으로 보기
-                </Link>
+        <>
+            <div className="sticky top-[60px] z-[50] -mx-4 flex items-center gap-1.5 bg-paper/95 py-1.5 pr-2.5 backdrop-blur sm:mx-0 sm:pr-0">
+                <div className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto py-1 pl-3 [scrollbar-width:none] sm:pl-0" role="group" aria-label="필터">
+                    <Pick label={currentDate === "all" ? "기간" : dateLabel || "기간"} on={currentDate !== "all"} items={DATE_FILTERS} current={currentDate} onPick={v => updateFilters("date", v)} />
+                    <Pick label={currentRegion === "전체" ? "지역" : pathDistrict ? `${currentRegion} ${pathDistrict}` : currentRegion} on={currentRegion !== "전체"}
+                        items={REGIONS.map(r => ({ label: r, value: r }))} current={currentRegion} onPick={v => updateFilters("region", v)} />
+                    <Pick label={currentCategory === "전체" ? "분야" : currentCategory} on={currentCategory !== "전체"}
+                        items={CATEGORIES.map(c => ({ label: c, value: c }))} current={currentCategory} onPick={v => updateFilters("category", v)} />
+                    <button type="button" className="pica-chip" aria-pressed={kidsOn} onClick={() => updateFilters("kids", kidsOn ? "전체" : "any")}>
+                        {kidsOn ? KIDS_FILTERS.find(k => k.value === currentKids)?.label : "아이와"}
+                    </button>
+                </div>
+                <button type="button" onClick={open}
+                    className="flex h-9 shrink-0 items-center gap-1 rounded-full pl-2.5 pr-3 text-[13.5px] font-bold text-ink shadow-[inset_0_0_0_1.5px_var(--pk-ink)]"
+                    aria-label={extraOn ? "필터 (켜진 조건 있음)" : "필터"}>
+                    <SlidersHorizontal size={16} aria-hidden />필터{extraOn && <span className="ml-0.5 h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />}
+                </button>
             </div>
-            <Row label="언제">
-                {DATE_FILTERS.map((filter) => (
-                    <button
-                        key={filter.value}
-                        type="button"
-                        className="pica-chip"
-                        aria-pressed={currentDate === filter.value}
-                        onClick={() => updateFilters("date", filter.value)}
-                    >
-                        {filter.value !== "all" && <Calendar size={14} aria-hidden />}
-                        {filter.label}
-                    </button>
-                ))}
-            </Row>
-
-            <Row label="지역">
-                {REGIONS.map((region) => (
-                    <button
-                        key={region}
-                        type="button"
-                        className="pica-chip"
-                        aria-pressed={currentRegion === region}
-                        onClick={() => updateFilters("region", region)}
-                    >
-                        {region}
-                    </button>
-                ))}
-            </Row>
-            {/* 부산을 고르면 구·군 (specs/010). 장소 주소로 가른 것이라 장소를 모르는 행사는 «전체»에만 나온다 */}
-            {currentRegion === "부산" && (
-                <Row label="구·군">
-                    {[{ name: "전체" }, ...BUSAN_DISTRICTS].map((d) => (
-                        <button
-                            key={d.name}
-                            type="button"
-                            className="pica-chip"
-                            aria-pressed={(pathDistrict || "전체") === d.name}
-                            onClick={() => updateFilters("district", d.name)}
-                        >
-                            {d.name}
-                        </button>
-                    ))}
-                </Row>
-            )}
-
-            <Row label="분야">
-                {CATEGORIES.map((category) => (
-                    <button
-                        key={category}
-                        type="button"
-                        className="pica-chip"
-                        aria-pressed={currentCategory === category}
-                        onClick={() => updateFilters("category", category)}
-                    >
-                        {category}
-                    </button>
-                ))}
-            </Row>
-
-            <Row label="아이">
-                {KIDS_FILTERS.map((k) => (
-                    <button
-                        key={k.value}
-                        type="button"
-                        className="pica-chip"
-                        aria-pressed={currentKids === k.value}
-                        onClick={() => updateFilters("kids", k.value)}
-                    >
-                        {k.label}
-                    </button>
-                ))}
-            </Row>
 
             {myRegion && currentRegion === myRegion && (
-                <p className="pl-0 text-[13px] text-ink-soft md:pl-[56px]">
-                    내 지역(<b className="text-ink">{myRegion}</b>)을 자동으로 적용했습니다. 설정에서 끌 수 있습니다.
+                <p className="mt-1 text-[12.5px] text-ink-soft">
+                    내 지역(<b className="text-ink">{myRegion}</b>)을 먼저 보여 줍니다. 지역 칩에서 바꿀 수 있어요.
                 </p>
             )}
 
-            {/* 끝난 행사: 기본은 숨김. 켜면 종료 1개월 이내 행사가 "종료" 표시와 함께 맨 뒤에 붙는다 */}
-            <div className="pl-0 pt-1 md:pl-[56px]">
-                <Checkbox
-                    checked={showEnded}
-                    onChange={(e) => updateFilters("ended", e.currentTarget.checked ? "1" : "all")}
-                    label="종료된 행사도 보기 (종료 1개월 이내)"
-                    color="dark"
-                    size="sm"
-                    radius={0}
-                    styles={{ label: { color: 'var(--pk-ink-soft)', fontWeight: 500 }, input: { borderColor: 'var(--pk-line)', borderWidth: 1.5 } }}
-                />
-            </div>
-        </div>
+            {/* «필터»: 모든 조건 (언제·지역·구·군·분야·아이 나이·끝난 행사) */}
+            <Drawer opened={opened} onClose={close} position="bottom" size={440} title="필터" radius="lg" classNames={{ content: "pica-portal" }}
+                styles={{ title: { fontWeight: 700, fontSize: 18 }, body: { paddingBottom: 24 } }}>
+                <div className="flex flex-col gap-3">
+                    <Link href="/nearby" className="pica-chip w-max" onClick={close}>
+                        <LocateFixed size={14} aria-hidden />내 주변 가까운 순으로 보기
+                    </Link>
+                    <Row label="언제">
+                        {DATE_FILTERS.map(f => (
+                            <button key={f.value} type="button" className="pica-chip" aria-pressed={currentDate === f.value} onClick={() => updateFilters("date", f.value)}>{f.label}</button>
+                        ))}
+                    </Row>
+                    <Row label="지역">
+                        {REGIONS.map(r => (
+                            <button key={r} type="button" className="pica-chip" aria-pressed={currentRegion === r} onClick={() => updateFilters("region", r)}>{r}</button>
+                        ))}
+                    </Row>
+                    {/* 부산을 고르면 구·군 (specs/010). 장소 주소로 가른 것이라 장소를 모르는 행사는 «전체»에만 나온다 */}
+                    {currentRegion === "부산" && (
+                        <Row label="구·군">
+                            {[{ name: "전체" }, ...BUSAN_DISTRICTS].map(d => (
+                                <button key={d.name} type="button" className="pica-chip" aria-pressed={(pathDistrict || "전체") === d.name} onClick={() => updateFilters("district", d.name)}>{d.name}</button>
+                            ))}
+                        </Row>
+                    )}
+                    <Row label="분야">
+                        {CATEGORIES.map(c => (
+                            <button key={c} type="button" className="pica-chip" aria-pressed={currentCategory === c} onClick={() => updateFilters("category", c)}>{c}</button>
+                        ))}
+                    </Row>
+                    <Row label="아이">
+                        {KIDS_FILTERS.map(k => (
+                            <button key={k.value} type="button" className="pica-chip" aria-pressed={currentKids === k.value} onClick={() => updateFilters("kids", k.value)}>{k.label}</button>
+                        ))}
+                    </Row>
+                    {/* 끝난 행사: 기본은 숨김. 켜면 종료 1개월 이내 행사가 "종료" 표시와 함께 맨 뒤에 붙는다 */}
+                    <Checkbox
+                        checked={showEnded}
+                        onChange={(e) => updateFilters("ended", e.currentTarget.checked ? "1" : "all")}
+                        label="종료된 행사도 보기 (종료 1개월 이내)"
+                        color="var(--pk-accent)"
+                        size="sm"
+                        styles={{ label: { color: 'var(--pk-ink-soft)', fontWeight: 500 } }}
+                    />
+                </div>
+            </Drawer>
+        </>
     );
 }

@@ -53,7 +53,7 @@
   - 크기는 `size="shelf" | "detail" | "row"` 세 가지다.
 - [X] T014 지금 `ImageWithFallback`·`EventCard`의 포스터 자리를 `PosterOrText`로 바꾼다 (`frontend/src/components/ui/EventCard.tsx`, `frontend/src/components/ui/ImageWithFallback.tsx`를 쓰는 곳)
 - [X] T015 맨 위 줄을 pica 로고 · 찾기 · 내 정보(로그인 전이면 «로그인»)로 바꾼다. 관리자 링크, 인스타그램 링크, 로그아웃은 «내 정보» 메뉴 안으로 옮긴다 (`frontend/src/components/ui/Header.tsx`)
-- [ ] T016 확인한다: `npx tsc --noEmit`, quickstart 2단계(리소 색 검색), 9단계(명암비). 결과가 맞으면 커밋한다
+- [X] T016 확인한다: `npx tsc --noEmit`, quickstart 2단계(리소 색 검색), 9단계(명암비). 결과가 맞으면 커밋한다
 
 **Checkpoint**: 모든 공개 화면이 새 색·글꼴로 보인다. 안내 그림을 쓰는 행사는 지금 카드 자리에서도 글자 포스터로 보인다.
 
@@ -65,19 +65,19 @@
 
 **Independent Test**: quickstart 3단계(묶음별 건수가 T002 기준과 같음)와 4단계(375×812 첫 화면).
 
-- [ ] T017 [P] [US1] 날짜 묶음 선반 컴포넌트를 만든다 (`frontend/src/components/ui/Shelf.tsx`).
+- [X] T017 [P] [US1] 날짜 묶음 선반 컴포넌트를 만든다 (`frontend/src/components/ui/Shelf.tsx`).
   - 머리: 명조 묶음 이름 · 건수 · 정렬 기준 · «모두 보기» 링크(`?section=<key>`에 지금 필터 매개변수 유지).
   - 본문: 좌우로 넘기는 칸(scroll-snap). 첫 묶음은 칸 폭 104px, 나머지는 시안 폭이고, 묶음마다 앞 12장만 그린다.
   - 칸 내용: `PosterOrText` · 분야 꼬리표 · 날짜·시각(Space Grotesk) · 제목 2줄 · 장소 · 관람료(있을 때) · «피카가 본 이유»(있을 때).
-- [ ] T018 [US1] 필터 칩 줄을 기간⌄ · 지역⌄ · 분야⌄ · 아이와 + «필터»로 바꾸고, 화면 위에 붙게(sticky) 한다. 바꾸는 주소 매개변수(`date`·`region`·`category`·`kids`·`ended`·`q`)와 동작은 지금과 같다 (`frontend/src/components/ui/FilterBar.tsx`)
-- [ ] T019 [US1] 홈 머리말(큰 제목·설명)을 칩 줄로 바꾸고, 묶음을 `Shelf`로 그린다 (`frontend/src/components/HomeFeed.tsx`, `frontend/src/components/ui/FeedSections.tsx`).
+- [X] T018 [US1] 필터 칩 줄을 기간⌄ · 지역⌄ · 분야⌄ · 아이와 + «필터»로 바꾸고, 화면 위에 붙게(sticky) 한다. 바꾸는 주소 매개변수(`date`·`region`·`category`·`kids`·`ended`·`q`)와 동작은 지금과 같다 (`frontend/src/components/ui/FilterBar.tsx`)
+- [X] T019 [US1] 홈 머리말(큰 제목·설명)을 칩 줄로 바꾸고, 묶음을 `Shelf`로 그린다 (`frontend/src/components/HomeFeed.tsx`, `frontend/src/components/ui/FeedSections.tsx`).
   - `orderFeed()` 결과와 관심 분야를 앞으로 당기는 순서는 그대로 둔다.
   - 0건인 묶음은 숨긴다.
   - 결과가 0건이면 «조건에 맞는 행사가 없어요»와 필터를 푸는 버튼을 보인다.
-- [ ] T020 [US1] «상시·장기» 묶음을 접힌 한 줄 «상시·장기 N건 ⌄»로 두고, 누르면 펼친다 (`frontend/src/components/ui/FeedSections.tsx`)
-- [ ] T021 [US1] `?section=<key>`가 있으면 그 묶음만 세로 목록(지금 `EventList`의 20건씩 이어 그리기)으로 보인다 (`frontend/src/components/HomeFeed.tsx`, `frontend/src/components/ui/EventList.tsx`)
-- [ ] T022 [US1] 소식 받기(뉴스레터·키워드 알림) 띠를 `paper` 색의 옅은 띠로 바꾼다. `rgba(255,255,255,…)`와 `--pk-mark` 버튼을 없애고 폼 동작은 그대로 둔다 (`frontend/src/components/HomeFeed.tsx`)
-- [ ] T023 [US1] 확인한다: 개발 서버 375×812·1280에서 `/`, `/region/gimhae`를 본다. quickstart 3·4단계 결과를 `specs/014-design-apply/baseline.md`에 적는다. 맞으면 커밋한다
+- [X] T020 [US1] «상시·장기» 묶음을 접힌 한 줄 «상시·장기 N건 ⌄»로 두고, 누르면 펼친다 (`frontend/src/components/ui/FeedSections.tsx`)
+- [X] T021 [US1] `?section=<key>`가 있으면 그 묶음만 세로 목록(지금 `EventList`의 20건씩 이어 그리기)으로 보인다 (`frontend/src/components/HomeFeed.tsx`, `frontend/src/components/ui/EventList.tsx`)
+- [X] T022 [US1] 소식 받기(뉴스레터·키워드 알림) 띠를 `paper` 색의 옅은 띠로 바꾼다. `rgba(255,255,255,…)`와 `--pk-mark` 버튼을 없애고 폼 동작은 그대로 둔다 (`frontend/src/components/HomeFeed.tsx`)
+- [X] T023 [US1] 확인한다: 개발 서버 375×812·1280에서 `/`, `/region/gimhae`를 본다. quickstart 3·4단계 결과를 `specs/014-design-apply/baseline.md`에 적는다. 맞으면 커밋한다
 
 **Checkpoint**: 홈 단독으로 배포할 수 있는 상태다(MVP).
 
