@@ -6,8 +6,12 @@ import { EventList } from "@/components/ui/EventList";
 import { MapButton } from "@/components/ui/MapButton";
 import { guList, regionList, regionPath, splitList } from "@/lib/regions";
 import { SECTION_LABELS, type SectionKey } from "@/lib/feedOrder";
-import { Container, Title, Text, TextInput, Button, SimpleGrid, Group, Box, Alert, Stack } from "@mantine/core";
-import { ArrowLeft } from "lucide-react";
+import { Box } from "@mantine/core";
+import { ArrowLeft, CalendarPlus, MessageCircle } from "lucide-react";
+import { INSTAGRAM_URL, InstagramIcon } from "@/components/ui/InstagramLink";
+
+/** 카카오톡 채널 «피카» 홈 (specs/017) */
+const KAKAO_CHANNEL = "https://pf.kakao.com/_xoxdxkvX";
 
 import { formatPeriod, todayKST } from "@/lib/utils";
 import { orderFeed } from "@/lib/feedOrder";
@@ -52,7 +56,6 @@ export async function HomeFeed({ params: resolvedParams, region, district }: { p
   const guVenues = new Set<string>();
   for (const g of gus) for (const id of await getDistrictVenueIds(g)) guVenues.add(id);
   const fetched = (await getPublishedEvents(filters)).filter((e: any) => !gus.length || e.region !== "부산" || guVenues.has(e.venue_id));
-  const isSubscribed = resolvedParams.subscribed === "true";
 
   // 아이와 같이 가기 좋은 곳(specs/004): 규칙·운영자 수정으로 행사마다 구분을 매기고, 「아이」 필터가 켜지면 맞는 것만 남긴다
   const kids = readKidsParam(resolvedParams.kids);
@@ -126,7 +129,6 @@ export async function HomeFeed({ params: resolvedParams, region, district }: { p
   const sectionKey = resolvedParams.section as SectionKey | undefined;
   const one = sectionKey && SECTION_LABELS[sectionKey] ? ordered.find(s => s.key === sectionKey) : undefined;
 
-  const paperInput = { input: { backgroundColor: 'var(--pk-card)', border: '1px solid var(--pk-line)', color: 'var(--pk-ink)' } };
   const hasFilter = !!((regions.length && !region) || cats.length || sub || filters.search || filters.date || kids.on);
   const place = regions.length
     ? regions.map(r => r === "부산" && gus.length ? `부산 ${gus.join("·")}` : r).join(" · ")
@@ -134,11 +136,6 @@ export async function HomeFeed({ params: resolvedParams, region, district }: { p
 
   return (
     <Box>
-      {isSubscribed && (
-        <Alert variant="light" color="green" title="구독 완료" withCloseButton styles={{ root: { borderRadius: 0 } }}>
-          뉴스레터 구독이 완료되었습니다. 매주 가까운 곳의 공연·전시·축제 소식을 메일로 보내 드립니다.
-        </Alert>
-      )}
 
       {/* 칩 한 줄 (시안 f01). 큰 제목은 화면 읽기용으로만 둔다 */}
       <div className="mx-auto max-w-6xl px-4 pt-1 sm:px-6">
@@ -183,81 +180,18 @@ export async function HomeFeed({ params: resolvedParams, region, district }: { p
         />
       )}
 
-      {/* 소식 받기: 뉴스레터 + 키워드 알림 */}
-      <Box component="section" bg="var(--pk-soft)" c="var(--pk-ink)" mt={24}>
-        <Container size="xl" py={{ base: 32, sm: 56 }}>
-          <SimpleGrid cols={{ base: 1, md: 2 }} spacing={{ base: 40, md: 64 }}>
-            <Box>
-              <Title order={2} fz={{ base: 22, sm: 26 }} className="pica-display" mb={8}>
-                매주 한 번, 가까운 공연·전시 소식
-              </Title>
-              <Text fz="sm" c="var(--pk-ink-soft)" mb="lg">새로 올라온 공연과 전시를 정리해 메일로 보내 드립니다.</Text>
-              <form action="/api/newsletter" method="POST">
-                <Group align="flex-start" gap="xs">
-                  <TextInput
-                    name="email"
-                    type="email"
-                    placeholder="이메일 주소"
-                    aria-label="이메일 주소"
-                    required
-                    size="md"
-                    radius={10}
-                    flex={1}
-                    styles={paperInput}
-                  />
-                  <Button type="submit" size="md" radius={10} color="var(--pk-accent)" c="var(--pk-on-accent)" fw={700}>
-                    구독하기
-                  </Button>
-                </Group>
-              </form>
-              <Text fz="xs" c="var(--pk-ink-soft)" mt={8}>
-                입력한 이메일은 소식 발송에만 쓰고, 언제든 그만 받을 수 있어요.{" "}
-                <Link href="/privacy" style={{ color: "inherit", textDecoration: "underline" }}>개인정보처리방침</Link>
-              </Text>
-            </Box>
-
-            <Box>
-              <Title order={2} fz={{ base: 22, sm: 26 }} className="pica-display" mb={8}>
-                원하는 키워드가 올라오면 알림
-              </Title>
-              <Text fz="sm" c="var(--pk-ink-soft)" mb="lg">예: 창원, 무료, 국악. 키워드에 맞는 행사가 등록되면 바로 메일을 보냅니다.</Text>
-              <form action="/api/keywords" method="POST">
-                <Stack gap="xs">
-                  <TextInput
-                    name="email"
-                    type="email"
-                    placeholder="이메일 주소"
-                    aria-label="알림 받을 이메일 주소"
-                    required
-                    size="md"
-                    radius={10}
-                    styles={paperInput}
-                  />
-                  <Group gap="xs" align="flex-start">
-                    <TextInput
-                      name="keywords"
-                      placeholder="키워드 (쉼표로 구분)"
-                      aria-label="키워드"
-                      required
-                      size="md"
-                      radius={10}
-                      flex={1}
-                      styles={paperInput}
-                    />
-                    <Button type="submit" size="md" radius={10} variant="outline" color="var(--pk-ink)" fw={700}>
-                      알림 신청
-                    </Button>
-                  </Group>
-                </Stack>
-              </form>
-              <Text fz="xs" c="var(--pk-ink-soft)" mt={8}>
-                입력한 이메일은 소식 발송에만 쓰고, 언제든 그만 받을 수 있어요.{" "}
-                <Link href="/privacy" style={{ color: "inherit", textDecoration: "underline" }}>개인정보처리방침</Link>
-              </Text>
-            </Box>
-          </SimpleGrid>
-        </Container>
-      </Box>
+      {/* 소식 받기 (11/27): 메일을 보내는 기능이 없어 이메일 구독·키워드 알림 칸을 뺐다. 실제로 받아 볼 수 있는 길만 둔다 */}
+      <section className="mt-6 bg-[var(--pk-soft)]">
+        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
+          <h2 className="pica-display text-[22px] text-ink sm:text-[26px]">새 소식 받아 보기</h2>
+          <p className="mt-1 text-[14px] text-ink-soft">가까운 공연·전시 소식을 쓰시는 곳에서 받아 보세요.</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link href="/calendar" className="pica-chip"><CalendarPlus size={15} aria-hidden />캘린더로 받기</Link>
+            <a href={KAKAO_CHANNEL} target="_blank" rel="noopener noreferrer" className="pica-chip"><MessageCircle size={15} aria-hidden />카카오톡 채널 «피카»</a>
+            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="pica-chip"><InstagramIcon size={15} />인스타그램 @picka.news</a>
+          </div>
+        </div>
+      </section>
     </Box>
   );
 }

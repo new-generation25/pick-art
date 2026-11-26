@@ -77,8 +77,9 @@ export function HeaderSearch({ open, setOpen }: { open: boolean; setOpen: (v: bo
 
     return (
         <form onSubmit={submit} role="search"
-            className="pica-pop-in flex h-11 min-w-0 flex-1 items-center gap-2 rounded-full bg-card px-4 shadow-[0_1px_5px_rgba(30,26,21,.13)] sm:w-[360px] sm:flex-none">
-            <Search size={18} className="shrink-0 text-ink-soft" aria-hidden />
+            className="pica-pop-in group flex h-11 min-w-0 flex-1 items-center gap-2 rounded-full border-[1.5px] border-line bg-card pl-3.5 pr-1.5 transition-colors focus-within:border-accent focus-within:shadow-[0_0_0_3px_var(--pk-accent-soft,rgba(46,107,78,.15))] sm:w-[360px] sm:flex-none">
+            {/* 11/27 «네모 박스 선»: 사이트 공통 키보드 테두리가 안쪽 입력칸에 네모로 그려졌다 → 입력칸 테두리는 끄고 둥근 칸 전체에 초록 테두리 */}
+            <Search size={18} className="shrink-0 text-ink-soft transition-colors group-focus-within:text-accent" aria-hidden />
             <input ref={input} name="q" type="search" enterKeyHint="search" value={value}
                 onChange={(e) => {
                     const v = e.currentTarget.value;
@@ -86,9 +87,9 @@ export function HeaderSearch({ open, setOpen }: { open: boolean; setOpen: (v: bo
                     if (!v.trim() && urlQ) { setKeepTyped(true); dropQ(true); } // 글자를 다 지우면 검색 필터도 바로 푼다
                 }}
                 placeholder="행사 이름으로 찾기" aria-label="행사 이름으로 찾기"
-                className="min-w-0 flex-1 bg-transparent text-[15px] text-ink outline-none placeholder:text-ink-soft [&::-webkit-search-cancel-button]:hidden" />
-            <button type="button" onClick={close} aria-label={urlQ ? "검색어 지우기" : "찾기 닫기"} className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink-soft hover:text-ink">
-                <X size={18} />
+                className="min-w-0 flex-1 bg-transparent text-[15px] text-ink !outline-none placeholder:text-ink-soft/80 focus-visible:!outline-none [&::-webkit-search-cancel-button]:hidden" />
+            <button type="button" onClick={close} aria-label={urlQ ? "검색어 지우기" : "찾기 닫기"} className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-soft text-ink-soft transition-colors hover:bg-line hover:text-ink">
+                <X size={16} />
             </button>
         </form>
     );
