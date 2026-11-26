@@ -5,9 +5,10 @@ import { supabase } from "@/lib/supabase";
 
 type Provider = "google" | "kakao";
 
-// Supabase에서 카카오 공급자를 켠 뒤 .env.local 에 NEXT_PUBLIC_KAKAO_LOGIN=on 을 넣으면 버튼이 보인다.
-// 켜기 전에 누르면 'provider is not enabled' 오류 화면이 나오기 때문에 기본은 숨긴다.
-const KAKAO_ENABLED = process.env.NEXT_PUBLIC_KAKAO_LOGIN === "on";
+// 카카오 로그인: Kakao Developers 앱 «피카»(ID 1668029, 사업자 없는 앱이라 이메일은 받지 않음 — 닉네임 필수·프로필 사진 선택)
+// + Supabase Kakao 공급자(«Allow users without an email» 켬). 2026-11-26 켰다.
+// 문제가 생기면 NEXT_PUBLIC_KAKAO_LOGIN=off 로 버튼만 숨긴다.
+const KAKAO_ENABLED = process.env.NEXT_PUBLIC_KAKAO_LOGIN !== "off";
 
 // 구글·카카오 로그인. 로그인과 가입이 같은 흐름이다 — 처음 온 사람은
 // /auth/callback 에서 닉네임을 정하는 설정 화면으로 보낸다.

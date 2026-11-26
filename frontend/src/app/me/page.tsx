@@ -114,7 +114,7 @@ export default function MePage() {
                     <span className="grid h-[60px] w-[60px] flex-none place-items-center rounded-full bg-ink text-white"><UserRound className="h-7 w-7" aria-hidden /></span>
                     <div className="min-w-0">
                         <h1 className="pica-display text-[24px] leading-[1.2] text-ink">{p!.nickname}</h1>
-                        <p className="mt-[3px] truncate text-[13px] text-ink-soft">{user?.email}</p>
+                        <p className="mt-[3px] truncate text-[13px] text-ink-soft">{user?.email || (user?.app_metadata?.provider === "kakao" ? "카카오 계정으로 로그인" : "")}</p>
                     </div>
                     <button type="button" onClick={() => setEditing(v => !v)} className="ml-auto flex h-[34px] items-center whitespace-nowrap rounded-full bg-card px-3 text-[13px] font-bold shadow-[inset_0_0_0_1.5px_var(--pk-line)]">{editing ? "닫기" : "고치기"}</button>
                 </div>

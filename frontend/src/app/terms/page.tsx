@@ -24,7 +24,7 @@ export default function TermsPage() {
 
             <Section n={3} title="회원가입">
                 <p>
-                    회원가입은 소셜 계정(현재 구글) 로그인으로 합니다. 로그인하면 이 약관과{" "}
+                    회원가입은 소셜 계정(구글·카카오) 로그인으로 합니다. 로그인하면 이 약관과{" "}
                     <Link href="/privacy" className="underline underline-offset-2">개인정보처리방침</Link>에 동의한 것으로 봅니다.
                     회원은 언제든지 탈퇴를 요청할 수 있습니다.
                 </p>

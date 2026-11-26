@@ -24,7 +24,7 @@ export default function LoginPage() {
                     <div className="mt-4"><LegalLinks /></div>
 
                     <p className="mt-8 text-center text-sm font-medium text-neutral-400">
-                        처음이면 그대로 계속하면 가입됩니다. 카카오 로그인은 곧 추가됩니다.
+                        처음이면 그대로 계속하면 가입됩니다.
                     </p>
                 </div>
             </div>
