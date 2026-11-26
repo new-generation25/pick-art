@@ -72,6 +72,7 @@ export async function POST(request: Request) {
         if (r.error === "auth") return NextResponse.json({ error: "forbidden" }, { status: 403 });
         return json(MSG.welcome());
     }
+    if (action.kind === "ask") return json(MSG.ask());
     if (action.kind === "tip") {
         const r = await intake(secret, userKey, "start");
         if (r.error === "auth") return NextResponse.json({ error: "forbidden" }, { status: 403 });

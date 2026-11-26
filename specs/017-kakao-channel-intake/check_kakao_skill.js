@@ -50,7 +50,9 @@ assert.strictEqual(k.parseSkillRequest(plain('사진 보내기', '폴백 블록'
 assert.strictEqual(k.parseSkillRequest(plain('행사 올리고 싶어요', '행사 알리기')).action.kind, 'tip');   // 블록 이름으로
 assert.strictEqual(k.parseSkillRequest(plain(T, '행사 알리기')).action.kind, 'image');   // 사진 주소가 먼저
 // 웰컴·제보 시간 밖: 상담 연결 버튼 + 행사 알리기 버튼
-for (const card of [k.MSG.welcome(), k.MSG.notTip()]) {
+for (const w of ['운영자에게 문의', '문의', '상담']) assert.strictEqual(k.parseSkillRequest(plain(w, '폴백 블록')).action.kind, 'ask');
+assert.strictEqual(k.parseSkillRequest(plain('질문 있어요', '운영자 문의')).action.kind, 'ask');   // 메뉴 블록 이름으로
+for (const card of [k.MSG.welcome(), k.MSG.notTip(), k.MSG.ask()]) {
   const tc = card.template.outputs[0].textCard;
   assert.ok(tc.title.length <= 50 && tc.title.length + tc.description.length <= 400, 'textCard 400자');
   assert.deepStrictEqual(tc.buttons.map(b => b.action), ['operator', 'message']);

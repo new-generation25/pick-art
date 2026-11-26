@@ -30,6 +30,10 @@ const TIP_WORDS = new Set([TIP_TEXT, "제보", "제보하기", "행사 제보", 
 export const TIP_BLOCK = "행사 알리기";
 /** 상담 연결 버튼 이름(스킬 응답 버튼 action "operator") */
 export const OPERATOR_LABEL = "운영자에게 문의";
+/** 채팅방 메뉴 «운영자 문의»가 부르는 오픈빌더 블록 이름. 채팅방 메뉴는 상담 연결을 직접 못 걸어서(연결 종류: URL·챗봇·소식·쿠폰·채널 프로필·QR)
+ *  이 블록이 상담 연결 버튼 카드로 답한다 */
+export const ASK_BLOCK = "운영자 문의";
+const ASK_WORDS = new Set([OPERATOR_LABEL, ASK_BLOCK, "문의", "문의하기", "상담", "상담원 연결", "운영자 연결"]);
 export const MAX_IMAGES = 10;
 /** 카카오에서 내려받을 때 상한(PC에서 보낸 원본 PNG 7.5MB 확인). 저장 전에 긴 변 2048px JPEG 로 줄인다 */
 export const MAX_IMAGE_BYTES = 25 * 1024 * 1024;
@@ -38,6 +42,7 @@ export type SkillAction =
     | { kind: "welcome" }
     | { kind: "agree" }
     | { kind: "tip" }
+    | { kind: "ask" }
     /** plugin: 보안 이미지 플러그인(«사진 보내기» 블록)으로 온 사진 — 그 블록을 부른 것 자체가 제보 뜻이다 */
     | { kind: "image"; urls: string[]; plugin?: boolean }
     | { kind: "text"; text: string };
@@ -112,6 +117,7 @@ export function parseSkillRequest(body: unknown): SkillRequest | null {
     }
     if (utterance === AGREE_TEXT) return { userKey, action: { kind: "agree" } };
     if (TIP_WORDS.has(utterance) || blockName === TIP_BLOCK) return { userKey, action: { kind: "tip" } };
+    if (ASK_WORDS.has(utterance) || blockName === ASK_BLOCK) return { userKey, action: { kind: "ask" } };
     if (/웰컴|welcome/i.test(blockName) || !utterance) return { userKey, action: { kind: "welcome" } };
     return { userKey, action: { kind: "text", text: utterance.slice(0, 1000) } };
 }
@@ -160,6 +166,11 @@ export const MSG = {
     welcome: () => menu(
         "피카 카카오톡 채널이에요",
         "가까운 공연·전시·축제를 날짜순으로 알려 드려요(picka.news).\n\n궁금한 것은 «운영자에게 문의»를 눌러 주세요. 운영자가 채팅으로 답해요.\n공연·전시를 알리고 싶은 단체·예술가는 «행사 알리기»를 눌러 주세요.",
+    ),
+    /** 채팅방 메뉴 «운영자 문의»: 상담 연결 버튼 (운영자 채팅 시간은 채널 관리자센터 채팅 설정과 같게: 매일 오전 9시~오후 6시) */
+    ask: () => menu(
+        "운영자에게 문의하기",
+        "아래 «운영자에게 문의»를 누르면 운영자와 1:1 채팅으로 이어져요. 매일 오전 9시~오후 6시에 답하고, 그 밖 시간에 남기면 다음 채팅 시간에 답해요.\n\n공연·전시를 알리려면 «행사 알리기»를 눌러 주세요.",
     ),
     /** 제보 시간이 아닐 때 온 말·사진: 저장하지 않았음을 밝히고 두 갈래 */
     notTip: () => menu(
