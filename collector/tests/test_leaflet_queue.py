@@ -486,3 +486,15 @@ def test_save_adds_venue_match(tmp_path):
     p.write_text(json.dumps(full(venue=f("진해아트홀 공연장")), ensure_ascii=False), encoding="utf-8")
     ok, result = lq.save(store, SID, str(p), cache_dir=str(tmp_path))
     assert ok and result["venue_match"] == {"venue_id": "v1", "name": "진해아트홀", "region": "창원"}
+
+
+@pytest.mark.parametrize("raw,expect", [
+    ("2026.2.24 —2027.8.29", ("2026-02-24", "2027-08-29")),        # 긴 줄표, 연도 넘김
+    ("2026. 04. 17. — 11. 29.", ("2026-04-17", "2026-11-29")),     # 긴 줄표, 끝에 연도 없음
+    ("2026. 11. 21. ― 12. 4", ("2026-11-21", "2026-12-04")),       # 가로 막대
+    ("2026. 11.17. – 2027. 5.30.", ("2026-11-17", "2027-05-30")),  # en dash
+    ("2026. 11. 21. - 12. 4", ("2026-11-21", "2026-12-04")),       # 하이픈(원래 되던 것)
+    ("2026.12.18(금) - 27(일)", ("2026-12-18", "2026-12-27")),      # 줄임 끝날(원래 되던 것)
+])
+def test_long_dash_period_keeps_end(raw, expect):
+    assert lq.parse_dates(raw) == expect

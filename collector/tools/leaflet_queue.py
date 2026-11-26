@@ -249,6 +249,9 @@ _ABBR_DOT = re.compile(r"(?P<y>20\d{2})\s*\.\s*(?P<m>\d{1,2})\s*\.\s*(?P<d>\d{1,
                        r"\s*[~∼–\-]\s*(?P<ed>\d{1,2})(?!\d)(?!\s*\.\s*\d)(?!\s*[:시월])")
 
 
+LONG_DASH = re.compile(r"\s*[—―－–]+\s*")
+
+
 def normalize_abbrev_end(text):
     """«2027년 1월 9일~10일» → «2027년 1월 9일 ~ 1월 10일», «2027. 1. 9 ~ 10»·«2027.1.9~10(일)» → «… ~ 1. 10…».
     시작의 월을 끝날에 채울 뿐 연도는 넣지 않는다(연도는 인쇄된 것만). 줄임 표기가 아니면 그대로 돌려준다."""
@@ -271,6 +274,9 @@ def parse_dates(date_raw, multiple_events=False):
     한 장에 행사가 여럿(multiple_events)이면 날짜 목록이 첫 날짜 하루로 바뀌는 오답을 막으려고 파싱하지 않는다."""
     if not date_raw or multiple_events:
         return None, None
+    # 긴 줄표(— ― － –)로 쓴 기간은 규칙 파서가 범위로 보지 않아 끝날을 버리고 «시작일 하루»로 바꿨다
+    # (11/27 카카오 제보 읽기 검증: «2026.2.24 —2027.8.29» → 2/24 하루). 범위 기호로 바꿔 읽는다
+    date_raw = LONG_DASH.sub(" ~ ", date_raw)
     p = parse_period(normalize_abbrev_end(date_raw), None)
     if not p["parsed"] or not p["start"] or not p["end"] or p["end"] < p["start"]:
         return None, None
