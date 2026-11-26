@@ -183,6 +183,10 @@ body {
 .pica-public[data-pica-theme="paper"] .pica-chip { border: 0; box-shadow: 0 1px 5px rgba(30, 26, 21, 0.13); height: 36px; padding: 0 12px; font-size: 13.5px; }
 .pica-public[data-pica-theme="paper"] .pica-chip:hover { background: var(--pk-paper); }
 .pica-public[data-pica-theme="paper"] .pica-chip[aria-pressed="true"] { box-shadow: none; }
+/* 고른 칩(초록)은 마우스를 올려도 초록 그대로 — 위 hover(종이색)가 덮으면 흰 글자가 안 보인다 */
+.pica-public[data-pica-theme="paper"] .pica-chip[aria-pressed="true"]:hover,
+.pica-portal .pica-chip[aria-pressed="true"]:hover,
+.pica-chip[aria-pressed="true"]:hover { background: var(--pk-mark); border-color: var(--pk-mark); color: var(--pk-on-mark); filter: brightness(0.93); }
 
 /* 숫자·날짜 (Space Grotesk, 자리 맞춤) */
 .pica-num { font-family: var(--pk-font-num, inherit); font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
