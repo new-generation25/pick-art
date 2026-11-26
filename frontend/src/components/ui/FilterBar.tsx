@@ -8,7 +8,7 @@ import { ChevronDown, LocateFixed, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { BUSAN_DISTRICTS, GN_REGIONS, regionFromPath, regionPath } from "@/lib/regions";
-import { CATEGORIES as FEED_CATEGORIES } from "@/lib/categories";
+import { CATEGORIES as FEED_CATEGORIES, normalizeCategory } from "@/lib/categories";
 
 const REGIONS = ["전체", ...GN_REGIONS];
 const CATEGORIES = ["전체", ...FEED_CATEGORIES];
@@ -55,7 +55,7 @@ function Pick({ label, on, items, current, onPick }: { label: string; on: boolea
     );
 }
 
-export function FilterBar() {
+export function FilterBar({ subs = [], total }: { subs?: { name: string; n: number }[]; total?: number }) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const pathname = usePathname();
@@ -63,7 +63,8 @@ export function FilterBar() {
     const { region: pathRegion, district: pathDistrict } = regionFromPath(pathname);
 
     const currentRegion = pathRegion || searchParams.get("region") || "전체";
-    const currentCategory = searchParams.get("category") || "전체";
+    const currentCategory = normalizeCategory(searchParams.get("category")) || "전체";
+    const currentSub = searchParams.get("sub") || "";
     const currentDate = searchParams.get("date") || "all";
     const currentKids = searchParams.get("kids") || "전체";
     const showEnded = searchParams.get("ended") === "1";
@@ -107,8 +108,10 @@ export function FilterBar() {
             district = value === "전체" ? null : value;
         } else if (value === "전체" || value === "all") {
             params.delete(key);
+            if (key === "category") params.delete("sub"); // 분야를 바꾸면 세부도 푼다 (specs/015)
         } else {
             params.set(key, value);
+            if (key === "category") params.delete("sub");
         }
         if (region === "전체" && myRegion) params.set("region", "전체"); // 자동 적용 사용자가 고른 '전체'는 주소에 남긴다
         else if (region === "전체") params.delete("region");
@@ -123,7 +126,8 @@ export function FilterBar() {
 
     return (
         <>
-            <div className="sticky top-[60px] z-[50] -mx-4 flex items-center gap-1.5 bg-paper/95 py-1.5 pr-2.5 backdrop-blur sm:mx-0 sm:pr-0">
+            <div className="sticky top-[60px] z-[50] -mx-4 bg-paper/95 backdrop-blur sm:mx-0">
+            <div className="flex items-center gap-1.5 py-1.5 pr-2.5 sm:pr-0">
                 <div className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto py-1 pl-3 [scrollbar-width:none] sm:pl-0" role="group" aria-label="필터">
                     <Pick label={currentDate === "all" ? "기간" : dateLabel || "기간"} on={currentDate !== "all"} items={DATE_FILTERS} current={currentDate} onPick={v => updateFilters("date", v)} />
                     <Pick label={currentRegion === "전체" ? "지역" : pathDistrict ? `${currentRegion} ${pathDistrict}` : currentRegion} on={currentRegion !== "전체"}
@@ -139,6 +143,20 @@ export function FilterBar() {
                     aria-label={extraOn ? "필터 (켜진 조건 있음)" : "필터"}>
                     <SlidersHorizontal size={16} aria-hidden />필터{extraOn && <span className="ml-0.5 h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />}
                 </button>
+            </div>
+            {/* 세부 갈래 칩 (specs/015): 분야를 골랐을 때만. 건수 0인 갈래는 숨긴다 */}
+            {currentCategory !== "전체" && subs.length > 0 && (
+                <div className="flex gap-1.5 overflow-x-auto pb-2 pl-3 pr-2.5 [scrollbar-width:none] sm:pl-0" role="group" aria-label={`${currentCategory} 세부 갈래`}>
+                    <button type="button" className="pica-chip !h-8 !px-3 !text-[13px]" aria-pressed={!currentSub} onClick={() => updateFilters("sub", "전체")}>
+                        {currentCategory} 전체{typeof total === "number" && <span className="pica-num opacity-70">{total}</span>}
+                    </button>
+                    {subs.map(s => (
+                        <button key={s.name} type="button" className="pica-chip !h-8 !px-3 !text-[13px]" aria-pressed={currentSub === s.name} onClick={() => updateFilters("sub", s.name)}>
+                            {s.name}<span className="pica-num opacity-70">{s.n}</span>
+                        </button>
+                    ))}
+                </div>
+            )}
             </div>
 
             {myRegion && currentRegion === myRegion && (

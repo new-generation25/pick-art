@@ -16,6 +16,7 @@ import { PosterOrText } from "@/components/ui/PosterOrText";
 import { StickyActions } from "@/components/ui/StickyActions";
 import { RouteButtons } from "@/components/ui/RouteButtons";
 import { AdminPosterControl } from "@/components/ui/AdminPosterControl";
+import { AdminGenreControl } from "@/components/ui/AdminGenreControl";
 import { DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/site";
 import { AddToCalendar } from "@/components/ui/AddToCalendar";
 import { AdminInstaMark } from "@/components/ui/AdminInstaMark";
@@ -158,6 +159,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
             <div className="relative mx-auto -mt-[22px] max-w-3xl rounded-t-[22px] bg-paper px-4 pb-2 pt-5 sm:px-6">
                 <div className="flex flex-wrap items-center gap-[5px]">
                     <span className="pica-cat" data-cat={event.category}>{event.category}</span>
+                    {event.subcategory && <span className="pica-cat" data-cat={event.category}>{event.subcategory}</span>}
                     {kids.group === "target" && <span className="pica-cat" data-cat={event.category}>아이와</span>}
                     {event.is_free && <span className="inline-flex h-[22px] items-center rounded-md px-[7px] text-[12px] font-bold text-ink shadow-[inset_0_0_0_1px_#CFC5B4]">무료</span>}
                     {isEnded && <span className="inline-flex h-[22px] items-center rounded-md bg-ink px-[7px] text-[12px] font-bold text-white">종료</span>}
@@ -203,6 +205,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                         } />
                     ))}
                 </ul>
+                <AdminGenreControl eventId={event.id} category={event.category} sub={event.subcategory ?? null} by={event.subcategory_by ?? null} pending={!!event.subcategory_pending} evidence={event.subcategory_evidence} />
                 <AdminKidsControl eventId={event.id} override={event.kids_override ?? null} ruleGroup={ruleKids.group} />
 
                 {/* 피카가 본 이유 (specs/009): 사람이 쓴 한 줄. 없으면 보이지 않는다 */}

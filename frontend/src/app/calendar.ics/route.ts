@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { calendar } from "@/lib/ics";
 import { SITE_URL } from "@/lib/site";
 import { GN_REGIONS } from "@/lib/regions";
-import { CATEGORIES, HIDDEN_CATEGORIES } from "@/lib/categories";
+import { CATEGORIES, HIDDEN_CATEGORIES, normalizeCategory } from "@/lib/categories";
 import { todayKST } from "@/lib/utils";
 import { addDays } from "@/lib/feedOrder";
 import { UUID } from "@/lib/places";
@@ -18,7 +18,7 @@ export async function GET(req: Request) {
     const region = sp.get("region");
     const category = sp.get("category");
     if (region && !GN_REGIONS.includes(region)) return new NextResponse("없는 지역입니다.", { status: 400 });
-    if (category && !CATEGORIES.includes(category)) return new NextResponse("없는 분야입니다.", { status: 400 });
+    if (category && !CATEGORIES.includes(normalizeCategory(category))) return new NextResponse("없는 분야입니다.", { status: 400 });
     const venue = sp.get("venue");
     const org = sp.get("org");
     if (venue && !UUID.test(venue)) return new NextResponse("없는 장소입니다.", { status: 400 });
@@ -46,7 +46,7 @@ export async function GET(req: Request) {
         .lte("event_date_start", addDays(today, 60));
     for (const c of HIDDEN_CATEGORIES) q = q.neq("category", c);
     if (region) q = q.eq("region", region);
-    if (category) q = q.eq("category", category);
+    if (category) q = q.eq("category", normalizeCategory(category)); // 예전 구독 주소의 «체험·교육»도 (specs/015)
     if (venue) q = q.eq("venue_id", venue);
     if (orgEvents) q = q.in("id", orgEvents.length ? orgEvents : ["00000000-0000-0000-0000-000000000000"]);
     const { data, error } = await q.order("event_date_start").limit(1000);

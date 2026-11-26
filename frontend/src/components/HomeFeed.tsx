@@ -13,6 +13,7 @@ import { formatPeriod, todayKST } from "@/lib/utils";
 import { orderFeed } from "@/lib/feedOrder";
 import { ageLabel, fitsAge, kidsInfo, readKidsParam } from "@/lib/kids";
 import { isEndingSoon } from "@/lib/eventDetails";
+import { SUBCATEGORIES, normalizeCategory } from "@/lib/categories";
 
 const DATE_LABEL: Record<string, string> = { today: "오늘", week: "이번 주", month: "이번 달", ending: "곧 끝남" };
 
@@ -25,13 +26,14 @@ export type HomeParams = {
   kids?: string;
   subscribed?: string;
   section?: string;
+  sub?: string;
 };
 
 /** 홈 목록 화면. 지역 페이지(/region/[name])는 region 을 고정해 같은 화면을 쓴다 */
 export async function HomeFeed({ params: resolvedParams, region, district }: { params: HomeParams; region?: string; district?: string }) {
   const filters = {
     region: region ?? resolvedParams.region,
-    category: resolvedParams.category,
+    category: normalizeCategory(resolvedParams.category) ?? undefined, // 예전 «체험·교육» 주소도 «체험»으로 (specs/015)
     search: resolvedParams.q,
     date: resolvedParams.date,
     ended: resolvedParams.ended
@@ -47,9 +49,14 @@ export async function HomeFeed({ params: resolvedParams, region, district }: { p
   const kidsOf = new Map(fetched.map((e: any) => [e.id, kidsInfo(e)]));
   const today = todayKST();
   // 「곧 끝남」(specs/006): 7일 넘게 하는 행사 중 7일 안에 끝나는 것
-  const dbEvents = fetched
+  const beforeSub = fetched
     .filter((e: any) => !kids.on || fitsAge(kidsOf.get(e.id)!, kids.age))
     .filter((e: any) => filters.date !== "ending" || isEndingSoon(e, today));
+  // 세부 갈래(specs/015): 분야를 골랐을 때만. 칩에 쓸 세부별 건수는 세부로 거르기 전에 센다
+  const subList = filters.category ? SUBCATEGORIES[filters.category] ?? [] : [];
+  const sub = subList.includes(resolvedParams.sub || "") ? resolvedParams.sub! : undefined;
+  const subCounts = subList.map(name => ({ name, n: beforeSub.filter((e: any) => e.subcategory === name).length })).filter(x => x.n > 0);
+  const dbEvents = sub ? beforeSub.filter((e: any) => e.subcategory === sub) : beforeSub;
 
   // DB 행을 EventCard 모양으로
   const toCard = (event: any) => ({
@@ -60,6 +67,7 @@ export async function HomeFeed({ params: resolvedParams, region, district }: { p
     id: event.id,
     title: event.title,
     category: event.category,
+    subcategory: event.subcategory,
     date: formatPeriod(event.event_date_start, event.event_date_end),
     location: event.venue || event.region,
     imageUrl: event.poster_image_url,
@@ -75,6 +83,7 @@ export async function HomeFeed({ params: resolvedParams, region, district }: { p
     id: e.id,
     title: e.title,
     category: e.category,
+    subcategory: e.subcategory,
     start: e.event_date_start,
     end: e.event_date_end,
     venue: e.venue || e.region,
@@ -108,7 +117,7 @@ export async function HomeFeed({ params: resolvedParams, region, district }: { p
   const one = sectionKey && SECTION_LABELS[sectionKey] ? ordered.find(s => s.key === sectionKey) : undefined;
 
   const paperInput = { input: { backgroundColor: 'var(--pk-card)', border: '1px solid var(--pk-line)', color: 'var(--pk-ink)' } };
-  const hasFilter = !!((filters.region && !region) || filters.category || filters.search || filters.date || kids.on);
+  const hasFilter = !!((filters.region && !region) || filters.category || sub || filters.search || filters.date || kids.on);
   const place = region ? (district ? `${region} ${district}` : region) : null;
 
   return (
@@ -122,7 +131,7 @@ export async function HomeFeed({ params: resolvedParams, region, district }: { p
       {/* 칩 한 줄 (시안 f01). 큰 제목은 화면 읽기용으로만 둔다 */}
       <div className="mx-auto max-w-6xl px-4 pt-1 sm:px-6">
         <h1 className="sr-only">{place ? `${place}에서 열리는 공연·전시·축제` : "가까운 곳에서 열리는 공연·전시·축제"}</h1>
-        <FilterBar />
+        <FilterBar subs={subCounts} total={beforeSub.length} />
         {(place || filters.search) && (
           <p className="mt-1 text-[13px] text-ink-soft">
             {place && <><b className="text-ink">{place}</b>에서 열리는 행사 </>}
@@ -157,7 +166,7 @@ export async function HomeFeed({ params: resolvedParams, region, district }: { p
       {/* «지도» 버튼 (specs/014 US3): 누르면 지금 필터 결과의 장소를 지도 시트로 */}
       {!one && (
         <MapButton
-          summary={[DATE_LABEL[filters.date || ""] || "", place || "", filters.category || "", kids.on ? "아이와" : ""].filter(Boolean).join(" · ")}
+          summary={[DATE_LABEL[filters.date || ""] || "", place || "", filters.category ? (sub ? `${filters.category} · ${sub}` : filters.category) : "", kids.on ? "아이와" : ""].filter(Boolean).join(" · ")}
           events={dbEvents.map((e: any) => ({ ...toShelf(e), venueId: e.venue_id ?? null, today: (e.event_date_start || e.event_date_end || today) <= today }))}
         />
       )}

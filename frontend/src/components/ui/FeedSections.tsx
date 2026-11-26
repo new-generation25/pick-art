@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Shelf, ShelfTile, type ShelfCard } from "./Shelf";
 import { supabase } from "@/lib/supabase";
 import { SECTION_LABELS, SectionKey } from "@/lib/feedOrder";
+import { normalizeCategory } from "@/lib/categories";
 
 export type FeedCard = ShelfCard & { kidRank?: number };
 
@@ -34,7 +35,7 @@ export function FeedSections({ sections, moreBase }: { sections: { key: SectionK
             const { data: { session } } = await supabase.auth.getSession();
             if (!session?.user) return;
             const { data: profile } = await supabase.from("profiles").select("interests").eq("id", session.user.id).maybeSingle();
-            if (!cancelled && profile?.interests?.length) setInterests(profile.interests);
+            if (!cancelled && profile?.interests?.length) setInterests(profile.interests.map((c: string) => normalizeCategory(c)));
         })();
         return () => { cancelled = true; };
     }, []);

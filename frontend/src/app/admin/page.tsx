@@ -8,6 +8,7 @@ import {
 import { RefreshCw, ExternalLink } from "lucide-react";
 import { SiteVisitsPanel, type SiteVisits } from "@/components/admin/SiteVisitsPanel";
 import { PlaceholderCandidates } from "@/components/admin/PlaceholderCandidates";
+import { GenrePending } from "@/components/admin/GenrePending";
 import { supabase } from "@/lib/supabase";
 import { GN_REGIONS } from "@/lib/regions";
 import {
@@ -403,6 +404,8 @@ export default function AdminDashboard() {
 
                 {/* 안내 그림 후보 (specs/014) */}
                 <PlaceholderCandidates />
+                {/* 세부 판정 대기 (specs/015) */}
+                <GenrePending />
 
                 <SiteVisitsPanel data={ops.snapshots["site_visits"]?.data as unknown as SiteVisits | undefined} updatedAt={ops.snapshots["site_visits"]?.updated_at} />
 

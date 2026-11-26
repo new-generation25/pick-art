@@ -11,6 +11,7 @@ interface Event {
     id: string;
     title: string;
     category: string;
+    subcategory?: string | null;
     date: string;
     location: string;
     imageUrl: string;
@@ -80,6 +81,7 @@ export function EventList({ initialEvents, filters = {}, limit, isSelectMode = f
                     id: event.id,
                     title: event.title,
                     category: event.category,
+                    subcategory: event.subcategory,
                     date: formatPeriod(event.event_date_start, event.event_date_end),
                     location: event.venue || event.region,
                     imageUrl: event.poster_image_url,
@@ -129,6 +131,7 @@ export function EventList({ initialEvents, filters = {}, limit, isSelectMode = f
                 id: event.id,
                 title: event.title,
                 category: event.category,
+                subcategory: event.subcategory,
                 date: formatPeriod(event.event_date_start, event.event_date_end),
                 location: event.venue || event.region,
                 imageUrl: event.poster_image_url,

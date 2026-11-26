@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { PosterOrText } from "./PosterOrText";
 import { shortPeriod } from "@/lib/posters";
+import { categoryLabel } from "@/lib/categories";
 
 export type ShelfCard = {
     id: string;
     title: string;
     category: string;
+    subcategory?: string | null;
     start: string | null;
     end: string | null;
     venue: string | null;
@@ -21,7 +23,9 @@ export type ShelfCard = {
 
 /** 선반 칸 하나 (시안 f01 .tile). 첫 묶음은 좁은 칸(104px), 나머지는 넓은 칸(146px) */
 export function ShelfTile({ c, wide = false, priority = false }: { c: ShelfCard; wide?: boolean; priority?: boolean }) {
-    const tag = c.kidMark ? `${c.category} · 아이와` : c.category;
+    // 꼬리표: «공연 · 뮤지컬», 세부가 없으면 «공연». 아이와는 뒤에 (specs/015 FR-009). 좁은 칸은 말줄임
+    const base = categoryLabel(c.category, c.subcategory);
+    const tag = c.kidMark ? `${base} · 아이와` : base;
     return (
         <Link href={`/events/${c.id}`} className={`block flex-none text-ink no-underline ${wide ? "w-[146px]" : "w-[104px]"}`}>
             <PosterOrText

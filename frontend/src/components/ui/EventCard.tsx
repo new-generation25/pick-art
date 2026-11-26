@@ -7,6 +7,7 @@ interface EventProps {
     id: string;
     title: string;
     category: string;
+    subcategory?: string | null;
     date: string;
     location: string;
     imageUrl: string;
@@ -121,6 +122,7 @@ export function EventCard({ event, priority = false, disableNavigation = false }
                         <span className="pica-cat" data-cat={event.category} data-ended={event.isEnded ? "true" : undefined}>
                             {event.category}
                         </span>
+                        {event.subcategory && <span className="text-[12px] font-semibold text-ink-soft">{event.subcategory}</span>}
                         {event.isFree && (
                             <span className="pica-cat border-ink text-ink" style={{ borderColor: "currentColor" }}>무료</span>
                         )}
