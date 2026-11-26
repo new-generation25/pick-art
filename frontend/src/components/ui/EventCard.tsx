@@ -1,6 +1,6 @@
 import { MapPin } from "lucide-react";
 import Link from "next/link";
-import { ImageWithFallback } from "./ImageWithFallback";
+import { PosterOrText } from "./PosterOrText";
 import { todayKST } from "@/lib/utils";
 
 interface EventProps {
@@ -15,6 +15,19 @@ interface EventProps {
     kidMark?: boolean;   // 아이 대상 행사 (specs/004)
     endingSoon?: boolean; // 7일 넘게 하는 행사가 7일 안에 끝남 (specs/006)
     ageBadge?: string;   // 「아이」 필터가 켜졌을 때만: 관람 하한 (예: 24개월+, 만 7세+, 나이 정보 없음)
+    posterPlaceholder?: boolean | null; // 포스터 자리가 «안내 그림»(specs/014) → 글자 포스터
+    source?: string | null;             // 글자 포스터의 «정보: …»
+}
+
+/** formatPeriod 문자열 → [시작, 끝] (YYYY-MM-DD). 글자 포스터의 날짜에 쓴다 */
+function isoRange(date: string): [string | null, string | null] {
+    const [a, b] = date.split(" ~ ");
+    const s = a?.match(/^(\d{4})\.(\d{2})\.(\d{2})$/);
+    if (!s) return [null, null];
+    const start = `${s[1]}-${s[2]}-${s[3]}`;
+    if (!b) return [start, start];
+    const e = b.length === 5 ? `${s[1]}.${b}` : b;
+    return [start, e.replace(/\./g, "-")];
 }
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
@@ -62,15 +75,20 @@ export function EventCard({ event, priority = false, disableNavigation = false }
             {/* 포스터: 모바일은 왼쪽 작은 썸네일, 넓은 화면은 위쪽 3:4 */}
             <div className="relative w-[92px] shrink-0 self-stretch bg-paper sm:w-full sm:self-auto sm:border-b-[length:var(--pk-border)] sm:border-line">
                 <div className="relative h-full min-h-[124px] w-full sm:aspect-[3/4] sm:h-auto">
-                    <ImageWithFallback
-                        // 포스터가 없으면 «포스터 없음» 칸 (헌장 I: 공식 원본이 아닌 사진을 포스터처럼 쓰지 않는다 — 예전에는 임의 사진을 불러왔다)
-                        src={event.imageUrl || ""}
-                        alt={event.title}
-                        fill
-                        className={event.isEnded ? "object-cover grayscale opacity-70" : "object-cover"}
-                        sizes="(max-width: 640px) 92px, (max-width: 1200px) 50vw, 25vw"
+                    <PosterOrText
+                        // 포스터가 없거나 안내 그림이면 글자 포스터 (헌장 I: 공식 원본이 아닌 사진을 포스터처럼 쓰지 않는다)
+                        event={{
+                            title: event.title,
+                            event_date_start: isoRange(event.date)[0],
+                            event_date_end: isoRange(event.date)[1],
+                            poster_image_url: event.imageUrl,
+                            poster_placeholder: event.posterPlaceholder,
+                            venue: event.location,
+                            source: event.source,
+                        }}
+                        size="row"
                         priority={priority}
-                        fallbackText="포스터 없음"
+                        className={`!absolute inset-0 !aspect-auto h-full !rounded-none !shadow-none sm:!static sm:!aspect-[3/4] ${event.isEnded ? "grayscale opacity-70" : ""}`}
                     />
                 </div>
                 {event.isEnded && (

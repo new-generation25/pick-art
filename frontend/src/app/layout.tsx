@@ -43,7 +43,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#F6EFDF",
+  themeColor: "#F4EFE6",
 };
 
 const theme = createTheme({
@@ -70,10 +70,10 @@ export default function RootLayout({
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
         />
-        {/* 리소 테마 제목·날짜 글꼴 (Black Han Sans, OFL) */}
+        {/* 화면 제목(Gowun Batang 700)·숫자(Space Grotesk) 글꼴, OFL (specs/014, BRAND_GUIDE 3절 «화면 글꼴») */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=Space+Grotesk:wght@500;600;700&display=swap" />
       </head>
       <body className={cn(
         "min-h-screen bg-neutral-50 font-sans antialiased text-neutral-900",

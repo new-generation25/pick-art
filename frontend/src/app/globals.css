@@ -26,6 +26,9 @@
   --color-on-mark: var(--pk-on-mark);
   --color-band: var(--pk-band);
   --color-on-band: var(--pk-on-band);
+  --color-soft: var(--pk-soft);
+  --color-accent-soft: var(--pk-accent-soft);
+  --color-land: var(--pk-land);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -135,6 +138,98 @@ body {
   --pk-font-display: "Jua", "Pretendard Variable", Pretendard, sans-serif;
   --pk-display-weight: 400;
 }
+
+/* D. 확정 화면 팔레트(specs/014, 2026-11-26 운영자 확정 «이시안 확정», BRAND_GUIDE 2절 «화면 팔레트»):
+   종이색 바탕, 짙은 초록 강조, 명조 제목(Gowun Batang), 숫자 Space Grotesk. 시안 docs/design/mockups_2026-11-26_v4/dirs/f01.html */
+.pica-public[data-pica-theme="paper"] {
+  --pk-paper: #f4efe6;
+  --pk-card: #ffffff;
+  --pk-soft: #ebe4d7;          /* 상세·공간 머리 띠 */
+  --pk-ink: #1e1a15;
+  --pk-ink-soft: #6b6257;
+  --pk-line: #e3dbcd;
+  --pk-accent: #2e6b4e;
+  --pk-accent-soft: #e6efe9;
+  --pk-on-accent: #ffffff;
+  --pk-mark: #2e6b4e;          /* 켜진 칩 */
+  --pk-on-mark: #ffffff;
+  --pk-band: #ebe4d7;
+  --pk-on-band: #1e1a15;
+  --pk-land: #ece6d8;          /* 지도 시트 바탕 */
+  --pk-cat-show-bg: #e6efe9;     --pk-cat-show-fg: #2e6b4e;
+  --pk-cat-exhibit-bg: #e6efe9;  --pk-cat-exhibit-fg: #2e6b4e;
+  --pk-cat-festival-bg: #e6efe9; --pk-cat-festival-fg: #2e6b4e;
+  --pk-cat-event-bg: #e6efe9;    --pk-cat-event-fg: #2e6b4e;
+  --pk-cat-learn-bg: #e6efe9;    --pk-cat-learn-fg: #2e6b4e;
+  --pk-radius: 14px;
+  --pk-chip-radius: 18px;
+  --pk-border: 1px;
+  --pk-card-shadow: 0 1px 4px rgba(30, 26, 21, 0.08);
+  --pk-stub-edge: 1px solid #e3dbcd;
+  --pk-print: none;
+  --pk-print-sm: none;
+  --pk-font-display: "Gowun Batang", "Pretendard Variable", Pretendard, serif;
+  --pk-display-weight: 700;
+  --pk-font-num: "Space Grotesk", "Pretendard Variable", Pretendard, sans-serif;
+}
+.pica-public[data-pica-theme="paper"] .pica-cat { border-radius: 6px; height: 22px; padding: 0 7px; }
+.pica-public[data-pica-theme="paper"] .pica-cat[data-cat="행사"] { border-color: transparent; }
+.pica-public[data-pica-theme="paper"] .pica-chip { border: 0; box-shadow: 0 1px 5px rgba(30, 26, 21, 0.13); height: 36px; padding: 0 12px; font-size: 13.5px; }
+.pica-public[data-pica-theme="paper"] .pica-chip:hover { background: var(--pk-paper); }
+.pica-public[data-pica-theme="paper"] .pica-chip[aria-pressed="true"] { box-shadow: none; }
+
+/* 숫자·날짜 (Space Grotesk, 자리 맞춤) */
+.pica-num { font-family: var(--pk-font-num, inherit); font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
+
+/* 날짜 묶음 선반 (specs/014 US1) */
+.pica-shelf-row {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+  padding: 0 16px;
+  align-items: flex-start;
+}
+.pica-shelf-row::-webkit-scrollbar { display: none; }
+.pica-shelf-row::after { content: ""; flex: none; width: 6px; }
+.pica-shelf-row > * { scroll-snap-align: start; }
+.pica-clamp-2, .pica-clamp-3 { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+.pica-clamp-2 { -webkit-line-clamp: 2; }
+.pica-clamp-3 { -webkit-line-clamp: 3; }
+
+/* 포스터 칸과 글자 포스터 (specs/014 US2) */
+.pica-poster {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--pk-soft, #ebe4d7);
+  box-shadow: 0 1px 4px rgba(30, 26, 21, 0.12);
+}
+.pica-poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pica-textposter {
+  position: absolute;
+  inset: 0;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  background: var(--pk-accent-soft, #e6efe9);
+  border-top: 4px solid var(--pk-accent);
+  color: var(--pk-ink);
+}
+.pica-textposter .tp-date { font-family: var(--pk-font-num, inherit); font-weight: 700; font-size: 20px; line-height: 1.1; }
+.pica-textposter .tp-title { font-family: var(--pk-font-display); font-weight: 700; font-size: 15px; line-height: 1.3; margin-top: 8px; flex: 1 1 auto; min-height: 0; }
+.pica-textposter .tp-src { font-size: 11px; color: var(--pk-ink-soft); line-height: 1.3; }
+.pica-textposter .tp-none { font-size: 10.5px; color: var(--pk-ink-soft); margin-top: 2px; }
+.pica-poster[data-size="row"] .pica-textposter { padding: 6px; border-top-width: 3px; }
+.pica-poster[data-size="row"] .tp-date { font-size: 12px; }
+.pica-poster[data-size="row"] .tp-title { font-size: 10px; margin-top: 3px; }
+.pica-poster[data-size="row"] .tp-src, .pica-poster[data-size="row"] .tp-none { display: none; }
+.pica-poster[data-size="detail"] .tp-date { font-size: 26px; }
+.pica-poster[data-size="detail"] .tp-title { font-size: 19px; }
+.pica-poster[data-size="detail"] .tp-src { font-size: 12.5px; }
 
 /* 공개 화면 전체(관리자 화면 제외)에 적용. Mantine 컴포넌트도 이 변수를 읽는다 */
 .pica-public {
@@ -252,23 +347,23 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--pk-accent, #2350d8);
-  color: var(--pk-on-accent, #fff);
-  border: 2px solid var(--pk-ink, #1a1a1a);
+  background: var(--pk-ink, #1e1a15);
+  color: #fff;
+  border: 2.5px solid #fff;
   border-radius: 999px;
   font: 700 14px/1 "Pretendard", system-ui, sans-serif;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
   cursor: pointer;
 }
-.pica-pin-cluster {
-  background: var(--pk-ink, #1a1a1a);
-  color: var(--pk-paper, #ecede6);
+.pica-pin-cluster,
+.pica-pin[data-selected="true"] {
+  background: var(--pk-accent, #2e6b4e);
 }
 .pica-origin {
   width: 18px;
   height: 18px;
   border-radius: 999px;
-  background: var(--pk-mark, #ff4fa3);
+  background: var(--pk-accent, #2e6b4e);
   border: 3px solid #fff;
-  box-shadow: 0 0 0 2px var(--pk-ink, #1a1a1a);
+  box-shadow: 0 0 0 2px var(--pk-ink, #1e1a15);
 }

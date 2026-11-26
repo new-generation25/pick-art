@@ -56,6 +56,8 @@ export async function HomeFeed({ params: resolvedParams, region, district }: { p
     date: formatPeriod(event.event_date_start, event.event_date_end),
     location: event.venue || event.region,
     imageUrl: event.poster_image_url,
+    posterPlaceholder: event.poster_placeholder,
+    source: event.source,
     isFree: event.is_free,
     isEnded: !!event.event_date_end && event.event_date_end < today,
   });

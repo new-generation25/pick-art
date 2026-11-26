@@ -16,6 +16,18 @@ export function needsTextPoster(e: PosterInput): boolean {
     return !url || !!e.poster_placeholder;
 }
 
+/** 글자 포스터·선반 칸의 짧은 날짜: «11.28», «11.27–28», «11.30–12.06», 날짜가 없으면 «일정 미정» */
+export function shortPeriod(start?: string | null, end?: string | null): string {
+    const md = (d: string) => `${d.slice(5, 7)}.${d.slice(8, 10)}`;
+    const s = start || end;
+    const e = end || start;
+    if (!s || !e) return "일정 미정";
+    if (s === e) return md(s);
+    if (s.slice(0, 7) === e.slice(0, 7)) return `${md(s)}–${e.slice(8, 10)}`;
+    if (s.slice(0, 4) !== e.slice(0, 4)) return `${md(s)}–${e.slice(0, 4)}.${md(e)}`;
+    return `${md(s)}–${md(e)}`;
+}
+
 /** 글자 포스터의 «정보: …» 에 쓸 이름. 장소 → 출처(웹검색·KOPIS 같은 모음 출처는 쓰지 않음) 순서 */
 const AGGREGATORS = new Set(["KOPIS", "웹검색", "인스타그램", "행사일정"]);
 export function posterSourceName(e: { venue?: string | null; source?: string | null }): string | null {

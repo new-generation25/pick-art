@@ -18,6 +18,9 @@ export type NearbyRow = {
     event_date_end: string;
     poster_image_url: string | null;
     is_free: boolean | null;
+    poster_placeholder?: boolean | null;
+    source?: string | null;
+    venue_id?: string | null;
     coords: { lat: number; lng: number } | null;
 };
 
@@ -63,6 +66,9 @@ export async function getNearbyRows(): Promise<NearbyRow[]> {
         event_date_end: e.event_date_end,
         poster_image_url: e.poster_image_url,
         is_free: e.is_free,
+        poster_placeholder: e.poster_placeholder ?? false,
+        source: e.source ?? null,
+        venue_id: e.venue_id ?? null,
         coords: e.venue_id ? coords.get(e.venue_id) ?? null : null,
     }));
 }

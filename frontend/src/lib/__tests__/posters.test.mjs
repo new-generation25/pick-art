@@ -1,7 +1,16 @@
 // 실행(frontend 폴더): node --experimental-strip-types --test src/lib/__tests__/posters.test.mjs
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { needsTextPoster, posterSourceName } from "../posters.ts";
+import { needsTextPoster, posterSourceName, shortPeriod } from "../posters.ts";
+
+test("짧은 날짜", () => {
+    assert.equal(shortPeriod("2026-11-28", "2026-11-28"), "11.28");
+    assert.equal(shortPeriod("2026-11-27", "2026-11-28"), "11.27–28");
+    assert.equal(shortPeriod("2026-11-30", "2026-12-06"), "11.30–12.06");
+    assert.equal(shortPeriod("2026-12-01", "2035-12-31"), "12.01–2035.12.31");
+    assert.equal(shortPeriod(null, "2026-12-02"), "12.02");
+    assert.equal(shortPeriod(null, null), "일정 미정");
+});
 
 test("포스터가 없거나 안내 그림이면 글자 포스터", () => {
     assert.equal(needsTextPoster({ poster_image_url: null }), true);

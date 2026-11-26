@@ -17,7 +17,7 @@ export default function SavedPage() {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session?.user) { setState("login"); return; }
             const { data } = await supabase.from("favorites")
-                .select("created_at, events(id,title,category,event_date_start,event_date_end,venue,region,poster_image_url,is_free,status)")
+                .select("created_at, events(id,title,category,event_date_start,event_date_end,venue,region,poster_image_url,poster_placeholder,source,is_free,status)")
                 .order("created_at", { ascending: false });
             const today = todayKST();
             const rows = (data || []).map((f: any) => f.events).filter((e: any) => e && e.status === "PUBLISHED");
@@ -26,7 +26,7 @@ export default function SavedPage() {
             setCards(rows.map((e: any) => ({
                 id: e.id, title: e.title, category: e.category,
                 date: formatPeriod(e.event_date_start, e.event_date_end),
-                location: e.venue || e.region, imageUrl: e.poster_image_url, isFree: e.is_free, isEnded: ended(e),
+                location: e.venue || e.region, imageUrl: e.poster_image_url, posterPlaceholder: e.poster_placeholder, source: e.source, isFree: e.is_free, isEnded: ended(e),
             })));
             setState("ready");
         })();

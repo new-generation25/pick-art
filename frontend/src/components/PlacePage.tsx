@@ -58,6 +58,7 @@ export function PlacePage({ eyebrow, name, facts, actions, calendarQuery, upcomi
                                     id: e.id, title: e.title, category: e.category,
                                     date: formatPeriod(e.event_date_start, e.event_date_end),
                                     location: e.venue || e.region || "", imageUrl: e.poster_image_url ?? "", isFree: !!e.is_free,
+                                    posterPlaceholder: e.poster_placeholder, source: e.source,
                                 }} />
                             ))}
                         </div>

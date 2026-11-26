@@ -35,24 +35,24 @@
   - `--report`는 같은 지문을 3개 넘는 행사가 쓰는 그림 목록(«안내 그림 후보»)을 낸다.
   - 서비스 키는 출력하지 않는다.
 - [X] T007 (결과 11/26: 지문 채움 472건, 바깥 주소(KOPIS 등) 413건은 받기 거절로 실패 — 브라우저처럼 꾸며 받는 방식은 쓰지 않았다. 후보 5개 중 포스터가 아닌 4개 표시(김해 «준비 중» 2종 각 9건, 통영 기본 회색 그림 21건, 함양문화예술회관 로고 카드 4건), 수요문화대학 시리즈 포스터는 실제 포스터라 두었다. 공개 행사 43건이 글자 포스터 대상) T006을 미리보기 → `--apply`로 돌린다. 처음 표시할 지문은 `239e6b7f…`(27,274바이트), `c5e19531…`(51,060바이트), k6 「제23회 김해시립소년소녀합창단 정기연주회」 포스터의 지문이다. 이 셋을 `placeholder_images`에 넣고 `poster_placeholder=true` 행사 수를 보고한다 (`collector/tools/poster_fingerprint.py --apply --mark`)
-- [ ] T008 공개 행사를 읽는 쿼리가 `poster_placeholder`를 함께 가져오게 한다 (`frontend/src/lib/supabase.ts`, `frontend/src/lib/places.ts`, `frontend/src/app/events/[id]/page.tsx`의 select)
+- [X] T008 공개 행사를 읽는 쿼리가 `poster_placeholder`를 함께 가져오게 한다 (`frontend/src/lib/supabase.ts`, `frontend/src/lib/places.ts`, `frontend/src/app/events/[id]/page.tsx`의 select)
 - [X] T009 [P] 글자 포스터 판단 함수 `needsTextPoster({ poster_image_url, poster_placeholder })`와 출처 이름 함수 `posterSourceName(event)`를 만든다. 출처 이름은 장소 → 출처 순서로 고른다 (`frontend/src/lib/posters.ts`). 단위 시험을 붙인다 (`frontend/src/lib/__tests__/posters.test.mjs`)
-- [ ] T010 테마 묶음 `paper`를 더한다 (`frontend/src/app/globals.css`).
+- [X] T010 테마 묶음 `paper`를 더한다 (`frontend/src/app/globals.css`).
   - 값은 BRAND_GUIDE 2절 «화면 팔레트».
   - 분야 꼬리표 색은 공연·전시·축제·행사·체험 모두 흰 면에 테두리로 하고, 공연만 초록 글자로 한다(시안 f01).
   - `.pica-display`는 Gowun Batang 700에 그림자 없음.
   - `.pica-pin`·`.pica-origin`의 리소 기본값을 `paper` 색으로 바꾼다.
-- [ ] T011 글꼴을 바꾼다 (`frontend/src/app/layout.tsx`).
+- [X] T011 글꼴을 바꾼다 (`frontend/src/app/layout.tsx`).
   - Gowun Batang(700)과 Space Grotesk(500·700)를 Google Fonts `display=swap`으로 더하고, Black Han Sans 링크는 뺀다.
   - `--pk-font-display`, `--pk-font-num` 변수를 `paper` 묶음에 둔다.
   - `viewport.themeColor`를 `#F4EFE6`으로 바꾼다.
-- [ ] T012 `MainLayout`의 `data-pica-theme`를 `"paper"`로 바꾼다 (`frontend/src/components/MainLayout.tsx`)
-- [ ] T013 포스터 또는 글자 포스터를 그리는 공용 컴포넌트를 만든다 (`frontend/src/components/ui/PosterOrText.tsx`).
+- [X] T012 `MainLayout`의 `data-pica-theme`를 `"paper"`로 바꾼다 (`frontend/src/components/MainLayout.tsx`)
+- [X] T013 포스터 또는 글자 포스터를 그리는 공용 컴포넌트를 만든다 (`frontend/src/components/ui/PosterOrText.tsx`).
   - `needsTextPoster`가 참이거나 이미지를 불러오지 못하면 글자 포스터를 그린다.
   - 글자 포스터 내용은 날짜(Space Grotesk, 가장 큼) · 제목 3줄 말줄임 · «정보: 출처 이름»이다. 포스터가 없는 행사면 «포스터 없음»을 작게 적는다.
   - 크기는 `size="shelf" | "detail" | "row"` 세 가지다.
-- [ ] T014 지금 `ImageWithFallback`·`EventCard`의 포스터 자리를 `PosterOrText`로 바꾼다 (`frontend/src/components/ui/EventCard.tsx`, `frontend/src/components/ui/ImageWithFallback.tsx`를 쓰는 곳)
-- [ ] T015 맨 위 줄을 pica 로고 · 찾기 · 내 정보(로그인 전이면 «로그인»)로 바꾼다. 관리자 링크, 인스타그램 링크, 로그아웃은 «내 정보» 메뉴 안으로 옮긴다 (`frontend/src/components/ui/Header.tsx`)
+- [X] T014 지금 `ImageWithFallback`·`EventCard`의 포스터 자리를 `PosterOrText`로 바꾼다 (`frontend/src/components/ui/EventCard.tsx`, `frontend/src/components/ui/ImageWithFallback.tsx`를 쓰는 곳)
+- [X] T015 맨 위 줄을 pica 로고 · 찾기 · 내 정보(로그인 전이면 «로그인»)로 바꾼다. 관리자 링크, 인스타그램 링크, 로그아웃은 «내 정보» 메뉴 안으로 옮긴다 (`frontend/src/components/ui/Header.tsx`)
 - [ ] T016 확인한다: `npx tsc --noEmit`, quickstart 2단계(리소 색 검색), 9단계(명암비). 결과가 맞으면 커밋한다
 
 **Checkpoint**: 모든 공개 화면이 새 색·글꼴로 보인다. 안내 그림을 쓰는 행사는 지금 카드 자리에서도 글자 포스터로 보인다.

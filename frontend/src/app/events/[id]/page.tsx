@@ -85,6 +85,8 @@ export default async function EventDetailPage({ params }: EventPageProps) {
             date: formatPeriod(e.event_date_start, e.event_date_end),
             location: e.venue || e.region,
             imageUrl: e.poster_image_url,
+            posterPlaceholder: e.poster_placeholder,
+            source: e.source,
             isFree: e.is_free,
         }));
 

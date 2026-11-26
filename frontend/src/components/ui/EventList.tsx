@@ -16,6 +16,8 @@ interface Event {
     imageUrl: string;
     isFree: boolean;
     isEnded?: boolean;
+    posterPlaceholder?: boolean | null;
+    source?: string | null;
 }
 
 interface EventListProps {
@@ -81,6 +83,8 @@ export function EventList({ initialEvents, filters = {}, limit, isSelectMode = f
                     date: formatPeriod(event.event_date_start, event.event_date_end),
                     location: event.venue || event.region,
                     imageUrl: event.poster_image_url,
+                    posterPlaceholder: event.poster_placeholder,
+                    source: event.source,
                     isFree: event.is_free,
                 }));
                 setEvents(formatted);
@@ -128,6 +132,8 @@ export function EventList({ initialEvents, filters = {}, limit, isSelectMode = f
                 date: formatPeriod(event.event_date_start, event.event_date_end),
                 location: event.venue || event.region,
                 imageUrl: event.poster_image_url,
+                posterPlaceholder: event.poster_placeholder,
+                source: event.source,
                 isFree: event.is_free,
             }));
             setEvents(prev => [...prev, ...formatted]);

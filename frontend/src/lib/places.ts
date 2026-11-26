@@ -6,8 +6,9 @@ import { todayKST, monthsAgoKST } from "@/lib/utils";
 export type PlaceEvent = {
     id: string; title: string; category: string; region: string | null; venue: string | null;
     event_date_start: string | null; event_date_end: string | null; poster_image_url: string | null; is_free: boolean | null;
+    poster_placeholder?: boolean | null; source?: string | null;
 };
-const EVENT_COLS = "id,title,category,region,venue,event_date_start,event_date_end,poster_image_url,is_free";
+const EVENT_COLS = "id,title,category,region,venue,event_date_start,event_date_end,poster_image_url,is_free,poster_placeholder,source";
 export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** 다가오는 행사(끝나지 않은 것, 시작일 순)와 지난 1년 행사(최근 끝난 순 30건) */
