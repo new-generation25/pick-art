@@ -12,6 +12,9 @@ export const metadata: Metadata = {
     alternates: { canonical: "/partners" },
 };
 
+/** 카카오톡 채널 «피카» 채팅방 (specs/017). 챗봇이 동의를 받고 사진·글을 리플렛 검토함으로 넣는다. 11/26 운영자 휴대폰 시험 통과 → «지금» */
+const KAKAO_CHAT = "https://pf.kakao.com/_xoxdxkvX/chat";
+
 const NOW = "bg-[var(--pk-ink)] text-[var(--pk-paper)]";
 const SOON = "border-[1.5px] border-[var(--pk-ink-soft)] text-ink-soft";
 
@@ -113,6 +116,7 @@ export default function PartnersPage() {
                         </Step>
                         <Step n={3} title="빠진 게 있으면 알려 주세요">
                             <Link href="/tip/leaflet" className="font-bold underline underline-offset-2">리플렛 사진 한 장</Link>이나 <Link href="/tip" className="font-bold underline underline-offset-2">행사 제보</Link>로 보내 주세요.
+                            카카오톡 채널 <a href={KAKAO_CHAT} className="font-bold underline underline-offset-2">«피카»</a>에서 «행사 알리기»를 눌러 보내셔도 돼요.
                         </Step>
                     </ol>
                     <p className="mt-4 text-[14px] leading-relaxed text-ink-soft">관객·출연자 개인 연락처, 잔여석, 매출은 받지 않아요. 정기 회의나 보고도 없어요.</p>
@@ -136,6 +140,12 @@ export default function PartnersPage() {
                             <li>리플렛·포스터를 올리면 피카가 글자를 읽어 정리해요</li>
                             <li>운영자 확인 뒤 실려요. 공식 페이지가 없으면 «단체 제공»으로 표시해요</li>
                             <li>로그인이 필요하고 하루 5장까지예요</li>
+                        </Box>
+                        <Box title="카카오톡으로 보내기" cta={{ href: KAKAO_CHAT, label: "카카오톡 채널 «피카» 열기" }}>
+                            <li>채널 «피카»(검색 ID pickanews) 채팅방에서 «행사 알리기»를 누르고 리플렛·포스터 사진을 보내 주세요</li>
+                            <li>처음 한 번 권리 확인 두 가지에 동의하면 돼요. 로그인은 필요 없어요</li>
+                            <li>단체 이름·날짜는 사진 바로 뒤에 글로 보내도 같이 묶여요</li>
+                            <li>운영자 확인 뒤 실리고, 하루 5건까지예요. 받은 사진은 포스터로 쓰지 않아요(포스터로 실리려면 사이트에서 파일로 올려 주세요)</li>
                         </Box>
                         <Box title="노출·클릭 정리">
                             <li>피카에서 몇 번 보였고, 원본 안내·캘린더 추가가 몇 번 눌렸는지 달마다 정리돼요</li>

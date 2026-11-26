@@ -20,7 +20,7 @@ r = k.parseSkillRequest(base({ action: { params: { secureimage: JSON.stringify({
 assert.deepStrictEqual(r.action.urls, [U]);
 // 동의 안 함
 r = k.parseSkillRequest(base({ action: { params: { secureimage: JSON.stringify({ privacyAgreement: 'N', secureUrls: `List(${U})` }) } } }));
-assert.deepStrictEqual(r.action, { kind: 'image', urls: [] });
+assert.deepStrictEqual(r.action, { kind: 'image', urls: [], plugin: true });
 // 카카오 밖 주소는 버림
 r = k.parseSkillRequest(base({ action: { params: { secureimage: JSON.stringify({ privacyAgreement: 'Y', secureUrls: 'List(http://evil.example/img.jpg, http://kakaocdn.net.evil.com/a.jpg)' }) } } }));
 assert.deepStrictEqual(r.action.urls, []);
@@ -40,6 +40,20 @@ assert.strictEqual(k.parseSkillRequest(plain('포스터 ' + T, '폴백 블록'))
 assert.strictEqual(k.parseSkillRequest(plain('https://evil.example/a.png', '폴백 블록')).action.kind, 'text');
 assert.strictEqual(k.parseSkillRequest({ userRequest: { user: {} } }), null);
 assert.strictEqual(k.parseSkillRequest(null), null);
+// 플러그인 사진은 제보 뜻(plugin 표시), 그냥 보낸 사진은 아님
+assert.strictEqual(k.parseSkillRequest(base()).action.plugin, true);
+assert.ok(!k.parseSkillRequest(plain(T, '폴백 블록')).action.plugin);
+// 제보 메뉴(11/26 «제보는 메뉴형태로»)
+for (const w of ['행사 알리기', '제보', '리플렛 보내기']) assert.strictEqual(k.parseSkillRequest(plain(w, '폴백 블록')).action.kind, 'tip');
+assert.strictEqual(k.parseSkillRequest(plain('주차 되나요?', '폴백 블록')).action.kind, 'text');
+// 웰컴·제보 시간 밖: 상담 연결 버튼 + 행사 알리기 버튼
+for (const card of [k.MSG.welcome(), k.MSG.notTip()]) {
+  const tc = card.template.outputs[0].textCard;
+  assert.ok(tc.title.length <= 50 && tc.title.length + tc.description.length <= 400, 'textCard 400자');
+  assert.deepStrictEqual(tc.buttons.map(b => b.action), ['operator', 'message']);
+  assert.strictEqual(tc.buttons[1].messageText, '행사 알리기');
+  assert.ok(tc.buttons.every(b => b.label.length <= 14));
+}
 // 답 모양
 const m = k.MSG.consent();
 assert.strictEqual(m.version, '2.0'); assert.ok(m.template.outputs.every(o => o.simpleText.text.length <= 1000));

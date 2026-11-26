@@ -66,8 +66,14 @@ export async function POST(request: Request) {
     if (!req) return NextResponse.json({ error: "bad request" }, { status: 400 });
     const { userKey, action } = req;
 
+    // 채널로 오는 말은 제보만이 아니다: 웰컴·제보 시간 밖의 말에는 «운영자에게 문의»(상담 연결)·«행사 알리기» 두 갈래를 보인다
     if (action.kind === "welcome") {
         const r = await intake(secret, userKey, "status");
+        if (r.error === "auth") return NextResponse.json({ error: "forbidden" }, { status: 403 });
+        return json(MSG.welcome());
+    }
+    if (action.kind === "tip") {
+        const r = await intake(secret, userKey, "start");
         if (r.error === "auth") return NextResponse.json({ error: "forbidden" }, { status: 403 });
         if (!r.ok) return json(MSG.error());
         return json(r.agreed ? MSG.ready() : MSG.consent());
@@ -80,12 +86,17 @@ export async function POST(request: Request) {
     if (action.kind === "text") {
         const r = await intake(secret, userKey, "text", action.text);
         if (r.error === "auth") return NextResponse.json({ error: "forbidden" }, { status: 403 });
-        if (r.error === "not_agreed") return json(MSG.consent());
+        if (r.error === "not_agreed" || r.error === "not_tip") return json(MSG.notTip());
         if (r.error === "daily_limit" || r.error === "site_limit") return json(MSG.limit());
         return json(r.ok ? MSG.gotText(!!r.attached) : MSG.error());
     }
 
-    // 사진
+    // 사진. 보안 이미지 플러그인(«사진 보내기» 블록)으로 왔으면 그 블록을 부른 것이 곧 제보 뜻이라 제보 시간을 연다
+    if (action.plugin) {
+        const s = await intake(secret, userKey, "start");
+        if (s.error === "auth") return NextResponse.json({ error: "forbidden" }, { status: 403 });
+        if (s.ok && !s.agreed) return json(MSG.consent());
+    }
     if (action.urls.length === 0) return json(MSG.noImage());
     const made: { id: string; path: string; url: string }[] = [];
     let refused = 0;
@@ -93,7 +104,7 @@ export async function POST(request: Request) {
         if (!isKakaoImageUrl(url)) continue;
         const r = await intake(secret, userKey, "image");
         if (r.error === "auth") return NextResponse.json({ error: "forbidden" }, { status: 403 });
-        if (r.error === "not_agreed") return json(MSG.consent());
+        if (r.error === "not_agreed" || r.error === "not_tip") return json(MSG.notTip());
         if (r.ok && r.id && r.image_path) made.push({ id: r.id, path: r.image_path, url });
         else refused++;
     }

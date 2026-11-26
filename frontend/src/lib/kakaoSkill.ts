@@ -11,6 +11,10 @@
  *     보낸 사진이 채팅방에 보이지 않아(운영자 시험) 안내하지 않지만, 블록은 남겨 둔다
  * https://kakaobusiness.gitbook.io/main/tool/chatbot/skill_guide/apply_skill_to_plugin.md
  * https://kakaobusiness.gitbook.io/main/tool/chatbot/skill_guide/answer_json_format.md
+ *
+ * 채널로 오는 말은 제보만이 아니다(운영자 11/26 «일반 사용자들도 있잖아», «제보는 메뉴형태로»).
+ * «행사 알리기»를 누른 뒤 30분 동안 보낸 사진·글만 제보로 받는다(DB kakao_senders.tip_until).
+ * 그 밖의 말은 저장하지 않고 «운영자에게 문의»(버튼 action "operator" = 상담 연결, 채널 1:1 채팅으로 넘김)·«행사 알리기»를 보인다.
  */
 import { RIGHTS_CHECKS, RIGHTS_VERSION, PRIVACY_NOTE } from "./leaflets";
 
@@ -19,6 +23,11 @@ export const SKILL_KEY_HEADER = "x-pica-skill-key";
 export const AGREE_TEXT = "동의하고 보내기";
 /** 사진 받기 버튼이 보내는 말. 오픈빌더 «사진 보내기» 블록(보안 이미지 파라미터)의 발화와 같아야 한다 */
 export const PHOTO_TEXT = "사진 보내기";
+/** 제보 메뉴. 웰컴 카드 버튼·채팅방 메뉴가 보내는 말 */
+export const TIP_TEXT = "행사 알리기";
+const TIP_WORDS = new Set([TIP_TEXT, "제보", "제보하기", "행사 제보", "리플렛 보내기", "포스터 보내기"]);
+/** 상담 연결 버튼 이름(스킬 응답 버튼 action "operator") */
+export const OPERATOR_LABEL = "운영자에게 문의";
 export const MAX_IMAGES = 10;
 /** 카카오에서 내려받을 때 상한(PC에서 보낸 원본 PNG 7.5MB 확인). 저장 전에 긴 변 2048px JPEG 로 줄인다 */
 export const MAX_IMAGE_BYTES = 25 * 1024 * 1024;
@@ -26,7 +35,9 @@ export const MAX_IMAGE_BYTES = 25 * 1024 * 1024;
 export type SkillAction =
     | { kind: "welcome" }
     | { kind: "agree" }
-    | { kind: "image"; urls: string[] }
+    | { kind: "tip" }
+    /** plugin: 보안 이미지 플러그인(«사진 보내기» 블록)으로 온 사진 — 그 블록을 부른 것 자체가 제보 뜻이다 */
+    | { kind: "image"; urls: string[]; plugin?: boolean }
     | { kind: "text"; text: string };
 
 export type SkillRequest = { userKey: string; action: SkillAction };
@@ -87,7 +98,7 @@ export function parseSkillRequest(body: unknown): SkillRequest | null {
     for (const bag of [obj(action.params), obj(action.detailParams)]) {
         for (const v of Object.values(bag)) {
             const urls = secureImageUrls(v);
-            if (urls) return { userKey, action: { kind: "image", urls } };
+            if (urls) return { userKey, action: { kind: "image", urls, plugin: true } };
         }
     }
     const utterance = str(ur.utterance).trim();
@@ -98,6 +109,7 @@ export function parseSkillRequest(body: unknown): SkillRequest | null {
         return { userKey, action: { kind: "image", urls: words } };
     }
     if (utterance === AGREE_TEXT) return { userKey, action: { kind: "agree" } };
+    if (TIP_WORDS.has(utterance)) return { userKey, action: { kind: "tip" } };
     if (/웰컴|welcome/i.test(blockName) || !utterance) return { userKey, action: { kind: "welcome" } };
     return { userKey, action: { kind: "text", text: utterance.slice(0, 1000) } };
 }
@@ -105,7 +117,9 @@ export function parseSkillRequest(body: unknown): SkillRequest | null {
 // ---------- 답 ----------
 
 type QuickReply = { label: string; action: "message"; messageText: string };
-export type SkillResponse = { version: "2.0"; template: { outputs: { simpleText: { text: string } }[]; quickReplies?: QuickReply[] } };
+type Button = { label: string; action: "message"; messageText: string } | { label: string; action: "operator" };
+type Output = { simpleText: { text: string } } | { textCard: { title: string; description: string; buttons: Button[]; buttonLayout: "vertical" } };
+export type SkillResponse = { version: "2.0"; template: { outputs: Output[]; quickReplies?: QuickReply[] } };
 
 const qr = (label: string): QuickReply => ({ label, action: "message", messageText: label });
 
@@ -119,15 +133,45 @@ export function reply(texts: string[], quick: string[] = []): SkillResponse {
     };
 }
 
+/** 두 갈래 카드: 운영자 상담 연결 · 행사 알리기 (textCard 단일형은 제목+설명 400자까지) */
+function menu(title: string, description: string): SkillResponse {
+    return {
+        version: "2.0",
+        template: {
+            outputs: [{
+                textCard: {
+                    title: title.slice(0, 50),
+                    description: description.slice(0, 400 - title.length),
+                    buttons: [
+                        { label: OPERATOR_LABEL, action: "operator" },
+                        { label: TIP_TEXT, action: "message", messageText: TIP_TEXT },
+                    ],
+                    buttonLayout: "vertical",
+                },
+            }],
+        },
+    };
+}
+
 export const MSG = {
+    /** 웰컴: 채널 소개 + 두 갈래 */
+    welcome: () => menu(
+        "피카 카카오톡 채널이에요",
+        "가까운 공연·전시·축제를 날짜순으로 알려 드려요(picka.news).\n\n궁금한 것은 «운영자에게 문의»를 눌러 주세요. 운영자가 채팅으로 답해요.\n공연·전시를 알리고 싶은 단체·예술가는 «행사 알리기»를 눌러 주세요.",
+    ),
+    /** 제보 시간이 아닐 때 온 말·사진: 저장하지 않았음을 밝히고 두 갈래 */
+    notTip: () => menu(
+        "무엇을 도와드릴까요?",
+        "방금 보낸 내용은 저장하거나 운영자에게 넘기지 않았어요.\n\n문의는 «운영자에게 문의»를 누른 뒤 다시 보내 주세요.\n행사를 알리려면 «행사 알리기»를 누른 뒤 사진·글을 보내 주세요.",
+    ),
     consent: () => reply([
         "피카(picka.news)는 경남·부산의 공연·전시·축제를 날짜순으로 알려 드려요.\n리플렛·포스터 사진이나 일정 글을 보내 주시면 운영자가 확인한 뒤에 피카에 올립니다. 자동으로 올라가지 않아요.",
         `보내기 전에 아래 두 가지에 동의해 주세요.\n\n1. ${RIGHTS_CHECKS[0]}\n\n2. ${RIGHTS_CHECKS[1]}\n\n${PRIVACY_NOTE} 사진은 1년 동안 보관한 뒤 지웁니다. 카카오 이름·전화번호는 받지 않아요. 자세한 내용: picka.news/privacy`,
     ], [AGREE_TEXT]),
     ready: () => reply([
-        "리플렛·포스터 사진을 이 채팅창에 그냥 보내 주세요(여러 장도 돼요).\n단체 이름·행사 이름·날짜 같은 내용은 글로 보내 주셔도 돼요. 사진 바로 뒤 10분 안에 보낸 글은 같은 제보로 묶어요.",
+        "지금부터 30분 동안 보내는 사진·글을 행사 제보로 받아요.\n리플렛·포스터 사진을 이 채팅창에 그냥 보내 주세요(여러 장도 돼요). 단체 이름·행사 이름·날짜는 글로 보내 주셔도 돼요. 사진 바로 뒤 10분 안에 보낸 글은 같은 제보로 묶어요.",
     ]),
-    agreed: () => reply(["동의해 주셔서 고맙습니다. 이제 리플렛·포스터 사진이나 일정 글을 이 채팅창에 보내 주세요.\n동의 전에 보낸 사진은 저장하지 않았으니 한 번 더 보내 주세요."]),
+    agreed: () => reply(["동의해 주셔서 고맙습니다. 지금부터 30분 동안 보내는 리플렛·포스터 사진이나 일정 글을 행사 제보로 받아요. 이 채팅창에 보내 주세요."]),
     gotImages: (n: number, refused: number) => reply([
         `사진 ${n}장 받았어요. 운영자가 확인한 뒤에 피카에 올립니다.` +
         (refused ? `\n하루 5장까지 받아서 ${refused}장은 받지 못했어요. 내일 다시 보내 주세요.` : "") +
