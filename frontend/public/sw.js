@@ -59,3 +59,34 @@ self.addEventListener("fetch", (event) => {
     }
     // 그 밖(RSC 데이터·이미지 등)은 손대지 않는다
 });
+
+/*
+ * 푸시 알림 (specs/018): 수집기(send_push.py)가 보낸 {title, body, url}을 알림으로 띄운다.
+ * 누르면 그 주소(행사 상세·지역 주말 목록)를 연다. 이미 열린 피카 창이 있으면 그 창으로 간다.
+ */
+self.addEventListener("push", (event) => {
+    let data = {};
+    try { data = event.data ? event.data.json() : {}; } catch { data = { body: event.data && event.data.text() }; }
+    const title = data.title || "피카";
+    event.waitUntil(
+        self.registration.showNotification(title, {
+            body: data.body || "",
+            icon: "/icons/icon-192.png",
+            badge: "/icons/icon-192.png",
+            tag: data.tag || undefined,
+            data: { url: data.url || "/" },
+        })
+    );
+});
+
+self.addEventListener("notificationclick", (event) => {
+    event.notification.close();
+    const url = new URL((event.notification.data && event.notification.data.url) || "/", self.location.origin).href;
+    event.waitUntil(
+        self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((wins) => {
+            const same = wins.find((w) => w.url.startsWith(self.location.origin));
+            if (same) return same.navigate(url).then((w) => (w || same).focus());
+            return self.clients.openWindow(url);
+        })
+    );
+});

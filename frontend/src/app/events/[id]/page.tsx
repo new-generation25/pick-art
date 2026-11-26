@@ -26,6 +26,7 @@ import { getEventOrgs } from "@/lib/places";
 import { isGroupProvided } from "@/lib/leaflets";
 import { maskPersonalPhones } from "@/lib/privacy";
 import { Users, Building2 } from "lucide-react";
+import { VenueFollowButton } from "@/components/ui/VenueFollowButton";
 
 interface EventPageProps {
     params: Promise<{
@@ -188,6 +189,8 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                             <Building2 className="h-[18px] w-[18px]" aria-hidden /> 공간 정보
                         </Link>
                     )}
+                    {/* 장소 찜 (specs/018): 이 장소에 새 행사가 올라오면 알림 */}
+                    {hasVenuePage && <VenueFollowButton venueId={event.venue_id} icon />}
                 </div>
 
                 {/* 정보 줄: 시각 · 관람료 · 관람 · 공간 · 출처 · 주최·주관 */}

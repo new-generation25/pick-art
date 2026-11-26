@@ -9,6 +9,7 @@ import { SECTION_LABELS, type SectionKey } from "@/lib/feedOrder";
 import { Box } from "@mantine/core";
 import { ArrowLeft, CalendarPlus, MessageCircle } from "lucide-react";
 import { INSTAGRAM_URL, InstagramIcon } from "@/components/ui/InstagramLink";
+import { PushButton } from "@/components/ui/PushButton";
 
 /** 카카오톡 채널 «피카» 홈 (specs/017) */
 const KAKAO_CHANNEL = "https://pf.kakao.com/_xoxdxkvX";
@@ -184,8 +185,9 @@ export async function HomeFeed({ params: resolvedParams, region, district }: { p
       <section className="mt-6 bg-[var(--pk-soft)]">
         <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
           <h2 className="pica-display text-[22px] text-ink sm:text-[26px]">새 소식 받아 보기</h2>
-          <p className="mt-1 text-[14px] text-ink-soft">가까운 공연·전시 소식을 쓰시는 곳에서 받아 보세요.</p>
-          <div className="mt-4 flex flex-wrap gap-2">
+          <p className="mt-1 text-[14px] text-ink-soft">찜한 행사 전날과 주말 행사를 휴대폰 알림으로, 또는 쓰시는 곳에서 받아 보세요.</p>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <PushButton compact />
             <Link href="/calendar" className="pica-chip"><CalendarPlus size={15} aria-hidden />캘린더로 받기</Link>
             <a href={KAKAO_CHANNEL} target="_blank" rel="noopener noreferrer" className="pica-chip"><MessageCircle size={15} aria-hidden />카카오톡 채널 «피카»</a>
             <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="pica-chip"><InstagramIcon size={15} />인스타그램 @picka.news</a>

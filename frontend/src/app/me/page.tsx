@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Bell, CalendarPlus, ChevronRight, Info, Mail, MapPin, UserRound } from "lucide-react";
+import { ArrowLeft, Bell, Building2, CalendarPlus, ChevronRight, Heart, Info, MapPin, Sun, UserRound } from "lucide-react";
+import { PushButton } from "@/components/ui/PushButton";
 import { supabase } from "@/lib/supabase";
 import { GN_REGIONS } from "@/lib/regions";
 import { CATEGORIES } from "@/lib/categories";
@@ -15,6 +16,7 @@ import { ShelfTile, type ShelfCard } from "@/components/ui/Shelf";
 type Profile = {
     nickname: string; phone: string; region: string; interests: string[];
     email_notifications: boolean; new_event_notifications: boolean; auto_region: boolean;
+    push_favorites: boolean; push_weekend: boolean; push_venues: boolean;
 };
 
 /**
@@ -27,6 +29,7 @@ export default function MePage() {
     const [user, setUser] = useState<any>(null);
     const [p, setP] = useState<Profile | null>(null);
     const [saved, setSaved] = useState<ShelfCard[]>([]);
+    const [venues, setVenues] = useState<{ id: string; name: string; region: string | null }[]>([]);
     const [editing, setEditing] = useState(false);
     const [msg, setMsg] = useState("");
 
@@ -35,12 +38,20 @@ export default function MePage() {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session?.user) { setState("login"); return; }
             setUser(session.user);
-            const [{ data: profile }, { data: favs }] = await Promise.all([
+            const [{ data: profile }, { data: favs }, { data: follows }] = await Promise.all([
                 supabase.from("profiles").select("*").eq("id", session.user.id).maybeSingle(),
                 supabase.from("favorites")
                     .select("created_at, events(id,title,category,event_date_start,event_date_end,venue,region,poster_image_url,poster_placeholder,source,is_free,status)")
                     .order("created_at", { ascending: false }),
+                supabase.from("venue_follows").select("venue_id, created_at").order("created_at", { ascending: false }),
             ]);
+            // 찜한 장소 이름 (공개 뷰: 좌표가 확인된 장소만 보인다. 안 보이면 «장소»로)
+            const vids = (follows || []).map((f: { venue_id: string }) => f.venue_id);
+            if (vids.length) {
+                const { data: vs } = await supabase.from("public_venues").select("id,name,region").in("id", vids);
+                const byId = new Map((vs || []).map((v: { id: string; name: string; region: string | null }) => [v.id, v]));
+                setVenues(vids.map((id: string) => byId.get(id) ?? { id, name: "장소", region: null }));
+            }
             setP({
                 nickname: profile?.nickname || `픽아트회원${session.user.id.slice(0, 4)}`,
                 phone: profile?.phone || "",
@@ -49,6 +60,9 @@ export default function MePage() {
                 email_notifications: profile?.email_notifications ?? true,
                 new_event_notifications: profile?.new_event_notifications ?? true,
                 auto_region: profile?.auto_region ?? true,
+                push_favorites: profile?.push_favorites ?? true,
+                push_weekend: profile?.push_weekend ?? true,
+                push_venues: profile?.push_venues ?? true,
             });
             const today = todayKST();
             const rows = (favs || []).map((f: any) => f.events).filter((e: any) => e && e.status === "PUBLISHED");
@@ -138,6 +152,20 @@ export default function MePage() {
                 <div className="pica-shelf-row">{saved.map(c => <ShelfTile key={c.id} c={c} />)}</div>
             )}
 
+            {/* 찜한 장소 (specs/018): 새 행사가 올라오면 휴대폰 알림 */}
+            <div id="venues" className="flex scroll-mt-20 items-baseline justify-between px-4 pb-2.5 pt-6">
+                <h2 className="pica-display text-[21px] text-ink">찜한 장소<span className="pica-num ml-1.5 text-[18px] text-accent">{venues.length}</span></h2>
+            </div>
+            {venues.length === 0 ? (
+                <p className="px-4 text-[14px] text-ink-soft">아직 찜한 장소가 없어요. 공간 정보나 행사 상세의 장소 하트를 누르면, 그 장소에 새 행사가 올라올 때 알려 드려요.</p>
+            ) : (
+                <div className="flex flex-wrap gap-2 px-4">
+                    {venues.map(v => (
+                        <Link key={v.id} href={`/venues/${v.id}`} className="pica-chip"><Heart size={14} fill="currentColor" className="text-accent" aria-hidden />{v.name}{v.region && <span className="text-[12px] font-medium text-ink-soft">{v.region}</span>}</Link>
+                    ))}
+                </div>
+            )}
+
             {/* 내 지역 · 관심 분야 · 캘린더 · 알림 */}
             <div id="settings" className="scroll-mt-20">
                 <div className={card}>
@@ -173,9 +201,13 @@ export default function MePage() {
                     <p className="pb-3 text-[12px] text-ink-soft"><Link href="/calendar" className="underline">지역·분야를 따로 골라 구독하기</Link></p>
                 </div>
 
+                {/* 휴대폰 알림 (specs/018): 예전 «새 행사·이메일 알림» 토글은 실제로 보내는 곳이 없어 이것으로 바꿨다 */}
                 <div className={card}>
-                    <Line icon={Bell} title="새 행사 알림" sub="관심 분야 새 행사가 올라오면" right={<Toggle on={p!.new_event_notifications} onChange={v => save({ new_event_notifications: v })} label="새 행사 알림" />} />
-                    <Line icon={Mail} title="이메일 알림" sub="중요한 안내만" right={<Toggle on={p!.email_notifications} onChange={v => save({ email_notifications: v })} label="이메일 알림" />} />
+                    <Line icon={Bell} title="휴대폰 알림" sub="이 기기로 받아요. 기기마다 따로 켜요" />
+                    <div className="pb-2"><PushButton /></div>
+                    <Line icon={Heart} title="찜한 행사 전날" sub="찜한 행사가 시작하기 하루 전 아침" right={<Toggle on={p!.push_favorites} onChange={v => save({ push_favorites: v })} label="찜한 행사 전날 알림" />} />
+                    <Line icon={Building2} title="찜한 장소 새 행사" sub="찜한 장소에 새 행사가 올라오면" right={<Toggle on={p!.push_venues} onChange={v => save({ push_venues: v })} label="찜한 장소 새 행사 알림" />} />
+                    <Line icon={Sun} title="주말 행사 요약" sub={`금요일 오후, ${p!.region || "내 지역"}의 이번 주말 행사`} right={<Toggle on={p!.push_weekend} onChange={v => save({ push_weekend: v })} label="주말 행사 요약 알림" />} />
                 </div>
             </div>
             <p className="mx-4 mt-2 h-5 text-[12.5px] text-accent" aria-live="polite">{msg}</p>

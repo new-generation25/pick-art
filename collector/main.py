@@ -230,6 +230,9 @@ async def run_crawlers(specific_target=None):
             # 공개 후 중복 점검(2026-11-26): 공개 행 전체를 (시작일·지역)으로 묶어 견주고, 같은 행사면 순위 낮은 쪽을 백업 후 숨긴다
             dd = await run_tool("dedupe_published.py", timeout_min=10, args=["--apply"])
             geo_line += f"\n• 공개 후 중복 점검: {dd['summary']}"
+            # 휴대폰 알림(specs/018): 찜한 행사 전날·금요일 주말 요약·찜한 장소 새 행사. 같은 알림은 두 번 보내지 않는다
+            ps = await run_tool("send_push.py", timeout_min=5)
+            geo_line += f"\n• 휴대폰 알림: {ps['summary']}"
 
             # 인스타 운영 기록(docs/insta, git 밖) 글 파일을 구글드라이브 폴더로 복사. 실패해도 루틴은 계속한다
             backup = await run_tool("backup_insta.py", timeout_min=10)

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PlacePage } from "@/components/PlacePage";
+import { VenueFollowButton } from "@/components/ui/VenueFollowButton";
 import { VenueRoute } from "@/components/ui/VenueRoute";
 import { getVenuePage } from "@/lib/places";
 import { DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/site";
@@ -40,7 +41,7 @@ export default async function VenuePage({ params }: Props) {
             hosts={hosts}
             admin={{ table: "venues", id: venue.id }}
             facts={facts}
-            actions={<VenueRoute name={venue.name} region={venue.region} lat={venue.lat} lng={venue.lng} appname={new URL(SITE_URL).host} block />}
+            actions={<><VenueFollowButton venueId={venue.id} icon /><VenueRoute name={venue.name} region={venue.region} lat={venue.lat} lng={venue.lng} appname={new URL(SITE_URL).host} block /></>}
             calendarQuery={`venue=${venue.id}`}
             upcoming={upcoming}
             past={past}
