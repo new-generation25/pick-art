@@ -47,6 +47,11 @@ export function NearbyMap({ items, origin, originLabel, range, appname, onFail }
     const box = useRef<HTMLDivElement>(null);
     const mapRef = useRef<any>(null);
     const markers = useRef<any[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- naver maps 타입 없음(위 mapRef 와 같음)
+    const originMarker = useRef<any>(null);
+    // 거리 조건이 바뀔 때 가운데를 맞출 기준점(effect 의존성에 넣지 않으려고 ref 로 둔다)
+    const originNow = useRef(origin);
+    originNow.current = origin;
     const [ready, setReady] = useState(false);
     const [zoom, setZoom] = useState(zoomForRange(range));
     const [selected, setSelected] = useState<VenueGroup<Item> | null>(null);
@@ -69,7 +74,7 @@ export function NearbyMap({ items, origin, originLabel, range, appname, onFail }
                 scaleControl: false,
             });
             mapRef.current = map;
-            new maps.Marker({
+            originMarker.current = new maps.Marker({
                 position: new maps.LatLng(origin.lat, origin.lng),
                 map,
                 title: originLabel,
@@ -84,14 +89,24 @@ export function NearbyMap({ items, origin, originLabel, range, appname, onFail }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // 기준점·거리 조건이 바뀌면 지도 가운데와 확대를 맞춘다
+    // 기준점만 바뀌면(«내 위치로 바꾸기» 등) 지금 배율 그대로 가운데와 기준점 표시만 옮긴다
     useEffect(() => {
         const map = mapRef.current;
         if (!ready || !map) return;
         const { maps } = window.naver;
-        map.setCenter(new maps.LatLng(origin.lat, origin.lng));
+        const at = new maps.LatLng(origin.lat, origin.lng);
+        originMarker.current?.setPosition(at);
+        map.panTo(at);
+    }, [ready, origin.lat, origin.lng]);
+
+    // 거리 조건(r)이 바뀔 때만 그 범위에 맞는 배율로 맞춘다
+    useEffect(() => {
+        const map = mapRef.current;
+        if (!ready || !map) return;
+        const { maps } = window.naver;
+        map.setCenter(new maps.LatLng(originNow.current.lat, originNow.current.lng));
         map.setZoom(zoomForRange(range));
-    }, [ready, origin.lat, origin.lng, range]);
+    }, [ready, range]);
 
     // 표시 그리기: 조건·확대가 바뀔 때마다 다시
     useEffect(() => {
@@ -117,6 +132,17 @@ export function NearbyMap({ items, origin, originLabel, range, appname, onFail }
                     map.fitBounds(b, { top: 60, right: 60, bottom: 60, left: 60 });
                 } else {
                     setSelected(c.groups[0]);
+                    // 그 장소로 옮긴다(배율 그대로). 아래 행사 목록이 지도 아래쪽을 덮으므로
+                    // 표시가 위에서 1/4 쯤(가운데보다 지도 높이 1/4 위)에 오게 가운데를 잡는다
+                    const pin = new maps.LatLng(c.lat, c.lng);
+                    const proj = map.getProjection?.();
+                    const h = box.current?.clientHeight || 0;
+                    if (proj?.fromCoordToOffset && proj?.fromOffsetToCoord && h) {
+                        const off = proj.fromCoordToOffset(pin);
+                        map.panTo(proj.fromOffsetToCoord(new maps.Point(off.x, off.y + h * 0.25)));
+                    } else {
+                        map.panTo(pin);
+                    }
                 }
             });
             markers.current.push(m);
