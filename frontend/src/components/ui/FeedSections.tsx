@@ -26,7 +26,11 @@ const SORT_NOTE: Record<SectionKey, string> = {
  * 포스터 없는 행사가 뒤에 있는 규칙은 지킨다: [포스터·관심] [포스터·그 외] [무포스터·관심] [무포스터·그 외]
  * «상시·장기»는 접힌 한 줄로 두고 누르면 펼친다. 묶음마다 앞 12장만 그리고 나머지는 «모두 보기»(?section=)로 보낸다.
  */
-export function FeedSections({ sections, moreBase }: { sections: { key: SectionKey; cards: FeedCard[] }[]; moreBase: string }) {
+export function FeedSections({ sections, moreBase, folded = [], foldedMoreBase }: {
+    sections: { key: SectionKey; cards: FeedCard[] }[]; moreBase: string;
+    /** 기간 필터 밖이라 접힌 한 줄로 보이는 묶음(11/27: «오늘»을 골라도 이번 주·다음 주를 한 줄로) */
+    folded?: SectionKey[]; foldedMoreBase?: string;
+}) {
     const [interests, setInterests] = useState<string[]>([]);
 
     useEffect(() => {
@@ -48,8 +52,12 @@ export function FeedSections({ sections, moreBase }: { sections: { key: SectionK
         cards: interests.length ? [...s.cards].sort((a, b) => rank(a) - rank(b)) : s.cards,
     }));
 
-    const more = (key: SectionKey) => `${moreBase}${moreBase.includes("?") ? "&" : "?"}section=${key}`;
-    const firstKey = ordered.find(s => s.key !== "long")?.key;
+    const more = (key: SectionKey) => {
+        const b = folded.includes(key) && foldedMoreBase ? foldedMoreBase : moreBase;
+        return `${b}${b.includes("?") ? "&" : "?"}section=${key}`;
+    };
+    const isFolded = (key: SectionKey) => key === "long" || folded.includes(key);
+    const firstKey = ordered.find(s => !isFolded(s.key))?.key;
 
     return (
         <>
@@ -58,13 +66,13 @@ export function FeedSections({ sections, moreBase }: { sections: { key: SectionK
                     관심 분야(<b className="text-ink">{interests.join("·")}</b>)를 묶음마다 먼저 보여 줍니다.
                 </p>
             )}
-            {ordered.map(s => s.key === "long" ? (
+            {ordered.map(s => isFolded(s.key) ? (
                 <details key={s.key} className="group mx-4 mt-4 border-t border-line">
                     <summary className="flex h-[54px] cursor-pointer list-none items-center justify-between border-b border-line [&::-webkit-details-marker]:hidden">
                         <span className="flex items-baseline gap-[7px]">
-                            <span className="pica-display text-[18px] text-ink">{SECTION_LABELS.long.title}</span>
+                            <span className="pica-display text-[18px] text-ink">{SECTION_LABELS[s.key].title}</span>
                             <span className="pica-num text-[16px] font-semibold text-accent">{s.cards.length}</span>
-                            <small className="text-[12.5px] font-medium text-ink-soft">곧 끝나는 것부터</small>
+                            <small className="text-[12.5px] font-medium text-ink-soft">{s.key === "long" ? "곧 끝나는 것부터" : SECTION_LABELS[s.key].note}</small>
                         </span>
                         <ChevronDown size={20} className="text-ink-soft transition-transform group-open:rotate-180" aria-hidden />
                     </summary>
@@ -72,7 +80,7 @@ export function FeedSections({ sections, moreBase }: { sections: { key: SectionK
                         <div className="pica-shelf-row">
                             {s.cards.slice(0, 12).map(c => <ShelfTile key={c.id} c={c} wide />)}
                         </div>
-                        <Link href={more(s.key)} className="mx-4 mt-3 inline-block text-[13px] font-semibold text-ink-soft hover:text-ink">상시·장기 모두 보기 ({s.cards.length}건)</Link>
+                        <Link href={more(s.key)} className="mx-4 mt-3 inline-block text-[13px] font-semibold text-ink-soft hover:text-ink">{SECTION_LABELS[s.key].title} 모두 보기 ({s.cards.length}건)</Link>
                     </div>
                 </details>
             ) : (

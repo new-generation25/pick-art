@@ -109,8 +109,10 @@ export function FilterBar({ subs = [], total }: { subs?: { name: string; n: numb
     const go = (nextRegions: string[], nextGus: string[], params: URLSearchParams) => {
         params.delete("region");
         params.delete("gu");
-        const rs = nextRegions.filter(r => GN_REGIONS.includes(r));
+        let rs = nextRegions.filter(r => GN_REGIONS.includes(r));
         const gs = rs.includes("부산") ? nextGus : [];
+        // 경남 18곳과 부산 전체를 모두 고르면 지역 조건이 없는 것과 같다 → «전체»로 (11/27 «창원 외 18»이 헷갈림)
+        if (gs.length === 0 && GN_REGIONS.every(r => rs.includes(r))) rs = [];
         let path = "/";
         if (rs.length === 0) {
             if (myRegion) params.set("region", "전체"); // 자동 적용 사용자가 고른 '전체'는 주소에 남긴다
@@ -196,7 +198,7 @@ export function FilterBar({ subs = [], total }: { subs?: { name: string; n: numb
             <div className="flex items-center gap-1.5 py-1.5 pr-2.5 sm:pr-0">
                 <div className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto py-1 pl-3 [scrollbar-width:none] sm:pl-0" role="group" aria-label="필터">
                     <Pick label={currentDate === "all" ? "기간" : dateLabel || "기간"} on={currentDate !== "all"} items={DATE_FILTERS} current={currentDate} onPick={v => updateFilters("date", v)} />
-                    <Pick label={regions.length === 0 ? "지역" : GN_ONLY.every(r => regions.includes(r)) && regions.length === GN_ONLY.length ? "경남 전체" : regions.length > 1 ? `${regions[0]} 외 ${regions.length - 1}` : gus.length === 1 ? `${regions[0]} ${gus[0]}` : gus.length > 1 ? `${regions[0]} ${gus[0]} 외 ${gus.length - 1}` : regions[0]} on={regions.length > 0}
+                    <Pick label={regions.length === 0 ? "지역" : GN_ONLY.every(r => regions.includes(r)) ? (regions.includes("부산") ? (gus.length ? `경남·부산 ${gus.length}개 구` : "경남·부산") : "경남 전체") : regions.length > 1 ? `${regions[0]} 외 ${regions.length - 1}` : gus.length === 1 ? `${regions[0]} ${gus[0]}` : gus.length > 1 ? `${regions[0]} ${gus[0]} 외 ${gus.length - 1}` : regions[0]} on={regions.length > 0}
                         items={REGIONS.map(r => ({ label: r, value: r }))} current={currentRegion} onPick={v => updateFilters("region", v)} />
                     <Pick label={cats.length === 0 ? "분야" : cats.length > 1 ? `${cats[0]} 외 ${cats.length - 1}` : cats[0]} on={cats.length > 0}
                         items={CATEGORIES.map(c => ({ label: c, value: c }))} current={currentCategory} onPick={v => updateFilters("category", v)} />

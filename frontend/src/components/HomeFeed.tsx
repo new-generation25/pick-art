@@ -4,7 +4,7 @@ import { FeedSections } from "@/components/ui/FeedSections";
 import { FilterBar } from "@/components/ui/FilterBar";
 import { EventList } from "@/components/ui/EventList";
 import { MapButton } from "@/components/ui/MapButton";
-import { guList, regionList, regionPath, splitList } from "@/lib/regions";
+import { GN_REGIONS, guList, regionList, regionPath, splitList } from "@/lib/regions";
 import { SECTION_LABELS, type SectionKey } from "@/lib/feedOrder";
 import { Box } from "@mantine/core";
 import { ArrowLeft, CalendarPlus, MessageCircle } from "lucide-react";
@@ -120,6 +120,30 @@ export async function HomeFeed({ params: resolvedParams, region, district }: { p
     cards: s.items.map(toShelf).sort((a, b) => a.kidRank - b.kidRank),
   }));
 
+  // 기간 필터(오늘·이번 주)를 걸었어도 그 뒤 기간 행사는 아래에 접힌 한 줄로 보여 준다(«상시·장기»처럼, 11/27 운영자).
+  // 다른 조건(지역·분야·세부·아이·검색)은 그대로 둔다
+  const AFTER: Record<string, SectionKey[]> = { today: ["week", "next"], week: ["next"] };
+  const extraKeys = resolvedParams.section ? [] : AFTER[filters.date || ""] ?? [];
+  let extraSections: typeof sections = [];
+  if (extraKeys.length) {
+    const rest = (await getPublishedEvents({ ...filters, date: undefined }))
+      .filter((e: any) => !gus.length || e.region !== "부산" || guVenues.has(e.venue_id));
+    for (const e of rest) if (!kidsOf.has(e.id)) kidsOf.set(e.id, kidsInfo(e));
+    const restRows = rest
+      .filter((e: any) => !kids.on || fitsAge(kidsOf.get(e.id)!, kids.age))
+      .filter((e: any) => !sub || e.subcategory === sub);
+    extraSections = orderFeed(restRows, today)
+      .filter(s => extraKeys.includes(s.key))
+      .map(s => ({ key: s.key, cards: s.items.map(toShelf).sort((a, b) => a.kidRank - b.kidRank) }));
+  }
+  // 순서: 기간 안 묶음 → 접힌 다음 기간 → 상시·장기 → 최근 끝난 행사
+  const tailKeys: SectionKey[] = ["long", "ended"];
+  const shown = [
+    ...sections.filter(s => !tailKeys.includes(s.key)),
+    ...extraSections,
+    ...sections.filter(s => tailKeys.includes(s.key)),
+  ];
+
   // «모두 보기»(?section=…): 그 묶음만 세로 목록. 다른 조건은 그대로 둔다
   const base = region ? regionPath(region, district) : "/";
   const keep = new URLSearchParams();
@@ -127,12 +151,20 @@ export async function HomeFeed({ params: resolvedParams, region, district }: { p
     if (typeof v === "string" && v && k !== "section" && k !== "subscribed" && !(region && k === "region")) keep.set(k, v);
   }
   const moreBase = `${base}${keep.toString() ? `?${keep.toString()}` : ""}`;
+  // 접힌 다음 기간의 «모두 보기»는 기간 필터를 뺀 주소로
+  const keepNoDate = new URLSearchParams(keep);
+  keepNoDate.delete("date");
+  const extraMoreBase = `${base}${keepNoDate.toString() ? `?${keepNoDate.toString()}` : ""}`;
   const sectionKey = resolvedParams.section as SectionKey | undefined;
   const one = sectionKey && SECTION_LABELS[sectionKey] ? ordered.find(s => s.key === sectionKey) : undefined;
 
   const hasFilter = !!((regions.length && !region) || cats.length || sub || filters.search || filters.date || kids.on);
+  // 경남 18곳을 모두 골랐으면 «경남 전체»로 줄여 쓴다
+  const GN_ONLY = GN_REGIONS.filter(r => r !== "부산");
+  const allGn = GN_ONLY.every(r => regions.includes(r));
+  const placeParts = allGn ? ["경남 전체", ...regions.filter(r => !GN_ONLY.includes(r))] : regions;
   const place = regions.length
-    ? regions.map(r => r === "부산" && gus.length ? `부산 ${gus.join("·")}` : r).join(" · ")
+    ? placeParts.map(r => r === "부산" && gus.length ? `부산 ${gus.join("·")}` : r).join(" · ")
     : null;
 
   return (
@@ -163,13 +195,13 @@ export async function HomeFeed({ params: resolvedParams, region, district }: { p
             <p className="mb-4 text-[12.5px] text-ink-soft">{SECTION_LABELS[one.key].note}</p>
             <EventList initialEvents={one.items.map(toCard)} filters={filters} showEndNote={false} />
           </div>
-        ) : sections.length === 0 ? (
+        ) : shown.length === 0 ? (
           <div className="px-4 py-16 text-center">
             <p className="text-[16px] font-bold text-ink">조건에 맞는 행사가 없어요</p>
             {hasFilter && <a href={base} className="mt-3 inline-block rounded-full bg-accent px-5 py-2.5 text-[14px] font-bold text-on-accent">필터 풀기</a>}
           </div>
         ) : (
-          <FeedSections sections={sections} moreBase={moreBase} />
+          <FeedSections sections={shown} moreBase={moreBase} folded={extraSections.map(s => s.key)} foldedMoreBase={extraMoreBase} />
         )}
       </div>
 
