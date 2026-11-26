@@ -10,8 +10,8 @@
 
 ## Phase 1: Setup
 
-- [ ] T001 시안과 지금 화면을 나란히 볼 수 있게 `.claude/launch.json`의 프론트 개발 서버 항목(webpack, `NODE_OPTIONS=--max-old-space-size=2048`)을 확인한다. 없으면 더한다. 개발 서버는 한 번에 하나만 띄운다 (`.claude/launch.json`)
-- [ ] T002 바꾸기 전 기준값을 기록한다. 운영 사이트 `https://picka.news`에서 quickstart 3단계의 주소 5개 묶음별 건수와 홈 FCP·LCP 3회를 재어 적는다 (`specs/014-design-apply/baseline.md`)
+- [X] T001 시안과 지금 화면을 나란히 볼 수 있게 `.claude/launch.json`의 프론트 개발 서버 항목(webpack, `NODE_OPTIONS=--max-old-space-size=2048`)을 확인한다. 없으면 더한다. 개발 서버는 한 번에 하나만 띄운다 (`.claude/launch.json`)
+- [X] T002 바꾸기 전 기준값을 기록한다. 운영 사이트 `https://picka.news`에서 quickstart 3단계의 주소 5개 묶음별 건수와 홈 FCP·LCP 3회를 재어 적는다 (`specs/014-design-apply/baseline.md`)
 
 ---
 
@@ -19,7 +19,7 @@
 
 **⚠️ 이 단계가 끝나야 사용자 이야기를 시작한다**
 
-- [ ] T003 마이그레이션을 만든다 (`supabase/migrations/20261127010000_design_apply.sql`). 머리에 되돌리기 SQL을 적고, 내용은 data-model.md를 그대로 따른다.
+- [X] T003 마이그레이션을 만든다 (`supabase/migrations/20261127010000_design_apply.sql`). 머리에 되돌리기 SQL을 적고, 내용은 data-model.md를 그대로 따른다.
   - `placeholder_images`: `sha256 text PK`(64자리 소문자 16진수 CHECK), `bytes integer`, `note text`(≤120자), `marked_by uuid`, `marked_at timestamptz DEFAULT now()`. RLS는 읽기·쓰기 모두 `public.is_admin()`만.
   - `events`: `poster_sha256 text NULL`, `poster_placeholder boolean NOT NULL DEFAULT false`.
   - 트리거 두 개:
@@ -27,16 +27,16 @@
     - `placeholder_images`에 행이 더해지거나 빠지면 같은 지문의 행사를 일괄로 고친다.
   - `orgs`·`venues`: `partner_since date NULL`(CHECK `partner_since <= (now() AT TIME ZONE 'Asia/Seoul')::date + 1`), `partner_note text NULL`(≤200자).
   - `public_venues` 뷰: `id, name, region, lat, lng, closed_days, capacity, district, partner_since` 순서로 다시 만든다.
-- [ ] T004 T003을 운영 DB에 적용하고 확인한다. 새 칸과 뷰 칸이 생겼는지, 익명 키로 `placeholder_images`를 읽으면 0행인지 본다. 결과를 `specs/014-design-apply/baseline.md`에 덧붙인다 (Supabase SQL)
-- [ ] T005 [P] 수집기가 포스터를 올릴 때 올린 바이트의 SHA-256을 `poster_sha256`으로 함께 넘기게 고친다 (`collector/database.py` 144행 부근, `collector/utils.py` 71행 부근, 행사 저장 경로)
-- [ ] T006 [P] 지문 채움 도구를 만든다 (`collector/tools/poster_fingerprint.py`).
+- [X] T004 T003을 운영 DB에 적용하고 확인한다. 새 칸과 뷰 칸이 생겼는지, 익명 키로 `placeholder_images`를 읽으면 0행인지 본다. 결과를 `specs/014-design-apply/baseline.md`에 덧붙인다 (Supabase SQL)
+- [X] T005 [P] (바꿈: 업로드 호출처가 9곳이라 각 저장 경로를 고치지 않고, `utils.process_and_upload_image`가 지문을 세 번째 값으로 돌려주게 하고 정기 루틴(`main.py`)에 `poster_fingerprint.py --apply` 단계를 더해 새 행사 지문을 채운다) 수집기가 포스터를 올릴 때 올린 바이트의 SHA-256을 `poster_sha256`으로 함께 넘기게 고친다 (`collector/database.py` 144행 부근, `collector/utils.py` 71행 부근, 행사 저장 경로)
+- [X] T006 [P] 지문 채움 도구를 만든다 (`collector/tools/poster_fingerprint.py`).
   - 공개·검토 행사 중 `poster_sha256`이 빈 행의 포스터를 피카 저장소에서 받아 지문을 적는다.
   - `--apply`가 없으면 미리보기만 한다.
   - `--report`는 같은 지문을 3개 넘는 행사가 쓰는 그림 목록(«안내 그림 후보»)을 낸다.
   - 서비스 키는 출력하지 않는다.
-- [ ] T007 T006을 미리보기 → `--apply`로 돌린다. 처음 표시할 지문은 `239e6b7f…`(27,274바이트), `c5e19531…`(51,060바이트), k6 「제23회 김해시립소년소녀합창단 정기연주회」 포스터의 지문이다. 이 셋을 `placeholder_images`에 넣고 `poster_placeholder=true` 행사 수를 보고한다 (`collector/tools/poster_fingerprint.py --apply --mark`)
+- [X] T007 (결과 11/26: 지문 채움 472건, 바깥 주소(KOPIS 등) 413건은 받기 거절로 실패 — 브라우저처럼 꾸며 받는 방식은 쓰지 않았다. 후보 5개 중 포스터가 아닌 4개 표시(김해 «준비 중» 2종 각 9건, 통영 기본 회색 그림 21건, 함양문화예술회관 로고 카드 4건), 수요문화대학 시리즈 포스터는 실제 포스터라 두었다. 공개 행사 43건이 글자 포스터 대상) T006을 미리보기 → `--apply`로 돌린다. 처음 표시할 지문은 `239e6b7f…`(27,274바이트), `c5e19531…`(51,060바이트), k6 「제23회 김해시립소년소녀합창단 정기연주회」 포스터의 지문이다. 이 셋을 `placeholder_images`에 넣고 `poster_placeholder=true` 행사 수를 보고한다 (`collector/tools/poster_fingerprint.py --apply --mark`)
 - [ ] T008 공개 행사를 읽는 쿼리가 `poster_placeholder`를 함께 가져오게 한다 (`frontend/src/lib/supabase.ts`, `frontend/src/lib/places.ts`, `frontend/src/app/events/[id]/page.tsx`의 select)
-- [ ] T009 [P] 글자 포스터 판단 함수 `needsTextPoster({ poster_image_url, poster_placeholder })`와 출처 이름 함수 `posterSourceName(event)`를 만든다. 출처 이름은 장소 → 출처 순서로 고른다 (`frontend/src/lib/posters.ts`). 단위 시험을 붙인다 (`frontend/src/lib/__tests__/posters.test.mjs`)
+- [X] T009 [P] 글자 포스터 판단 함수 `needsTextPoster({ poster_image_url, poster_placeholder })`와 출처 이름 함수 `posterSourceName(event)`를 만든다. 출처 이름은 장소 → 출처 순서로 고른다 (`frontend/src/lib/posters.ts`). 단위 시험을 붙인다 (`frontend/src/lib/__tests__/posters.test.mjs`)
 - [ ] T010 테마 묶음 `paper`를 더한다 (`frontend/src/app/globals.css`).
   - 값은 BRAND_GUIDE 2절 «화면 팔레트».
   - 분야 꼬리표 색은 공연·전시·축제·행사·체험 모두 흰 면에 테두리로 하고, 공연만 초록 글자로 한다(시안 f01).

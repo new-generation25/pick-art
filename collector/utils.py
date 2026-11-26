@@ -1,3 +1,4 @@
+import hashlib
 from urllib.parse import urlparse
 import os
 import io
@@ -85,7 +86,8 @@ async def process_and_upload_image(supabase: Client, img_url: str, storage_path:
             orig_url = orig_url.replace("127.0.0.1", "localhost")
 
         # 썸네일은 일단 원본 URL을 같이 쓰거나 필요 시 추가 구현 (여기선 원본만 리턴)
-        return orig_url, orig_url, "hash_placeholder"
+        # 세 번째 값: 저장소에 올린 파일의 지문(SHA-256, specs/014). events.poster_sha256 과 같은 계산
+        return orig_url, orig_url, hashlib.sha256(orig_data).hexdigest()
 
     except Exception as e:
         print(f"Error processing image {img_url}: {e}")

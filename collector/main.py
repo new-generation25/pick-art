@@ -218,6 +218,9 @@ async def run_crawlers(specific_target=None):
             # 내 주변 행사(specs/002): 새로 공개된 행사의 장소 좌표 채우기. 실패해도 루틴은 계속한다
             geo = await run_tool("geocode_venues.py", timeout_min=20)
             geo_line = f"• 장소 좌표: {geo['summary']}"
+            # 포스터 지문(specs/014): 새 행사의 포스터 SHA-256 을 채운다. 안내 그림이면 DB 가 글자 포스터 표시를 켠다
+            fp = await run_tool("poster_fingerprint.py", timeout_min=15, args=["--apply"])
+            geo_line += f"\n• 포스터 지문: {fp['summary']}"
 
             # 인스타 운영 기록(docs/insta, git 밖) 글 파일을 구글드라이브 폴더로 복사. 실패해도 루틴은 계속한다
             backup = await run_tool("backup_insta.py", timeout_min=10)
