@@ -21,7 +21,13 @@ export function PushButton({ compact = false }: { compact?: boolean }) {
         (async () => {
             const { data: { session } } = await supabase.auth.getSession();
             setLoggedIn(!!session?.user);
-            setState(await pushState());
+            // 서비스 워커가 늦거나 막혀도 버튼은 보이게: 3초 안에 상태를 못 읽으면 «꺼짐»으로 보고 버튼을 낸다 (11/27 버튼이 안 보인 일)
+            try {
+                const st = await Promise.race([pushState(), new Promise<PushState>(r => setTimeout(() => r("off"), 3000))]);
+                setState(st === "checking" ? "off" : st);
+            } catch {
+                setState("off");
+            }
         })();
     }, []);
 
@@ -30,6 +36,7 @@ export function PushButton({ compact = false }: { compact?: boolean }) {
         if (!loggedIn) return;
         setBusy(true);
         try {
+            if (!("Notification" in window) || !("serviceWorker" in navigator)) throw new Error("이 브라우저는 알림을 지원하지 않아요");
             setState(state === "on" ? await disablePush() : await enablePush());
         } catch (e) {
             setNote(`알림을 켜지 못했어요: ${e instanceof Error ? e.message : String(e)}`);
@@ -39,7 +46,9 @@ export function PushButton({ compact = false }: { compact?: boolean }) {
     };
 
     const chip = "pica-chip";
-    if (state === "checking" || loggedIn === null) return null;
+    if (state === "checking" || loggedIn === null) {
+        return compact ? null : <button type="button" disabled className="flex h-[42px] w-full items-center justify-center gap-1.5 rounded-[10px] bg-soft text-[14px] font-bold text-ink-soft"><BellRing size={15} aria-hidden />알림 상태 확인 중…</button>;
+    }
 
     if (state === "unsupported") {
         return compact ? null : <p className="py-2 text-[13px] text-ink-soft">이 브라우저는 알림을 받을 수 없어요. 크롬·사파리 최신판에서 열어 주세요.</p>;

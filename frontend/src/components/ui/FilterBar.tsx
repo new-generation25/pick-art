@@ -153,7 +153,10 @@ export function FilterBar({ subs = [], total }: { subs?: { name: string; n: numb
     const dr = draft ?? { r: regions, g: gus, c: cats };
     const toggle = (list: string[], v: string) => v === "전체" ? [] : list.includes(v) ? list.filter(x => x !== v) : [...list, v];
     const toggleRegion = (r: string) => {
-        const rs = toggle(dr.r, r);
+        // «경남 전체»가 켜진 채 시군 하나를 누르면 그 시군만 (부산 전체 → 구 하나와 같은 방식, 11/27)
+        const rs = GN_ONLY.includes(r) && GN_ONLY.every(x => dr.r.includes(x))
+            ? [...dr.r.filter(x => !GN_ONLY.includes(x)), r]
+            : toggle(dr.r, r);
         setDraft({ ...dr, r: rs, g: rs.includes("부산") ? dr.g : [] });
     };
     // 경남 전체: 18개 시군을 한꺼번에 넣거나 뺀다
@@ -246,7 +249,7 @@ export function FilterBar({ subs = [], total }: { subs?: { name: string; n: numb
                     <Row label="경남">
                         <button type="button" className="pica-chip" aria-pressed={allGn} onClick={toggleAllGn}>경남 전체</button>
                         {GN_ONLY.map(r => (
-                            <button key={r} type="button" className="pica-chip" aria-pressed={dr.r.includes(r)} onClick={() => toggleRegion(r)}>{r}</button>
+                            <button key={r} type="button" className="pica-chip" aria-pressed={!allGn && dr.r.includes(r)} onClick={() => toggleRegion(r)}>{r}</button>
                         ))}
                     </Row>
                     {/* 부산은 구·군까지 (specs/010). 장소 주소로 가른 것이라 장소를 모르는 행사는 «부산 전체»에만 나온다 */}
