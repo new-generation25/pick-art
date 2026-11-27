@@ -455,7 +455,7 @@ SCREEN_CSS = """
 .group .gl div { border-bottom: 2px solid #E3DBCD; }
 .group .gocta { border: none; border-radius: 22px; }
 """
-THEME = "riso"
+THEME = "screen"  # 2026-11-27 운영자 결정 「새 색·글꼴」
 
 
 def _screen_page(html: str) -> str:
@@ -519,7 +519,7 @@ def main():
     ap.add_argument("--handle", default="")
     ap.add_argument("--today")
     ap.add_argument("--story", action="store_true", help="스토리 1장(1080x1920)만 만든다")
-    ap.add_argument("--theme", choices=["riso", "screen"], default="riso", help="screen = 사이트 새 화면 색·글꼴(시안)")
+    ap.add_argument("--theme", choices=["riso", "screen"], default="screen", help="screen = 사이트 새 화면 색·글꼴(2026-11-27 기본), riso = 옛 리소 테마")
     a = ap.parse_args()
     global THEME
     THEME = a.theme
