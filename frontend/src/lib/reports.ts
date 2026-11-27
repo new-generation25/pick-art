@@ -66,7 +66,7 @@ export function checkTip(t: TipInput, hasPhoto: boolean): string[] {
     const url = normalizeTipUrl(t.url);
     if (t.title.trim().length < 2) errs.push("행사 이름을 적어 주세요.");
     if (url && !/^https?:\/\/\S+\.\S+$/i.test(url)) errs.push("링크를 다시 확인해 주세요. 게시물이나 안내 페이지 주소를 통째로 붙여 주세요.");
-    if (!url && !hasPhoto) errs.push("링크나 사진 가운데 하나는 필요해요. 확인한 행사만 올리기 위해서예요.");
+    if (!url && !hasPhoto) errs.push("«링크 붙여 넣기» 칸에 주소를 넣거나 사진을 한 장 올려 주세요. 둘 중 하나는 있어야 확인할 수 있어요.");
     if (t.date_start && t.date_end && t.date_end < t.date_start) errs.push("끝나는 날짜가 시작보다 앞이에요.");
     const contact = t.contact.trim();
     if (contact && contact.length < 5) errs.push("연락처를 다시 확인해 주세요(전화번호나 이메일).");
@@ -79,7 +79,7 @@ export function tipErrorText(message: string): string {
     if (message.includes("login_required")) return "로그인한 뒤 보낼 수 있어요. 다시 로그인해 주세요.";
     if (message.includes("duplicate")) return "오늘 이미 받은 제보예요. 고맙습니다.";
     if (message.includes("daily_limit")) return "오늘은 더 보낼 수 없어요(하루 10건). 내일 다시 알려 주세요.";
-    if (message.includes("need_source")) return "링크나 사진 가운데 하나는 필요해요.";
+    if (message.includes("need_source")) return "«링크 붙여 넣기» 칸에 주소를 넣거나 사진을 한 장 올려 주세요.";
     if (message.includes("need_consent")) return "연락처를 남기려면 동의가 필요해요.";
     if (message.includes("bad_url")) return "링크를 다시 확인해 주세요. 게시물이나 안내 페이지 주소를 통째로 붙여 주세요.";
     if (message.includes("bad_title")) return "행사 이름을 적어 주세요.";

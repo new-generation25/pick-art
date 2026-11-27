@@ -170,12 +170,14 @@ export function TipForm() {
             </div>
 
             <fieldset className="flex flex-col gap-4">
-                <legend className={label}>원문 링크나 사진 <span className="font-normal text-ink-soft">(둘 중 하나)</span></legend>
+                <legend className={label}>원문 링크나 사진 <span className="font-normal text-ink-soft">(둘 중 하나는 꼭)</span></legend>
+                {/* 이름표가 안 보이면 빈 상자가 링크 칸인지 알 수 없다 — «링크 입력란이 없는데 링크가 없다고 한다»(운영자 2026-11-28) */}
                 <div>
-                    <label htmlFor="tip-url" className="sr-only">원문 링크</label>
-                    <input id="tip-url" type="text" inputMode="url" autoCapitalize="none" autoCorrect="off" value={form.url} onChange={set("url")} maxLength={500} className={field} placeholder="인스타그램 게시물·예매 페이지 주소" />
+                    <label htmlFor="tip-url" className="mb-1 block text-[13px] font-semibold text-ink-soft">링크 붙여 넣기</label>
+                    <input id="tip-url" type="text" inputMode="url" autoCapitalize="none" autoCorrect="off" value={form.url} onChange={set("url")} maxLength={500} className={field} placeholder="https://… 인스타그램 게시물·예매 페이지 주소" />
                 </div>
                 <div>
+                    <p className="mb-1 text-[13px] font-semibold text-ink-soft">또는 사진 올리기</p>
                     <input id="tip-photo" type="file" accept="image/jpeg,image/png,image/webp,image/*" onChange={pick} className="peer sr-only" />
                     <label htmlFor="tip-photo" className="flex min-h-12 cursor-pointer items-center justify-center rounded-full border border-dashed border-ink-soft bg-card px-4 text-[15px] font-semibold text-ink peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-[var(--pk-accent)]">
                         {file ? "다른 사진으로 바꾸기" : "포스터·현수막 사진 한 장 올리기"}
@@ -188,14 +190,16 @@ export function TipForm() {
             <details className={fold}>
                 <summary className={foldTitle}>더 알려 주기 <span className="font-normal text-ink-soft">(선택 — 날짜·장소)</span></summary>
                 <div className="mt-3 flex flex-col gap-3">
-                    <div className="grid grid-cols-2 gap-3">
-                        <div>
+                    {/* 날짜 칸은 휴대폰에서 한 줄에 하나씩: 두 칸을 나란히 두면 폭 150px 에 날짜 글자와 달력 그림이 겹친다(운영자 2026-11-28).
+                        아이폰은 빈 날짜 칸이 납작해지거나 칸 밖으로 넘치므로 block·최소 높이·max-w-full 을 준다 */}
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div className="min-w-0">
                             <label htmlFor="tip-start" className="mb-1 block text-[13px] font-semibold text-ink-soft">시작 날짜</label>
-                            <input id="tip-start" type="date" value={form.date_start} onChange={set("date_start")} className={`${field} min-w-0`} />
+                            <input id="tip-start" type="date" value={form.date_start} onChange={set("date_start")} className={`${field} block min-h-[51px] min-w-0 max-w-full`} />
                         </div>
-                        <div>
+                        <div className="min-w-0">
                             <label htmlFor="tip-end" className="mb-1 block text-[13px] font-semibold text-ink-soft">끝나는 날짜</label>
-                            <input id="tip-end" type="date" value={form.date_end} onChange={set("date_end")} className={`${field} min-w-0`} />
+                            <input id="tip-end" type="date" value={form.date_end} onChange={set("date_end")} className={`${field} block min-h-[51px] min-w-0 max-w-full`} />
                         </div>
                     </div>
                     <div className="grid grid-cols-[minmax(0,1fr)_110px] gap-3">
