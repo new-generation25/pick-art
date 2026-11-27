@@ -201,6 +201,34 @@ def extract_post_event(lines, ref, url):
     return [{"title": title, "category": cat, "venue": venue[:60], "start": per[0], "end": per[1], "time": per[2], "url": url}]
 
 
+# ---- 대기함에 올리지 않을 글 (2026-11-27 운영자 «말도 안 되는 건을 왜 검토로 올리나» — 전수 검토 631건 중 431건이 이런 글이었다)
+# 피카는 부산·경남 행사만 싣는다. 장소에 다른 시도 이름만 있으면 올리지 않는다(서울 마포아트센터 공연, 대구·경주 순회공연 등)
+OUTSIDE = re.compile(r"서울|마포|대학로|종로|혜화|강남구|홍대|성수동|용산|잠실|여의도|영등포|성북|인천|대구|대전|광주|울산|세종|수원|성남|고양|일산|부천|"
+                     r"의정부|남양주|파주|포천|안산|용인|과천|김포|춘천|강릉|원주|속초|청주|충주|제천|천안|아산|전주|군산|익산|목포|여수|순천|강진|"
+                     r"포항|경주|구미|안동|김천|제주|경기도|경기아트|강원|충북|충남|전북|전남|경북")
+INSIDE = re.compile(r"부산|해운대|수영구|동래|금정|사상|사하|영도|기장|연제|부산진|서면|광안|벡스코|경남|창원|마산|진해|김해|진주|통영|거제|양산|밀양|"
+                    r"사천|함안|고성|합천|거창|함양|창녕|의령|남해|하동|산청|장유")
+OUTSIDE_TAIL = re.compile(r"(?:[｜|\-–—]\s*|\s)(?:" + OUTSIDE.pattern + r")\s*[^\w가-힣]*$")
+# 행사 이름이 아니라 홍보·소식인 제목
+NOT_EVENT_TITLE = re.compile(r"할인|맛집|TOP\s?\d+|추천 ?코스|대관|채용|일자리|개통|출시|실거래|수험생|수험표|배경화면|설문|반값|프로모션|당첨자|"
+                             r"무조건 저장|저장 ?필수")
+# 날짜 없는 글에서: 끝난 공연의 인사·후기
+RECAP = re.compile(r"감사합니다|감사드|마무리|성료|마쳤|다녀왔|후기|끝났습니다|종료했|막을 내")
+
+
+def out_of_region(title, venue):
+    """장소에 다른 시도 이름이 있고 부산·경남 이름이 없으면 True. 장소를 못 읽은 글은 제목 끝의 지역 표시(«｜서울», «2027 대전»)만 본다"""
+    venue = venue or ""
+    if venue:
+        return bool(OUTSIDE.search(venue)) and not INSIDE.search(venue)
+    return bool(OUTSIDE_TAIL.search(title or "")) and not INSIDE.search(title or "")
+
+
+def keep_event(e):
+    """대기함에 올릴 만한 행사인지(부산·경남 안이고, 제목이 홍보·소식이 아니다)"""
+    return not out_of_region(e.get("title"), e.get("venue")) and not NOT_EVENT_TITLE.search(e.get("title") or "")
+
+
 def caption_lines(cap):
     """캡션 → 줄 목록(해시태그 줄은 뺀다). 수집과 다시 읽기(tools/reextract_instagram.py)가 같은 규칙을 쓴다"""
     return [ln.strip() for ln in (cap or "").replace("#", "\n#").split("\n") if ln.strip() and not ln.strip().startswith("#")]
@@ -240,8 +268,8 @@ async def collect_account(page, db, account, published, seen, max_age_days=21, d
         lines = caption_lines(cap)
         if third_party_roundup(lines, author, handle):
             continue   # 다른 계정이 여러 공연을 묶어 소개한 글(공동 게시). 행사는 주최 계정의 글로 잡힌다
-        evs = extract_post_event(lines, posted or date.today(), url)
-        if not evs and EVENT_WORDS.search(cap) and idx < 6:
+        evs = [e for e in extract_post_event(lines, posted or date.today(), url) if keep_event(e)]
+        if not evs and EVENT_WORDS.search(cap) and idx < 6 and len(lines) >= 2 and not RECAP.search(cap[:400])                 and not NOT_EVENT_TITLE.search(cap[:200]):
             # 날짜가 캡션에 없고 포스터에만 있는 경우. 게시일을 알 수 없어 최근 6개 게시물만 남기고,
             # 검토 때 이미지를 보고 날짜를 넣는다
             head = next((ln for ln in lines if len(re.sub(r"[^\w가-힣]", "", ln)) >= 4), "")

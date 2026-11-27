@@ -103,3 +103,23 @@ def test_day_only_end_does_not_eat_a_time():
     assert parse_period("12.3(목) - 7시 30분", REF)[:2] == ("2026-12-03", "2026-12-03")
     assert parse_period("12.3(목) ~ 19:30", REF)[:2] == ("2026-12-03", "2026-12-03")
     assert parse_period("12.3(목)~5(토)", REF)[:2] == ("2026-12-03", "2026-12-05")
+
+
+def test_out_of_region_and_promo_titles_are_not_stacked():
+    # 장소가 다른 시도: 올리지 않는다
+    assert ibs.out_of_region("3번째 안착한 청소년극 1번 <더 체리>", "마포아트센터 플레이맥")
+    assert ibs.out_of_region("크리스마스 콘서트", "대구콘서트하우스 챔버홀")
+    assert ibs.out_of_region("토요 클래식 살롱", "경주예술의전당 원화홀")
+    # 장소가 부산·경남: 제목에 다른 지역 이름이 있어도 올린다
+    assert not ibs.out_of_region("강릉시립교향악단 with 한재민", "통영국제음악당 콘서트홀")
+    assert not ibs.out_of_region("2026 부산국제아트페어 BIAF", "벡스코 제2전시장")
+    assert not ibs.out_of_region("나는 나를 죽였다", "나다소극장")
+    # 장소를 못 읽은 글: 제목 끝의 지역 표시만 본다
+    assert ibs.out_of_region("지브리 영화음악 콘서트 2027 대전💛", "")
+    assert ibs.out_of_region("1️⃣8️⃣ 사육신 충효예술한마당｜서울 🏯", "")
+    assert not ibs.out_of_region("서울예술단 <신과 함께_저승편>", "")
+    assert not ibs.out_of_region("해운대 빛축제｜부산", "")
+    # 홍보·소식 제목
+    assert not ibs.keep_event({"title": "수험생 워터파크 종일권 1만원", "venue": ""})
+    assert not ibs.keep_event({"title": "2026 제천 맛집 추천 TOP 20", "venue": ""})
+    assert ibs.keep_event({"title": "제20회 이웃사랑 김장나눔축제", "venue": "고성군종합운동장 순환도로"})
