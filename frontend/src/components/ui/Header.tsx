@@ -10,8 +10,8 @@ import { INSTAGRAM_URL, InstagramIcon } from "./InstagramLink";
 import { HeaderSearch } from "./HeaderSearch";
 
 /**
- * 맨 위 한 줄 (specs/014 시안 f01): 왼쪽 글자 로고 pica(끝 점만 초록), 오른쪽 찾기 · 내 정보.
- * 내 정보 메뉴 안에 찜·설정·캘린더·인스타그램·관리자·로그아웃을 둔다. 로그인 전이면 내 정보 → 로그인.
+ * 맨 위 한 줄 (specs/014 시안 f01 → 운영자 11/27 머리 줄 시안 h01-B): 왼쪽 까치 그림 + 글자 로고 pica(끝 점만 초록), 오른쪽 찾기 · 내 정보(흰 원).
+ * 내 정보 메뉴 안에 찜·설정·캘린더·인스타그램·관리자·로그아웃을 둔다. 로그인 전이면 인물 원 대신 «로그인» 글자 버튼.
  */
 export function Header() {
     const router = useRouter();
@@ -50,9 +50,14 @@ export function Header() {
         <div className="fixed inset-x-0 top-0 z-[1000] h-[60px] border-b border-line bg-paper">
             <div className="mx-auto flex h-full max-w-6xl items-center justify-between gap-2 pl-[18px] pr-[10px] sm:px-6">
                 {/* 찾는 중이면 휴대폰에서는 로고 자리까지 찾기 칸이 쓰고, PC에서는 로고를 두고 오른쪽에 적당한 길이로 연다 */}
-                <Link href="/" aria-label="pica 홈" className={`${searching ? "hidden sm:flex" : "flex"} shrink-0 items-baseline gap-2.5 no-underline`}>
-                    <span className="pica-num text-[26px] font-bold leading-none tracking-[-0.6px] text-ink">pica<span className="text-accent">.</span></span>
-                    <span className={`hidden text-[13px] font-semibold text-ink-soft ${searching ? "lg:inline" : "sm:inline"}`}>가까운 공연·전시·축제</span>
+                <Link href="/" aria-label="pica 홈" className={`${searching ? "hidden sm:flex" : "flex"} shrink-0 items-center gap-2 no-underline`}>
+                    {/* 확정 로고 그림의 윗부분(우체통 위 까치). 높이 36px, 그림 파일은 3배 크기. AI 시안이라 나중에 벡터로 다시 그린 파일로 바꾼다(브랜드 가이드 4절) */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/icons/logo-mark.png" alt="" width={40} height={36} className="block h-9 w-auto flex-none" />
+                    <span className="flex items-baseline gap-2.5">
+                        <span className="pica-num text-[24px] font-bold leading-none tracking-[-0.6px] text-ink">pica<span className="text-accent">.</span></span>
+                        <span className={`hidden text-[13px] font-semibold text-ink-soft ${searching ? "lg:inline" : "sm:inline"}`}>가까운 공연·전시·축제</span>
+                    </span>
                 </Link>
 
                 <div className={`flex min-w-0 items-center justify-end gap-1 ${searching ? "flex-1" : ""}`}>
@@ -62,7 +67,7 @@ export function Header() {
                     {user ? (
                         <Menu shadow="md" width={210} position="bottom-end" transitionProps={{ transition: "pop-top-right", duration: 220, timingFunction: "cubic-bezier(.2,.8,.2,1)" }}>
                             <Menu.Target>
-                                <button type="button" className="grid h-11 w-11 place-items-center rounded-full bg-ink text-white" aria-label="내 정보">
+                                <button type="button" className="grid h-11 w-11 place-items-center rounded-full bg-white text-ink shadow-[inset_0_0_0_1.5px_#CFC5B4]" aria-label="내 정보">
                                     <UserRound size={20} />
                                 </button>
                             </Menu.Target>
@@ -81,8 +86,8 @@ export function Header() {
                             </Menu.Dropdown>
                         </Menu>
                     ) : (
-                        <Link href="/login" className="grid h-11 w-11 place-items-center rounded-full bg-ink text-white" aria-label="내 정보 (로그인)">
-                            <UserRound size={20} />
+                        <Link href="/login" className="ml-1 flex h-[38px] shrink-0 items-center rounded-full bg-white px-[13px] text-[14px] font-bold text-ink no-underline shadow-[inset_0_0_0_1.5px_#CFC5B4]">
+                            로그인
                         </Link>
                     )}
                 </div>
