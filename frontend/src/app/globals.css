@@ -251,6 +251,21 @@ body {
 .pica-poster[data-size="detail"] .tp-date { font-size: 26px; }
 .pica-poster[data-size="detail"] .tp-title { font-size: 19px; }
 .pica-poster[data-size="detail"] .tp-src { font-size: 12.5px; }
+/* 선반 칸(홈 줄, 폭 104px 안팎)의 글자 포스터: 날짜·제목·정보 세 덩어리가 각각 온전히 보이게 한다(운영자 11/27, 시안 v4 f01).
+   예전에는 날짜가 두 줄로 꺾이고 제목 3번째 줄이 반쯤 잘린 채 «정보» 줄 위에 겹쳐 보였다.
+   날짜는 한 줄, 제목은 줄지 않는 2줄(칸이 넓으면 3줄), 정보는 맨 아래 한 줄 말줄임 */
+.pica-poster[data-size="shelf"] { container-type: inline-size; }
+.pica-poster[data-size="shelf"] .tp-date { font-size: 16px; white-space: nowrap; }
+.pica-poster[data-size="shelf"] .tp-date[data-len="m"] { font-size: 13.5px; letter-spacing: -0.2px; }
+.pica-poster[data-size="shelf"] .tp-date[data-len="l"] { font-size: 12.5px; white-space: normal; }
+.pica-poster[data-size="shelf"] .tp-title { font-size: 14px; margin-top: 6px; flex: 0 0 auto; -webkit-line-clamp: 2; }
+.pica-poster[data-size="shelf"] .tp-src { margin-top: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* 해를 넘기는 기간은 날짜가 두 줄이라, 좁은 칸에서는 제목을 한 줄만 둔다(정보 줄과 붙지 않게) */
+.pica-poster[data-size="shelf"] .tp-date[data-len="l"] + .tp-title { -webkit-line-clamp: 1; }
+@container (min-width: 124px) {
+  .pica-poster[data-size="shelf"] .tp-title { -webkit-line-clamp: 3; }
+  .pica-poster[data-size="shelf"] .tp-date[data-len="l"] + .tp-title { -webkit-line-clamp: 2; }
+}
 
 /* 공개 화면 전체(관리자 화면 제외)에 적용. Mantine 컴포넌트도 이 변수를 읽는다 */
 .pica-public {
