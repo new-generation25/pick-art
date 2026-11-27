@@ -69,7 +69,7 @@ export function waitingReason(p: ReviewPost, today: string): { head: string; lin
         if (r === "ended") return { head: "이미 끝난 행사", lines: ["다음 정기 실행이 «만료»로 정리합니다."] };
         return { head: "자동 공개 대기 — 검증에서 멈춤", lines: ["날짜는 공개 범위 안인데 공개되지 않았습니다. 원문 링크가 열리지 않거나 극장 영화로 걸러진 경우입니다.", "다음 정기 실행이 다시 확인합니다. 원문이 열리는지 봐 주세요."] };
     }
-    if (p.status === "REJECTED") return { head: "반영 안 함", lines: [c.rejected_reason ? `이유: ${String(c.rejected_reason)}` : "운영자가 반영하지 않기로 한 글입니다.", "같은 글이 다시 수집되지 않도록 지우지 않고 남겨 둡니다. 되돌리면 대기함으로 돌아갑니다."] };
+    if (p.status === "REJECTED") return { head: "반영 안 함", lines: [c.rejected_reason ? `이유: ${String(c.rejected_reason)}` : "운영자가 반영하지 않기로 한 글입니다.", "같은 글이 다시 수집되지 않도록 지우지 않고 남겨 둡니다. 되돌리면 판단 대기로 돌아갑니다."] };
     if (p.status === "PUBLISHED") return { head: "공개됨", lines: ["정기 실행의 검증을 통과해 공개된 글입니다."] };
     if (p.status === "DUPLICATE") return { head: "이미 공개된 행사와 같음", lines: ["같은 행사가 이미 공개돼 있어 따로 올리지 않았습니다."] };
     if (p.status === "EXPIRED") return { head: "기간이 지나 만료", lines: ["끝나는 날이 지나 공개하지 않았습니다."] };
@@ -92,7 +92,7 @@ interface Props {
 
 export function PostDetailModal({ post, actor, onClose, ...handlers }: Props) {
     return (
-        <Modal opened={!!post} onClose={onClose} size="xl" centered title={<span className="text-[13px] font-semibold text-ink-soft">대기함 글 자세히 보기</span>}
+        <Modal opened={!!post} onClose={onClose} size="xl" centered title={<span className="text-[13px] font-semibold text-ink-soft">판단 대기 글 자세히 보기</span>}
             classNames={{ content: "pica-portal" }} styles={{ body: { paddingTop: 0 } }}>
             {post && <Detail key={post.id} post={post} actor={actor} {...handlers} />}
         </Modal>
@@ -180,7 +180,7 @@ function Detail({ post, actor, onSaved, onReview, onCollected, onRestore }: { po
         onCollected(post.id, null);
         setActMsg("반영하지 않기로 했습니다.");
     };
-    const restore = async () => { setBusy(true); setActMsg(""); await onRestore(post); setBusy(false); setActMsg("대기함으로 되돌렸습니다."); };
+    const restore = async () => { setBusy(true); setActMsg(""); await onRestore(post); setBusy(false); setActMsg("판단 대기로 되돌렸습니다."); };
 
     const btn = "inline-flex h-11 items-center justify-center gap-1.5 rounded-full px-5 text-[14.5px] font-bold no-underline disabled:opacity-50";
     const primary = `${btn} bg-accent text-on-accent`;
@@ -194,7 +194,7 @@ function Detail({ post, actor, onSaved, onReview, onCollected, onRestore }: { po
     ) : post.status === "COLLECTED" || post.status === "PENDING" ? (
         <button type="button" disabled={busy} onClick={collectedReject} className={ghost}><X size={16} aria-hidden />반영 안 함</button>
     ) : post.status === "REJECTED" ? (
-        <button type="button" disabled={busy} onClick={restore} className={primary}><RotateCcw size={16} aria-hidden />대기함으로 되돌리기</button>
+        <button type="button" disabled={busy} onClick={restore} className={primary}><RotateCcw size={16} aria-hidden />판단 대기로 되돌리기</button>
     ) : null;
 
     const label = "text-[12px] font-semibold text-ink-soft";
@@ -225,7 +225,7 @@ function Detail({ post, actor, onSaved, onReview, onCollected, onRestore }: { po
                 <p className="mt-0.5 text-[12px] text-ink-soft">수집 {fmt(post.collected_at)}{c.review_bucket_at ? ` · 나눈 때 ${fmt(String(c.review_bucket_at))}` : ""}</p>
 
                 <section className="mt-3 rounded-[14px] bg-[var(--pk-accent-soft)] px-4 py-3" aria-label="대기 이유">
-                    <p className={label}>왜 대기함에 있나</p>
+                    <p className={label}>왜 판단 대기에 있나</p>
                     <p className="text-[15px] font-bold text-ink">{why.head}</p>
                     {why.lines.map((l, i) => <p key={i} className="mt-1 text-[13.5px] leading-relaxed text-ink">{l}</p>)}
                     {c.review_reason && <p className="mt-1 text-[11.5px] text-ink-soft">분류 기록: {String(c.review_bucket ? BUCKET_LABEL[c.review_bucket as ReviewBucket] || c.review_bucket : post.status)} · {String(c.review_reason)}</p>}

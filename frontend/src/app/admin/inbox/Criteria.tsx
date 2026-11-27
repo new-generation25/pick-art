@@ -48,13 +48,13 @@ function Card({ it }: { it: Item }) {
 
 export function CriteriaModal({ opened, onClose }: { opened: boolean; onClose: () => void }) {
     return (
-        <Modal opened={opened} onClose={onClose} size="xl" centered title={<span className="text-[16px] font-bold text-ink">대기함 판단 기준</span>}>
+        <Modal opened={opened} onClose={onClose} size="xl" centered title={<span className="text-[16px] font-bold text-ink">판단 대기 기준</span>}>
             <p className="text-[13.5px] leading-relaxed text-ink">
                 정기 실행(매일 08:20·15:00)이 수집한 글을 아래 순서로 나눕니다. 위에서부터 처음 맞는 규칙 하나만 적용합니다.
             </p>
             <ol className="mt-2 list-decimal space-y-1 pl-5 text-[13.5px] leading-relaxed text-ink">
-                <li>끝나는 날(없으면 시작일)이 오늘보다 앞이면 <b>만료</b> — 대기함에 오지 않습니다.</li>
-                <li>이미 공개된 행사와 같으면(시작일이 같고 제목이 서로 포함) <b>중복</b> — 대기함에 오지 않습니다.</li>
+                <li>끝나는 날(없으면 시작일)이 오늘보다 앞이면 <b>만료</b> — 판단 대기에 오지 않습니다.</li>
+                <li>이미 공개된 행사와 같으면(시작일이 같고 제목이 서로 포함) <b>중복</b> — 판단 대기에 오지 않습니다.</li>
                 <li>인스타그램 글은 계정 역할과 읽힌 정보에 따라 <b>공개 후보 · 동의 필요 · 사람 판단</b>으로 갑니다.</li>
                 <li>기관 누리집·블로그·KOPIS 수집분은 날짜(오늘~60일)·원문 링크·중복 검증을 통과하면 <b>바로 공개</b>되고, 통과하지 못한 것만 <b>자동 공개 대기</b>에 남습니다.</li>
             </ol>
