@@ -76,7 +76,48 @@ async def fetch_caption(page, code):
 
 
 TITLE_HINT = re.compile(r"「|《|〈|<|‘|'|\"|제\s?\d+\s?회|축제|페스티벌|공연|음악회|콘서트|전시|문화제|마켓|클래스|대회|상영|야행")
-SIGNUP = re.compile(r"신청|접수|모집|마감|발표|수강료|참가비|문의")
+SIGNUP = re.compile(r"신청|접수|모집|마감|발표|수강료|참가비|문의|당첨")
+# 문장으로 끝나는 줄(«…만나보세요», «…전해드립니다😊»). 장소 줄·행사 이름 줄을 가려낼 때만 쓴다
+SENTENCE = re.compile(r"(니다|세요|어요|아요|예요|에요|해요|까요|네요|군요|지요|구요|는데|한데|되는|하는|있는)$")
+# 표지가 붙은 줄: «공연명 : ○○»은 그 값이 제목이고, «장소: ○○»·«문의 ○○» 같은 줄은 제목 후보가 아니다
+LABEL_TITLE = re.compile(r"^(?:공연명|전시명|행사명|작품명|축제명|제목)\s*[:：|]\s*(.{2,60})$")
+LABEL_OTHER = re.compile(r"^(?:장소|전시 ?장소|공연 ?장소|행사 ?장소|일시|시간|공연 ?시간|관람 ?시간|문의|공연 ?문의|예매|관람료|입장료|티켓|주최|주관|후원)\s*[:：|]?\s")
+# 연도로 시작하는 짧은 행사 이름 줄: «2026 부산국제아트페어 BIAF». 글 맨 위 3줄 안에 있을 때만 쓴다
+YEAR_NAME = re.compile(r"^20\d\d\s+[가-힣A-Za-z]")
+
+# 작품 이름만 적은 줄: «연극 [나는 나를 죽였다]», «🎭 연극 〈나는 나를 죽였다〉». 이런 줄이 있으면 홍보 문구보다 먼저 제목으로 쓴다
+WORK_TITLE = re.compile(r"^(?:연극|뮤지컬|음악극|창작극|마당극|인형극|낭독극|낭독 ?공연|무용|오페라|창극|판소리|콘서트|음악회|연주회|독주회|리사이틀|"
+                        r"전시|개인전|기획전|특별전|공연|영화)\s*[\[〈《「『<]\s*([^\]〉》」』>]{2,40}?)\s*[\]〉》」』>](.*)$")
+NOT_A_WORK = re.compile(r"^(안내|공지|모집|마감|이벤트|예매|티켓)")
+# 장소 이름으로 끝나는 말. 이 말이 든 짧은 줄은 행사 이름이 아니라 장소로 본다(«벡스코 제2전시장», «나다소극장»)
+VENUE_WORD = re.compile(r"소극장|극장|아트홀|콘서트홀|전시장|전시실|전시관|아트센터|예술의전당|문화의전당|문화예술회관|문화회관|예술회관|미술관|갤러리|"
+                        r"박물관|기념관|도서관|문화센터|음악당|공연장|스튜디오|씨어터|시어터|아트스페이스|회관|체육관|컨벤션센터|벡스코|BEXCO|"
+                        r"[가-힣A-Za-z]홀(?![가-힣])", re.I)
+EVENT_TYPE = re.compile(r"축제|페스티벌|페스타|문화제|음악회|콘서트|공연|전시회|전시(?!장|실|관)|특별전|기획전|개인전|아트페어|마켓|대회|상영|"
+                        r"연주회|리사이틀|展|모집|안내|이벤트")
+BULLET = re.compile(r"^[\s•·∙▪▫■□◾◽▶▷✔✅☑📌📍🏛\-–—*]+")
+
+
+def venue_line(ln):
+    """장소만 적은 줄이면 그 장소 이름, 아니면 ''.
+    짧고(30자), 장소 말 뒤에 붙는 말이 짧고(«제2전시장», «대극장», «624»), 행사 종류 말·날짜·시각·문장 끝·쉼표가 없다."""
+    c = BULLET.sub("", ln).strip()
+    c = re.sub(r"^[^\w가-힣(]+", "", c)                              # 앞쪽 이모지·기호
+    c = re.sub(r"[^\w가-힣)\]]+$", "", c)                           # 뒤쪽 이모지·기호
+    c = re.sub(r"\s*[(（][^)）]{0,40}[)）]\s*$", "", c).strip()   # 뒤에 붙은 (주소)·(3층)
+    hits = list(VENUE_WORD.finditer(c))
+    if not (2 <= len(c) <= 30) or not hits:
+        return ""
+    if re.search(r"\d{1,2}\s*[:시]\s*\d{0,2}|\d{1,2}\s*[./월]\s*\d{1,2}|20\d\d|[\[〈《「『<'\"‘“,，｜|]|[.!?~]$", c):
+        return ""
+    if SENTENCE.search(c) or re.search(r"에서|으로|까지|부터|함께|특성|\s등(\s|$)", c):
+        return ""
+    tail = c[hits[-1].end():].strip()
+    if len(tail) > 8 or " " in tail:                                 # 장소 말 뒤에 말이 이어지면 장소 이름이 아니라 글 제목이다
+        return ""
+    if EVENT_TYPE.search(VENUE_WORD.sub("", c)) or SIGNUP.search(c) or re.search(r"공고|대관|휴관", c):
+        return ""
+    return c
 DATE_LINE = re.compile(r"^(📅|🗓|📆)|일시|일정|날짜|기간|\d{1,2}\s*월\s*\d{1,2}\s*일|\d{1,2}\s*[./]\s*\d{1,2}\.?\s*\(")
 GREETING = re.compile(r"^안녕하세요|입니다[.!😊😁]*$|^(공지|알림|안내)\s*$")
 
@@ -91,21 +132,44 @@ def extract_post_event(lines, ref, url):
     # 표지(📅·일시·날짜·기간) 있는 줄을 먼저, 없으면 본문 속 날짜 문장을 본다
     marked = [i for i, ln in enumerate(lines) if re.search(r"^(📅|🗓|📆)|일시|일정|날짜|기간", ln)]
     order = marked + [i for i in range(len(lines)) if i not in marked]
+    di = -1   # 날짜를 읽은 줄
     for i in order:
         ln = lines[i]
         if not DATE_LINE.search(ln) or SIGNUP.search(ln):
             continue
         per = parse_period(re.sub(r"^.*?(일시|일정|날짜|기간)\s*[:：|]?\s*", "", ln), ref)
+        di = i
         if not per and i in marked and i + 1 < len(lines):  # '📅 일시' 줄 아래에 날짜가 오는 경우
             per = parse_period(re.sub(r"^[^\d]*", "", lines[i + 1]), ref)
+            di = i + 1
         if per:
             break
     if not per:
         return []
     text = " ".join(lines[:15])
-    head = [ln for ln in lines[:8] if len(_clean(ln)) >= 4 and not DATE_LINE.search(ln) and not GREETING.search(ln.strip())]
+    # 장소만 적은 줄은 제목 후보에서 뺀다(«벡스코 제2전시장»이 «전시»에 걸려 제목이 되던 문제)
+    head = [ln for ln in lines[:8] if len(_clean(ln)) >= 4 and not DATE_LINE.search(ln) and not GREETING.search(ln.strip())
+            and not venue_line(ln) and not LABEL_OTHER.match(_clean(ln) + " ")]
     title = next((ln for ln in head if TITLE_HINT.search(ln)), head[0] if head else "")
-    if len(_clean(title)) > 30:
+    # 확실한 표시가 있으면 그것을 먼저 쓴다: ① «연극 [작품 이름]» 줄(이름만 적은 줄 먼저) ② «공연명 : ○○» ③ 맨 위 «2026 ○○» 행사 이름 줄
+    works = [m for m in (WORK_TITLE.match(_clean(ln)) for ln in lines[:25]) if m and not NOT_A_WORK.match(m.group(1))]
+    work = next((m.group(1) for m in works if not m.group(2).strip()), "") or (works[0].group(1) if works else "")
+    label = next((m.group(1) for m in (LABEL_TITLE.match(_clean(ln)) for ln in lines[:25]) if m), "")
+    def _tail(x):
+        return re.sub(r"[^\w가-힣)\]〉》」』>]+$", "", x)
+    named = next((_tail(_clean(ln)) for ln in lines[:3] if YEAR_NAME.match(_clean(ln)) and len(_tail(_clean(ln))) <= 30
+                  and not SENTENCE.search(_tail(_clean(ln))) and not venue_line(ln)), "")
+    near_top = title in lines[:4]
+    if named and ((near_top and re.search(r"[「《〈<‘“'\"].{2,}[」》〉>’”'\"]", title))
+                  or (len(_clean(title)) >= 6 and named.startswith(_tail(_clean(title))))):
+        named = ""   # 맨 위 가까이에서 고른 제목에 작품 이름 표시(〈 〉, ‘ ’)가 있거나 같은 이름이면 그대로 둔다
+    if work:
+        title = work.strip()
+    elif label:
+        title = label.strip()
+    elif named:
+        title = named
+    elif len(_clean(title)) > 30:
         # 긴 홍보 문장 대신 괄호 속 작품명이나 '제N회 ○○축제' 같은 행사명
         m = re.search(r"[「《〈<]([^」》〉>]{2,40})[」》〉>]", text) or \
             re.search(r"((?:20\d\d\s*)?제\s?\d+\s?회\s?[가-힣A-Za-z0-9·&]+(?:\s[가-힣A-Za-z0-9·&]+){0,3}?\s?"
@@ -126,10 +190,27 @@ def extract_post_event(lines, ref, url):
         return v
     venue = next((v for v in (_venue(ln) for ln in cands if not SIGNUP.search(ln))
                   if v and not re.search(r"안내$", v)), "")
+    if not venue and di >= 0:
+        # 표지 없이 적은 장소: 날짜 줄의 «| 장소», 또는 날짜 줄 바로 아래 4줄·위 2줄 안의 장소 줄
+        tail = lines[di].split("|")[-1] if "|" in lines[di] else ""
+        near = [tail] + lines[di + 1:di + 5] + lines[max(0, di - 2):di][::-1]
+        venue = next((v for v in (venue_line(ln) for ln in near if ln) if v), "")
     cat = "축제" if re.search(r"축제|페스티벌|문화제|야행|페스타", title) else \
           "전시" if re.search(r"전시|展|특별전|기획전", title) else \
           "공연" if re.search(r"공연|음악회|콘서트|연주|버스킹|소리극|연극|뮤지컬", title + text[:300]) else "행사"
     return [{"title": title, "category": cat, "venue": venue[:60], "start": per[0], "end": per[1], "time": per[2], "url": url}]
+
+
+def caption_lines(cap):
+    """캡션 → 줄 목록(해시태그 줄은 뺀다). 수집과 다시 읽기(tools/reextract_instagram.py)가 같은 규칙을 쓴다"""
+    return [ln.strip() for ln in (cap or "").replace("#", "\n#").split("\n") if ln.strip() and not ln.strip().startswith("#")]
+
+
+def third_party_roundup(lines, author, handle):
+    """글쓴이가 이 계정이 아니고 날짜 줄이 3개 이상이면, 다른 계정이 여러 행사를 묶어 소개한 글로 본다"""
+    if not author or author.strip().lower() == (handle or "").strip().lower():
+        return False
+    return sum(1 for ln in lines if DATE_LINE.search(ln) and not SIGNUP.search(ln)) >= 3
 
 
 async def collect_account(page, db, account, published, seen, max_age_days=21, dry=False):
@@ -155,7 +236,9 @@ async def collect_account(page, db, account, published, seen, max_age_days=21, d
         if not cap or NOT_EVENT.search(cap[:200]):
             continue
         url = f"https://www.instagram.com/p/{code}/"
-        lines = [ln.strip() for ln in cap.replace("#", "\n#").split("\n") if ln.strip() and not ln.strip().startswith("#")]
+        lines = caption_lines(cap)
+        if third_party_roundup(lines, author, handle):
+            continue   # 다른 계정이 여러 공연을 묶어 소개한 글(공동 게시). 행사는 주최 계정의 글로 잡힌다
         evs = extract_post_event(lines, posted or date.today(), url)
         if not evs and EVENT_WORDS.search(cap) and idx < 6:
             # 날짜가 캡션에 없고 포스터에만 있는 경우. 게시일을 알 수 없어 최근 6개 게시물만 남기고,

@@ -24,6 +24,8 @@ CATEGORY = [("축제|페스타|페스티벌|야행|문화제|예술제|축전", 
 
 # 11.6.(금) / 2026. 11. 7.(토) / 10월 30일(금)
 MD = re.compile(r"(?:(20\d\d)\s*[.년]\s*)?(\d{1,2})\s*(?:[./]|월)\s*(\d{1,2})\s*(?:일|\.)?")
+# 끝 날짜에 일만 적은 기간: 12.03(목)-05(토) / 12월 3일(목)–6일(일). 시각(«- 7시», «~ 19:30»)과 헷갈리지 않게 뒤에 «일»이나 «(»가 와야 한다
+DAY_ONLY_END = re.compile(r"^\s*(?:\([^)]{1,4}\))?\s*[-~–—]\s*(\d{1,2})\s*(?:일|\()")
 
 
 def _clean(s):
@@ -51,10 +53,18 @@ def parse_period(line, ref: date):
             found.append(date(yy, mo, d))
         except ValueError:
             continue
+        last_end = m.end()
         if len(found) == 2:
             break
     if not found:
         return None
+    if len(found) == 1:
+        m2 = DAY_ONLY_END.match(body[last_end:])
+        if m2 and found[0].day < int(m2.group(1)) <= 31:
+            try:
+                found.append(found[0].replace(day=int(m2.group(1))))
+            except ValueError:
+                pass
     t = re.search(r"\d{1,2}:\d{2}\s*(?:~\s*\d{1,2}:\d{2})?", body)
     return found[0].isoformat(), found[-1].isoformat(), t.group(0) if t else ""
 
