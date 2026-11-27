@@ -223,6 +223,7 @@ body { background: #888; }
 .event .ev-big span:last-child { font-size: 56px; font-weight: 900; line-height: 1.2; padding-bottom: 12px; }
 .event .ways div { font-size: 40px; font-weight: 700; padding: 26px 30px; margin-bottom: 18px; background: %(card)s; border: 3px solid %(ink)s; }
 .event .ways b, .group .gocta b { font-weight: 900; }
+.event .ways .pt { display: inline-block; margin-left: 16px; font-size: 30px; font-weight: 800; color: #fff; background: %(blue)s; padding: 4px 16px; vertical-align: middle; }
 .event .small { font-size: 26px; font-weight: 500; color: %(ink_soft)s; line-height: 1.55; }
 .group .gl div { font-size: 40px; font-weight: 700; line-height: 1.4; padding: 26px 0; border-bottom: 3px solid %(ink)s; }
 .group .gocta { background: %(blue)s; color: #fff; font-size: 36px; font-weight: 700; line-height: 1.5; padding: 30px 36px; border: 4px solid %(ink)s; }
@@ -350,10 +351,10 @@ def slides_html(f: dict, poster: str, handle: str) -> list:
   <div class="pad disp h2 print" style="top:250px">우리 동네 행사,<br>알려 주세요</div>
   <div class="pad ev-big" style="top:480px"><span class="n">5</span><span>명께 매주<br>커피 쿠폰</span></div>
   <div class="pad ways" style="top:760px">
-    <div><b>피카 사이트</b> 「행사 제보하기」</div>
+    <div><b>피카 사이트</b> 「행사 제보하기」<span class="pt">실리면 100포인트</span></div>
     <div><b>카카오톡 채널 «피카»</b> 「행사 알리기」</div>
   </div>
-  <div class="pad small" style="bottom:110px">그 주에 확인해서 피카에 실린 제보 가운데 골라요 · 당첨은 인스타그램과 카카오톡 채널 «피카»에서 알려요<br>제일 많이 알리신 두 분은 무조건 당첨.<br>이 이벤트는 인스타그램이 후원·보증·관리하지 않으며, 인스타그램과 관련이 없습니다.</div>
+  <div class="pad small" style="bottom:110px">커피 쿠폰은 12월까지 · 그 주에 확인해서 피카에 실린 제보 가운데 골라요 · 당첨은 인스타그램과 카카오톡 채널 «피카»에서 알려요<br>제일 많이 알리신 두 분은 무조건 당첨.<br>이 이벤트는 인스타그램이 후원·보증·관리하지 않으며, 인스타그램과 관련이 없습니다.</div>
 </div>""")
 
     # 7. 단체·예술가 안내(2026-11-27 운영자 결정, 같은 문서 12-3)
@@ -453,6 +454,7 @@ SCREEN_CSS = """
 .how .hint { border: none; border-radius: 999px; background: #E6EFE9; }
 .event .ev-big .n { font-family: 'Space Grotesk', sans-serif; letter-spacing: -8px; }
 .event .ways div { border: none; border-radius: 20px; box-shadow: 0 3px 12px rgba(30,26,21,.12); }
+.event .ways .pt { border-radius: 999px; }
 .group .gl div { border-bottom: 2px solid #E3DBCD; }
 .group .gocta { border: none; border-radius: 22px; }
 """
