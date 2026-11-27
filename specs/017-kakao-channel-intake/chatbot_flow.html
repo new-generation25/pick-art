@@ -1,0 +1,204 @@
+<title>피카 카카오톡 챗봇 흐름</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=Noto+Sans+KR:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* 레이아웃: 위에서 아래로 흐르는 한 줄 기둥. 단계는 세로 선으로 잇고, 챗봇 말풍선은 카카오 채팅 모양을 흉내 낸다 */
+:root {
+  --paper: #F4EFE6; --card: #FFFFFF; --ink: #1E1A15; --soft: #6B6257; --line: #E3DBCD;
+  --green: #2E6B4E; --green-soft: #E6EFE9; --amber: #8A5A12; --amber-soft: #F6ECD8; --chat: #B2C7D9;
+  --f-title: "Gowun Batang", "Noto Serif KR", serif;
+  --f-body: "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --f-num: "Space Grotesk", "Noto Sans KR", sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #191612; --card: #24201B; --ink: #F1EBE0; --soft: #B4A999; --line: #3A342C;
+  --green: #7CC4A0; --green-soft: #1F3329; --amber: #E0B46A; --amber-soft: #352A18; --chat: #2E3F4E; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #191612; --card: #24201B; --ink: #F1EBE0; --soft: #B4A999; --line: #3A342C;
+  --green: #7CC4A0; --green-soft: #1F3329; --amber: #E0B46A; --amber-soft: #352A18; --chat: #2E3F4E; color-scheme: dark }
+body { background: var(--paper); color: var(--ink); font: 15px/1.65 var(--f-body); }
+.wrap { max-width: 820px; margin: 0 auto; padding-block: 28px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 40px; }
+h1 { font: 700 30px/1.25 var(--f-title); margin: 0; text-wrap: balance; }
+h2 { font: 700 21px/1.3 var(--f-title); margin: 0 0 14px; text-wrap: balance; }
+h3 { font-size: 15px; margin: 0; }
+p { margin: 0; }
+.sub { color: var(--soft); margin-top: 8px; max-width: 62ch; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.chip { font-size: 12.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+.live { background: var(--green-soft); color: var(--green); }
+.wait { background: var(--amber-soft); color: var(--amber); }
+.num { font-family: var(--f-num); font-variant-numeric: tabular-nums; }
+
+/* 들어오는 길 */
+.doors { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.door { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 4px; min-width: 0; }
+.door b { font-size: 14.5px; }
+.door span { color: var(--soft); font-size: 13.5px; }
+
+/* 단계 기둥 */
+.steps { display: grid; gap: 0; }
+.step { display: grid; grid-template-columns: 36px 1fr; gap: 14px; }
+.rail { display: flex; flex-direction: column; align-items: center; }
+.dot { width: 30px; height: 30px; border-radius: 50%; background: var(--green); color: var(--paper); display: grid; place-items: center; font: 700 14px var(--f-num); flex: none; }
+.rail::after { content: ""; flex: 1; width: 2px; background: var(--line); margin: 4px 0; }
+.step:last-child .rail::after { display: none; }
+.body { padding-bottom: 22px; display: grid; gap: 10px; min-width: 0; }
+.who { color: var(--soft); font-size: 13.5px; }
+
+/* 채팅 흉내 */
+.chat { background: var(--chat); border-radius: 12px; padding: 12px; display: grid; gap: 8px; }
+.me { justify-self: end; background: #FEE500; color: #1E1A15; border-radius: 12px 2px 12px 12px; padding: 7px 12px; font-size: 14px; max-width: 85%; }
+.bot { justify-self: start; background: var(--card); color: var(--ink); border-radius: 2px 12px 12px 12px; padding: 10px 12px; font-size: 14px; max-width: 92%; display: grid; gap: 8px; min-width: 0; }
+.bot .t { font-weight: 700; }
+.btns { display: grid; gap: 6px; }
+.btn { border: 1px solid var(--line); border-radius: 8px; padding: 6px; text-align: center; font-size: 13.5px; background: var(--paper); }
+.btn small { color: var(--soft); }
+.qr { justify-self: start; border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 4px 12px; font-size: 13px; }
+.note { font-size: 13.5px; color: var(--soft); }
+
+/* 다른 갈래 */
+.forks { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.fork { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.fork .chat { padding: 10px; }
+
+/* 규칙 */
+ul.rules { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; }
+
+/* 표 */
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--card); }
+table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 13px; color: var(--soft); font-weight: 700; }
+tr:last-child td { border-bottom: 0; }
+
+/* 제안 */
+.ideas { display: grid; gap: 10px; }
+.idea { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 6px; }
+.idea .why { color: var(--soft); font-size: 13.5px; }
+.tag { font-size: 12px; font-weight: 700; color: var(--amber); }
+
+/* 운영자 몫 */
+.todo { background: var(--green-soft); border: 2px solid var(--green); border-radius: 14px; padding: 16px 18px; display: grid; gap: 10px; }
+.todo h2 { color: var(--green); margin: 0; }
+.todo ol { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; }
+a { color: var(--green); }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>피카 카카오톡 챗봇 흐름</h1>
+    <p class="sub">카카오톡 채널 «피카»(@pickanews)에 들어온 사람이 무엇을 누르고 무엇을 받는지, 2026-11-27 밤 기준으로 정리했습니다. 채널은 주로 행사 제보를 받는 곳이고, 마지막 목표는 피카(picka.news) 이용자를 늘리는 것입니다.</p>
+    <div class="chips"><span class="chip live">운영 중</span><span class="chip wait">배포 대기: 카드 버튼 «행사 알리기 · 피카 보기»</span></div>
+  </header>
+
+  <section>
+    <h2>들어오는 길</h2>
+    <div class="doors">
+      <div class="door"><b>채팅방 처음 열기</b><span>인사 카드가 옵니다</span></div>
+      <div class="door"><b>아래 메뉴 «행사 알리기»</b><span>제보를 시작합니다</span></div>
+      <div class="door"><b>아래 메뉴 «피카 보기»</b><span>picka.news 가 열립니다(챗봇 거치지 않음)</span></div>
+      <div class="door"><b>아래 메뉴 «문의하기»</b><span>연락 길 안내 카드. 셋째 칸은 바꿀 자리(아래 결정)</span></div>
+      <div class="door"><b>아무 말·사진 보내기</b><span>제보 시간 30분 안이면 제보, 밖이면 안내 카드</span></div>
+    </div>
+    <p class="note" style="margin-top:10px">아래 메뉴는 채팅방에 들어오면 펼쳐진 채로 보입니다(«항상 열림»). 한 줄 3칸 틀이라 세 칸을 모두 채워야 합니다.</p>
+  </section>
+
+  <section>
+    <h2>제보 흐름</h2>
+    <div class="steps">
+      <div class="step"><div class="rail"><span class="dot">1</span></div><div class="body">
+        <h3>인사 카드</h3><p class="who">채팅방을 처음 열면</p>
+        <div class="chat"><div class="bot"><span class="t">피카 카카오톡 채널이에요</span><span>가까운 공연·전시·축제를 날짜순으로 알려 드려요(picka.news). 궁금한 것은 메일이나 인스타그램 @picka.news 메시지로 보내 주세요. 공연·전시를 알리고 싶은 단체·예술가는 «행사 알리기»를 눌러 주세요.</span>
+          <div class="btns"><span class="btn">행사 알리기</span><span class="btn">피카 보기 <small>→ picka.news</small></span></div></div></div>
+      </div></div>
+
+      <div class="step"><div class="rail"><span class="dot">2</span></div><div class="body">
+        <h3>«행사 알리기» → 권리 확인 동의 (처음 한 번)</h3><p class="who">동의한 적이 없는 사람</p>
+        <div class="chat"><div class="me">행사 알리기</div>
+          <div class="bot"><span>리플렛·포스터 사진이나 일정 글을 보내 주시면 운영자가 확인한 뒤에 피카에 올립니다. 자동으로 올라가지 않아요.</span><span>보내기 전에 두 가지에 동의해 주세요. ① 올릴 권한이 있음 ② 행사 정보를 피카 사이트·SNS에 알리는 데 씀. 사진은 1년 보관, 카카오 이름·전화번호는 받지 않아요.</span></div>
+          <span class="qr">동의하고 보내기</span></div>
+      </div></div>
+
+      <div class="step"><div class="rail"><span class="dot">3</span></div><div class="body">
+        <h3>제보 시간 30분 열림</h3><p class="who">동의를 누르면, 또는 이미 동의한 사람이 «행사 알리기»를 누르면</p>
+        <div class="chat"><div class="me">동의하고 보내기</div><div class="bot"><span>동의해 주셔서 고맙습니다. 지금부터 30분 동안 보내는 리플렛·포스터 사진이나 일정 글을 행사 제보로 받아요.</span></div></div>
+      </div></div>
+
+      <div class="step"><div class="rail"><span class="dot">4</span></div><div class="body">
+        <h3>사진·글 보내기</h3><p class="who">채팅창에 그냥 보냅니다. 여러 장도 됩니다</p>
+        <div class="chat"><div class="me">📷 포스터 사진</div><div class="bot"><span>사진 1장 받았어요. 운영자가 확인한 뒤에 피카에 올립니다. 단체 이름이 사진에 없으면 지금 글로 보내 주세요.</span></div>
+          <div class="me">극단 ○○, 12월 20일 창원 공연이에요</div><div class="bot"><span>방금 보낸 사진과 함께 받았어요.</span></div></div>
+        <p class="note">사진 뒤 10분 안에 보낸 글은 같은 제보로 묶습니다. 보낼 때마다 제보 시간이 30분 늘어납니다.</p>
+      </div></div>
+
+      <div class="step"><div class="rail"><span class="dot">5</span></div><div class="body">
+        <h3>운영자 확인 → 피카에 실림</h3><p class="who">운영자</p>
+        <p>예약 작업이 사진의 글자를 읽어 초안을 만들고, 운영자가 관리자 화면 «리플렛 제보»에서 확인해 «등록»해야 picka.news 에 공개됩니다.</p>
+      </div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>제보가 아닐 때</h2>
+    <div class="forks">
+      <div class="fork"><h3>제보 시간 밖에 보낸 말·사진</h3>
+        <div class="chat"><div class="me">주차 되나요?</div><div class="bot"><span class="t">무엇을 도와드릴까요?</span><span>방금 보낸 내용은 저장하거나 운영자에게 넘기지 않았어요. 문의는 메일이나 인스타그램 @picka.news 메시지로 보내 주세요.</span><div class="btns"><span class="btn">행사 알리기</span><span class="btn">피카 보기</span></div></div></div></div>
+      <div class="fork"><h3>«문의하기»·«상담» 같은 말</h3>
+        <div class="chat"><div class="me">문의하기</div><div class="bot"><span class="t">피카 카카오톡 채널이에요</span><span>이 채널은 공연·전시 정보를 받는 곳이라 자동으로 답해요. 궁금한 것은 메일 pick.art.pica@gmail.com 이나 인스타그램 @picka.news 메시지로 보내 주세요.</span><div class="btns"><span class="btn">행사 알리기</span><span class="btn">피카 보기</span></div></div></div>
+        <p class="note">상담 연결 버튼은 두지 않습니다(운영자 11/27). 입력창 옆 카카오 자체 «상담 연결» 버튼은 카카오가 붙이는 것이라 남고, 누르면 파트너센터 «내 채팅»으로 들어옵니다.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>피카 회원과 잇기</h2>
+    <div class="steps">
+      <div class="step"><div class="rail"><span class="dot">1</span></div><div class="body"><h3>picka.news «내 정보» → «연결 코드 받기»</h3><p class="who">로그인한 회원(구글·카카오 모두)</p><p>6자리 코드가 10분 동안 보입니다. «카카오톡 채널 열기» 버튼이 같이 있습니다.</p></div></div>
+      <div class="step"><div class="rail"><span class="dot">2</span></div><div class="body"><h3>채팅방에 «연결 123456»</h3>
+        <div class="chat"><div class="me">연결 482915</div><div class="bot"><span>피카 회원과 연결했어요. 이 채팅방에서 보내는 행사 제보는 회원님이 보낸 것으로 기록돼요.</span></div></div>
+        <p class="note">그 전에 같은 카톡으로 보낸 제보도 이 회원에게 붙습니다. 틀린 코드는 하루 5번까지. «연결»만 보내면 방법을 안내합니다. 연결 끊기는 «내 정보»에서.</p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>정해 둔 규칙</h2>
+    <ul class="rules">
+      <li>한 사람 하루 <span class="num">5</span>건, 채널 전체 하루 <span class="num">60</span>건까지 받습니다.</li>
+      <li>보낸 사람은 카카오가 주는 비식별 값을 한 번 더 바꾼 구분값으로만 압니다. 이름·전화번호는 받지 않습니다.</li>
+      <li>사진과 구분값·동의 기록은 1년 뒤 지웁니다. 회원 연결은 «연결 끊기»나 탈퇴 때까지.</li>
+      <li>무엇이든 자동으로 실리지 않습니다. 운영자가 확인해야 공개됩니다.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>운영 중과 배포 대기</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>항목</th><th>지금 운영</th><th>배포하면</th></tr></thead>
+      <tbody>
+        <tr><td>인사·안내 카드 버튼</td><td>인스타그램으로 문의 · 행사 알리기</td><td>행사 알리기 · 피카 보기</td></tr>
+        <tr><td>«문의하기» 카드 제목</td><td>운영자에게 문의하기</td><td>피카 카카오톡 채널이에요</td></tr>
+        <tr><td>상담 연결 버튼</td><td>없음(11/27 배포로 뺌)</td><td>없음</td></tr>
+        <tr><td>회원 연결 코드</td><td>동작(11/27 배포)</td><td>그대로</td></tr>
+        <tr><td>아래 메뉴</td><td colspan="2">행사 알리기 · 피카 보기 · 문의하기, 항상 열림 (관리자센터 설정, 배포와 무관)</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>피카 이용자를 늘리려면</h2>
+    <p class="sub" style="margin:-6px 0 12px">챗봇은 제보를 받는 데서 끝나지 않고 picka.news 로 사람을 보내야 합니다. 바로 할 수 있는 것부터 적었습니다.</p>
+    <div class="ideas">
+      <div class="idea"><span class="tag">설정만, 배포 없음</span><h3>아래 메뉴 셋째 칸을 사이트로 보내는 칸으로</h3><p>«문의하기» 대신 «내 주변 행사»(picka.news/nearby) 또는 «캘린더 받기»(picka.news/calendar).</p><p class="why">메뉴 3칸 중 2칸이 사이트로 가게 됩니다. 캘린더 구독은 한 번 받으면 행사가 계속 들어와 다시 찾게 됩니다.</p></div>
+      <div class="idea"><span class="tag">코드, 배포 필요</span><h3>제보를 받은 뒤 답에 «피카 보기»와 회원 연결 권유</h3><p>«사진 받았어요» 답 아래에 «피카 보기» 버튼과 «picka.news 회원이면 연결해 두세요» 한 줄.</p><p class="why">제보한 사람은 가장 관심 많은 사람입니다. 지금은 제보 뒤 답에 사이트로 가는 버튼이 없습니다. 포인트 문구는 포인트 기능(021) 확인 뒤에.</p></div>
+      <div class="idea"><span class="tag">코드, 배포 필요</span><h3>카드의 «피카 보기»를 첫째 버튼으로</h3><p>인사 카드는 제보하러 온 단체만 보는 게 아닙니다. 관객에게는 «피카 보기»가 먼저 보이는 편이 낫습니다.</p><p class="why">제보가 주된 쓰임이라 지금은 «행사 알리기»가 위에 있습니다. 둘 중 무엇을 위로 둘지는 운영자 판단입니다.</p></div>
+    </div>
+  </section>
+
+  <section class="todo">
+    <h2>골라 주실 것 · 직접 해 주실 것</h2>
+    <ol>
+      <li><b>아래 메뉴 셋째 칸</b>: «문의하기» 그대로 / «내 주변 행사» / «캘린더 받기» 중에서 골라 주세요. 관리자센터 설정이라 고르시면 바로 바꿉니다.</li>
+      <li><b>위 제안 2·3번</b>을 할지 골라 주세요. 하면 코드를 고친 뒤 배포가 필요합니다.</li>
+      <li><b>배포</b>: 카드 버튼 «행사 알리기 · 피카 보기»(커밋 c39ec20)는 배포해야 나옵니다. «피카 앱 개선» 세션에 «017 가져와서 배포해»라고 직접 보내 주세요.</li>
+    </ol>
+  </section>
+</div>
