@@ -55,7 +55,8 @@ const LINK_HELP_WORDS = new Set(["연결", "회원 연결", "피카 연결", "�
 
 export type SkillAction =
     | { kind: "welcome" }
-    | { kind: "link"; code: string }
+    /** bare: 숫자 6자리만 보냄(운영자 11/28 시험에서 «507627»만 보내 제보로 저장됨). 맞는 코드가 아니면 평소 글로 다룬다 */
+    | { kind: "link"; code: string; bare?: boolean }
     | { kind: "linkHelp" }
     | { kind: "agree" }
     | { kind: "tip" }
@@ -146,6 +147,7 @@ function parseAction(body: unknown): { userKey: string; action: SkillAction } | 
     if (utterance === AGREE_TEXT) return { userKey, action: { kind: "agree" } };
     const link = LINK_RE.exec(utterance.replace(/\s+/g, " "));
     if (link) return { userKey, action: { kind: "link", code: link[1] } };
+    if (/^\d{6}$/.test(utterance)) return { userKey, action: { kind: "link", code: utterance, bare: true } };
     if (LINK_HELP_WORDS.has(utterance)) return { userKey, action: { kind: "linkHelp" } };
     if (TIP_WORDS.has(utterance) || blockName === TIP_BLOCK) return { userKey, action: { kind: "tip" } };
     if (ASK_WORDS.has(utterance) || blockName === ASK_BLOCK) return { userKey, action: { kind: "ask" } };

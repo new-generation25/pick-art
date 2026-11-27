@@ -87,6 +87,14 @@ export async function POST(request: Request) {
         // 피카 회원 잇기: «내 정보»에서 받은 6자리 코드(10분, 틀린 시도 하루 5번까지)
         const r = await intake(secret, userKey, "link", action.code);
         if (r.error === "auth") return NextResponse.json({ error: "forbidden" }, { status: 403 });
+        // 숫자 6자리만 보냈는데 연결 코드가 아니면 평소 글(제보 시간이면 제보)로 받는다
+        if (action.bare && (r.error === "bad_code" || r.error === "link_limit")) {
+            if (!isFriend) return json(MSG.notTip());
+            const t = await intake(secret, userKey, "text", action.code);
+            if (t.error === "not_agreed" || t.error === "not_tip") return json(MSG.notTip());
+            if (t.error === "daily_limit" || t.error === "site_limit") return json(MSG.limit());
+            return json(t.ok ? MSG.gotText(!!t.attached) : MSG.error());
+        }
         if (r.error === "bad_code") return json(MSG.badCode());
         if (r.error === "link_limit") return json(MSG.linkLimit());
         return json(r.ok ? MSG.linked() : MSG.error());
