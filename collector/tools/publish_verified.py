@@ -34,6 +34,7 @@ from database import Database  # noqa: E402
 from utils import check_link, process_and_upload_image  # noqa: E402
 from genre import is_theater_film, normalize_category  # noqa: E402
 from dedupe import loose, norm, similar  # noqa: E402,F401
+from title_rules import clean_title  # noqa: E402
 
 ISO = re.compile(r"^20\d\d-\d\d-\d\d$")
 OUT_DIR = os.path.join("..", "docs")  # 결과 목록 JSON 자리(테스트는 임시 폴더로 바꾼다)
@@ -210,7 +211,7 @@ async def main(date_from, date_to, dry, ids=None):
                 if a.get(k):
                     desc_parts.append(f"{label}: {a[k]}")
             event = {
-                "title": chosen["content"]["title"],
+                "title": clean_title(chosen["content"]["title"])[0],  # 제목 노출 규칙(운영자 11/27, title_rules.py)
                 "description": "\n".join(p for p in desc_parts if p)[:4000],
                 "category": normalize_category(a.get("category")) or "행사",  # 체험·교육 → 체험 (specs/015)
                 "region": a.get("region") or "경남",

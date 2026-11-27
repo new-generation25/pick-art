@@ -2,6 +2,7 @@ import os
 import asyncio
 from dotenv import load_dotenv
 from database import Database
+from title_rules import clean_title
 from ai_extractor import AIExtractor
 from datetime import datetime
 
@@ -48,7 +49,7 @@ async def reprocess():
                 # 3. Prepare Event Data
                 event_data = {
                     "raw_post_id": post['id'],
-                    "title": ai_suggestion.get('title') or title,
+                    "title": clean_title(ai_suggestion.get('title') or title)[0],  # 제목 노출 규칙(11/27)
                     "description": ai_suggestion.get('description') or description,
                     "category": ai_suggestion.get('category') or '기타',
                     "region": ai_suggestion.get('region') or '기타',

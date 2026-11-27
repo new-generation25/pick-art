@@ -164,7 +164,7 @@ async def publish_only(ids):
                                           f"일시: {a['time']}" if a.get("time") else "",
                                           f"관람료: {price}" if price else ""] if p)
             event = {
-                "title": r["content"]["title"], "description": desc[:4000],
+                "title": pv.clean_title(r["content"]["title"])[0], "description": desc[:4000],  # 제목 노출 규칙(11/27)
                 "category": a.get("category") or "행사", "region": a.get("region") or "경남", "venue": a.get("venue") or "",
                 "event_date_start": a["date_start"], "event_date_end": a["date_end"],
                 "price_info": price, "is_free": "무료" in price,
