@@ -333,10 +333,10 @@ def slides_html(f: dict, poster: str, handle: str) -> list:
     # 주소는 카드에 쓰지 않는다(2026-11-21 링크 금지 규칙). 사이트는 「프로필 링크」로 보낸다.
     out.append(f"""
 <div class="slide intro">{top(5)}
-  <div class="pad disp h2 print" style="top:170px">피카는<br>이래서 만들었어요</div>
+  <div class="pad disp h2 print" style="top:170px">그래서<br>피카를 만들었어요</div>
   <div class="pad story-txt" style="top:420px">
     <p>몇 달 동안 준비한 동네 극단, 작은 합창단, 예술가의 전시가 포스터 몇 장 붙이고 소리 소문 없이 끝나는 일이 많아요.</p>
-    <p>피카(pick art)는 흩어진 이런 소식을 매일 모아 <b>출처로 하고</b> 여러분들에게 전해 드려요.</p>
+    <p>피카(pick art)는 흩어진 이런 소식을 매일 모아 <b>출처를 확인하고</b> 여러분들에게 전해 드려요.</p>
   </div>
   <div class="pad feats" style="top:900px"><span>오늘·이번 주</span><span>지역·분야로 고르기</span><span>지도로 보기</span></div>
   <div class="pad gocta" style="bottom:120px">가까운 공연·전시·축제 전체는<br><b>프로필 링크 → 피카</b>에서 볼 수 있어요{f'<br><span class="cnt">현재 등록된 부산경남 소식 {f["live_count"]:,}개</span>' if f.get("live_count") else ''}</div>
