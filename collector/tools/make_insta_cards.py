@@ -217,6 +217,16 @@ body { background: #888; }
 .story .titlebox .s { font-size: 32px; margin-top: 6px; opacity: .92; font-weight: 600; }
 .story .more { position: absolute; left: 72px; right: 72px; top: 1640px; font-size: 28px; font-weight: 700; color: %(ink_soft)s; }
 
+/* 6. 제보 이벤트 · 7. 단체 안내 */
+.event .ev-big { display: flex; align-items: flex-end; gap: 22px; }
+.event .ev-big .n { font-family: 'Black Han Sans', sans-serif; font-size: 240px; line-height: .85; color: %(blue)s; }
+.event .ev-big span:last-child { font-size: 56px; font-weight: 900; line-height: 1.2; padding-bottom: 12px; }
+.event .ways div { font-size: 40px; font-weight: 700; padding: 26px 30px; margin-bottom: 18px; background: %(card)s; border: 3px solid %(ink)s; }
+.event .ways b, .group .gocta b { font-weight: 900; }
+.event .small { font-size: 26px; font-weight: 500; color: %(ink_soft)s; line-height: 1.55; }
+.group .gl div { font-size: 40px; font-weight: 700; line-height: 1.4; padding: 26px 0; border-bottom: 3px solid %(ink)s; }
+.group .gocta { background: %(blue)s; color: #fff; font-size: 36px; font-weight: 700; line-height: 1.5; padding: 30px 36px; border: 4px solid %(ink)s; }
+
 /* 4. 반으로 나눈 장 */
 .how .half { position: absolute; left: 72px; right: 72px; }
 .how .half.up { top: 150px; height: 520px; }
@@ -252,7 +262,7 @@ body { background: #888; }
 
 
 def slides_html(f: dict, poster: str, handle: str) -> list:
-    n_total = 6  # 6장: 피카 소개 + 프로필 링크(2026-11-27 운영자 지시)
+    n_total = 7  # 행사 4장 + 피카 소개 1장 + 제보 이벤트 1장 + 단체 안내 1장(2026-11-27 운영자 지시)
     brand = f'<div class="brand">픽아트 <b>pica</b>{(" · " + esc(handle)) if handle else ""}</div>'
 
     def top(i):
@@ -318,24 +328,10 @@ def slides_html(f: dict, poster: str, handle: str) -> list:
   {credit}
 </div>""")
 
-    # 5. 저장·공유 CTA + 출처
-    out.append(f"""
-<div class="slide cta">
-  <div class="top"><div class="brand" style="color:#fff">픽아트 <b style="color:{RISO['pink']}">pica</b>{(" · " + esc(handle)) if handle else ""}</div><div class="page" style="color:#fff">5/{n_total}</div></div>
-  <div class="pad disp big" style="top:220px">같이 갈<br>사람<br>태그!</div>
-  <div class="pad acts" style="top:720px">
-    <div class="act"><span class="i">🔖</span>저장해 두기</div>
-    <div class="act"><span class="i">📨</span>친구에게 보내기</div>
-    <div class="act"><span class="i">➕</span>팔로우하고<br>매일 받기</div>
-  </div>
-  <div class="pad src" style="top:1010px">출처 · {esc(source_label(f))}<br>방문 전 공식 안내에서 변경 사항을 꼭 확인하세요.</div>
-  <div class="credit"><span>{esc(f['poster_credit'])}</span><span>문화예술 큐레이션</span></div>
-</div>""")
-
-    # 6. 피카 소개 — 왜 만들었는지 + 사이트로 오는 길(2026-11-27 운영자 지시)
+    # 5. 피카 소개 — 왜 만들었는지 + 사이트로 오는 길(2026-11-27 운영자 지시)
     # 주소는 카드에 쓰지 않는다(2026-11-21 링크 금지 규칙). 사이트는 「프로필 링크」로 보낸다.
     out.append(f"""
-<div class="slide intro">{top(6)}
+<div class="slide intro">{top(5)}
   <div class="pad disp h2 print" style="top:170px">피카는<br>이래서 만들었어요</div>
   <div class="pad story-txt" style="top:420px">
     <p>동네 극단, 작은 합창단, 작가 모임이 몇 달 준비한 공연도 포스터 한 장 붙이고 끝나는 일이 많아요.</p>
@@ -344,6 +340,32 @@ def slides_html(f: dict, poster: str, handle: str) -> list:
   <div class="pad feats" style="top:900px"><span>오늘·이번 주</span><span>지역·분야로 고르기</span><span>지도로 보기</span></div>
   <div class="pad gocta" style="bottom:120px">가까운 공연·전시·축제 전체는<br><b>프로필 링크 → 피카</b>에서 볼 수 있어요</div>
   {credit}
+</div>""")
+
+    # 6. 숨은 행사 제보 이벤트(2026-11-27 운영자 결정, docs/PLAN_community_2026-11.md 12-1)
+    out.append(f"""
+<div class="slide event">{top(6)}
+  <div class="pad" style="top:160px"><span class="chip pink">숨은 행사 제보 이벤트</span></div>
+  <div class="pad disp h2 print" style="top:250px">우리 동네 행사,<br>알려 주세요</div>
+  <div class="pad ev-big" style="top:480px"><span class="n">5</span><span>명에게 매주<br>커피 쿠폰</span></div>
+  <div class="pad ways" style="top:760px">
+    <div><b>피카 사이트</b> 「행사 제보하기」</div>
+    <div><b>카카오톡 채널 «피카»</b> 「행사 알리기」</div>
+  </div>
+  <div class="pad small" style="bottom:110px">그 주에 확인돼 실린 제보를 보낸 분 중에서 뽑아요 · 당첨은 스토리로 알려요<br>이 이벤트는 인스타그램이 후원·보증·관리하지 않으며, 인스타그램과 관련이 없습니다.</div>
+</div>""")
+
+    # 7. 단체·예술가 안내(2026-11-27 운영자 결정, 같은 문서 12-3)
+    out.append(f"""
+<div class="slide group">{top(7)}
+  <div class="pad" style="top:160px"><span class="chip pink">단체·예술가 안내</span></div>
+  <div class="pad disp h2 print" style="top:250px">작은 공연·전시,<br>무료로 실어 드려요</div>
+  <div class="pad gl" style="top:540px">
+    <div>신청하신 행사는 그 주에 먼저 소개해요</div>
+    <div>한 번 동의하면 앞으로의 소식도 계속 실어요</div>
+    <div>원하지 않으시면 언제든 그만두실 수 있어요</div>
+  </div>
+  <div class="pad gocta" style="bottom:120px">신청: <b>프로필 링크 → 피카</b> 「동의하고 실리기」<br>또는 카카오톡 채널 «피카» 「행사 알리기」</div>
 </div>""")
     return out
 
@@ -428,6 +450,10 @@ SCREEN_CSS = """
 .intro .gocta { border: none; border-radius: 22px; }
 .how .half.down { border-top: 2px solid #E3DBCD; }
 .how .hint { border: none; border-radius: 999px; background: #E6EFE9; }
+.event .ev-big .n { font-family: 'Space Grotesk', sans-serif; letter-spacing: -8px; }
+.event .ways div { border: none; border-radius: 20px; box-shadow: 0 3px 12px rgba(30,26,21,.12); }
+.group .gl div { border-bottom: 2px solid #E3DBCD; }
+.group .gocta { border: none; border-radius: 22px; }
 """
 THEME = "riso"
 
