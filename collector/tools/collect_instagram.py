@@ -6,9 +6,12 @@
 - 공개는 하지 않는다. 주간 검토: python tools/review_instagram.py
 """
 import asyncio
+import json
 import os
 import re
 import sys
+import time
+from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -19,6 +22,24 @@ from database import Database  # noqa: E402
 from insta_browser_scraper import UA, collect_account, load_seen, save_seen, _norm  # noqa: E402
 
 PROFILE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".cache", "ig_profile")
+VISITS_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".cache", "insta_visits.json")
+# 정기 실행(main.py run_tool)은 90분에 끊는다. 그 전에 스스로 멈춰 기록을 남긴다(2026-11-27: 계정 586개로 늘어 이틀 연속 90분 초과)
+BUDGET_MIN_DEFAULT = 80
+SAVE_EVERY = 25
+
+
+def load_visits():
+    try:
+        return json.load(open(VISITS_PATH, encoding="utf-8"))
+    except (FileNotFoundError, ValueError):
+        return {}
+
+
+def save_visits(v):
+    os.makedirs(os.path.dirname(VISITS_PATH), exist_ok=True)
+    json.dump(v, open(VISITS_PATH, "w", encoding="utf-8"), ensure_ascii=False)
+
+
 REGIONS = "창원 진주 통영 사천 김해 밀양 거제 양산 의령 함안 창녕 고성 남해 하동 산청 함양 거창 합천".split()
 
 
@@ -48,6 +69,12 @@ async def main(dry):
         published.setdefault(ev["event_date_start"], []).append(_norm(ev["title"]))
     seen = load_seen()
     total_new = total_found = 0
+    # 가장 오래 안 본 계정부터(처음 보는 계정이 맨 앞). 시간 상한에 걸려도 다음 회차가 이어서 본다
+    visits = load_visits()
+    accounts.sort(key=lambda a: visits.get(a["handle"], ""))
+    budget = float(arg("budget-min") or BUDGET_MIN_DEFAULT) * 60
+    t0 = time.monotonic()
+    done = 0
     async with async_playwright() as p:
         # 로그아웃 상태로 여러 계정을 읽으면 곧 로그인 화면으로 돌려보낸다(is_from_rle). --login 으로 만든 세션을 쓴다
         ctx = await p.chromium.launch_persistent_context(PROFILE_DIR, headless=True, locale="ko-KR", user_agent=UA)
@@ -57,6 +84,9 @@ async def main(dry):
             await ctx.close()
             return
         for a in accounts:
+            if time.monotonic() - t0 > budget:
+                print(f"⏱️ 시간 상한 {budget/60:.0f}분 — 남은 계정 {len(accounts) - done}개는 다음 회차가 오래된 순서로 이어서 본다")
+                break
             try:
                 n_new, n_found, found = await collect_account(page, None if dry else db, a, published, seen, dry=dry)
             except Exception as e:  # 한 계정이 막혀도 나머지는 계속
@@ -68,11 +98,17 @@ async def main(dry):
             for e in found:
                 tag = " [포스터만]" if e.get("image_only") else ""
                 print(f"   {e['start'] or '날짜?'}~{e['end']} {e['title'][:40]} | {e['venue'][:25]}{tag}")
+            done += 1
+            visits[a["handle"]] = datetime.now().isoformat(timespec="seconds")
+            if not dry and done % SAVE_EVERY == 0:  # 중간에 끊겨도 읽은 기록이 남게
+                save_seen(seen)
+                save_visits(visits)
             await asyncio.sleep(6)
         await ctx.close()
     if not dry:
         save_seen(seen)
-    print(f"\n계정 {len(accounts)}개 → 새 게시물 {total_new}, 행사 후보 {total_found} (status=REVIEW)")
+        save_visits(visits)
+    print(f"\n계정 {done}/{len(accounts)}개 → 새 게시물 {total_new}, 행사 후보 {total_found} (status=REVIEW)")
 
 
 async def login():
