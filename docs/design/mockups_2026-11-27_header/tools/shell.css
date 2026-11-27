@@ -1,0 +1,23 @@
+/* 시안 공통 틀: 글꼴 이름표와 휴대폰 화면 틀만. 색·모양은 각 시안(dirs/dNN.html)이 정한다.
+   글꼴 원본은 ../fonts_full/ (미리보기용 전체 파일). 비교 페이지를 만들 때 build.py가 쓰인 글자만 남긴 파일로 바꾼다. */
+@font-face{font-family:"PT";src:url("../../mockups_2026-11-26_v2/fonts_full/Pretendard-Regular.ttf");font-weight:400}
+@font-face{font-family:"PT";src:url("../../mockups_2026-11-26_v2/fonts_full/Pretendard-Medium.ttf");font-weight:500}
+@font-face{font-family:"PT";src:url("../../mockups_2026-11-26_v2/fonts_full/Pretendard-SemiBold.ttf");font-weight:600}
+@font-face{font-family:"PT";src:url("../../mockups_2026-11-26_v2/fonts_full/Pretendard-Bold.ttf");font-weight:700}
+@font-face{font-family:"PT";src:url("../../mockups_2026-11-26_v2/fonts_full/Pretendard-ExtraBold.ttf");font-weight:800}
+@font-face{font-family:"BHS";src:url("../../mockups_2026-11-26_v2/fonts_full/BlackHanSans-Regular.ttf");font-weight:400}
+@font-face{font-family:"GB";src:url("../../mockups_2026-11-26_v2/fonts_full/GowunBatang-Regular.ttf");font-weight:400}
+@font-face{font-family:"GB";src:url("../../mockups_2026-11-26_v2/fonts_full/GowunBatang-Bold.ttf");font-weight:700}
+@font-face{font-family:"DH";src:url("../../mockups_2026-11-26_v2/fonts_full/DoHyeon-Regular.ttf");font-weight:400}
+@font-face{font-family:"SG";src:url("../../mockups_2026-11-26_v2/fonts_full/SpaceGrotesk-VF.ttf");font-weight:300 700}
+@font-face{font-family:"PX";src:url("../../mockups_2026-11-26_v2/fonts_full/IBMPlexMono-Medium.ttf");font-weight:500}
+@font-face{font-family:"PX";src:url("../../mockups_2026-11-26_v2/fonts_full/IBMPlexMono-SemiBold.ttf");font-weight:600}
+
+.ph{width:375px;height:812px;overflow:auto;position:relative;scrollbar-width:none;font-family:"PT",sans-serif;font-size:15px;line-height:1.5;word-break:keep-all;-webkit-font-smoothing:antialiased;flex:none}
+.ph::-webkit-scrollbar{display:none}
+.ph *,.ph *::before,.ph *::after{box-sizing:border-box}
+.ph h1,.ph h2,.ph h3,.ph h4,.ph p,.ph dl,.ph dd,.ph figure,.ph ul,.ph ol{margin:0}
+.ph ul,.ph ol{padding:0;list-style:none}
+.ph a{color:inherit;text-decoration:none}
+.ph button{font:inherit;color:inherit;cursor:pointer}
+.ph img{display:block;max-width:none}

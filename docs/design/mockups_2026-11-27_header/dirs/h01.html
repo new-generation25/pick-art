@@ -1,0 +1,428 @@
+<script type="application/json" id="meta-h01">
+{"name": "머리 줄 로고 · 내 정보 버튼 시안", "bench": ["확정 시안 f01"], "concept": "확정 시안의 맨 위 한 줄(왼쪽 로고, 오른쪽 찾기·내 정보)만 바꾼 4안. 나머지 화면은 그대로다. 각 화면 칩 아래 회색 띠는 로그아웃 상태에서 오른쪽 버튼이 어떻게 바뀌는지 보여 주는 설명용 띠로, 실제 화면에는 없다.", "palette": [["#F4EFE6", "바탕"], ["#1E1A15", "글자"], ["#2E6B4E", "강조"], ["#E6EFE9", "강조 옅은 면"], ["#CFC5B4", "선 버튼 테두리"]], "fonts": ["PT", "GB", "SG"], "notes": {"A": ["지금 사이트(시안 f01): 글자 로고 «pica.», 검정 원 인물", "문제: 검정 꽉 찬 원이 종이색 화면에서 가장 진한 덩어리라 눈이 먼저 감. 로고는 글자뿐이라 까치 우편 상징과 이어지지 않음"], "B": ["확정 로고(우체통 위 까치) 윗부분을 글자 앞에 두고, 인물 버튼은 흰 원에 선만", "로고·프로필·앱 아이콘과 같은 상징이 사이트 맨 위에도 보임 (브랜드 가이드 4절: 로고 = 우체통 위 까치)", "선 원은 찾기 버튼과 무게가 비슷해 오른쪽이 가벼워짐", "그림이 작으면 까치 꼬리·엽서가 뭉개짐. 가이드대로 사람이 벡터로 다시 그린 로고가 있어야 선명함(지금 파일은 AI 시안 PNG)"], "C": ["제목과 같은 명조로 «pica», 아래 «가까운 공연·전시·축제». 로그인하면 이름 첫 글자 원", "상세 제목·묶음 머리와 같은 명조라 화면 전체가 한 목소리", "한 줄 소개는 가이드 1절 «헤더 옆 짧은 소개»와 같은 말", "로그인 전에는 «로그인» 글자, 로그인 뒤에는 닉네임 첫 글자(닉네임이 없으면 인물 아이콘)"], "D": ["로고는 그대로 두고, 인물 원 대신 글자가 있는 초록 테두리 알약", "버튼이 무엇인지 글자로 바로 읽힘(어르신·처음 온 사람)", "오른쪽 폭을 더 써서 좁은 화면에서는 로고와 버튼 사이가 빠듯함"]}}
+</script>
+<style>
+.f01{--bg:#F4EFE6;--card:#FFFFFF;--soft:#EBE4D7;--line:#E3DBCD;--ink:#1E1A15;--sub:#6B6257;--ac:#2E6B4E;--acs:#E6EFE9;--land:#ECE6D8;background:var(--bg);color:var(--ink);font-family:"PT",sans-serif}
+.f01 .sg{font-family:"SG","PT",sans-serif;font-feature-settings:"tnum"}
+.f01 svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none;display:block}
+/* 머리: 로고 · 찾기 · 내 정보 */
+.f01 .hd{display:flex;align-items:center;justify-content:space-between;height:56px;padding:0 10px 0 18px}
+.f01 .logo{font-family:"SG",sans-serif;font-weight:700;font-size:26px;letter-spacing:-.6px;line-height:1}
+.f01 .logo i{font-style:normal;color:var(--ac)}
+.f01 .hd .r{display:flex;gap:4px}
+.f01 .ib{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--ink)}
+.f01 .ib.me{background:var(--ink);color:#fff}
+/* 칩 한 줄 (8번) */
+.f01 .fb{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:6px;padding:6px 10px 12px 0;background:rgba(244,239,230,.96);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.f01 .chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;padding:4px 0 4px 12px}
+.f01 .chips::-webkit-scrollbar{display:none}
+.f01 .chip{flex:none;height:36px;border-radius:18px;background:#fff;box-shadow:0 1px 5px rgba(30,26,21,.13);display:flex;align-items:center;gap:3px;padding:0 9px 0 12px;font-size:13.5px;font-weight:600;white-space:nowrap}
+.f01 .chip svg.i{width:15px;height:15px}
+.f01 .chip.on{background:var(--ac);color:#fff}
+.f01 .chip.nd{padding:0 12px}
+.f01 .fbtn{flex:none;height:36px;border-radius:18px;padding:0 11px 0 9px;display:flex;align-items:center;gap:4px;font-size:13.5px;font-weight:700;box-shadow:inset 0 0 0 1.5px var(--ink)}
+.f01 .fbtn svg.i{width:16px;height:16px}
+/* 선반 (2번) */
+.f01 .sh{padding:8px 0 10px}
+.f01 .shh{display:flex;align-items:flex-end;justify-content:space-between;padding:0 16px 12px}
+.f01 .shh h2{font-family:"GB",serif;font-size:25px;font-weight:700;line-height:1.15;letter-spacing:-.5px;display:flex;align-items:baseline;gap:7px}
+.f01 .shh h2 .n{font-family:"SG";font-weight:600;font-size:22px;color:var(--ac)}
+.f01 .shh .sub{font-size:12.5px;color:var(--sub);margin-top:3px}
+.f01 .shh .all{font-size:13px;font-weight:600;color:var(--sub);white-space:nowrap;padding-bottom:2px}
+.f01 .row{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding:0 16px;align-items:flex-start}
+.f01 .row::-webkit-scrollbar{display:none}
+.f01 .row::after{content:"";flex:none;width:6px}
+.f01 .tile{flex:none;width:104px}
+.f01 .tile.l{width:146px}
+.f01 .pw{position:relative;width:100%;aspect-ratio:4/5;border-radius:8px;overflow:hidden;background:var(--soft);box-shadow:0 1px 4px rgba(30,26,21,.12)}
+.f01 .pw img{width:100%;height:100%;object-fit:cover;display:block}
+.f01 .k{margin-top:8px;font-size:12px;font-weight:700;color:var(--ac);display:flex;gap:5px;align-items:center;white-space:nowrap}
+.f01 .k .sg{font-weight:600;font-size:12.5px;color:var(--ink)}
+.f01 .t{margin-top:2px;font-size:14px;font-weight:700;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.f01 .tile:not(.l) .t{-webkit-line-clamp:3}
+.f01 .v{margin-top:3px;font-size:12px;line-height:1.35;color:var(--sub);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.f01 .p{margin-top:3px;font-size:12px;font-weight:700}
+.f01 .why{margin-top:7px;background:var(--acs);border-radius:8px;padding:6px 8px;font-size:12px;line-height:1.4}
+.f01 .why b{display:block;font-size:11px;font-weight:700;color:var(--ac);margin-bottom:1px}
+.f01 .gp{position:absolute;inset:0;padding:12px;display:flex;flex-direction:column;background:var(--acs);border-top:4px solid var(--ac)}
+.f01 .gp .gk{font-size:11px;font-weight:700;color:var(--ac)}
+.f01 .gp .gd{font-family:"SG";font-weight:700;font-size:20px;line-height:1.1;margin-top:2px}
+.f01 .gp .gt{font-family:"GB",serif;font-size:15px;font-weight:700;line-height:1.3;margin-top:8px;flex:1}
+.f01 .gp .gs{font-size:11px;color:var(--sub)}
+.f01 .fold{margin:16px 16px 0;border-top:1px solid var(--line)}
+.f01 .fold a{display:flex;align-items:center;justify-content:space-between;height:54px;border-bottom:1px solid var(--line);font-family:"GB",serif;font-size:18px;font-weight:700}
+.f01 .fold a span{display:flex;align-items:baseline;gap:7px}
+.f01 .fold a .sg{font-size:16px;font-weight:600;color:var(--ac)}
+.f01 .fold small{font-size:12.5px;font-weight:500;color:var(--sub)}
+/* 맨 아래 지도 칸 */
+.f01 .msec{margin-top:28px;background:var(--soft);padding:20px 0 24px}
+.f01 .msec .mh{padding:0 16px 12px;display:flex;justify-content:space-between;align-items:flex-end}
+.f01 .msec h2{font-size:22px;font-weight:800;letter-spacing:-.4px}
+.f01 .msec .mh p{font-size:13px;color:var(--sub);margin-top:2px}
+.f01 .msec .mh a{font-size:13px;font-weight:700;display:flex;align-items:center;gap:4px;white-space:nowrap;height:36px;padding:0 12px;border-radius:18px;background:#fff;box-shadow:0 1px 4px rgba(20,23,28,.12)}
+.f01 .map{position:relative;height:290px;margin:0 12px;border-radius:16px;overflow:hidden;background:var(--land)}
+.f01 .map>svg{position:absolute;inset:0;width:351px;height:290px}
+.f01 .pin{position:absolute;min-width:30px;height:30px;margin:-15px 0 0 -15px;padding:0 8px;border-radius:15px;background:var(--ink);color:#fff;border:2.5px solid #fff;box-shadow:0 2px 6px rgba(20,23,28,.3);display:grid;place-items:center;font-family:"SG","PT",sans-serif;font-weight:700;font-size:14px;line-height:1}
+.f01 .pin.ac{background:var(--ac)}
+.f01 .pin.sel{background:var(--ac);transform:scale(1.18)}
+.f01 .lb{position:absolute;font-size:11.5px;font-weight:700;line-height:1.2;white-space:nowrap;color:var(--ink);text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff}
+.f01 .vl{margin:12px 16px 0}
+.f01 .vl li{display:flex;align-items:center;gap:10px;height:48px;border-bottom:1px solid #E1E3E8;font-size:14.5px;font-weight:600}
+.f01 .vl li b{font-family:"SG";font-size:14px;min-width:24px;height:24px;border-radius:12px;background:#fff;display:grid;place-items:center;box-shadow:inset 0 0 0 1.5px var(--ink)}
+.f01 .vl li span{flex:1}
+.f01 .vl li small{font-size:12.5px;color:var(--sub);font-weight:500}
+.f01 .hint{margin:12px 16px 0;font-size:12.5px;color:var(--sub);line-height:1.6}
+.f01 .tail{height:84px}
+.f01 .mapgo{position:sticky;bottom:18px;z-index:6;display:flex;align-items:center;gap:7px;width:max-content;margin:-46px auto 0;height:46px;padding:0 20px 0 16px;border-radius:23px;background:var(--ink);color:#fff;font-size:15px;font-weight:700;box-shadow:0 6px 16px rgba(20,23,28,.3)}
+/* 상세 */
+.f01 .dtop{position:relative;background:var(--soft);padding:0 0 38px}
+.f01 .dnav{display:flex;align-items:center;justify-content:space-between;height:52px;padding:0 6px}
+.f01 .dnav .lbl{font-size:13px;font-weight:600;color:var(--sub)}
+.f01 .cover{width:156px;margin:0 auto;border-radius:6px;overflow:hidden;box-shadow:0 10px 26px rgba(30,26,21,.24)}
+.f01 .cover img{width:156px;height:312px;display:block}
+.f01 .info{position:relative;margin-top:-22px;background:var(--bg);border-radius:22px 22px 0 0;padding:20px 16px 28px}
+.f01 .tags{display:flex;gap:5px}
+.f01 .tg{display:inline-flex;align-items:center;height:22px;padding:0 7px;border-radius:6px;font-size:12px;font-weight:700;color:var(--ac);background:var(--acs)}
+.f01 .tg.o{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px #CFC5B4}
+.f01 .info h1{font-family:"GB",serif;font-size:26px;font-weight:700;letter-spacing:-.5px;line-height:1.3;margin-top:8px}
+.f01 .when{margin-top:5px;font-size:15.5px;font-weight:600}
+.f01 .where{display:flex;align-items:center;gap:5px;margin-top:2px;font-size:15px;color:var(--sub)}
+.f01 .where svg.i{width:16px;height:16px}
+.f01 .acts{display:flex;gap:8px;margin-top:14px}
+.f01 .acts a{flex:1;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:15px;font-weight:700;background:var(--card);box-shadow:0 0 0 1px var(--line)}
+.f01 .acts a.go{background:var(--acs);color:var(--ac);box-shadow:none}
+.f01 .acts svg.i{width:18px;height:18px}
+.f01 .il{margin-top:16px;border-top:1px solid var(--line)}
+.f01 .il li{display:grid;grid-template-columns:22px 58px 1fr;gap:8px;align-items:start;padding:13px 0;border-bottom:1px solid var(--line);font-size:14.5px;line-height:1.55}
+.f01 .il li svg.i{width:18px;height:18px;margin-top:2px;color:var(--sub)}
+.f01 .il li .kk{color:var(--sub);font-size:13.5px;padding-top:1px}
+.f01 .il li .s{display:block;font-size:13px;color:var(--sub)}
+.f01 .slots{display:flex;gap:6px;flex-wrap:wrap}
+.f01 .slots span{font-family:"SG";font-weight:600;font-size:14px;height:32px;padding:0 11px;border-radius:8px;background:var(--card);box-shadow:0 0 0 1px var(--line);display:inline-flex;align-items:center}
+.f01 .mini{display:block;position:relative;margin-top:8px;height:104px;border-radius:10px;overflow:hidden;background:var(--land)}
+.f01 .mini svg{position:absolute;inset:0;width:100%;height:104px}
+.f01 .mini .pin{left:60%;top:52%}
+.f01 .dwhy{margin-top:16px;border-radius:14px;box-shadow:inset 0 0 0 1.5px var(--ac);background:#F8FBF9;padding:14px 16px;font-size:15px;line-height:1.6}
+.f01 .dwhy em{display:block;font-style:normal;font-size:12px;font-weight:700;color:var(--ac);margin-bottom:3px}
+.f01 .note{margin-top:12px;font-size:13px;line-height:1.6;color:var(--sub)}
+.f01 .note a{color:var(--ink);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.f01 .h3{font-family:"GB",serif;font-size:19px;font-weight:700;margin-top:26px;letter-spacing:-.3px}
+.f01 .mrow{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.f01 .mrow img{width:44px;height:55px;border-radius:6px;object-fit:cover;flex:none}
+.f01 .mrow .d{font-family:"SG","PT",sans-serif;font-weight:600;font-size:12.5px;color:var(--ac)}
+.f01 .mrow .t2{font-size:14.5px;font-weight:700;line-height:1.4}
+.f01 .mrow .v2{font-size:12.5px;color:var(--sub)}
+.f01 .bar{position:sticky;bottom:0;z-index:6;display:flex;gap:8px;align-items:center;padding:10px 12px 12px;background:var(--bg);box-shadow:0 -1px 0 var(--line)}
+.f01 .bar .ic{width:48px;height:48px;border-radius:12px;background:var(--card);box-shadow:0 0 0 1px var(--line);display:grid;place-items:center;flex:none}
+.f01 .bar .go{flex:1;height:48px;border-radius:12px;background:var(--ac);color:#fff;display:flex;align-items:center;justify-content:center;gap:7px;font-size:16px;font-weight:700}
+.f01 .bar .go svg.i{width:18px;height:18px}
+
+/* 지도 버튼을 누른 화면 */
+.f01 .scrim{position:absolute;inset:0;z-index:7;background:rgba(30,26,21,.5)}
+.f01 .msheet{position:absolute;left:0;right:0;top:58px;bottom:0;z-index:8;background:var(--bg);border-radius:22px 22px 0 0;box-shadow:0 -8px 24px rgba(30,26,21,.25);overflow-y:auto;scrollbar-width:none}
+.f01 .msheet::-webkit-scrollbar{display:none}
+.f01 .msheet .grab{display:block;width:40px;height:5px;border-radius:3px;background:#CFC5B4;margin:8px auto 0}
+.f01 .mhd{display:flex;align-items:center;justify-content:space-between;padding:8px 10px 10px 16px}
+.f01 .mhd h2{font-family:"GB",serif;font-size:23px;font-weight:700;line-height:1.2}
+.f01 .mhd p{display:flex;align-items:center;gap:6px;margin-top:3px;font-size:12.5px;color:var(--sub)}
+.f01 .mhd p i{font-style:normal;height:22px;padding:0 8px;border-radius:11px;background:var(--ac);color:#fff;font-size:12px;font-weight:700;display:inline-flex;align-items:center}
+.f01 .mhd .dn{width:44px;height:44px;border-radius:50%;background:var(--card);box-shadow:0 0 0 1px var(--line);display:grid;place-items:center}
+.f01 .mmap{position:relative;height:290px;margin:0 12px;border-radius:16px;overflow:hidden;background:var(--land)}
+.f01 .mmap>svg{position:absolute;inset:0;width:351px;height:290px}
+.f01 .loc{position:absolute;right:10px;bottom:10px;width:40px;height:40px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(30,26,21,.25);display:grid;place-items:center}
+.f01 .vsel{margin:14px 0 0}
+.f01 .vsel .vh{display:flex;align-items:baseline;justify-content:space-between;padding:0 16px 10px}
+.f01 .vsel .vh b{font-size:16px;font-weight:800}
+.f01 .vsel .vh span{font-size:12.5px;color:var(--sub)}
+.f01 .vsel .vh a{font-size:13px;font-weight:700;color:var(--ac);white-space:nowrap}
+.f01 .vsel .tile{width:96px}
+.f01 .vlist{margin:14px 16px 0;border-top:1px solid var(--line)}
+.f01 .vlist li{display:flex;align-items:center;gap:10px;height:50px;border-bottom:1px solid var(--line);font-size:14.5px;font-weight:600}
+.f01 .vlist li b{font-family:"SG";font-size:14px;min-width:26px;height:26px;border-radius:13px;background:var(--card);display:grid;place-items:center;box-shadow:inset 0 0 0 1.5px var(--ink)}
+.f01 .vlist li span{flex:1}
+.f01 .vlist li small{font-size:12.5px;color:var(--sub);font-weight:500}
+.f01 .mhint{margin:12px 16px 0;font-size:12.5px;color:var(--sub);line-height:1.6}
+
+/* 공간 페이지 */
+.f01 .vhead{background:var(--soft);padding:0 16px 22px}
+.f01 .vhead .dnav{padding:0 0 0 0;margin:0 -10px}
+.f01 .eb{display:flex;align-items:center;gap:8px;margin-top:2px}
+.f01 .kind{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:700;color:var(--sub)}
+.f01 .kind svg.i{width:17px;height:17px}
+.f01 .seal{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 9px 0 7px;border-radius:12px;background:var(--ac);color:#fff;font-size:12px;font-weight:700}
+.f01 .seal svg.i{width:15px;height:15px;stroke-width:2.2}
+.f01 .vhead h1{font-family:"GB",serif;font-size:29px;font-weight:700;letter-spacing:-.5px;line-height:1.25;margin-top:8px}
+.f01 .facts{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:6px;font-size:14px;color:var(--sub)}
+.f01 .facts b{color:var(--ink);font-weight:700}
+.f01 .vmap{display:block;position:relative;margin-top:14px;height:120px;border-radius:12px;overflow:hidden;background:var(--land)}
+.f01 .vmap svg{position:absolute;inset:0;width:100%;height:120px}
+.f01 .vmap .mpin{position:absolute;left:58%;top:50%;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;background:var(--ac);border:3px solid #fff;box-shadow:0 1px 4px rgba(30,26,21,.35)}
+.f01 .vhead .acts{margin-top:12px}
+.f01 .sec2{padding:22px 0 0}
+.f01 .sec2 .shh h2{font-size:22px}
+.f01 .vrow .tile{width:112px}
+.f01 .vrow .gp{padding:10px}
+.f01 .vrow .gp .gk{display:none}
+.f01 .vrow .gp .gd{font-size:16px}
+.f01 .vrow .gp .gt{font-size:13px;line-height:1.3;margin-top:6px;overflow:hidden;flex:0 1 auto;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.f01 .vrow .gp .gs{margin-top:auto;line-height:1.3}
+.f01 .long{margin:12px 16px 0;display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;background:var(--card);box-shadow:0 0 0 1px var(--line);font-size:14px}
+.f01 .long em{font-style:normal;font-size:12px;font-weight:700;color:var(--ac);flex:none}
+.f01 .long span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.f01 .long small{font-family:"SG";font-size:12.5px;color:var(--sub);flex:none}
+.f01 .ol{margin:4px 16px 0}
+.f01 .ol li{display:grid;grid-template-columns:40px 1fr auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.f01 .oi{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--card);box-shadow:0 0 0 1px var(--line);color:var(--ink)}
+.f01 .oi.g{background:var(--ink);color:#fff;box-shadow:none}
+.f01 .oi svg.i{width:19px;height:19px}
+.f01 .ol .on{font-size:14.5px;font-weight:700;line-height:1.35}
+.f01 .ol .or{font-size:12.5px;color:var(--sub);margin-top:1px}
+.f01 .ol .oc{font-family:"SG";font-size:13px;font-weight:600;color:var(--sub);white-space:nowrap}
+.f01 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:10px 16px 0;font-size:12px;color:var(--sub)}
+.f01 .legend span{display:inline-flex;align-items:center;gap:5px}
+.f01 .legend .oi{width:22px;height:22px}
+.f01 .legend .oi svg.i{width:13px;height:13px}
+.f01 .legend .seal{height:20px;padding:0 6px 0 5px;font-size:11px}
+.f01 .legend .seal svg.i{width:12px;height:12px}
+.f01 .past{margin:4px 16px 0}
+.f01 .past li{display:grid;grid-template-columns:96px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.f01 .past li span{font-family:"SG","PT",sans-serif;color:var(--sub);font-size:13px}
+.f01 .past li b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.f01 .vnote{margin:18px 16px 24px;border:1.5px dashed var(--line);border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.6;color:var(--sub)}
+/* 내 정보 */
+.f01 .me-top{padding:0 16px 8px}
+.f01 .me-top .dnav{margin:0 -10px}
+.f01 .prof{display:flex;align-items:center;gap:14px;margin-top:4px}
+.f01 .av{width:60px;height:60px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;flex:none}
+.f01 .av svg.i{width:28px;height:28px}
+.f01 .prof h1{font-family:"GB",serif;font-size:24px;font-weight:700;line-height:1.2}
+.f01 .prof p{font-size:13px;color:var(--sub);margin-top:3px}
+.f01 .prof a{margin-left:auto;font-size:13px;font-weight:700;height:34px;padding:0 12px;border-radius:17px;box-shadow:inset 0 0 0 1.5px var(--line);display:flex;align-items:center;white-space:nowrap;background:var(--card)}
+.f01 .card2{margin:14px 16px 0;background:var(--card);border-radius:14px;box-shadow:0 1px 4px rgba(30,26,21,.08);padding:4px 14px}
+.f01 .card2 .ln{display:flex;align-items:center;gap:12px;min-height:56px;border-bottom:1px solid var(--line);font-size:15px}
+.f01 .card2 .ln:last-child{border-bottom:0}
+.f01 .card2 .ln svg.i{color:var(--sub)}
+.f01 .card2 .ln .lt{flex:1;min-width:0}
+.f01 .card2 .ln .lt b{display:block;font-weight:700}
+.f01 .card2 .ln .lt small{display:block;font-size:12.5px;color:var(--sub);line-height:1.4}
+.f01 .card2 .ln .val{font-size:14px;font-weight:700;color:var(--ac);white-space:nowrap}
+.f01 .tog{width:46px;height:28px;border-radius:14px;background:#D6CDBE;position:relative;flex:none}
+.f01 .tog::after{content:"";position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.f01 .tog.on{background:var(--ac)}
+.f01 .tog.on::after{left:21px}
+.f01 .cal{display:flex;gap:8px;padding:0 0 12px}
+.f01 .cal a{flex:1;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-weight:700;background:var(--acs);color:var(--ac)}
+.f01 .ints{display:flex;flex-wrap:wrap;gap:6px;padding:4px 0 14px}
+.f01 .ints span{height:34px;padding:0 13px;border-radius:17px;display:inline-flex;align-items:center;font-size:13.5px;font-weight:600;box-shadow:inset 0 0 0 1.5px var(--line);background:var(--card)}
+.f01 .ints span.on{background:var(--ac);color:#fff;box-shadow:none}
+.f01 .ch{display:flex;align-items:baseline;justify-content:space-between;margin:0 0 2px;padding-top:12px}
+.f01 .ch b{font-size:13px;font-weight:700;color:var(--sub)}
+.f01 .mt{font-family:"GB",serif;font-size:21px;font-weight:700;padding:24px 16px 10px;display:flex;align-items:baseline;justify-content:space-between}
+.f01 .mt .sg{font-size:18px;color:var(--ac);margin-left:6px}
+.f01 .mt a{font-family:"PT";font-size:13px;font-weight:600;color:var(--sub)}
+.f01 .out{display:block;text-align:center;margin:18px 16px 28px;font-size:14px;font-weight:600;color:var(--sub);text-decoration:underline;text-underline-offset:3px}
+
+/* 머리 시안 */
+.f01 .hd .hl{display:flex;align-items:center;gap:8px;min-width:0}
+.f01 .ib.line{background:var(--card);box-shadow:inset 0 0 0 1.5px #CFC5B4;color:var(--ink)}
+.f01 .ib.ini{background:var(--acs);color:var(--ac);font-family:"GB",serif;font-weight:700;font-size:18px;box-shadow:inset 0 0 0 1.5px #BFD6C8}
+.f01 .mark{display:block;height:36px;width:auto;flex:none}
+.f01 .logo.gb{font-family:"GB",serif;font-weight:700;font-size:27px;letter-spacing:-.4px}
+.f01 .logo.sm{font-size:24px}
+.f01 .tag{font-size:11.5px;font-weight:600;color:var(--sub);line-height:1.2;white-space:nowrap}
+.f01 .stack{display:flex;flex-direction:column;gap:3px}
+.f01 .pill{text-decoration:none;display:flex;align-items:center;gap:5px;height:38px;padding:0 13px 0 10px;border-radius:19px;background:var(--card);box-shadow:inset 0 0 0 1.5px var(--ac);color:var(--ac);font-size:14px;font-weight:700;white-space:nowrap}
+.f01 .pill svg.i{width:18px;height:18px}
+.f01 .pill.lo{box-shadow:inset 0 0 0 1.5px #CFC5B4;color:var(--ink)}
+.f01 .state{display:flex;align-items:center;justify-content:space-between;margin:2px 12px 6px;padding:8px 10px;border-radius:10px;background:#EBE4D7;font-size:12px;color:var(--sub)}
+.f01 .state b{color:var(--ink);font-weight:700}
+.f01 .state .r{display:flex;align-items:center;gap:6px}
+.f01 .state .ib,.f01 .state .pill{transform:scale(.82);transform-origin:right center}
+</style>
+<div class="ph f01" data-screen="h01-A">
+  <header class="hd">
+    <span class="logo">pica<i>.</i></span>
+    <div class="r"><a class="ib" aria-label="찾기"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg></a><a class="ib me" aria-label="내 정보"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1-4 4-6 7-6s6 2 7 6"/></svg></a></div>
+  </header>
+  <nav class="fb">
+    <div class="chips">
+      <span class="chip on">이번 주<svg class="i" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></span>
+      <span class="chip on">김해<svg class="i" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></span>
+      <span class="chip">분야<svg class="i" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></span>
+      <span class="chip nd">아이와</span>
+    </div>
+    <a class="fbtn"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>필터</a>
+  </nav>
+  <div class="state"><span><b>로그아웃일 때</b> 오른쪽 버튼</span><span class="r"><a class="ib me" aria-label="로그인"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1-4 4-6 7-6s6 2 7 6"/></svg></a></span></div>
+
+  <section class="sh">
+    <div class="shh">
+      <div><h2>오늘 <span class="n">6</span></h2><p class="sub">11.26 목 · 끝나는 날이 가까운 순</p></div>
+      <a class="all">모두 보기</a>
+    </div>
+    <div class="row"><article class="tile" data-card>
+        <div class="pw"><img src="img/t2.webp" alt="찾아가는 미술관 포스터"></div>
+        <p class="k">행사 <span class="sg">10:00</span></p>
+        <h3 class="t">찾아가는 미술관 – 〈주름과 덧댐〉 전시해설</h3>
+        <p class="v">진례면 행정복지센터</p>
+        <p class="why"><b>피카가 본 이유</b>클레이아크김해미술관이 진례면으로 찾아와 해설해요</p>
+      </article><article class="tile" data-card>
+        <div class="pw"><img src="img/g1.jpg" alt="임윤찬 피아노 리사이틀 포스터"></div>
+        <p class="k">공연 <span class="sg">19:30</span></p>
+        <h3 class="t">임윤찬 피아노 리사이틀</h3>
+        <p class="v">김해문화의전당 마루홀</p>
+        <p class="p">90,000원부터</p>
+      </article><article class="tile" data-card>
+        <div class="pw"><img src="img/t3.webp" alt="우리들의 팔레트 포스터"></div>
+        <p class="k">전시 <span class="sg">~11.28</span></p>
+        <h3 class="t">아람배움터 수강생 전시회 〈우리들의 팔레트〉</h3>
+        <p class="v">김해문화의전당</p>
+      </article><article class="tile" data-card>
+        <div class="pw"><img src="img/v2.webp" alt="시선기록 포스터"></div>
+        <p class="k">전시 <span class="sg">~11.29</span></p>
+        <h3 class="t">화실마그넷 첫번째 회원전 〈시선기록〉</h3>
+        <p class="v">김해서부문화센터</p>
+      </article></div>
+  </section>
+</div>
+
+<div class="ph f01" data-screen="h01-B">
+  <header class="hd">
+    <span class="hl"><img class="mark" src="img/logo_top.png" alt=""><span class="logo sm">pica<i>.</i></span></span>
+    <div class="r"><a class="ib" aria-label="찾기"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg></a><a class="ib line" aria-label="내 정보"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1-4 4-6 7-6s6 2 7 6"/></svg></a></div>
+  </header>
+  <nav class="fb">
+    <div class="chips">
+      <span class="chip on">이번 주<svg class="i" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></span>
+      <span class="chip on">김해<svg class="i" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></span>
+      <span class="chip">분야<svg class="i" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></span>
+      <span class="chip nd">아이와</span>
+    </div>
+    <a class="fbtn"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>필터</a>
+  </nav>
+  <div class="state"><span><b>로그아웃일 때</b> 오른쪽 버튼</span><span class="r"><a class="ib line" aria-label="로그인"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1-4 4-6 7-6s6 2 7 6"/></svg></a></span></div>
+
+  <section class="sh">
+    <div class="shh">
+      <div><h2>오늘 <span class="n">6</span></h2><p class="sub">11.26 목 · 끝나는 날이 가까운 순</p></div>
+      <a class="all">모두 보기</a>
+    </div>
+    <div class="row"><article class="tile" data-card>
+        <div class="pw"><img src="img/t2.webp" alt="찾아가는 미술관 포스터"></div>
+        <p class="k">행사 <span class="sg">10:00</span></p>
+        <h3 class="t">찾아가는 미술관 – 〈주름과 덧댐〉 전시해설</h3>
+        <p class="v">진례면 행정복지센터</p>
+        <p class="why"><b>피카가 본 이유</b>클레이아크김해미술관이 진례면으로 찾아와 해설해요</p>
+      </article><article class="tile" data-card>
+        <div class="pw"><img src="img/g1.jpg" alt="임윤찬 피아노 리사이틀 포스터"></div>
+        <p class="k">공연 <span class="sg">19:30</span></p>
+        <h3 class="t">임윤찬 피아노 리사이틀</h3>
+        <p class="v">김해문화의전당 마루홀</p>
+        <p class="p">90,000원부터</p>
+      </article><article class="tile" data-card>
+        <div class="pw"><img src="img/t3.webp" alt="우리들의 팔레트 포스터"></div>
+        <p class="k">전시 <span class="sg">~11.28</span></p>
+        <h3 class="t">아람배움터 수강생 전시회 〈우리들의 팔레트〉</h3>
+        <p class="v">김해문화의전당</p>
+      </article><article class="tile" data-card>
+        <div class="pw"><img src="img/v2.webp" alt="시선기록 포스터"></div>
+        <p class="k">전시 <span class="sg">~11.29</span></p>
+        <h3 class="t">화실마그넷 첫번째 회원전 〈시선기록〉</h3>
+        <p class="v">김해서부문화센터</p>
+      </article></div>
+  </section>
+</div>
+
+<div class="ph f01" data-screen="h01-C">
+  <header class="hd">
+    <span class="stack"><span class="logo gb">pica<i>.</i></span><span class="tag">가까운 공연·전시·축제</span></span>
+    <div class="r"><a class="ib" aria-label="찾기"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg></a><a class="ib ini" aria-label="내 정보">피</a></div>
+  </header>
+  <nav class="fb">
+    <div class="chips">
+      <span class="chip on">이번 주<svg class="i" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></span>
+      <span class="chip on">김해<svg class="i" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></span>
+      <span class="chip">분야<svg class="i" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></span>
+      <span class="chip nd">아이와</span>
+    </div>
+    <a class="fbtn"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>필터</a>
+  </nav>
+  <div class="state"><span><b>로그아웃일 때</b> 오른쪽 버튼</span><span class="r"><a class="pill lo" aria-label="로그인">로그인</a></span></div>
+
+  <section class="sh">
+    <div class="shh">
+      <div><h2>오늘 <span class="n">6</span></h2><p class="sub">11.26 목 · 끝나는 날이 가까운 순</p></div>
+      <a class="all">모두 보기</a>
+    </div>
+    <div class="row"><article class="tile" data-card>
+        <div class="pw"><img src="img/t2.webp" alt="찾아가는 미술관 포스터"></div>
+        <p class="k">행사 <span class="sg">10:00</span></p>
+        <h3 class="t">찾아가는 미술관 – 〈주름과 덧댐〉 전시해설</h3>
+        <p class="v">진례면 행정복지센터</p>
+        <p class="why"><b>피카가 본 이유</b>클레이아크김해미술관이 진례면으로 찾아와 해설해요</p>
+      </article><article class="tile" data-card>
+        <div class="pw"><img src="img/g1.jpg" alt="임윤찬 피아노 리사이틀 포스터"></div>
+        <p class="k">공연 <span class="sg">19:30</span></p>
+        <h3 class="t">임윤찬 피아노 리사이틀</h3>
+        <p class="v">김해문화의전당 마루홀</p>
+        <p class="p">90,000원부터</p>
+      </article><article class="tile" data-card>
+        <div class="pw"><img src="img/t3.webp" alt="우리들의 팔레트 포스터"></div>
+        <p class="k">전시 <span class="sg">~11.28</span></p>
+        <h3 class="t">아람배움터 수강생 전시회 〈우리들의 팔레트〉</h3>
+        <p class="v">김해문화의전당</p>
+      </article><article class="tile" data-card>
+        <div class="pw"><img src="img/v2.webp" alt="시선기록 포스터"></div>
+        <p class="k">전시 <span class="sg">~11.29</span></p>
+        <h3 class="t">화실마그넷 첫번째 회원전 〈시선기록〉</h3>
+        <p class="v">김해서부문화센터</p>
+      </article></div>
+  </section>
+</div>
+
+<div class="ph f01" data-screen="h01-D">
+  <header class="hd">
+    <span class="logo">pica<i>.</i></span>
+    <div class="r"><a class="ib" aria-label="찾기"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg></a><a class="pill" aria-label="내 정보"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1-4 4-6 7-6s6 2 7 6"/></svg>내 정보</a></div>
+  </header>
+  <nav class="fb">
+    <div class="chips">
+      <span class="chip on">이번 주<svg class="i" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></span>
+      <span class="chip on">김해<svg class="i" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></span>
+      <span class="chip">분야<svg class="i" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></span>
+      <span class="chip nd">아이와</span>
+    </div>
+    <a class="fbtn"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>필터</a>
+  </nav>
+  <div class="state"><span><b>로그아웃일 때</b> 오른쪽 버튼</span><span class="r"><a class="pill lo" aria-label="로그인"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1-4 4-6 7-6s6 2 7 6"/></svg>로그인</a></span></div>
+
+  <section class="sh">
+    <div class="shh">
+      <div><h2>오늘 <span class="n">6</span></h2><p class="sub">11.26 목 · 끝나는 날이 가까운 순</p></div>
+      <a class="all">모두 보기</a>
+    </div>
+    <div class="row"><article class="tile" data-card>
+        <div class="pw"><img src="img/t2.webp" alt="찾아가는 미술관 포스터"></div>
+        <p class="k">행사 <span class="sg">10:00</span></p>
+        <h3 class="t">찾아가는 미술관 – 〈주름과 덧댐〉 전시해설</h3>
+        <p class="v">진례면 행정복지센터</p>
+        <p class="why"><b>피카가 본 이유</b>클레이아크김해미술관이 진례면으로 찾아와 해설해요</p>
+      </article><article class="tile" data-card>
+        <div class="pw"><img src="img/g1.jpg" alt="임윤찬 피아노 리사이틀 포스터"></div>
+        <p class="k">공연 <span class="sg">19:30</span></p>
+        <h3 class="t">임윤찬 피아노 리사이틀</h3>
+        <p class="v">김해문화의전당 마루홀</p>
+        <p class="p">90,000원부터</p>
+      </article><article class="tile" data-card>
+        <div class="pw"><img src="img/t3.webp" alt="우리들의 팔레트 포스터"></div>
+        <p class="k">전시 <span class="sg">~11.28</span></p>
+        <h3 class="t">아람배움터 수강생 전시회 〈우리들의 팔레트〉</h3>
+        <p class="v">김해문화의전당</p>
+      </article><article class="tile" data-card>
+        <div class="pw"><img src="img/v2.webp" alt="시선기록 포스터"></div>
+        <p class="k">전시 <span class="sg">~11.29</span></p>
+        <h3 class="t">화실마그넷 첫번째 회원전 〈시선기록〉</h3>
+        <p class="v">김해서부문화센터</p>
+      </article></div>
+  </section>
+</div>
