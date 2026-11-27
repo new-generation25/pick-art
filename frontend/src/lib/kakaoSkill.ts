@@ -31,12 +31,12 @@ const TIP_WORDS = new Set([TIP_TEXT, "제보", "제보하기", "행사 제보", 
 export const TIP_BLOCK = "행사 알리기";
 /** 예전 상담 연결 버튼 이름. 옛 카드의 버튼을 누르면 이 말이 올 수 있어 문의 안내로 받는다 */
 export const OPERATOR_LABEL = "운영자에게 문의";
-/** 채팅방 메뉴 «운영자 문의»가 부르는 오픈빌더 블록 이름. 이 블록은 문의 길(메일·인스타그램 메시지)을 알려 준다 */
+/** «문의»·«상담» 같은 말을 받는 오픈빌더 블록 이름. 이 블록은 연락 길(메일·인스타그램 메시지)만 알려 준다(상담 창구 아님) */
 export const ASK_BLOCK = "운영자 문의";
 /** 문의 길: 사이트 소개·약관과 같은 메일, 인스타그램 메시지 */
 export const CONTACT_MAIL = "pick.art.pica@gmail.com";
-/** 프로필 주소(«메시지 보내기» 버튼이 있다). ig.me/m/… 은 PC 에서 instagram.com/m/… 으로 넘어가 확실하지 않아 쓰지 않는다 */
-export const INSTA_DM_URL = "https://www.instagram.com/picka.news/";
+/** 카드의 «피카 보기» 버튼 주소(채팅방 메뉴 «피카 보기»와 같음) */
+export const PICA_URL = "https://picka.news";
 const ASK_WORDS = new Set([OPERATOR_LABEL, ASK_BLOCK, "문의", "문의하기", "상담", "상담원 연결", "운영자 연결"]);
 export const MAX_IMAGES = 10;
 /** 카카오에서 내려받을 때 상한(PC에서 보낸 원본 PNG 7.5MB 확인). 저장 전에 긴 변 2048px JPEG 로 줄인다 */
@@ -154,7 +154,7 @@ export function reply(texts: string[], quick: string[] = []): SkillResponse {
     };
 }
 
-/** 두 갈래 카드: 인스타그램으로 문의 · 행사 알리기 (textCard 단일형은 제목+설명 400자까지) */
+/** 두 갈래 카드: 행사 알리기 · 피카 보기 (textCard 단일형은 제목+설명 400자까지) */
 function menu(title: string, description: string): SkillResponse {
     return {
         version: "2.0",
@@ -164,8 +164,9 @@ function menu(title: string, description: string): SkillResponse {
                     title: title.slice(0, 50),
                     description: description.slice(0, 400 - title.length),
                     buttons: [
-                        { label: "인스타그램으로 문의", action: "webLink", webLinkUrl: INSTA_DM_URL },
+                        // 운영자 11/27: 채널은 주로 제보용, 상담하기 꼴 버튼은 두지 않는다. 카드에도 «피카 보기»
                         { label: TIP_TEXT, action: "message", messageText: TIP_TEXT },
+                        { label: "피카 보기", action: "webLink", webLinkUrl: PICA_URL },
                     ],
                     buttonLayout: "vertical",
                 },
@@ -180,10 +181,10 @@ export const MSG = {
         "피카 카카오톡 채널이에요",
         `가까운 공연·전시·축제를 날짜순으로 알려 드려요(picka.news).\n\n궁금한 것은 메일 ${CONTACT_MAIL}이나 인스타그램 @picka.news 메시지로 보내 주세요.\n공연·전시를 알리고 싶은 단체·예술가는 «행사 알리기»를 눌러 주세요.`,
     ),
-    /** 채팅방 메뉴 «운영자 문의»: 문의 길 안내 (이 채팅창은 챗봇이라 사람이 답하지 않는다) */
+    /** «문의»·«상담» 같은 말: 상담 창구가 아니라는 것과 연락 길만 알린다 (이 채팅창은 챗봇이라 사람이 답하지 않는다) */
     ask: () => menu(
-        "운영자에게 문의하기",
-        `이 채팅창은 자동 응답이라 문의에 답하지 못해요.\n궁금한 것은 메일 ${CONTACT_MAIL}이나 인스타그램 @picka.news 메시지로 보내 주세요. 운영자가 확인하고 답해요.\n\n공연·전시를 알리려면 «행사 알리기»를 눌러 주세요.`,
+        "피카 카카오톡 채널이에요",
+        `이 채널은 공연·전시 정보를 받는 곳이라 자동으로 답해요.\n궁금한 것은 메일 ${CONTACT_MAIL}이나 인스타그램 @picka.news 메시지로 보내 주세요. 운영자가 확인하고 답해요.\n\n공연·전시를 알리려면 «행사 알리기»를 눌러 주세요.`,
     ),
     /** 제보 시간이 아닐 때 온 말·사진: 저장하지 않았음을 밝히고 두 갈래 */
     notTip: () => menu(
