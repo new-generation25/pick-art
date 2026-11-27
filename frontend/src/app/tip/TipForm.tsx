@@ -133,8 +133,7 @@ export function TipForm() {
     if (userId === null) {
         return (
             <div className="rounded-[14px] bg-card p-5 text-[15px] shadow-[0_1px_4px_rgba(30,26,21,.08)]">
-                <p className="leading-relaxed text-ink">제보는 로그인한 뒤 보낼 수 있어요. 보낸 행사가 피카에 실리면 그 계정에 <b>{TIP_POINTS}포인트</b>가 쌓여요.</p>
-                <p className="mt-1 text-[13.5px] leading-relaxed text-ink-soft">로그인하면 이 화면으로 돌아와요. 적을 것은 행사 이름과 링크(또는 사진) 하나예요.</p>
+                <p className="leading-relaxed text-ink">제보는 로그인한 뒤 보낼 수 있어요. 로그인하면 이 화면으로 돌아와요.</p>
                 <Link href={loginHref("/tip")} className="mt-4 flex h-14 items-center justify-center rounded-full bg-accent px-6 text-[17px] font-bold text-on-accent no-underline">로그인하고 제보하기</Link>
             </div>
         );
