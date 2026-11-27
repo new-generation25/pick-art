@@ -64,7 +64,14 @@ export async function POST(request: Request) {
     try { body = await request.json(); } catch { return NextResponse.json({ error: "bad request" }, { status: 400 }); }
     const req = parseSkillRequest(body);
     if (!req) return NextResponse.json({ error: "bad request" }, { status: 400 });
-    const { userKey, action } = req;
+    const { userKey, action, isFriend } = req;
+    // 채널 추가 여부가 실제 요청에 오는지 운영 로그로 확인하려고 남긴다(식별값 없이 참·거짓과 종류만)
+    console.log("kakao skill", action.kind, "isFriend", isFriend);
+
+    // 제보는 채널을 추가한 사람만 받는다(운영자 11/27 «카톡은 채널구독, 피카에서는 로그인»).
+    // 추가하지 않은 사람이 제보를 시작·동의·사진을 보내면 저장하지 않고 채널 추가를 권한다. 다른 말은 평소처럼 답한다
+    if (!isFriend && (action.kind === "tip" || action.kind === "agree" || action.kind === "image")) return json(MSG.needFriend());
+    if (!isFriend && action.kind === "text") return json(MSG.notTip());
 
     // 채널로 오는 말은 제보만이 아니다: 웰컴·제보 시간 밖의 말에는 «피카 보기»·«행사 제보하기»·«문의하기» 세 갈래를 보인다.
     // «문의하기»는 «메시지 남기기»(1:1 채팅, 파트너센터 «내 채팅») 버튼 카드로 답한다(운영자 11/27)

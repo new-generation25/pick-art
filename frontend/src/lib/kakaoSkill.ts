@@ -20,7 +20,7 @@
  * 파트너센터 «내 채팅»으로 들어감)을 보인다(운영자 11/27 «문의하기 > 메시지를 남겨 놓으시면 추후 응답 > 내채팅 연결»).
  * 버튼 순서는 «피카 보기»가 먼저(운영자 11/27 «피카 서비스 이용자를 늘려야지»).
  */
-import { RIGHTS_CHECKS, RIGHTS_VERSION, PRIVACY_NOTE } from "./leaflets";
+import { RIGHTS_VERSION } from "./leaflets";
 
 export const SKILL_KEY_HEADER = "x-pica-skill-key";
 /** 동의 버튼이 보내는 말. 오픈빌더 «제보 동의» 블록의 발화와 같아야 한다 */
@@ -42,6 +42,8 @@ export const OPERATOR_LABEL = "메시지 남기기";
 export const ASK_BLOCK = "운영자 문의";
 /** 카드의 «피카 보기» 버튼 주소(채팅방 메뉴 «피카 보기»와 같음) */
 export const PICA_URL = "https://picka.news";
+/** 채널 추가 주소 */
+export const CHANNEL_ADD_URL = "https://pf.kakao.com/_xoxdxkvX/friend";
 const ASK_WORDS = new Set([ASK_TEXT, OPERATOR_LABEL, "운영자에게 문의", ASK_BLOCK, "문의", "상담", "상담원 연결", "운영자 연결"]);
 export const MAX_IMAGES = 10;
 /** 카카오에서 내려받을 때 상한(PC에서 보낸 원본 PNG 7.5MB 확인). 저장 전에 긴 변 2048px JPEG 로 줄인다 */
@@ -62,7 +64,10 @@ export type SkillAction =
     | { kind: "image"; urls: string[]; plugin?: boolean }
     | { kind: "text"; text: string };
 
-export type SkillRequest = { userKey: string; action: SkillAction };
+/** isFriend: 보낸 사람이 채널을 추가했는지. 공식 문서(answer_json_format, user.properties.isFriend):
+ *  «사용자가 봇과 연결된 카카오톡 채널을 추가한 경우 제공», 추가하지 않았거나 차단했으면 값이 오지 않는다.
+ *  운영자 11/27 «카톡은 채널구독, 피카에서는 로그인» → 제보는 채널을 추가한 사람만 받는다 */
+export type SkillRequest = { userKey: string; isFriend: boolean; action: SkillAction };
 
 type Json = Record<string, unknown>;
 const obj = (v: unknown): Json => (v && typeof v === "object" && !Array.isArray(v) ? (v as Json) : {});
@@ -109,6 +114,14 @@ function secureImageUrls(v: unknown): string[] | null {
 
 /** 스킬 요청 → 보낸 사람 식별값(botUserKey)과 할 일. 모양이 틀리면 null */
 export function parseSkillRequest(body: unknown): SkillRequest | null {
+    const b0 = obj(body);
+    const props0 = obj(obj(obj(b0.userRequest).user).properties);
+    const isFriend = props0.isFriend === true || props0.isFriend === "true";
+    const r = parseAction(body);
+    return r && { ...r, isFriend };
+}
+
+function parseAction(body: unknown): { userKey: string; action: SkillAction } | null {
     const b = obj(body);
     const ur = obj(b.userRequest);
     const user = obj(ur.user);
@@ -200,10 +213,16 @@ export const MSG = {
         "무엇을 도와드릴까요?",
         "방금 보낸 내용은 저장하지 않았어요.\n\n행사를 알리려면 «행사 제보하기»를 누른 뒤 사진·글을 보내 주세요. 운영자에게 남길 말이 있으면 «문의하기»를 눌러 주세요.",
     ),
+    /** 동의 안내: 한 줄 요지로 줄임(운영자 11/27 «동의 체크도 통합해서 줄여»). 버튼 «동의하고 보내기» 하나는 그대로 */
     consent: () => reply([
-        "피카(picka.news)는 경남·부산의 공연·전시·축제를 날짜순으로 알려 드려요.\n리플렛·포스터 사진이나 일정 글을 보내 주시면 운영자가 확인한 뒤에 피카에 올립니다. 자동으로 올라가지 않아요.",
-        `보내기 전에 아래 두 가지에 동의해 주세요.\n\n1. ${RIGHTS_CHECKS[0]}\n\n2. ${RIGHTS_CHECKS[1]}\n\n${PRIVACY_NOTE} 사진은 1년 동안 보관한 뒤 지웁니다. 카카오 이름·전화번호는 받지 않아요. 자세한 내용: picka.news/privacy`,
+        "리플렛·포스터 사진이나 일정 글을 보내 주시면 운영자가 확인한 뒤에 피카에 올려요.\n\n«동의하고 보내기»를 누르면 보낸 정보가 사실이고, 이미지 권리를 확인했다는 뜻이에요. (사진 1년 보관 · 이름·전화번호는 받지 않음 · picka.news/privacy)",
     ], [AGREE_TEXT]),
+    /** 채널을 추가하지 않은 사람: 제보를 받지 않고 채널 추가를 권한다(운영자 11/27 «카톡은 채널구독») */
+    needFriend: () => one(card(
+        "채널을 추가해 주세요",
+        "피카 채널을 추가하면 행사 제보를 받을 수 있어요. 추가한 뒤 «행사 제보하기»를 다시 눌러 주세요.\n방금 보낸 내용은 저장하지 않았어요.",
+        [{ label: "채널 추가하기", action: "webLink", webLinkUrl: CHANNEL_ADD_URL }, PICA_BTN],
+    )),
     ready: () => reply([
         `지금부터 ${TIP_MINUTES}분 동안 보내는 사진·글을 행사 제보로 받아요.\n리플렛·포스터 사진을 이 채팅창에 그냥 보내 주세요(여러 장도 돼요). 단체 이름·행사 이름·날짜는 글로 보내 주셔도 돼요. 사진 바로 뒤에 보낸 글은 같은 제보로 묶어요.`,
     ]),
