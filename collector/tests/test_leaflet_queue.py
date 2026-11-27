@@ -77,6 +77,17 @@ class FakeStore:
         return len(old), len(rows)
 
     tips = None  # [{id, created_at, reward_contact, photo_path}]
+    avatars = None       # 버킷의 파일 경로 목록
+    avatars_used = None  # 회원 기록이 가리키는 경로
+
+    def avatar_files(self):
+        return list(self.avatars or [])
+
+    def avatar_paths_in_use(self):
+        return set(self.avatars_used or [])
+
+    def remove_avatar_files(self, paths):
+        self.avatars = [a for a in (self.avatars or []) if a not in paths]
 
     def expire_tip_contacts(self, before_iso, apply):
         old = [t for t in (self.tips or []) if t.get("reward_contact") and t["created_at"] < before_iso]
@@ -550,3 +561,15 @@ def test_cleanup_expires_tip_contacts_and_photos():
     assert [t["reward_contact"] for t in tips] == [None, None, "b@example.com"]
     assert [t["photo_path"] for t in tips] == [None, "tips/mid.jpg", "tips/new.jpg"]
     assert store.removed == ["tips/old.jpg"]
+
+
+def test_cleanup_removes_avatar_files_without_a_profile():
+    """specs/022: 회원 기록이 가리키지 않는 프로필 사진(탈퇴·바꾸다 남은 것)만 지운다"""
+    store = FakeStore([])
+    store.avatars = ["u1/a.jpg", "u1/old.jpg", "gone/x.jpg"]
+    store.avatars_used = ["u1/a.jpg"]
+    now = lq.datetime(2026, 11, 28, tzinfo=lq.timezone.utc)
+    dry = lq.cleanup(store, False, now=now)
+    assert (dry["avatar_orphans"], dry["avatar_removed"]) == (2, 0) and len(store.avatars) == 3
+    out = lq.cleanup(store, True, now=now)
+    assert (out["avatar_orphans"], out["avatar_removed"]) == (2, 2) and store.avatars == ["u1/a.jpg"] and not out["errors"]

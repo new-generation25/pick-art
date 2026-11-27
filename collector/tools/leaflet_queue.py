@@ -155,6 +155,27 @@ class Store:
                 .lt("created_at", before_iso).not_.is_("photo_path", "null")
                 .order("created_at").limit(PAGE).execute().data or [])
 
+    def avatar_files(self):
+        """avatars 버킷의 파일 경로(<회원 id>/<파일>.jpg). 올린 지 하루가 안 된 파일은 뺀다
+        (회원이 방금 올리고 기록을 적기 전인 파일을 지우지 않게)"""
+        day_ago = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
+        with contextlib.redirect_stdout(sys.stderr):
+            bucket = self.sb.storage.from_("avatars")
+            out = []
+            for folder in bucket.list() or []:
+                for f in bucket.list(folder["name"]) or []:
+                    if (f.get("created_at") or "") < day_ago:
+                        out.append(f"{folder['name']}/{f['name']}")
+            return out
+
+    def avatar_paths_in_use(self):
+        rows = self.sb.table("profiles").select("avatar_path").not_.is_("avatar_path", "null").execute().data or []
+        return {r["avatar_path"] for r in rows}
+
+    def remove_avatar_files(self, paths):
+        with contextlib.redirect_stdout(sys.stderr):
+            return self.sb.storage.from_("avatars").remove(paths)
+
     def clear_tip_photo(self, rid, path):
         res = (self.sb.table("reports").update({"photo_path": None})
                .eq("id", rid).eq("photo_path", path).execute())
@@ -504,8 +525,23 @@ def cleanup(store, apply, now=None):
         out["tip_photos"] = len(tip_rows)
     except Exception as e:  # 020 마이그레이션 전 DB 등: 리플렛 정리는 계속한다
         out["errors"].append(f"tip: {str(e)[:180]}")
+    # 프로필 사진(specs/022): 회원 기록이 가리키지 않는 파일(탈퇴한 회원의 것, 바꾸다 남은 것)을 지운다
+    out.update(avatar_orphans=0, avatar_removed=0)
+    orphans = []
+    try:
+        used = store.avatar_paths_in_use()
+        orphans = [f for f in store.avatar_files() if f not in used]
+        out["avatar_orphans"] = len(orphans)
+    except Exception as e:  # 022 마이그레이션 전 DB 등: 나머지 정리는 계속한다
+        out["errors"].append(f"avatar: {str(e)[:180]}")
     if not apply:
         return out
+    if orphans:
+        try:
+            store.remove_avatar_files(orphans)
+            out["avatar_removed"] = len(orphans)
+        except Exception as e:
+            out["errors"].append(f"avatar: {str(e)[:180]}")
     if tip_rows:
         try:
             store.remove_files([r["photo_path"] for r in tip_rows])
@@ -570,6 +606,7 @@ def main(argv):
         print(f"1년 지난 리플렛 이미지 {out['expired']}건 {verb} · 파일 {out['files_removed']} · 경로 비움 "
               f"{out['rows_cleared']} · 카카오 구분값 동의 {out['kakao_senders']}·제출 {out['kakao_sender_keys']}"
               f" · 제보 연락처(90일) {out['tip_contacts']} · 제보 사진(1년) {out['tip_photos']}"
+              f" · 주인 없는 프로필 사진 {out['avatar_orphans']}"
               + (f" · 오류 {len(out['errors'])}" if out["errors"] else ""))
         return 1 if out["errors"] else 0
     except ValidationError as e:

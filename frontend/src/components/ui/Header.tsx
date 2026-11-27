@@ -8,6 +8,8 @@ import { useRouter } from "next/navigation";
 import { Menu } from "@mantine/core";
 import { INSTAGRAM_URL, InstagramIcon } from "./InstagramLink";
 import { HeaderSearch } from "./HeaderSearch";
+import { Avatar } from "./Avatar";
+import { AVATAR_EVENT } from "@/lib/avatar";
 
 /**
  * 맨 위 한 줄 (specs/014 시안 f01 → 운영자 11/27 머리 줄 시안 h01-B): 왼쪽 까치 그림 + 글자 로고 pica(끝 점만 초록), 오른쪽 찾기 · 내 정보(흰 원).
@@ -18,6 +20,9 @@ export function Header() {
     const [user, setUser] = useState<any>(null);
     const [nickname, setNickname] = useState("");
     const [isAdmin, setIsAdmin] = useState(false);
+    // 프로필 원 (specs/022): 올린 사진 → 관리자(profiles.role)면 까치 → 사람 그림
+    const [avatarPath, setAvatarPath] = useState<string | null>(null);
+    const [adminRole, setAdminRole] = useState(false);
     const [searching, setSearching] = useState(false);
 
     useEffect(() => {
@@ -27,16 +32,22 @@ export function Header() {
                 setUser(session.user);
                 const { data: profile } = await supabase
                     .from('profiles')
-                    .select('nickname, role')
+                    .select('*')
                     .eq('id', session.user.id)
                     .single();
                 setNickname(profile?.nickname || session.user.email?.split('@')[0] || '사용자');
+                setAvatarPath(profile?.avatar_path || null);
+                setAdminRole(profile?.role === 'admin');
                 if (profile?.role === 'admin' || session.user.email?.toLowerCase().includes('max')) {
                     setIsAdmin(true);
                 }
             }
         };
         checkUser();
+        // «내 정보»에서 사진을 바꾸거나 지우면 바로 따라 바뀐다
+        const onAvatar = (e: Event) => setAvatarPath((e as CustomEvent<string | null>).detail);
+        window.addEventListener(AVATAR_EVENT, onAvatar);
+        return () => window.removeEventListener(AVATAR_EVENT, onAvatar);
     }, []);
 
     const handleLogout = async () => {
@@ -67,8 +78,8 @@ export function Header() {
                     {user ? (
                         <Menu shadow="md" width={210} position="bottom-end" transitionProps={{ transition: "pop-top-right", duration: 220, timingFunction: "cubic-bezier(.2,.8,.2,1)" }}>
                             <Menu.Target>
-                                <button type="button" className="grid h-11 w-11 place-items-center rounded-full bg-white text-ink shadow-[inset_0_0_0_1.5px_#CFC5B4]" aria-label="내 정보">
-                                    <UserRound size={20} />
+                                <button type="button" className="grid h-11 w-11 place-items-center rounded-full" aria-label="내 정보">
+                                    <Avatar path={avatarPath} admin={adminRole} size={44} />
                                 </button>
                             </Menu.Target>
                             <Menu.Dropdown className="pica-portal">

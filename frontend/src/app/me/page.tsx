@@ -14,6 +14,8 @@ import { loginHref, POINTS_NOTE, TIP_EVENT_NAME, TIP_POINTS } from "@/lib/report
 import { fetchMyLedger, fetchMyPoints, POINT_REASON, type LedgerRow, type MyPoints } from "@/lib/points";
 import { ShelfTile, type ShelfCard } from "@/components/ui/Shelf";
 import { KakaoLinkCard } from "@/components/me/KakaoLinkCard";
+import { Avatar } from "@/components/ui/Avatar";
+import { removeAvatar, uploadAvatar } from "@/lib/avatar";
 
 type Profile = {
     nickname: string; phone: string; region: string; interests: string[];
@@ -33,6 +35,10 @@ export default function MePage() {
     const [saved, setSaved] = useState<ShelfCard[]>([]);
     const [venues, setVenues] = useState<{ id: string; name: string; region: string | null }[]>([]);
     const [editing, setEditing] = useState(false);
+    // 프로필 사진 (specs/022): 본인만 올리고 지운다. 관리자는 사진이 없으면 까치 그림
+    const [avatarPath, setAvatarPath] = useState<string | null>(null);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [photoBusy, setPhotoBusy] = useState(false);
     const [points, setPoints] = useState<MyPoints | null>(null);
     const [ledger, setLedger] = useState<LedgerRow[]>([]);
     const [msg, setMsg] = useState("");
@@ -59,6 +65,8 @@ export default function MePage() {
                 const byId = new Map((vs || []).map((v: { id: string; name: string; region: string | null }) => [v.id, v]));
                 setVenues(vids.map((id: string) => byId.get(id) ?? { id, name: "장소", region: null }));
             }
+            setAvatarPath(profile?.avatar_path || null);
+            setIsAdmin(profile?.role === "admin");
             setP({
                 nickname: profile?.nickname || `픽아트회원${session.user.id.slice(0, 4)}`,
                 phone: profile?.phone || "",
@@ -96,6 +104,30 @@ export default function MePage() {
     };
     const logout = async () => { await supabase.auth.signOut(); router.push("/"); };
 
+    const pickPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.currentTarget.files?.[0];
+        e.currentTarget.value = "";   // 같은 파일을 다시 골라도 반응하게
+        if (!file || !user) return;
+        setPhotoBusy(true);
+        try {
+            setAvatarPath(await uploadAvatar(user.id, file, avatarPath));
+            setMsg("사진을 바꿨어요");
+        } catch (err) {
+            const m = (err as Error).message;
+            setMsg(m === "decode" ? "이 사진을 열지 못했어요. jpg·png 파일로 골라 주세요." : "사진을 올리지 못했어요. 잠시 뒤 다시 해 주세요.");
+        }
+        setPhotoBusy(false);
+        setTimeout(() => setMsg(""), 3500);
+    };
+    const dropPhoto = async () => {
+        if (!user || !avatarPath) return;
+        setPhotoBusy(true);
+        try { await removeAvatar(user.id, avatarPath); setAvatarPath(null); setMsg("사진을 지웠어요"); }
+        catch { setMsg("사진을 지우지 못했어요. 잠시 뒤 다시 해 주세요."); }
+        setPhotoBusy(false);
+        setTimeout(() => setMsg(""), 3500);
+    };
+
     if (state === "loading") return <main className="min-h-screen" />;
     if (state === "login") {
         return (
@@ -132,7 +164,7 @@ export default function MePage() {
                     <Link href="/" className="inline-flex h-11 items-center gap-1 rounded-full px-2 text-[14px] font-semibold text-ink-soft hover:text-ink"><ArrowLeft className="h-5 w-5" aria-hidden /> 행사 목록</Link>
                 </div>
                 <div className="flex items-center gap-3.5">
-                    <span className="grid h-[60px] w-[60px] flex-none place-items-center rounded-full bg-ink text-white"><UserRound className="h-7 w-7" aria-hidden /></span>
+                    <Avatar path={avatarPath} admin={isAdmin} size={60} />
                     <div className="min-w-0">
                         <h1 className="pica-display text-[24px] leading-[1.2] text-ink">{p!.nickname}</h1>
                         <p className="mt-[3px] truncate text-[13px] text-ink-soft">{user?.email || (user?.app_metadata?.provider === "kakao" ? "카카오 계정으로 로그인" : "")}</p>
@@ -141,6 +173,19 @@ export default function MePage() {
                 </div>
                 {editing && (
                     <div className="mt-3 grid gap-2 rounded-xl bg-card p-3 shadow-[0_0_0_1px_var(--pk-line)]">
+                        <div>
+                            <p className="text-[13px] font-semibold text-ink-soft">프로필 사진</p>
+                            <div className="mt-1 flex flex-wrap items-center gap-2">
+                                <label className={`flex h-[38px] cursor-pointer items-center rounded-full bg-accent-soft px-3.5 text-[13.5px] font-bold text-accent ${photoBusy ? "pointer-events-none opacity-50" : ""}`}>
+                                    {photoBusy ? "올리는 중…" : avatarPath ? "사진 바꾸기" : "사진 올리기"}
+                                    <input type="file" accept="image/*" onChange={pickPhoto} disabled={photoBusy} className="sr-only" />
+                                </label>
+                                {avatarPath && (
+                                    <button type="button" onClick={dropPhoto} disabled={photoBusy} className="h-[38px] rounded-full bg-card px-3.5 text-[13.5px] font-bold text-ink shadow-[inset_0_0_0_1.5px_var(--pk-line)] disabled:opacity-50">사진 지우기</button>
+                                )}
+                            </div>
+                            <p className="mt-1 text-[12.5px] leading-[1.4] text-ink-soft">가운데를 정사각으로 잘라 작게 줄여 저장해요. 지금은 내 화면에만 보여요.</p>
+                        </div>
                         <label className="text-[13px] font-semibold text-ink-soft">닉네임
                             <input defaultValue={p!.nickname} onBlur={e => save({ nickname: e.currentTarget.value.trim() || p!.nickname })} className="mt-1 w-full rounded-lg border border-line bg-paper px-3 py-2 text-[15px] text-ink" /></label>
                         <label className="text-[13px] font-semibold text-ink-soft">연락처 (선택 · 공개되지 않음)
