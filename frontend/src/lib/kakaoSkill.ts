@@ -188,13 +188,9 @@ const one = (c: TextCard): SkillResponse => ({ version: "2.0", template: { outpu
 /** 세 갈래 카드: 피카 보기 · 행사 제보하기 · 문의하기 (피카 보기가 먼저 — 운영자 11/27 «피카 서비스 이용자를 늘려야지») */
 const menu = (title: string, description: string) => one(card(title, description, [PICA_BTN, TIP_BTN, ASK_BTN]));
 
-/** 제보를 받은 뒤 붙이는 카드: 사이트로 보내고, 회원이면 카카오톡 제보 연결을 권한다(포인트 약속은 021 적용·확인 뒤) */
-const AFTER_TIP = card(
-    "",
-    "피카에서 이번 주 공연·전시도 둘러보세요.\n피카 회원이면 «내 정보»(picka.news/me)에서 «카카오톡 제보 연결»을 해 두면 보낸 제보가 내 기록에 남아요.",
-    [PICA_BTN],
-);
-const withAfterTip = (r: SkillResponse): SkillResponse => ({ ...r, template: { ...r.template, outputs: [...r.template.outputs, AFTER_TIP].slice(0, 3) } });
+/** 제보를 받은 답: 받았다는 말과 피카 안내를 말풍선 하나로(운영자 11/28 «메시지를 2개씩 보내? 1개로 응답만 해도») */
+const AFTER_TIP = "\n\n피카 회원이면 «내 정보»에서 «카카오톡 제보 연결»을 해 두세요. 보낸 제보가 내 기록에 남아요.";
+const gotCard = (text: string): SkillResponse => one(card("", text + AFTER_TIP, [PICA_BTN]));
 
 export const MSG = {
     /** 웰컴: 채널 소개 + 세 갈래 */
@@ -227,14 +223,14 @@ export const MSG = {
         `지금부터 ${TIP_MINUTES}분 동안 보내는 사진·글을 행사 제보로 받아요.\n리플렛·포스터 사진을 이 채팅창에 그냥 보내 주세요(여러 장도 돼요). 단체 이름·행사 이름·날짜는 글로 보내 주셔도 돼요. 사진 바로 뒤에 보낸 글은 같은 제보로 묶어요.`,
     ]),
     agreed: () => reply([`동의해 주셔서 고맙습니다. 지금부터 ${TIP_MINUTES}분 동안 보내는 리플렛·포스터 사진이나 일정 글을 행사 제보로 받아요. 이 채팅창에 보내 주세요.`]),
-    gotImages: (n: number, refused: number) => withAfterTip(reply([
-        `사진 ${n}장 받았어요. 운영자가 확인한 뒤에 피카에 올립니다.` +
+    gotImages: (n: number, refused: number) => gotCard(
+        `사진 ${n}장 받았어요. 운영자가 확인한 뒤에 피카에 올려요.` +
         (refused ? `\n하루 5장까지 받아서 ${refused}장은 받지 못했어요. 내일 다시 보내 주세요.` : "") +
         "\n단체 이름이 사진에 없으면 지금 글로 보내 주세요.",
-    ])),
+    ),
     gotText: (attached: boolean) => attached
-        ? reply(["방금 보낸 사진과 함께 받았어요. 운영자가 확인한 뒤에 피카에 올립니다."])
-        : withAfterTip(reply(["글로 받았어요. 운영자가 확인한 뒤에 피카에 올립니다. 리플렛·포스터 사진이 있으면 이 채팅창에 함께 보내 주세요."])),
+        ? reply(["방금 보낸 사진과 함께 받았어요. 운영자가 확인한 뒤에 피카에 올려요."])
+        : gotCard("글로 받았어요. 운영자가 확인한 뒤에 피카에 올려요. 리플렛·포스터 사진이 있으면 이 채팅창에 함께 보내 주세요."),
     linked: () => reply(["피카 회원과 연결했어요. 이 채팅방에서 보내는 행사 제보는 회원님이 보낸 것으로 기록돼요.\n연결을 끊으려면 피카 «내 정보»(picka.news/me)에서 «연결 끊기»를 눌러 주세요."]),
     badCode: () => reply(["연결 코드가 맞지 않거나 10분이 지났어요. 피카 «내 정보»(picka.news/me)에서 새 코드를 받아 «연결 123456»처럼 보내 주세요."]),
     linkLimit: () => reply(["오늘은 연결을 더 시도할 수 없어요. 내일 다시 해 주세요."]),

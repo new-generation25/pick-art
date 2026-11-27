@@ -43,7 +43,8 @@ async function storeImage(secret: string, id: string, path: string, url: string)
         const res = await fetch(url, { signal: AbortSignal.timeout(20_000) });
         if (!isKakaoImageUrl(res.url || url)) throw new Error("redirected outside kakaocdn");
         const type = (res.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();
-        if (!res.ok || !/^image\/(jpeg|png|webp)$/.test(type)) throw new Error(`fetch ${res.status} ${type}`);
+        // 카카오는 휴대폰 사진을 표준이 아닌 «image/jpg» 로 보낸다(11/28 운영자 휴대폰 시험, 이 때문에 사진을 버렸음)
+        if (!res.ok || !/^image\/(jpe?g|pjpeg|png|webp)$/.test(type)) throw new Error(`fetch ${res.status} ${type}`);
         const buf = await res.arrayBuffer();
         if (buf.byteLength === 0 || buf.byteLength > MAX_IMAGE_BYTES) throw new Error(`size ${buf.byteLength}`);
         const { body, contentType } = await toJpeg(buf, type);
