@@ -4,7 +4,7 @@ import { INSTAGRAM_URL, InstagramIcon } from "./InstagramLink";
 
 const linkClass = "text-[13px] font-bold text-ink underline-offset-4 hover:underline";
 
-/** 공개 화면 꼬리말: 브랜드, 인스타그램, 이용약관, 개인정보처리방침 */
+/** 공개 화면 꼬리말: 브랜드, 인스타그램, 소개·단체 안내, 이용약관, 개인정보처리방침, 운영 주체 («행사 제보하기»·«캘린더로 받아 보기»는 운영자 11/28 지시로 뺌) */
 export function SiteFooter() {
     return (
         <Box component="footer" py={32} bg="var(--pk-paper)" style={{ borderTop: '2px solid var(--pk-line)' }}>
@@ -19,8 +19,6 @@ export function SiteFooter() {
                     <Group gap="md">
                         <Link href="/about" className={linkClass}>피카 소개</Link>
                         <Link href="/partners" className={linkClass}>단체·공간 안내</Link>
-                        <Link href="/tip" className={linkClass}>행사 제보하기</Link>
-                        <Link href="/calendar" className={linkClass}>캘린더로 받아 보기</Link>
                         <Link href="/terms" className={linkClass}>이용약관</Link>
                         <Link href="/privacy" className={linkClass}>개인정보처리방침</Link>
                         <Text fz="xs" c="var(--pk-ink-soft)">&copy; 2024 pickart (pica). All rights reserved.</Text>
