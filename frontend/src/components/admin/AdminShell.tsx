@@ -39,6 +39,7 @@ export const ADMIN_SECTIONS: Section[] = [
         key: "status", label: "현황", short: "현황", icon: Activity, pages: [
             { href: "/admin/status", label: "운영 현황" },
             { href: "/admin/counts", label: "노출·클릭" },
+            { href: "/admin/members", label: "회원" },
             { href: "/admin/storage", label: "저장공간" },
         ],
     },

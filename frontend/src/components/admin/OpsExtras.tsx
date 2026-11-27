@@ -118,7 +118,7 @@ export function PushMemberStats() {
             </Paper>
             <Paper withBorder radius="md" p="md" id="member-stats">
                 <Title order={4}>회원</Title>
-                <Text size="xs" c="dimmed" mb="sm">숫자만 봅니다. 회원 목록과 개인 정보는 이 화면에 두지 않습니다.</Text>
+                <Text size="xs" c="dimmed" mb="sm">숫자만 봅니다. 한 명씩 보려면 <a href="/admin/members" style={{ color: "inherit", textDecoration: "underline" }}>회원 목록</a>으로 가세요.</Text>
                 {members && (
                     <SimpleGrid cols={3} spacing="sm">
                         <Num label="가입 회원" value={members.members} sub={`관리자 ${members.admins}명 포함`} />
