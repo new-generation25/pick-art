@@ -17,6 +17,7 @@ import {
 import { runStatusTone, splitCollectorAlerts, type CollectorAlert, type CollectorRun } from "@/lib/opsStats";
 import { todayKST } from "@/lib/utils";
 import { CONSENT_HINT, CONSENT_LABEL, type Consent } from "../inbox/ConsentGroups";
+import { consentRank, fetchSiteConsents, instaHandle, SITE_CONSENT_HINT, SITE_CONSENT_LABEL, type SiteConsent } from "@/lib/siteConsent";
 
 interface SourceItem {
     id: string;
@@ -82,6 +83,9 @@ export default function SourcesPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [filter, setFilter] = useState<Filter>("watch");
     const [consentFilter, setConsentFilter] = useState<Consent | "">("");
+    const [consentFirst, setConsentFirst] = useState(false);   // 동의 받은 계정을 위로
+    const [site, setSite] = useState<Record<string, SiteConsent>>({});
+    useEffect(() => { let off = false; (async () => { const m = await fetchSiteConsents(); if (!off) setSite(m); })(); return () => { off = true; }; }, []);
     const [shown, setShown] = useState(60);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -153,11 +157,15 @@ export default function SourcesPage() {
 
     const list = useMemo(() => {
         const s = searchTerm.trim().toLowerCase();
-        return items
+        const out = items
             .filter(i => filter === "all" || (filter === "watch" ? needsLook(healthOf(health, i), !!i.paused_reason) : i.type === filter))
             .filter(i => !consentFilter || (i.type === "instagram" && i.consent === consentFilter))
             .filter(i => !s || i.name?.toLowerCase().includes(s) || i.value?.toLowerCase().includes(s));
-    }, [items, filter, consentFilter, searchTerm, health]);
+        if (!consentFirst) return out;
+        // 동의 받은 계정 먼저: 확정 동의 → 상시 → 임시 → 사이트 신청 → 없음 → 철회 (인스타가 아닌 출처는 그 뒤, 원래 순서 유지)
+        const rank = (i: typeof out[number]) => i.type === "instagram" ? consentRank(i.consent, site[instaHandle(i.value)]) : 9;
+        return out.map((i, n) => ({ i, n })).sort((a, b) => rank(a.i) - rank(b.i) || a.n - b.n).map(x => x.i);
+    }, [items, filter, consentFilter, searchTerm, health, consentFirst, site]);
 
     const chips: { key: Filter; label: string }[] = [
         { key: "watch", label: `살펴볼 것 ${counts.watch || 0}` },
@@ -193,6 +201,12 @@ export default function SourcesPage() {
                             data={(Object.keys(CONSENT_LABEL) as Consent[]).map(c => ({ value: c, label: CONSENT_LABEL[c] }))}
                             value={consentFilter || null} onChange={v => { setConsentFilter((v as Consent) || ""); setShown(60); }} />
                     )}
+                    {(filter === "instagram" || filter === "all") && (
+                        <button type="button" aria-pressed={consentFirst} onClick={() => { setConsentFirst(v => !v); setShown(60); }}
+                            className={`h-9 rounded-full px-3.5 text-[13.5px] font-semibold ${consentFirst ? "bg-ink text-paper" : "bg-card text-ink shadow-[0_1px_4px_rgba(30,26,21,.1)]"}`}>
+                            동의 받은 계정 먼저
+                        </button>
+                    )}
                 </Group>
 
                 {error && <Text c="red" size="sm" mb="md" role="alert">{error}</Text>}
@@ -216,6 +230,11 @@ export default function SourcesPage() {
                                                 )}
                                                 {item.score != null && (
                                                     <Badge variant="filled" size="sm" color={item.score >= 80 ? "green" : item.score >= 60 ? "yellow" : "gray"}>{item.score}점</Badge>
+                                                )}
+                                                {item.type === "instagram" && site[instaHandle(item.value)] && (
+                                                    <Tooltip label={SITE_CONSENT_HINT[site[instaHandle(item.value)].status]} multiline w={260}>
+                                                        <Badge variant={site[instaHandle(item.value)].status === "confirmed" ? "filled" : "outline"} size="sm" color="green">{SITE_CONSENT_LABEL[site[instaHandle(item.value)].status]}</Badge>
+                                                    </Tooltip>
                                                 )}
                                                 {item.type === "instagram" && item.consent !== "none" && (
                                                     <Tooltip label={`${CONSENT_HINT[item.consent]}${item.consent_at ? ` (${item.consent_at})` : ""}`} multiline w={260}>
