@@ -23,6 +23,8 @@
 
 - [X] T030 [US3] `Avatar` 의 `admin`: 종이색(#F4EFE6) 원 안 `/icons/logo-mark.png`. 머리 줄과 «내 정보» 모두 `profiles.role = 'admin'` 으로 판정
 
+- [X] T031 [US3] 운영자 11/28 «관리자는 늘 까치로 고정»: `Avatar` 는 관리자면 사진을 받지 않고 까치만, `/me` «고치기»의 사진 버튼 자리는 관리자에게 «까치 그림으로 고정돼요» 한 줄
+
 ## 5. 확인·마무리
 
 - [X] T040 `npx tsc --noEmit` + `next build --webpack` + `pytest collector/tests`(264 통과)

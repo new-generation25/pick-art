@@ -5,7 +5,7 @@ import { UserRound } from "lucide-react";
 import { avatarUrl } from "@/lib/avatar";
 
 /**
- * 프로필 원 (specs/022, 머리 줄 시안 h01-B). 그리는 순서: 올린 사진 → 관리자면 까치 그림 → 사람 그림.
+ * 프로필 원 (specs/022, 머리 줄 시안 h01-B). 관리자는 늘 까치 그림(운영자 «관리자는 늘 까치로 고정»), 회원은 올린 사진 → 사람 그림.
  * 사진이 없을 때는 흰 원 + 안쪽 1.5px 선(#CFC5B4). 관리자는 종이색(#F4EFE6) 원 안에 확정 로고 윗부분(우체통 위 까치).
  */
 export function Avatar({ path, admin = false, size, className = "" }: { path?: string | null; admin?: boolean; size: number; className?: string }) {
@@ -13,12 +13,12 @@ export function Avatar({ path, admin = false, size, className = "" }: { path?: s
     useEffect(() => {
         let alive = true;
         setUrl(null);
-        avatarUrl(path).then(u => { if (alive) setUrl(u); });
+        if (!admin) avatarUrl(path).then(u => { if (alive) setUrl(u); });   // 관리자는 사진을 쓰지 않는다
         return () => { alive = false; };
-    }, [path]);
+    }, [path, admin]);
 
     const box = { width: size, height: size };
-    if (url) {
+    if (url && !admin) {
         // 사진 위의 테두리는 outline 으로 그린다(img 에는 안쪽 그림자가 보이지 않는다)
         // eslint-disable-next-line @next/next/no-img-element
         return <img src={url} alt="" style={{ ...box, outline: "1.5px solid #CFC5B4", outlineOffset: "-1.5px" }} className={`flex-none rounded-full object-cover ${className}`} onError={() => setUrl(null)} />;

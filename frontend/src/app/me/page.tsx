@@ -173,6 +173,9 @@ export default function MePage() {
                 </div>
                 {editing && (
                     <div className="mt-3 grid gap-2 rounded-xl bg-card p-3 shadow-[0_0_0_1px_var(--pk-line)]">
+                        {isAdmin ? (
+                            <p className="text-[13px] leading-[1.4] text-ink-soft"><b className="font-semibold">프로필 사진</b> · 관리자 계정은 까치 그림으로 고정돼요.</p>
+                        ) : (
                         <div>
                             <p className="text-[13px] font-semibold text-ink-soft">프로필 사진</p>
                             <div className="mt-1 flex flex-wrap items-center gap-2">
@@ -186,6 +189,7 @@ export default function MePage() {
                             </div>
                             <p className="mt-1 text-[12.5px] leading-[1.4] text-ink-soft">가운데를 정사각으로 잘라 작게 줄여 저장해요. 지금은 내 화면에만 보여요.</p>
                         </div>
+                        )}
                         <label className="text-[13px] font-semibold text-ink-soft">닉네임
                             <input defaultValue={p!.nickname} onBlur={e => save({ nickname: e.currentTarget.value.trim() || p!.nickname })} className="mt-1 w-full rounded-lg border border-line bg-paper px-3 py-2 text-[15px] text-ink" /></label>
                         <label className="text-[13px] font-semibold text-ink-soft">연락처 (선택 · 공개되지 않음)
