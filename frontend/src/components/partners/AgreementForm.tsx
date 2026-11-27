@@ -5,7 +5,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { GN_REGIONS } from "@/lib/regions";
 import {
-    AFTER_SUBMIT, CONSENT_ITEMS, CONSENT_KEYS, CONSENT_PRIVACY, CONSENT_SUMMARY, CONTACT_EMAIL, EMPTY_AGREEMENT, EXTRAS, IS_DRAFT, PRIVACY_NOTICE, STATUS_LABEL,
+    AFTER_SUBMIT, APPLICANT_TYPES, CONSENT_ITEMS, CONSENT_KEYS, CONSENT_ORG_AUTH, CONSENT_PRIVACY, CONSENT_SUMMARY, CONTACT_EMAIL, EMPTY_AGREEMENT, EXTRAS, IS_DRAFT, PRIVACY_NOTICE, STATUS_LABEL,
     TERMS_SECTIONS, TERMS_VERSION, checkAgreement, toRow, type AgreementInput,
 } from "@/lib/partnerAgreement";
 import { loginHref } from "@/lib/reports";
@@ -158,6 +158,7 @@ export function AgreementForm() {
                         </label>
                         <ul className="mt-3 flex flex-col gap-1.5 text-[14.5px] leading-relaxed text-ink">
                             {CONSENT_ITEMS.map(it => <li key={it.title}><b>{it.title}</b> · {it.text}</li>)}
+                            {form.applicant_type === "org" && <li><b>{CONSENT_ORG_AUTH.title}</b> · {CONSENT_ORG_AUTH.text}</li>}
                             <li><b>{CONSENT_PRIVACY.title}</b> · {CONSENT_PRIVACY.text}</li>
                         </ul>
                         <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-line pt-3 text-[15px] text-ink" role="radiogroup" aria-label="포스터·사진 사용">
@@ -184,9 +185,19 @@ export function AgreementForm() {
 
                 <fieldset className="flex flex-col gap-4">
                     <legend className="mb-3 text-[18px] font-bold text-ink">② 누구인가요</legend>
+                    {/* 개인/단체 구분 (운영자 2026-11-28): 개인은 대표자·고유번호를 묻지 않고, 단체는 동의 목록에 «권한» 한 줄이 더 보인다 */}
+                    <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="개인인지 단체·공간인지">
+                        {APPLICANT_TYPES.map(t => (
+                            <label key={t.value} className={`flex min-h-14 cursor-pointer items-center gap-2.5 rounded-[14px] border-[1.5px] bg-[var(--pk-card)] px-3 py-2 text-ink ${form.applicant_type === t.value ? "border-[var(--pk-accent)]" : "border-line"}`}>
+                                <input type="radio" name="pa-type" className="h-5 w-5 flex-none accent-[var(--pk-accent)]" checked={form.applicant_type === t.value} onChange={() => setForm(f => ({ ...f, applicant_type: t.value }))} />
+                                <span className="min-w-0 leading-tight"><b className="block text-[15px]">{t.label} *</b><small className="block text-[12.5px] text-ink-soft">{t.hint}</small></span>
+                            </label>
+                        ))}
+                    </div>
                     <div>
-                        <label htmlFor="pa-org" className={label}>단체·활동 이름 *</label>
-                        <input id="pa-org" value={form.org_name} onChange={setText("org_name")} maxLength={120} className={field} placeholder="극단 이름, 갤러리 이름, 활동명" autoComplete="organization" />
+                        <label htmlFor="pa-org" className={label}>{form.applicant_type === "person" ? "활동 이름 *" : "단체·활동 이름 *"}</label>
+                        <input id="pa-org" value={form.org_name} onChange={setText("org_name")} maxLength={120} className={field}
+                            placeholder={form.applicant_type === "person" ? "작가 이름, 활동명" : "극단 이름, 갤러리 이름, 활동명"} autoComplete={form.applicant_type === "person" ? "name" : "organization"} />
                     </div>
                     <div>
                         <label htmlFor="pa-url" className={label}>공식 SNS·누리집 주소 *</label>
@@ -210,6 +221,7 @@ export function AgreementForm() {
                                     {GN_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
                                 </select>
                             </div>
+                            {form.applicant_type !== "person" && <>
                             <div>
                                 <label htmlFor="pa-rep" className={label}>대표자</label>
                                 <input id="pa-rep" value={form.representative} onChange={setText("representative")} maxLength={60} className={field} />
@@ -218,6 +230,7 @@ export function AgreementForm() {
                                 <label htmlFor="pa-reg" className={label}>고유번호·사업자등록번호</label>
                                 <input id="pa-reg" value={form.reg_no} onChange={setText("reg_no")} maxLength={30} className={field} inputMode="numeric" />
                             </div>
+                            </>}
                             <div>
                                 <label htmlFor="pa-public" className={label}>공개해도 되는 문의 연락처</label>
                                 <input id="pa-public" value={form.contact_public} onChange={setText("contact_public")} maxLength={200} className={field} placeholder="예매 문의 전화 등" />

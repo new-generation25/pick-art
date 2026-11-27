@@ -144,7 +144,7 @@ function AdminEvents() {
     const sel = "h-9 max-w-full rounded-full border-0 bg-card px-3 text-[13.5px] font-semibold text-ink shadow-[0_1px_4px_rgba(30,26,21,.1)]";
 
     return (
-        <div className="mx-auto max-w-5xl px-4 pt-4">
+        <div className="pt-4">
             <div className="flex items-end justify-between gap-3">
                 <div>
                     <h1 className="pica-display text-[25px] leading-tight text-ink">행사</h1>
@@ -179,7 +179,7 @@ function AdminEvents() {
                 <button type="submit" className="h-9 rounded-full bg-ink px-3.5 text-[13.5px] font-bold text-paper">찾기</button>
             </form>
 
-            {error && <p className="mt-3 rounded-xl border-[1.5px] border-[#b5432f] bg-card px-3 py-2 text-[13.5px] text-ink" role="alert">{error}</p>}
+            {error && <p className="pica-err mt-3" role="alert">{error}</p>}
 
             <p className="mt-3 px-1 text-[13px] text-ink-soft" role="status">
                 {loading ? "찾는 중…" : <><b className="pica-num text-ink">{total.toLocaleString("ko-KR")}</b>건{rows.length < total ? ` 중 ${rows.length}건 보는 중` : ""}{tab === "hidden" ? " · 숨긴 행사는 공개 화면에 나오지 않습니다" : ""}</>}
@@ -219,18 +219,18 @@ function AdminEvents() {
                             </span>
                         </div>
                         {hiding === e.id && (
-                            <div className="mt-2 rounded-xl border border-dashed border-line px-3 py-2.5">
+                            <div className="mt-2 rounded-xl bg-paper px-3 py-2.5">
                                 <div className="flex flex-wrap items-center gap-2">
-                                    <select className="h-9 max-w-full rounded-lg border border-line bg-paper px-2 text-[14px] text-ink" value={reason} onChange={ev => setReason(ev.currentTarget.value)} aria-label="숨기는 이유">
+                                    <select className="h-9 max-w-full rounded-lg border border-line bg-card px-2 text-[14px] text-ink" value={reason} onChange={ev => setReason(ev.currentTarget.value)} aria-label="숨기는 이유">
                                         {HIDE_REASONS.map(r => <option key={r} value={r}>{r}</option>)}
                                     </select>
-                                    <input className="h-9 min-w-0 flex-1 basis-[180px] rounded-lg border border-line bg-paper px-2 text-[14px] text-ink" placeholder="덧붙일 말(없어도 됨)" value={note} onChange={ev => setNote(ev.currentTarget.value)} maxLength={200} aria-label="덧붙일 말" />
+                                    <input className="h-9 min-w-0 flex-1 basis-[180px] rounded-lg border border-line bg-card px-2 text-[14px] text-ink" placeholder="덧붙일 말(없어도 됨)" value={note} onChange={ev => setNote(ev.currentTarget.value)} maxLength={200} aria-label="덧붙일 말" />
                                     <button type="button" disabled={busy} onClick={() => hide(e)} className="h-9 rounded-full bg-ink px-3.5 text-[13.5px] font-bold text-paper disabled:opacity-50">숨기기</button>
                                     <button type="button" onClick={() => setHiding(null)} className="h-9 rounded-full px-2 text-[13.5px] font-semibold text-ink-soft">취소</button>
                                 </div>
                                 <p className="mt-1.5 text-[12.5px] text-ink-soft">
                                     지우지 않고 숨깁니다. «숨김»에서 언제든 되돌릴 수 있습니다.
-                                    {e.insta_post_url && <b className="text-[#b5432f]"> 이 행사는 피카 인스타그램에 소개한 게시물이 있습니다 — 게시물은 따로 내려야 합니다.</b>}
+                                    {e.insta_post_url && <b className="text-[#8f2218]"> 이 행사는 피카 인스타그램에 소개한 게시물이 있습니다 — 게시물은 따로 내려야 합니다.</b>}
                                 </p>
                             </div>
                         )}
@@ -250,7 +250,7 @@ function AdminEvents() {
                         <Text size="xs" c="dimmed">출처 «{editing.source || "없음"}» · 원본에서 확인한 내용만 고쳐 주세요. 추측한 날짜·장소·요금은 넣지 않습니다.</Text>
                         <EventFields value={draft} onChange={setDraft} />
                         <TextInput label="포스터 그림 주소" value={poster} onChange={e => setPoster(e.currentTarget.value)} placeholder="https://" description="공식 출처의 원본 포스터 주소만. 비우면 글자 포스터로 보입니다." />
-                        {formMsg && <Text size="sm" c="red" role="alert">{formMsg}</Text>}
+                        {formMsg && <Text size="sm" className="pica-err" role="alert">{formMsg}</Text>}
                         <Group justify="flex-end">
                             <Button variant="default" onClick={() => setEditing(null)}>취소</Button>
                             <Button loading={busy} onClick={saveEdit}>저장</Button>

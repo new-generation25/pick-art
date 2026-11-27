@@ -108,17 +108,13 @@ export default function AdminStoragePage() {
 
     return (
         <Box pb={40}>
-            <Container size="lg" pt={32}>
+            <Container fluid px={0} pt={32}>
                 <Group justify="space-between" align="end" mb={40}>
-                    <Group gap="sm">
-                        <ThemeIcon size={48} radius="xl" color="indigo" variant="light">
-                            <HardDrive size={24} />
-                        </ThemeIcon>
-                        <Box>
-                            <Title order={1} size={rem(32)} fw={900}>저장공간</Title>
-                            <Text c="dimmed" fw={500}>수집한 포스터 이미지와 데이터베이스가 차지하는 용량을 무료 플랜 한도와 비교합니다.</Text>
-                        </Box>
-                    </Group>
+                    {/* 제목 앞 그림은 뺐다: 다른 관리자 화면처럼 제목이 본문 왼쪽 선에서 시작한다(운영자 2026-11-28 «너비 맞춰») */}
+                    <Box>
+                        <Title order={1} size={rem(32)} fw={900}>저장공간</Title>
+                        <Text c="dimmed" fw={500}>수집한 포스터 이미지와 데이터베이스가 차지하는 용량을 무료 플랜 한도와 비교합니다.</Text>
+                    </Box>
                     <Button variant="light" color="indigo" leftSection={<RefreshCw size={14} />} onClick={fetchUsage} loading={loading}>
                         새로고침
                     </Button>

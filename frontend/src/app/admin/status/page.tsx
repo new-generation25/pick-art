@@ -23,8 +23,8 @@ import {
 const MEMBER_GOAL = 10000; // 유료 전환 기준: 가입 회원 1만 명 (docs/PLAN_community_2026-11.md 11절, profiles 행 수)
 const SECTIONS = [["alerts", "살펴볼 것"], ["trends", "추이"], ["collect", "수집"], ["spread", "분포"], ["site-visits", "방문"], ["people", "알림·회원"], ["insta", "인스타그램"]] as const;
 const KIND_COLOR: Record<SourceKind, string> = {
-    KOPIS: "var(--mantine-color-blue-6)",
-    "기관 공식": "var(--mantine-color-teal-6)",
+    KOPIS: "#2e6b4e",
+    "기관 공식": "#73a88d",
     인스타그램: "var(--mantine-color-grape-6)",
     큐레이션: "var(--mantine-color-orange-6)",
 };
@@ -203,7 +203,7 @@ function FoundStrip({ points, source }: { points: { run_at: string; found: numbe
             {points.map(p => (
                 <Box key={p.run_at} title={`${fmtTime(p.run_at)} · 발견 ${p.found}`} w={6}
                     h={p.found ? Math.max(2, Math.round((p.found / max) * H)) : 1}
-                    style={{ background: p.found ? "var(--mantine-color-blue-5)" : "var(--mantine-color-red-4)", borderRadius: 1, flexShrink: 0 }} />
+                    style={{ background: p.found ? "#4f8f6f" : "#d7675a", borderRadius: 1, flexShrink: 0 }} />
             ))}
         </Group>
     );
@@ -229,7 +229,7 @@ function BarList({ rows, highlightZero }: { rows: { label: string; n: number }[]
                 <Group key={r.label} gap={8} wrap="nowrap">
                     <Text size="sm" w={64} style={{ flexShrink: 0 }} c={highlightZero && !r.n ? "red" : undefined}>{r.label}</Text>
                     <Box style={{ flex: 1, minWidth: 0 }}>
-                        <Box h={10} style={{ width: `${(r.n / max) * 100}%`, minWidth: r.n ? 2 : 0, background: "var(--mantine-color-blue-5)", borderRadius: 2 }} />
+                        <Box h={10} style={{ width: `${(r.n / max) * 100}%`, minWidth: r.n ? 2 : 0, background: "#4f8f6f", borderRadius: 2 }} />
                     </Box>
                     <Text size="sm" w={40} ta="right" style={{ fontVariantNumeric: "tabular-nums" }}>{r.n}</Text>
                 </Group>
@@ -341,7 +341,7 @@ export default function AdminDashboard() {
     }, [ops, period]);
 
     if (!ops || !view) {
-        return <Container size="xl" py={60}><Group><Loader size="sm" /><Text c="dimmed">운영 숫자를 읽는 중…</Text></Group></Container>;
+        return <Container fluid px={0} py={60}><Group><Loader size="sm" /><Text c="dimmed">운영 숫자를 읽는 중…</Text></Group></Container>;
     }
     const { supply, days, lastNew, summary, instaDays, alerts, latestRuns, series, missed, resolvedCollector, trend, byBusan, instaLast } = view;
     const gyeongnam = supply.byRegion.filter(r => r.label !== "부산");
@@ -350,7 +350,7 @@ export default function AdminDashboard() {
     const added7 = days.slice(-7).reduce((s, d) => s + SOURCE_KINDS.reduce((t, k) => t + d[k], 0), 0);
 
     return (
-        <Container size="xl" pt={32} pb={80}>
+        <Container fluid px={0} pt={32} pb={80}>
             <Stack gap="xl">
                 <Group justify="space-between" align="flex-end">
                     <div>
@@ -370,7 +370,7 @@ export default function AdminDashboard() {
 
                 <Paper withBorder radius="md" p="md" id="alerts">
                     <Text fw={700} mb="xs">살펴볼 것</Text>
-                    {alerts.length === 0 ? <Text c="teal">지금 이상 없음</Text> : (
+                    {alerts.length === 0 ? <p className="pica-info">지금 이상 없음</p> : (
                         <Stack gap={6}>
                             {alerts.map((a, i) => (
                                 <Group key={i} gap="sm" wrap="nowrap" align="flex-start">

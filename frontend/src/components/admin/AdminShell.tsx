@@ -3,14 +3,17 @@
 import Link from "next/link";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, Building2, CalendarDays, ExternalLink, Inbox, ListChecks, LogOut, type LucideIcon } from "lucide-react";
+import { Activity, Building2, CalendarDays, Inbox, ListChecks, type LucideIcon } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { isLoggingOut, logoutAndReload } from "@/lib/logout";
+import { isLoggingOut } from "@/lib/logout";
+import { Avatar } from "@/components/ui/Avatar";
 import { fetchAdminCounts, menuBadges, type AdminCounts } from "@/lib/adminCounts";
 
 /**
  * 관리자 틀 (specs/019 A1). 메뉴 다섯: 오늘 할 일 · 대기함 · 행사 · 출처·단체 · 현황.
- * 휴대폰은 아래 탭, PC는 맨 위 줄. 한 메뉴에 화면이 여럿이면 둘째 줄에 칩으로 보인다.
+ * 맨 위 줄은 공개 화면 머리 줄과 같은 짜임이다(운영자 2026-11-28 «상단은 메인페이지 디자인을 따라가야»):
+ *   왼쪽 까치 그림 + pica. + «관리» 꼬리표(누르면 사이트 홈 — 운영자 2026-11-28 «피카 로고 누르면 홈으로 가기»), 오른쪽 관리자 원 하나(누르면 /me — 로그아웃은 거기 있다). «사이트 보기» 알약은 뺐다(운영자 2026-11-28 «빼» — 로고가 사이트 홈으로 간다).
+ * 메뉴는 공개 홈의 칩 줄과 같은 흰 알약. PC는 머리 줄 아래 한 줄, 휴대폰은 아래 탭. 한 메뉴에 화면이 여럿이면 그 아래 줄에 칩으로 보인다.
  * 관리자 확인이 끝나기 전에는 화면(children)을 그리지 않는다 — 화면이 그려지지 않으면 그 화면의 조회도 나가지 않는다.
  * 데이터 보호 자체는 DB 정책(profiles.role='admin')이 맡는다.
  */
@@ -92,8 +95,6 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         return () => data.subscription.unsubscribe();
     }, []);
 
-    const logout = logoutAndReload;
-
     if (state !== "admin") {
         return (
             <div className="pica-public flex min-h-screen items-center justify-center" data-pica-theme="paper">
@@ -121,43 +122,42 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         <AdminContext.Provider value={{ counts, reload, email }}>
                 <div className="pica-public pica-admin" data-pica-theme="paper">
                     <header className="fixed inset-x-0 top-0 z-[100] border-b border-line bg-paper">
-                        <div className="mx-auto flex h-[52px] max-w-6xl items-center gap-2 px-4">
-                            <Link href="/admin" className="flex items-baseline gap-1.5 no-underline" aria-label="관리자 첫 화면">
-                                <span className="pica-display text-[21px] leading-none text-ink">pica<span className="text-accent">.</span></span>
-                                <span className="text-[12.5px] font-semibold text-ink-soft">관리</span>
+                        {/* 첫 줄: 공개 화면 머리 줄과 같은 높이(60px)·여백 */}
+                        <div className="mx-auto flex h-[60px] max-w-6xl items-center justify-between gap-2 pl-[18px] pr-[10px] sm:px-6">
+                            <Link href="/" className="flex shrink-0 items-center gap-2 no-underline" aria-label="pica 홈">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src="/icons/logo-mark.png" alt="" width={40} height={36} className="block h-9 w-auto flex-none" />
+                                <span className="pica-num text-[24px] font-bold leading-none tracking-[-0.6px] text-ink">pica<span className="text-accent">.</span></span>
+                                <span className="rounded-full bg-[var(--pk-accent-soft)] px-2.5 py-[3px] text-[12.5px] font-bold leading-none text-accent">관리</span>
                             </Link>
-                            <nav className="ml-5 hidden items-center gap-1 md:flex" aria-label="관리자 메뉴">
-                                {ADMIN_SECTIONS.map(s => {
-                                    const on = s.key === current.key;
-                                    const n = badgeOf(s.key);
-                                    return (
-                                        <Link key={s.key} href={s.pages[0].href} aria-current={on ? "page" : undefined} title={n > 0 ? badgeHint(s.key, n) : undefined}
-                                            className={`flex h-9 items-center gap-1.5 rounded-full px-3.5 text-[14px] font-semibold no-underline ${on ? "bg-accent text-on-accent" : "text-ink hover:bg-soft"}`}>
-                                            <s.icon size={15} aria-hidden />{s.label}
-                                            {n > 0 && <span className={`pica-num whitespace-nowrap rounded-full px-1.5 text-[11.5px] font-bold ${on ? "bg-on-accent text-accent" : "bg-accent text-on-accent"}`}>{badgeText(s.key, n)}</span>}
-                                        </Link>
-                                    );
-                                })}
-                            </nav>
-                            <div className="ml-auto flex items-center gap-1">
-                                <Link href="/" className="flex h-9 items-center gap-1 rounded-full px-2.5 text-[13px] font-semibold text-ink-soft no-underline hover:bg-soft hover:text-ink">
-                                    <ExternalLink size={14} aria-hidden />사이트
-                                </Link>
-                                <button type="button" onClick={logout} className="flex h-9 items-center gap-1 rounded-full px-2.5 text-[13px] font-semibold text-ink-soft hover:bg-soft hover:text-ink">
-                                    <LogOut size={14} aria-hidden />로그아웃
-                                </button>
-                            </div>
+                            <Link href="/me" aria-label="내 정보" className="grid h-11 w-11 shrink-0 place-items-center rounded-full">
+                                <Avatar admin size={44} />
+                            </Link>
                         </div>
+                        {/* 메뉴 줄(PC): 공개 홈의 칩 줄과 같은 흰 알약. 고른 메뉴만 짙은 초록 */}
+                        <nav className="mx-auto hidden h-12 max-w-6xl items-center gap-1.5 px-6 md:flex" aria-label="관리자 메뉴">
+                            {ADMIN_SECTIONS.map(s => {
+                                const on = s.key === current.key;
+                                const n = badgeOf(s.key);
+                                return (
+                                    <Link key={s.key} href={s.pages[0].href} aria-current={on ? "page" : undefined} title={n > 0 ? badgeHint(s.key, n) : undefined}
+                                        className={`flex h-9 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[14px] font-bold no-underline ${on ? "bg-accent text-white" : "bg-card text-ink shadow-[0_1px_5px_rgba(30,26,21,.13)] hover:bg-paper"}`}>
+                                        <s.icon size={15} aria-hidden />{s.label}
+                                        {n > 0 && <span className={`pica-num whitespace-nowrap rounded-full px-1.5 text-[11.5px] font-bold leading-[18px] ${on ? "bg-white text-accent" : "bg-accent text-white"}`}>{badgeText(s.key, n)}</span>}
+                                    </Link>
+                                );
+                            })}
+                        </nav>
                         {current.pages.length > 1 && (
-                            <nav className="mx-auto flex max-w-6xl gap-1.5 overflow-x-auto px-4 pb-2 [scrollbar-width:none]" aria-label={`${current.label} 안의 화면`}>
+                            <nav className="mx-auto flex h-11 max-w-6xl items-center gap-1.5 overflow-x-auto px-4 [scrollbar-width:none] sm:px-6" aria-label={`${current.label} 안의 화면`}>
                                 {current.pages.map(pg => {
                                     const n = pageCount(pg);
                                     return (
                                         <Link key={pg.href} href={pg.href} aria-current={isPage(pg.href) ? "page" : undefined}
                                             title={n > 0 && pg.count === "alerts" ? badgeHint("status", n) : undefined}
-                                            className={`flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-[13px] font-semibold no-underline ${isPage(pg.href) ? "bg-ink text-paper" : "bg-card text-ink shadow-[0_1px_4px_rgba(30,26,21,.1)]"}`}>
+                                            className={`flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-[13px] no-underline ${isPage(pg.href) ? "bg-[var(--pk-accent-soft)] font-bold text-accent" : "bg-card font-semibold text-ink shadow-[0_1px_5px_rgba(30,26,21,.13)]"}`}>
                                             {pg.label}
-                                            {n > 0 && <span className="pica-num whitespace-nowrap rounded-full bg-accent px-1.5 text-[11px] font-bold leading-[17px] text-on-accent">{pg.count === "alerts" ? `경고 ${n}` : n}</span>}
+                                            {n > 0 && <span className="pica-num whitespace-nowrap rounded-full bg-accent px-1.5 text-[11px] font-bold leading-[17px] text-white">{pg.count === "alerts" ? `경고 ${n}` : n}</span>}
                                         </Link>
                                     );
                                 })}
@@ -165,8 +165,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                         )}
                     </header>
 
-                    <main className={`${current.pages.length > 1 ? "pt-[92px]" : "pt-[52px]"} pb-[84px] md:pb-10`}>
-                        {children}
+                    <main className={`${current.pages.length > 1 ? "pt-[104px] md:pt-[152px]" : "pt-[60px] md:pt-[108px]"} pb-[84px] md:pb-10`}>
+                        {/* 본문 틀 하나 (운영자 2026-11-28 «너비 맞춰»): 머리 줄과 같은 폭(max-w-6xl)·좌우 여백. 화면마다 폭을 따로 주지 않는다 */}
+                        <div className="mx-auto max-w-6xl px-4 sm:px-6">{children}</div>
                     </main>
 
                     <nav className="fixed inset-x-0 bottom-0 z-[100] grid grid-cols-5 border-t border-line bg-card pb-[env(safe-area-inset-bottom,0px)] md:hidden" aria-label="관리자 메뉴">
@@ -175,10 +176,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                             const n = badgeOf(s.key);
                             return (
                                 <Link key={s.key} href={s.pages[0].href} aria-current={on ? "page" : undefined} aria-label={n > 0 ? `${s.label} — ${badgeHint(s.key, n)}` : undefined}
-                                    className={`relative flex h-[58px] flex-col items-center justify-center gap-0.5 text-[11.5px] font-semibold no-underline ${on ? "text-accent" : "text-ink-soft"}`}>
+                                    className={`relative flex h-[58px] flex-col items-center justify-center gap-0.5 text-[11.5px] no-underline ${on ? "font-bold text-accent" : "font-semibold text-ink-soft"}`}>
                                     <s.icon size={20} aria-hidden strokeWidth={on ? 2.4 : 1.9} />
                                     {s.short}
-                                    {n > 0 && <span className="pica-num absolute right-[calc(50%-22px)] top-1.5 min-w-[17px] rounded-full bg-accent px-1 text-center text-[10.5px] font-bold leading-[17px] text-on-accent">{n}</span>}
+                                    {n > 0 && <span className="pica-num absolute right-[calc(50%-22px)] top-1.5 min-w-[17px] rounded-full bg-accent px-1 text-center text-[10.5px] font-bold leading-[17px] text-white">{n}</span>}
                                 </Link>
                             );
                         })}

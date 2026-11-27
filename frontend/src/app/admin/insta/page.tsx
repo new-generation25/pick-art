@@ -67,7 +67,7 @@ export default function AdminInstaPage() {
         return { stats, daily, summary, days, runs, last, weekAgo, groups: [...new Set(summary.map(m => m.group || ""))] };
     }, [snaps]);
 
-    if (!snaps || !v) return <div className="mx-auto max-w-5xl px-4 pt-4"><p className="py-10 text-center text-[15px] font-semibold text-ink-soft">불러오는 중…</p></div>;
+    if (!snaps || !v) return <div className="pt-4"><p className="py-10 text-center text-[15px] font-semibold text-ink-soft">불러오는 중…</p></div>;
     const { stats, daily, summary, days, runs, last, weekAgo, groups } = v;
     const updated = snaps.insta_daily?.updated_at || snaps.insta_stats?.updated_at;
     const cmp = (key: keyof Stat) => {
@@ -78,7 +78,7 @@ export default function AdminInstaPage() {
     const head = "mb-2 mt-7 px-1 text-[15px] font-bold text-ink";
 
     return (
-        <div className="mx-auto max-w-5xl px-4 pt-4">
+        <div className="pt-4">
             <div className="flex flex-wrap items-end justify-between gap-2">
                 <div>
                     <h1 className="pica-display text-[25px] leading-tight text-ink">인스타그램</h1>
@@ -91,7 +91,7 @@ export default function AdminInstaPage() {
                     활동 리포트(전체) <ExternalLink size={13} aria-hidden />
                 </a>
             </div>
-            {error && <p className="mt-3 rounded-xl border-[1.5px] border-[#b5432f] bg-card px-3 py-2 text-[13.5px] text-ink" role="alert">{error}</p>}
+            {error && <p className="pica-err mt-3" role="alert">{error}</p>}
 
             <div className="mt-3 grid grid-cols-2 gap-2.5 md:grid-cols-3">
                 <Tile label="팔로워" value={show(last?.followers)} sub={cmp("followers")} />
@@ -145,7 +145,7 @@ export default function AdminInstaPage() {
                                             <span className="shrink-0 text-right">
                                                 <span className="pica-num text-[15px] font-bold text-ink">{m.value ?? "—"}{m.unit ? ` ${m.unit}` : ""}</span>
                                                 {(m.status === "ok" || m.status === "warn") && (
-                                                    <span className={`ml-1.5 rounded-md px-1.5 py-0.5 text-[11px] font-bold ${m.status === "ok" ? "bg-[var(--pk-accent-soft)] text-accent" : "border border-[#b5432f] text-[#b5432f]"}`}>
+                                                    <span className={`ml-1.5 rounded-md px-1.5 py-0.5 text-[11px] font-bold ${m.status === "ok" ? "bg-[var(--pk-accent-soft)] text-accent" : "bg-[#fbeae7] text-[#8f2218]"}`}>
                                                         {m.status === "ok" ? "목표 충족" : "목표 미달"}
                                                     </span>
                                                 )}

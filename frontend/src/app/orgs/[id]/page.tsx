@@ -10,7 +10,7 @@ import { DEFAULT_OG_IMAGE } from "@/lib/site";
  */
 interface Props { params: Promise<{ id: string }> }
 
-const KIND_LABEL = { 기관: "기관", 단체: "단체", 계정: "인스타그램 계정" } as const;
+const KIND_LABEL = { 기관: "기관", 단체: "단체", 계정: "인스타그램 계정", 개인: "예술가" } as const;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const page = await getOrgPage((await params).id);
@@ -40,7 +40,7 @@ export default async function OrgPage({ params }: Props) {
     return (
         <PlacePage
             eyebrow={KIND_LABEL[org.kind] ?? org.kind}
-            kindIcon={org.kind === "기관" ? "기관" : "단체"}
+            kindIcon={org.kind === "기관" ? "기관" : org.kind === "개인" ? "개인" : "단체"}
             name={org.name}
             partnerSince={org.partner_since ?? null}
             admin={{ table: "orgs", id: org.id }}

@@ -166,7 +166,7 @@ export default function AdminLeafletsPage() {
     };
 
     return (
-        <Container size="lg" pt={32} pb={80}>
+        <Container fluid px={0} pt={32} pb={80}>
             <Group justify="space-between" align="flex-end" mb="lg">
                 <div>
                     <Title order={1} fw={900}>리플렛 제출</Title>
@@ -197,7 +197,7 @@ export default function AdminLeafletsPage() {
                                         {s.official_url && <Text size="sm" mt={6}>공식 안내: <Anchor href={s.official_url} target="_blank" rel="noopener noreferrer">{s.official_url}</Anchor></Text>}
                                         {Object.keys(s.given).length > 0 && <Text size="sm" mt={6}>단체가 적은 것: {Object.entries(s.given).map(([k, x]) => `${k} «${x}»`).join(" · ")}</Text>}
                                         {s.note && <Text size="sm" mt={6}>더 알려 준 것: {s.note}</Text>}
-                                        {a.error && <Text size="sm" c="red" mt={6}>읽지 못함: {String(a.error)}</Text>}
+                                        {a.error && <Text size="sm" className="pica-err" mt={6}>읽지 못함: {String(a.error)}</Text>}
                                         {s.ai_result && !a.error && (
                                             <Text size="xs" c="dimmed" mt={6}>
                                                 읽은 원문 — {["title", "genre_text", "date_text", "time_text", "venue", "price_text", "booking_text", "organizer"].map(k => {

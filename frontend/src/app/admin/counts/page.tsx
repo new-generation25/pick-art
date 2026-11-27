@@ -89,7 +89,7 @@ export default function AdminCountsPage() {
     };
 
     return (
-        <Container size="lg" pt={32} pb={80}>
+        <Container fluid px={0} pt={32} pb={80}>
             <Group justify="space-between" align="flex-end" mb="md" wrap="wrap">
                 <div>
                     <Title order={1} fw={900}>노출·클릭</Title>
@@ -105,7 +105,7 @@ export default function AdminCountsPage() {
                     <Button variant="light" onClick={download} disabled={!shown.length}>CSV 내려받기</Button>
                 </Group>
             </Group>
-            {error && <Text c="red" mb="md">{error}</Text>}
+            {error && <Text className="pica-err" mb="md">{error}</Text>}
             {totals === null ? <Loader size="sm" /> : (
                 <>
                     <Paper withBorder p="sm" mb="md">

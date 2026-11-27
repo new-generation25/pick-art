@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, BadgeCheck, Building2, CalendarPlus, Landmark, Users } from "lucide-react";
+import { ArrowLeft, BadgeCheck, Building2, CalendarPlus, Landmark, Users, UserRound } from "lucide-react";
 import { ShelfTile } from "@/components/ui/Shelf";
 import { AdminPartnerControl } from "@/components/ui/AdminPartnerControl";
 import { formatPeriod, todayKST } from "@/lib/utils";
@@ -26,7 +26,7 @@ export function PartnerSeal({ label = "협약", small = false }: { label?: strin
  */
 export function PlacePage({ eyebrow, kindIcon = "venue", name, partnerSince, facts, actions, calendarQuery, upcoming, past, hosts, note, admin }: {
     eyebrow: string;
-    kindIcon?: "venue" | "기관" | "단체";
+    kindIcon?: "venue" | "기관" | "단체" | "개인";
     name: string;
     partnerSince?: string | null;
     facts: { label: string; value: React.ReactNode }[];
@@ -49,7 +49,7 @@ export function PlacePage({ eyebrow, kindIcon = "venue", name, partnerSince, fac
         venue: e.venue || e.region, imageUrl: e.poster_image_url, posterPlaceholder: e.poster_placeholder, source: e.source,
         price: e.is_free ? "무료" : null, endingSoon: isEndingSoon(e, today),
     });
-    const KindIcon = kindIcon === "기관" ? Landmark : kindIcon === "단체" ? Users : Building2;
+    const KindIcon = kindIcon === "기관" ? Landmark : kindIcon === "단체" ? Users : kindIcon === "개인" ? UserRound : Building2;
 
     return (
         <main className="min-h-screen pb-16">
@@ -63,7 +63,7 @@ export function PlacePage({ eyebrow, kindIcon = "venue", name, partnerSince, fac
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
                         <span className="inline-flex items-center gap-[5px] text-[13px] font-bold text-ink-soft"><KindIcon className="h-[17px] w-[17px]" aria-hidden />{eyebrow}</span>
-                        {partnerSince && <PartnerSeal label={kindIcon === "venue" ? "협약 공간" : "협약 단체"} />}
+                        {partnerSince && <PartnerSeal label={kindIcon === "venue" ? "협약 공간" : kindIcon === "개인" ? "협약 예술가" : "협약 단체"} />}
                     </div>
                     <h1 className="pica-display mt-2 text-[29px] leading-[1.25] tracking-[-0.5px] text-ink">{name}</h1>
                     <p className="mt-1.5 flex flex-wrap gap-x-3.5 gap-y-1 text-[14px] text-ink-soft">
@@ -120,7 +120,7 @@ export function PlacePage({ eyebrow, kindIcon = "venue", name, partnerSince, fac
                                         </span>
                                         <span className="min-w-0">
                                             <span className="flex flex-wrap items-center gap-1.5 text-[14.5px] font-bold leading-[1.35]">{h.org.name}{h.org.partner_since && <PartnerSeal small />}</span>
-                                            <span className="mt-px block text-[12.5px] text-ink-soft">{h.org.kind === "기관" ? "기관" : "단체"} · {h.roles.join("·")}</span>
+                                            <span className="mt-px block text-[12.5px] text-ink-soft">{h.org.kind === "기관" ? "기관" : h.org.kind === "개인" ? "예술가" : "단체"} · {h.roles.join("·")}</span>
                                         </span>
                                         <span className="pica-num whitespace-nowrap text-[13px] font-semibold text-ink-soft">{h.count}건</span>
                                     </Link>

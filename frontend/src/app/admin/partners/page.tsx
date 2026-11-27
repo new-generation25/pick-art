@@ -6,7 +6,7 @@ import { Container, Title, Text, Paper, Group, Badge, Button, SegmentedControl, 
 import { supabase } from "@/lib/supabase";
 import { appendOrgNote } from "@/lib/orgNotes";
 import { todayKST } from "@/lib/utils";
-import { STATUS_LABEL, orgNormName } from "@/lib/partnerAgreement";
+import { APPLICANT_LABEL, STATUS_LABEL, orgNormName } from "@/lib/partnerAgreement";
 import { agreementHandle, setSourceConsent } from "@/lib/siteConsent";
 import { useAdmin } from "@/components/admin/AdminShell";
 
@@ -26,6 +26,7 @@ async function switchConsent(a: { id: string; insta_handle: string | null; offic
     return `출처 @${handle} 의 동의 단계를 «${word}»로 바꿨습니다.`;
 }
 type Agreement = {
+    applicant_type: "person" | "org" | null;   // 개인/단체 구분(2026-11-28 부터 받음, 그 전 신청은 null)
     id: string; org_name: string; representative: string | null; reg_no: string | null; official_url: string;
     insta_handle: string | null; region: string | null; contact_private: string; contact_public: string | null;
     image_use: "yes" | "no"; extras: { monthly_report?: boolean; grant_alerts?: boolean; grant_profile?: string };
@@ -72,7 +73,7 @@ function ConfirmBox({ a, note, onDone, onError }: { a: Agreement; note: string; 
             let org: Partial<Org> = {};
             if (pick === NEW_ORG) {
                 const { data, error } = await supabase.from("orgs")
-                    .insert({ name: a.org_name.trim(), norm_name: orgNormName(a.org_name), kind: "단체", insta_handle: a.insta_handle })
+                    .insert({ name: a.org_name.trim(), norm_name: orgNormName(a.org_name), kind: a.applicant_type === "person" ? "개인" : "단체", insta_handle: a.insta_handle })
                     .select("id").single();
                 if (error || !data) throw new Error(`단체 만들기 실패: ${error?.message || "권한"} (같은 이름·인스타 계정의 단체가 이미 있으면 검색해서 고르세요)`);
                 orgId = data.id;
@@ -118,7 +119,7 @@ function ConfirmBox({ a, note, onDone, onError }: { a: Agreement; note: string; 
                                     {" "}<Anchor component={Link} href={`/orgs/${o.id}`} target="_blank" size="xs">페이지</Anchor></span>
                             } />
                         ))}
-                        <Radio value={NEW_ORG} label={`새 단체로 만들기: «${a.org_name}»${a.insta_handle ? ` · @${a.insta_handle}` : ""}`} />
+                        <Radio value={NEW_ORG} label={`새로 만들기(${a.applicant_type === "person" ? "개인" : "단체"}): «${a.org_name}»${a.insta_handle ? ` · @${a.insta_handle}` : ""}`} />
                     </Stack>
                 </Radio.Group>
             )}
@@ -176,7 +177,7 @@ export default function AdminPartnersPage() {
     };
 
     return (
-        <Container size="lg" pt={32} pb={80}>
+        <Container fluid px={0} pt={32} pb={80}>
             <Group justify="space-between" align="flex-end" mb="lg">
                 <div>
                     <Title order={1} fw={900}>협약 신청</Title>
@@ -188,8 +189,8 @@ export default function AdminPartnersPage() {
                 </div>
                 <SegmentedControl value={filter} onChange={v => setFilter(v as "todo" | "all")} data={[{ label: "할 것", value: "todo" }, { label: "전체", value: "all" }]} />
             </Group>
-            {error && <Text c="red" mb="md">{error}</Text>}
-            {notice && <Paper withBorder p="sm" radius="md" mb="md" role="status"><Text size="sm" style={{ overflowWrap: "anywhere" }}>{notice}</Text></Paper>}
+            {error && <Text className="pica-err" mb="md">{error}</Text>}
+            {notice && <p className="pica-info mb-4" role="status">{notice}</p>}
             {rows === null ? <Loader size="sm" /> : rows.length === 0 ? (
                 <Text c="dimmed">{filter === "todo" ? "확인할 협약 신청이 없습니다." : "아직 협약 신청이 없습니다."}</Text>
             ) : (
@@ -200,6 +201,7 @@ export default function AdminPartnersPage() {
                                 <Group gap="xs">
                                     <Badge color={COLOR[a.status]} variant={a.status === "new" ? "filled" : "light"}>{STATUS_LABEL[a.status]}</Badge>
                                     {a.withdraw_requested_at && a.status !== "withdrawn" && <Badge color="orange" variant="filled">철회 요청 {when(a.withdraw_requested_at)}</Badge>}
+                                    {a.applicant_type && <Badge variant="light" color={a.applicant_type === "person" ? "grape" : "blue"}>{APPLICANT_LABEL[a.applicant_type]}</Badge>}
                                     <Badge variant="outline" color="gray">{a.image_use === "yes" ? "이미지 사용 동의" : "이미지 비동의(글만)"}</Badge>
                                     <Badge variant="outline" color="gray" style={{ textTransform: "none" }}>{a.terms_version}</Badge>
                                     <Badge variant="outline" color="gray">{a.user_id ? "회원" : "로그인 없이"}</Badge>

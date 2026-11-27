@@ -215,8 +215,8 @@ export default function MapSheet({ events, summary, onClose }: { events: SheetEv
                     {me ? "가까운 순으로 정렬했어요." : "«가까운 순»은 위치를 허락하면 켜져요."} 위치는 순서를 정하는 데만 써요.
                 </p>
             </div>
-            <button type="button" onClick={close} className="fixed bottom-[18px] left-1/2 z-[1201] flex h-[46px] -translate-x-1/2 lg:left-auto lg:right-[280px] lg:translate-x-1/2 items-center gap-[7px] rounded-full bg-ink pl-4 pr-5 text-[15px] font-bold text-white shadow-[0_6px_16px_rgba(20,23,28,.3)]">
-                <List size={18} aria-hidden /> 목록
+            <button type="button" onClick={close} className="fixed bottom-[18px] left-1/2 z-[1201] flex h-[46px] -translate-x-1/2 lg:left-auto lg:right-[280px] lg:translate-x-1/2 items-center gap-[7px] rounded-full bg-white pl-4 pr-5 text-[15px] font-bold text-accent shadow-[inset_0_0_0_1.5px_var(--pk-accent),0_6px_16px_rgba(20,23,28,.3)]">
+                <List size={18} aria-hidden /> 목록으로 보기
             </button>
         </div>
     );

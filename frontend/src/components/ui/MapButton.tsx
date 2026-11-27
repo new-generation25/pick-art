@@ -28,18 +28,20 @@ export function MapButton({ events, summary, showTip = false, hideFromId }: { ev
         return () => io.disconnect();
     }, [hideFromId]);
     if (!events.length && !showTip) return null;
-    const pill = "flex h-[46px] flex-none items-center gap-[7px] rounded-full pl-4 pr-[18px] text-[15px] font-bold text-white shadow-[0_6px_16px_rgba(20,23,28,.3)]";
+    const pill = "flex h-[46px] flex-none items-center gap-[7px] rounded-full pl-4 pr-[18px] text-[15px] font-bold shadow-[0_6px_16px_rgba(20,23,28,.3)]";
+    // «지도로 보기»는 흰 바탕 + 초록 안쪽 테두리·글자(운영자 2026-11-28 시안 «D 초록 글자»), «제보하기»는 꽉 찬 초록
+    const outline = "bg-white text-accent shadow-[inset_0_0_0_1.5px_var(--pk-accent),0_6px_16px_rgba(20,23,28,.3)]";
     return (
         <>
             {!open && (
                 <div aria-hidden={below} className={`fixed bottom-[18px] left-1/2 z-[70] flex -translate-x-1/2 items-center gap-2 ${below ? "pointer-events-none invisible" : ""}`}>
                     {events.length > 0 && (
-                        <button type="button" onClick={() => setOpen(true)} className={`${pill} bg-ink`}>
-                            <MapIcon size={18} aria-hidden /> 지도
+                        <button type="button" onClick={() => setOpen(true)} className={`${pill} ${outline}`}>
+                            <MapIcon size={18} aria-hidden /> 지도로 보기
                         </button>
                     )}
                     {showTip && (
-                        <Link href="/tip" className={`${pill} bg-accent no-underline`}>
+                        <Link href="/tip" className={`${pill} bg-accent text-white no-underline`}>
                             <PencilLine size={18} aria-hidden /> 제보하기
                         </Link>
                     )}

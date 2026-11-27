@@ -9,7 +9,8 @@
  */
 
 // 2026-11-27: 동의서 글은 그대로, 받는 방법이 바뀌었다(필수 체크 4개 → «전체 동의» 하나, 로그인 필수 — specs/023)
-export const TERMS_VERSION = "2026-11-27-draft";
+// 2026-11-28: 개인/단체 구분을 받고, 단체에는 «단체를 대표해 동의할 수 있어요» 한 줄을 더했다
+export const TERMS_VERSION = "2026-11-28-draft";
 export const IS_DRAFT = true;
 export const CONTACT_EMAIL = "pick.art.pica@gmail.com";
 
@@ -73,6 +74,19 @@ export const CONSENT_ITEMS = [
 ] as const;
 export const CONSENT_PRIVACY = { title: "연락처(개인정보)", text: "담당 연락처는 협약 확인과 연락에만 쓰고, 협약이 끝난 뒤 1년 지나면 지워요." } as const;
 export const CONSENT_KEYS = ["agree_listing", "agree_collect", "agree_confirm", "agree_privacy"] as const;
+/** 단체로 신청할 때만 목록에 더 보이는 줄: 단체 이름으로 동의하는 것이라 그럴 권한이 있는지 확인한다 */
+export const CONSENT_ORG_AUTH = { title: "권한", text: "단체를 대표해 동의할 수 있어요." } as const;
+
+/**
+ * 누가 신청하나 (운영자 2026-11-28 «파트너 협약할때 단체인지 개인인지 구분» → «넣어»).
+ * person = 개인(작가·연주자), org = 단체·공간. 운영자가 «협약 확인»으로 새 줄을 만들 때 orgs.kind 가 «개인»/«단체»로 갈린다
+ */
+export const APPLICANT_TYPES = [
+    { value: "person", label: "개인", hint: "작가·연주자" },
+    { value: "org", label: "단체·공간", hint: "극단·갤러리·공연장" },
+] as const;
+export type ApplicantType = (typeof APPLICANT_TYPES)[number]["value"];
+export const APPLICANT_LABEL: Record<string, string> = { person: "개인", org: "단체·공간" };
 
 /** 제출 뒤 안내 */
 export const AFTER_SUBMIT = [
@@ -93,6 +107,7 @@ export const PRIVACY_NOTICE =
     "보유 기간: 협약이 끝나거나 철회한 날부터 1년. 동의하지 않을 수 있지만, 그러면 협약을 맺을 수 없습니다.";
 
 export type AgreementInput = {
+    applicant_type: ApplicantType | "";
     org_name: string;
     representative: string;
     reg_no: string;
@@ -112,7 +127,7 @@ export type AgreementInput = {
 };
 
 export const EMPTY_AGREEMENT: AgreementInput = {
-    org_name: "", representative: "", reg_no: "", official_url: "", insta_handle: "", region: "",
+    applicant_type: "", org_name: "", representative: "", reg_no: "", official_url: "", insta_handle: "", region: "",
     contact_private: "", contact_public: "", agree_listing: false, agree_collect: false, image_use: "",
     agree_confirm: false, agree_privacy: false, monthly_report: false, grant_alerts: false, grant_profile: "",
 };
@@ -130,7 +145,8 @@ export function normInsta(v: string): string | null {
 /** 입력 검사. 문제가 없으면 빈 배열 */
 export function checkAgreement(a: AgreementInput): string[] {
     const errs: string[] = [];
-    if (!a.org_name.trim()) errs.push("단체·활동 이름을 적어 주세요.");
+    if (!a.applicant_type) errs.push("② 개인인지 단체·공간인지 골라 주세요.");
+    if (!a.org_name.trim()) errs.push(a.applicant_type === "person" ? "활동 이름을 적어 주세요." : "단체·활동 이름을 적어 주세요.");
     if (!/^https?:\/\/\S+\.\S+/.test(a.official_url.trim())) errs.push("공식 SNS·누리집 주소(https로 시작)를 넣어 주세요.");
     if (a.insta_handle.trim() && !normInsta(a.insta_handle)) errs.push("인스타그램 계정은 @계정 또는 instagram.com/계정 모양으로 적어 주세요.");
     if (a.contact_private.trim().length < 3) errs.push("담당 연락처(전화 또는 메일)를 적어 주세요.");
@@ -142,10 +158,12 @@ export function checkAgreement(a: AgreementInput): string[] {
 /** DB 에 넣을 줄 */
 export function toRow(a: AgreementInput) {
     const opt = (s: string) => (s.trim() ? s.trim() : null);
+    const person = a.applicant_type === "person";
     return {
+        applicant_type: a.applicant_type,
         org_name: a.org_name.trim(),
-        representative: opt(a.representative),
-        reg_no: opt(a.reg_no),
+        representative: person ? null : opt(a.representative),   // 개인에게는 묻지 않는 칸
+        reg_no: person ? null : opt(a.reg_no),
         official_url: a.official_url.trim(),
         insta_handle: normInsta(a.insta_handle),
         region: opt(a.region),

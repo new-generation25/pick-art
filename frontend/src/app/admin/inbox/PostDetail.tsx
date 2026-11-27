@@ -6,13 +6,18 @@
 //     코멘트마다 그때의 갈래·분류 이유를 함께 적어, 나중에 분류 규칙을 손볼 때 근거로 읽는다
 //     (모아 보기: collector/tools/review_notes.py).
 // content 는 jsonb 라 통째로 바뀐다 → 쓰기 직전에 최신 값을 다시 읽어 admin_notes 만 고친다.
+//   · 이 창 안에서도 처리한다(운영자 2026-11-28 «개별 카드에서도 반영, 반영안함 할수 있어야지»): 공개 승인 · 공개 후보로 옮기기 ·
+//     반영 안 함 · 되돌리기. 쓰는 방식은 목록(ReviewQueue·CollectedQueue)과 같고, 결과는 페이지의 목록에 바로 반영된다.
+//   · Mantine 창은 화면 맨 바깥에 그려져 종이 테마의 색 값(--pk-…)이 닿지 않는다. 그래서 버튼 바탕색이 빠져 글자만 보였다.
+//     창 내용에 pica-portal 을 붙여 색 값을 준다.
 
 import { useState } from "react";
 import { Modal } from "@mantine/core";
-import { ExternalLink } from "lucide-react";
+import { Check, ExternalLink, MessageSquarePlus, RotateCcw, X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { todayKST } from "@/lib/utils";
-import { BUCKET_LABEL, reasonText, type ReviewBucket, type ReviewContent, type ReviewPost } from "./ReviewQueue";
+import { InstagramIcon } from "@/components/ui/InstagramLink";
+import { BUCKET_LABEL, reasonText, type ReviewBucket, type ReviewChange, type ReviewContent, type ReviewPost } from "./ReviewQueue";
 import { reasonOf, type CollectedPost } from "./CollectedQueue";
 import { notesOf, type AdminNote } from "./notes";
 
@@ -77,18 +82,26 @@ interface Props {
     onClose: () => void;
     /** 코멘트를 쓰거나 지운 뒤: 페이지가 목록의 content 를 바꾼다 */
     onSaved: (id: string, content: ReviewContent) => void;
+    /** 인스타 후보(REVIEW)를 승인·옮김·반영 안 함 한 뒤 */
+    onReview: (changes: ReviewChange[]) => void;
+    /** 자동 공개 대기(COLLECTED·PENDING)를 반영 안 함 한 뒤 */
+    onCollected: (id: string, next: null) => void;
+    /** 반영 안 한 것을 되돌린다 */
+    onRestore: (post: ReviewPost) => Promise<void>;
 }
 
-export function PostDetailModal({ post, actor, onClose, onSaved }: Props) {
+export function PostDetailModal({ post, actor, onClose, ...handlers }: Props) {
     return (
         <Modal opened={!!post} onClose={onClose} size="xl" centered title={<span className="text-[13px] font-semibold text-ink-soft">대기함 글 자세히 보기</span>}
-            styles={{ body: { paddingTop: 0 } }}>
-            {post && <Detail key={post.id} post={post} actor={actor} onSaved={onSaved} />}
+            classNames={{ content: "pica-portal" }} styles={{ body: { paddingTop: 0 } }}>
+            {post && <Detail key={post.id} post={post} actor={actor} {...handlers} />}
         </Modal>
     );
 }
 
-function Detail({ post, actor, onSaved }: { post: ReviewPost; actor: string; onSaved: (id: string, content: ReviewContent) => void }) {
+type Handlers = Pick<Props, "onSaved" | "onReview" | "onCollected" | "onRestore">;
+
+function Detail({ post, actor, onSaved, onReview, onCollected, onRestore }: { post: ReviewPost; actor: string } & Handlers) {
     const c = post.content || {};
     const a = c.ai_suggestion || {};
     const today = todayKST();
@@ -127,6 +140,63 @@ function Detail({ post, actor, onSaved }: { post: ReviewPost; actor: string; onS
     };
     const remove = async (at: string) => { if (await write(prev => prev.filter(n => n.at !== at))) setMsg("코멘트를 지웠습니다."); };
 
+    // ── 이 창에서 처리하기. 목록과 같은 방식: 최신 값을 다시 읽고, 그사이 상태가 바뀌었으면 쓰지 않는다
+    const [actMsg, setActMsg] = useState("");
+    const bucket = c.review_bucket as ReviewBucket | undefined;
+    const approved = !!c.publish_approved_at;
+    const reviewAct = async (kind: "approve" | "candidate" | "reject") => {
+        const title = c.title || "제목 없음";
+        const ask = kind === "approve" ? `«${title}»을(를) 공개 승인할까요?\n\n다음 정기 실행이 날짜·원문 링크·중복을 확인한 뒤 공개합니다.`
+            : kind === "candidate" ? (bucket === "consent" ? "작가·단체 계정 글입니다. 게시 동의를 받았나요?\n\n«확인»을 누르면 «공개 후보»로 옮깁니다(아직 공개하지 않습니다)." : "«공개 후보»로 옮길까요? (아직 공개하지 않습니다)")
+                : `«${title}»을(를) 반영하지 않을까요?\n\n«반영 안 한 것»으로 갑니다. 거기서 되돌릴 수 있습니다.`;
+        if (!window.confirm(ask)) return;
+        setBusy(true); setActMsg("");
+        const { data: cur, error: readErr } = await supabase.from("raw_posts").select("status,content").eq("id", post.id).maybeSingle();
+        if (readErr || !cur || cur.status !== "REVIEW") { setBusy(false); setActMsg(`처리하지 못했습니다: ${readErr?.message || "이미 처리된 글입니다. 창을 닫고 다시 읽어 주세요"}`); return; }
+        const now = new Date().toISOString();
+        const next: ReviewContent = { ...((cur.content || {}) as ReviewContent) };
+        let status = "REVIEW";
+        if (kind === "approve") { next.publish_approved_at = now; next.publish_approved_by = actor || undefined; }
+        else if (kind === "candidate") {
+            next.review_bucket = "candidate"; next.review_bucket_at = now;
+            next.review_reason = `admin_moved_from_${bucket || "human"}`; next.review_moved_by = actor || undefined;
+        } else {
+            // 승인 표시는 지운다: 되돌렸을 때 다시 승인하지 않은 채 공개되지 않게
+            delete next.publish_approved_at; delete next.publish_failed_at; status = "REJECTED";
+        }
+        const { data, error } = await supabase.from("raw_posts").update(status === "REVIEW" ? { content: next } : { status, content: next })
+            .eq("id", post.id).eq("status", "REVIEW").select("id");
+        setBusy(false);
+        if (error || !data?.length) { setActMsg(`처리하지 못했습니다: ${error?.message || "관리자 권한 또는 상태 변경을 확인해 주세요"}`); return; }
+        onReview([{ id: post.id, status, content: next }]);
+        setActMsg(kind === "approve" ? "공개 승인했습니다. 다음 정기 실행이 확인한 뒤 공개합니다." : kind === "candidate" ? "공개 후보로 옮겼습니다." : "반영하지 않기로 했습니다.");
+    };
+    const collectedReject = async () => {
+        if (!window.confirm(`«${c.title || "제목 없음"}»을(를) 반영하지 않을까요?\n\n«반영 안 한 것»으로 갑니다. 거기서 되돌릴 수 있습니다.`)) return;
+        setBusy(true); setActMsg("");
+        const { data, error } = await supabase.from("raw_posts").update({ status: "REJECTED" }).eq("id", post.id).in("status", ["COLLECTED", "PENDING"]).select("id");
+        setBusy(false);
+        if (error || !data?.length) { setActMsg(`처리하지 못했습니다: ${error?.message || "이미 처리된 글입니다"}`); return; }
+        onCollected(post.id, null);
+        setActMsg("반영하지 않기로 했습니다.");
+    };
+    const restore = async () => { setBusy(true); setActMsg(""); await onRestore(post); setBusy(false); setActMsg("대기함으로 되돌렸습니다."); };
+
+    const btn = "inline-flex h-11 items-center justify-center gap-1.5 rounded-full px-5 text-[14.5px] font-bold no-underline disabled:opacity-50";
+    const primary = `${btn} bg-accent text-on-accent`;
+    const ghost = `${btn} bg-card text-ink shadow-[inset_0_0_0_1.5px_var(--pk-ink)]`;
+    const actions = post.status === "REVIEW" ? (
+        <>
+            {bucket === "candidate" && !approved && <button type="button" disabled={busy} onClick={() => reviewAct("approve")} className={primary}><Check size={16} aria-hidden />공개 승인</button>}
+            {bucket !== "candidate" && <button type="button" disabled={busy} onClick={() => reviewAct("candidate")} className={primary}><Check size={16} aria-hidden />공개 후보로 옮기기</button>}
+            <button type="button" disabled={busy} onClick={() => reviewAct("reject")} className={ghost}><X size={16} aria-hidden />반영 안 함</button>
+        </>
+    ) : post.status === "COLLECTED" || post.status === "PENDING" ? (
+        <button type="button" disabled={busy} onClick={collectedReject} className={ghost}><X size={16} aria-hidden />반영 안 함</button>
+    ) : post.status === "REJECTED" ? (
+        <button type="button" disabled={busy} onClick={restore} className={primary}><RotateCcw size={16} aria-hidden />대기함으로 되돌리기</button>
+    ) : null;
+
     const label = "text-[12px] font-semibold text-ink-soft";
     return (
         <div className="grid gap-4 md:grid-cols-[minmax(0,260px)_minmax(0,1fr)]">
@@ -134,13 +204,14 @@ function Detail({ post, actor, onSaved }: { post: ReviewPost; actor: string; onS
                 {poster && imgOk
                     // eslint-disable-next-line @next/next/no-img-element -- 인스타·기관 누리집의 그림 주소를 그대로 보여 준다(관리자만 보는 창)
                     ? <img src={poster} alt="" referrerPolicy="no-referrer" onError={() => setImgOk(false)} className="max-h-[420px] w-full rounded-[12px] bg-soft object-contain" />
-                    : <div className="flex h-[180px] items-center justify-center rounded-[12px] bg-soft text-[13px] text-ink-soft">{poster ? "포스터를 불러오지 못했습니다" : "포스터 없음"}</div>}
+                    : <div className="flex h-[180px] items-center justify-center rounded-[12px] bg-soft px-4 text-center text-[13px] leading-[1.5] text-ink-soft">{poster ? "포스터를 불러오지 못했습니다. 원문에서 확인해 주세요." : "포스터 없음"}</div>}
                 <a href={post.source_url} target="_blank" rel="noopener noreferrer"
-                    className="mt-3 flex h-10 items-center justify-center gap-1.5 rounded-full bg-accent px-4 text-[14px] font-bold text-on-accent no-underline">
-                    {isInsta ? "인스타그램에서 원문 열기" : "원문 페이지 열기"} <ExternalLink size={14} aria-hidden />
+                    className="mt-3 flex h-11 items-center justify-center gap-2 rounded-full bg-ink px-4 text-[14.5px] font-bold text-white no-underline">
+                    {isInsta ? <InstagramIcon size={18} /> : <ExternalLink size={16} aria-hidden />}
+                    {isInsta ? "인스타그램에서 원문 열기" : "원문 페이지 열기"}
                 </a>
-                <p className="mt-1.5 break-all text-[11.5px] text-ink-soft">{post.source_url}</p>
-                {isInsta && <p className="mt-1 text-[11.5px] text-ink-soft">정기 실행의 링크 확인은 인스타그램 글이 지워졌는지는 가려내지 못합니다. 승인 전에 원문이 열리는지 봐 주세요.</p>}
+                <p className="mt-2 break-all text-[11.5px] leading-[1.5] text-ink-soft">{post.source_url}</p>
+                {isInsta && <p className="mt-1 text-[11.5px] leading-[1.5] text-ink-soft">정기 실행의 링크 확인은 인스타그램 글이 지워졌는지는 가려내지 못합니다. 승인 전에 원문이 열리는지 봐 주세요.</p>}
             </div>
 
             <div className="min-w-0">
@@ -153,12 +224,19 @@ function Detail({ post, actor, onSaved }: { post: ReviewPost; actor: string; onS
                 </p>
                 <p className="mt-0.5 text-[12px] text-ink-soft">수집 {fmt(post.collected_at)}{c.review_bucket_at ? ` · 나눈 때 ${fmt(String(c.review_bucket_at))}` : ""}</p>
 
-                <section className="mt-3 rounded-[12px] border-[1.5px] border-accent bg-[var(--pk-accent-soft)] px-3.5 py-3" aria-label="대기 이유">
+                <section className="mt-3 rounded-[14px] bg-[var(--pk-accent-soft)] px-4 py-3" aria-label="대기 이유">
                     <p className={label}>왜 대기함에 있나</p>
                     <p className="text-[15px] font-bold text-ink">{why.head}</p>
                     {why.lines.map((l, i) => <p key={i} className="mt-1 text-[13.5px] leading-relaxed text-ink">{l}</p>)}
                     {c.review_reason && <p className="mt-1 text-[11.5px] text-ink-soft">분류 기록: {String(c.review_bucket ? BUCKET_LABEL[c.review_bucket as ReviewBucket] || c.review_bucket : post.status)} · {String(c.review_reason)}</p>}
                 </section>
+
+                {(actions || actMsg) && (
+                    <div className="mt-3 flex flex-wrap items-center gap-2" aria-label="이 글 처리하기">
+                        {actions}
+                        {actMsg && <span className="basis-full text-[13px] font-semibold text-ink" role="status">{actMsg}</span>}
+                    </div>
+                )}
 
                 <section className="mt-3" aria-label="운영자 코멘트">
                     <p className={label}>운영자 코멘트 <span className="font-medium">— 관리자만 봅니다. 이 판단이 왜 맞거나 틀렸는지 적어 두면 분류 규칙을 손볼 때 근거로 씁니다.</span></p>
@@ -179,7 +257,7 @@ function Detail({ post, actor, onSaved }: { post: ReviewPost; actor: string; onS
                         placeholder="예: 기관 계정인데 날짜를 못 읽음 — 포스터 그림에만 날짜가 있음 / 이 계정은 공연 후기만 올림"
                         className="mt-2 w-full rounded-[10px] border border-line bg-paper px-3 py-2 text-[14px] text-ink" />
                     <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                        <button type="button" disabled={busy || !draft.trim()} onClick={add} className="h-9 rounded-full bg-ink px-4 text-[13.5px] font-bold text-paper disabled:opacity-50">코멘트 남기기</button>
+                        <button type="button" disabled={busy || !draft.trim()} onClick={add} className="inline-flex h-10 items-center gap-1.5 rounded-full bg-card px-4 text-[14px] font-bold text-ink shadow-[inset_0_0_0_1.5px_var(--pk-ink)] disabled:opacity-50"><MessageSquarePlus size={15} aria-hidden />코멘트 남기기</button>
                         <span className="text-[12.5px] text-ink-soft" role="status">{msg}</span>
                     </div>
                 </section>

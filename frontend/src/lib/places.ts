@@ -52,7 +52,7 @@ async function getHosts(eventIds: string[]): Promise<Host[]> {
         .slice(0, 12);
 }
 
-export type Org = { id: string; name: string; kind: "기관" | "단체" | "계정"; insta_handle: string | null; small: boolean; partner_since?: string | null };
+export type Org = { id: string; name: string; kind: "기관" | "단체" | "계정" | "개인"; insta_handle: string | null; small: boolean; partner_since?: string | null };
 export const ROLE_ORDER = ["주최", "주관", "기획", "제작", "게시"] as const;
 
 export async function getOrgPage(id: string) {

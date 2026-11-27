@@ -11,7 +11,7 @@ import { supabase } from "@/lib/supabase";
 import { todayKST } from "@/lib/utils";
 import { appendOrgNote } from "@/lib/orgNotes";
 
-type Org = { id: string; name: string; kind: "기관" | "단체" | "계정"; insta_handle: string | null; small: boolean; partner_since: string | null };
+type Org = { id: string; name: string; kind: "기관" | "단체" | "계정" | "개인"; insta_handle: string | null; small: boolean; partner_since: string | null };
 const COLS = "id,name,kind,insta_handle,small,partner_since";
 const PAGE = 50;
 type Only = "" | "partner" | "small";
@@ -92,7 +92,7 @@ export default function AdminOrgsPage() {
 
     const sel = "h-9 max-w-full rounded-full border-0 bg-card px-3 text-[13.5px] font-semibold text-ink shadow-[0_1px_4px_rgba(30,26,21,.1)]";
     return (
-        <div className="mx-auto max-w-5xl px-4 pt-4">
+        <div className="pt-4">
             <h1 className="pica-display text-[25px] leading-tight text-ink">단체</h1>
             <p className="mt-0.5 text-[13px] text-ink-soft">행사의 주최·주관으로 이어진 기관·단체·계정입니다. 새 단체는 정기 실행이 행사와 함께 만들고, 협약 신청을 확인할 때도 만들어집니다.</p>
 
@@ -110,7 +110,7 @@ export default function AdminOrgsPage() {
                 <button type="submit" className="h-9 rounded-full bg-ink px-3.5 text-[13.5px] font-bold text-paper">찾기</button>
             </form>
 
-            {error && <p className="mt-3 rounded-xl border-[1.5px] border-[#b5432f] bg-card px-3 py-2 text-[13.5px] text-ink" role="alert">{error}</p>}
+            {error && <p className="pica-err mt-3" role="alert">{error}</p>}
             <p className="mt-3 px-1 text-[13px] text-ink-soft" role="status">
                 {loading ? "찾는 중…" : <><b className="pica-num text-ink">{total.toLocaleString("ko-KR")}</b>곳{rows.length < total ? ` 중 ${rows.length}곳 보는 중` : ""}</>}
             </p>
@@ -142,13 +142,13 @@ export default function AdminOrgsPage() {
             <Modal opened={!!editing} onClose={() => setEditing(null)} title={editing?.name || "단체"} centered>
                 {editing && (
                     <Stack gap="sm">
-                        <Select label="종류" data={["기관", "단체", "계정"]} value={form.kind} allowDeselect={false} onChange={v => setForm({ ...form, kind: v || "단체" })} />
+                        <Select label="종류" data={["기관", "단체", "개인", "계정"]} value={form.kind} allowDeselect={false} onChange={v => setForm({ ...form, kind: v || "단체" })} />
                         <TextInput label="인스타 계정" placeholder="@ 없이" value={form.insta_handle} onChange={e => setForm({ ...form, insta_handle: e.currentTarget.value })} />
                         <TextInput label="협약 맺은 날" type="date" max={todayKST()} value={form.partner_since} onChange={e => setForm({ ...form, partner_since: e.currentTarget.value })}
                             description="날짜가 있으면 단체 화면에 «협약» 도장이 보입니다. 비우면 협약 표시를 풉니다." />
                         {savedNote && <Text size="xs" c="dimmed" style={{ whiteSpace: "pre-wrap" }}>지금까지의 메모(관리자만 봄): {savedNote}</Text>}
                         <Textarea label="메모 덧붙이기(관리자만 봄)" autosize minRows={2} value={form.note} onChange={e => setForm({ ...form, note: e.currentTarget.value })} maxLength={300} />
-                        {formMsg && <Text size="sm" c="red" role="alert">{formMsg}</Text>}
+                        {formMsg && <Text size="sm" className="pica-err" role="alert">{formMsg}</Text>}
                         <Group justify="flex-end">
                             <Button variant="default" onClick={() => setEditing(null)}>취소</Button>
                             <Button loading={busy} onClick={save}>저장</Button>

@@ -439,10 +439,73 @@ body {
   --mantine-primary-color-filled: #2e6b4e; --mantine-primary-color-filled-hover: #285f45;
   --mantine-primary-color-light: rgba(46, 107, 78, 0.1); --mantine-primary-color-light-hover: rgba(46, 107, 78, 0.16); --mantine-primary-color-light-color: #2e6b4e;
   --mantine-color-anchor: #2e6b4e;
+  /* 본문 정리 (운영자 2026-11-28 «본문도 정리»): 청록(teal)·초록(green)도 짙은 초록 하나로, 회색은 종이 색 계열로, 빨강은 진한 빨강 글자 + 옅은 빨강 면으로.
+     Mantine 기본 파랑·회색이 관리자 화면에 남지 않게 한다. 주황·노랑(주의)은 그대로 둔다 */
+  --mantine-color-teal-0: #eef5f1; --mantine-color-teal-1: #dce9e2; --mantine-color-teal-2: #b9d3c5; --mantine-color-teal-3: #93bca7; --mantine-color-teal-4: #73a88d; --mantine-color-teal-5: #4f8f6f; --mantine-color-teal-6: #2e6b4e; --mantine-color-teal-7: #285f45; --mantine-color-teal-8: #21503a; --mantine-color-teal-9: #193e2d;
+  --mantine-color-teal-filled: #2e6b4e; --mantine-color-teal-filled-hover: #285f45;
+  --mantine-color-teal-light: #e6efe9; --mantine-color-teal-light-hover: #dce9e2; --mantine-color-teal-light-color: #2e6b4e;
+  --mantine-color-teal-outline: #2e6b4e; --mantine-color-teal-outline-hover: rgba(46, 107, 78, 0.06); --mantine-color-teal-text: #2e6b4e;
+  --mantine-color-green-0: #eef5f1; --mantine-color-green-1: #dce9e2; --mantine-color-green-2: #b9d3c5; --mantine-color-green-3: #93bca7; --mantine-color-green-4: #73a88d; --mantine-color-green-5: #4f8f6f; --mantine-color-green-6: #2e6b4e; --mantine-color-green-7: #285f45; --mantine-color-green-8: #21503a; --mantine-color-green-9: #193e2d;
+  --mantine-color-green-filled: #2e6b4e; --mantine-color-green-filled-hover: #285f45;
+  --mantine-color-green-light: #e6efe9; --mantine-color-green-light-hover: #dce9e2; --mantine-color-green-light-color: #2e6b4e;
+  --mantine-color-green-outline: #2e6b4e; --mantine-color-green-outline-hover: rgba(46, 107, 78, 0.06); --mantine-color-green-text: #2e6b4e;
+  --mantine-color-gray-0: #faf7f1; --mantine-color-gray-1: #f1ebe0; --mantine-color-gray-2: #ebe4d7; --mantine-color-gray-3: #e3dbcd; --mantine-color-gray-4: #cfc5b4;
+  --mantine-color-gray-5: #a99f90; --mantine-color-gray-6: #6b6257; --mantine-color-gray-7: #51493f; --mantine-color-gray-8: #3a342c; --mantine-color-gray-9: #1e1a15;
+  --mantine-color-gray-filled: #6b6257; --mantine-color-gray-filled-hover: #51493f;
+  --mantine-color-gray-light: #ebe4d7; --mantine-color-gray-light-hover: #e3dbcd; --mantine-color-gray-light-color: #51493f;
+  --mantine-color-gray-outline: #6b6257; --mantine-color-gray-outline-hover: rgba(107, 98, 87, 0.06); --mantine-color-gray-text: #6b6257;
+  --mantine-color-red-0: #fbeae7; --mantine-color-red-1: #f6d5d0; --mantine-color-red-2: #eeb1a9; --mantine-color-red-3: #e48b80; --mantine-color-red-4: #d7675a;
+  --mantine-color-red-5: #c5463a; --mantine-color-red-6: #b3261e; --mantine-color-red-7: #9c2019; --mantine-color-red-8: #821a14; --mantine-color-red-9: #66140f;
+  --mantine-color-red-filled: #b3261e; --mantine-color-red-filled-hover: #9c2019;
+  --mantine-color-red-light: #fbeae7; --mantine-color-red-light-hover: #f6d5d0; --mantine-color-red-light-color: #8f2218;
+  --mantine-color-red-outline: #b3261e; --mantine-color-red-outline-hover: rgba(179, 38, 30, 0.06); --mantine-color-red-text: #8f2218;
+  --mantine-color-error: #b3261e;
+  --mantine-color-text: #1e1a15; --mantine-color-dimmed: #6b6257; --mantine-color-placeholder: #a99f90;
+  --mantine-color-default: #ffffff; --mantine-color-default-hover: #faf7f1; --mantine-color-default-color: #1e1a15; --mantine-color-default-border: #cfc5b4;
+  --mantine-font-size-md: 15px;
 }
-/* 관리자 화면의 Mantine 카드(Paper)는 종이 위 흰 카드로 */
-.pica-admin { --mantine-color-gray-0: #faf7f1; }
 .pica-admin a { text-underline-offset: 3px; }
+/* 화면 제목·묶음 제목(Mantine Title 1~3단계)은 공개 화면 제목과 같은 명조. 화면마다 준 굵기(fw 900)는 명조에 없는 굵기라 700 으로 맞춘다.
+   카드 안의 작은 제목(4단계부터)은 옆 카드의 굵은 고딕 제목과 같게 둔다 */
+.pica-admin .mantine-Title-root { font-weight: 700 !important; color: var(--pk-ink); }
+.pica-admin :is(h1, h2, h3).mantine-Title-root { font-family: var(--pk-font-display); letter-spacing: -0.01em; }
+/* 포스터가 없을 때의 빈 칸(공용 부품의 기본 회색)을 관리자 화면에서는 종이 색 계열로 */
+.pica-admin .bg-neutral-100 { background-color: #ebe4d7; }
+.pica-admin .text-neutral-400 { color: #a99f90; }
+/* 카드(Paper withBorder)는 테두리 없는 흰 카드: 모서리 14px, 옅은 그림자. 카드 안의 카드는 그림자 없이 옅은 선 */
+.pica-admin .mantine-Paper-root[data-with-border] {
+  --paper-radius: 14px !important; --paper-shadow: 0 1px 4px rgba(30, 26, 21, 0.08) !important;
+  background-color: #fff; border: 0; box-shadow: 0 1px 4px rgba(30, 26, 21, 0.08);
+}
+.pica-admin .mantine-Paper-root .mantine-Paper-root {
+  --paper-radius: 12px !important; --paper-shadow: none !important;
+  border: 1px solid #e3dbcd; box-shadow: none;
+}
+/* 보조 단추(variant default)는 흰 알약 + 1.5px 선. 보조 글자(작은 흐린 글자)는 13px */
+.pica-admin .mantine-Button-root[data-variant="default"], .pica-admin .mantine-ActionIcon-root[data-variant="default"] { border-width: 1.5px; }
+.pica-admin .mantine-Text-root[style*="--mantine-color-dimmed"][style*="--mantine-font-size-sm"] { font-size: 13px; }
+/* 표 머리 글자는 보조 글자 색 */
+.pica-admin .mantine-Table-th { color: #6b6257; font-size: 13px; font-weight: 700; }
 /* 표가 든 카드는 휴대폰 폭에서 카드 안에서만 좌우로 넘긴다(쪽 전체가 옆으로 밀리지 않게, FR-006) */
 .pica-admin .mantine-Paper-root:has(.mantine-Table-table) { overflow-x: auto; }
 
+/* 날짜 입력칸 (운영자 2026-11-28 «아직도 모바일에서 삐져나가는게 있고»): 아이폰 사파리는 날짜 칸에 자체 최소 폭을 두어
+   min-width:0 · max-width:100% 만으로는 칸 밖으로 넘친다. 기본 모양을 끄고 폭을 강제한다. 값은 왼쪽에 붙인다.
+   비어 있으면 아이폰은 아무 글자도 보여 주지 않으므로, 아이폰에서만 «날짜 고르기»를 칸 안에 보인다
+   (-webkit-touch-callout 은 아이폰·아이패드 사파리에만 있다. 안드로이드·PC 는 «연도. 월. 일.»이 스스로 보인다). */
+.pica-date { -webkit-appearance: none; appearance: none; display: block; width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; }
+.pica-date::-webkit-date-and-time-value { text-align: left; }
+.pica-date-wrap { position: relative; min-width: 0; }
+.pica-date-wrap[data-empty="true"]::after {
+  content: "날짜 고르기"; display: none; position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+  color: var(--pk-ink-soft, #6b6257); font-size: 16px; pointer-events: none;
+}
+@supports (-webkit-touch-callout: none) {
+  .pica-date-wrap[data-empty="true"]::after { display: block; }
+}
+
+/* 관리자 화면의 알림 줄 (운영자 2026-11-28 «본문도 정리»). 창(Modal) 안에서도 쓰이므로 색을 직접 적는다.
+   오류: 옅은 빨강 면 + 진한 빨강 글자. 안내: 옅은 초록 면 + 초록 글자. 빈 상태: 점선 대신 옅은 면 */
+.pica-err { display: block; width: fit-content; max-width: 100%; border-radius: 10px; background: #fbeae7; padding: 8px 12px; color: #8f2218; font-size: 13.5px; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; }
+.pica-info { display: block; border-radius: 10px; background: #e6efe9; padding: 8px 12px; color: #2e6b4e; font-size: 13.5px; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; }
+.pica-empty { display: block; border-radius: 14px; background: #ebe4d7; padding: 20px 16px; text-align: center; color: #6b6257; font-size: 14px; font-weight: 600; }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { MapPin } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 /**
@@ -47,14 +46,14 @@ function VenueInfo({ v, onSaved }: { v: Venue; onSaved: (patch: Partial<Venue>) 
         if (error || !data?.length) { setMsg(`저장하지 못했습니다: ${error?.message || "권한 확인"}`); return; }
         setMsg("저장했습니다."); onSaved(patch);
     };
-    const input = "h-9 rounded-lg bg-neutral-50 px-2 text-sm ring-1 ring-neutral-200";
+    const input = "h-9 rounded-lg border border-line bg-card px-2 text-[14px] text-ink";
     return (
         <div className="mt-2 flex flex-wrap items-end gap-2">
-            <label className="text-xs text-neutral-500">휴관일<br /><input className={`${input} w-40 max-w-full`} value={closed} onChange={e => setClosed(e.target.value)} placeholder="예: 매주 월요일" maxLength={60} /></label>
-            <label className="text-xs text-neutral-500">객석<br /><input className={`${input} w-20`} value={cap} onChange={e => setCap(e.target.value)} inputMode="numeric" placeholder="석" /></label>
-            <label className="text-xs text-neutral-500">구·군<br /><input className={`${input} w-28`} value={district} onChange={e => setDistrict(e.target.value)} placeholder="예: 해운대구" maxLength={20} /></label>
-            {dirty && <button type="button" className="h-9 rounded-lg bg-neutral-900 px-3 text-xs font-bold text-white" onClick={save}>공간 정보 저장</button>}
-            {msg && <span className="pb-2 text-xs text-neutral-500" role="status">{msg}</span>}
+            <label className="text-xs text-ink-soft">휴관일<br /><input className={`${input} w-40 max-w-full`} value={closed} onChange={e => setClosed(e.target.value)} placeholder="예: 매주 월요일" maxLength={60} /></label>
+            <label className="text-xs text-ink-soft">객석<br /><input className={`${input} w-20`} value={cap} onChange={e => setCap(e.target.value)} inputMode="numeric" placeholder="석" /></label>
+            <label className="text-xs text-ink-soft">구·군<br /><input className={`${input} w-28`} value={district} onChange={e => setDistrict(e.target.value)} placeholder="예: 해운대구" maxLength={20} /></label>
+            {dirty && <button type="button" className="h-9 rounded-full bg-accent px-3.5 text-[13px] font-bold text-white" onClick={save}>공간 정보 저장</button>}
+            {msg && <span className="pb-2 text-xs text-ink-soft" role="status">{msg}</span>}
         </div>
     );
 }
@@ -139,52 +138,50 @@ export default function AdminVenuesPage() {
 
     return (
         <div className="pb-10">
-            <div className="container mx-auto px-4 pt-8">
-                <h1 className="text-3xl font-black text-neutral-900 flex items-center gap-3">
-                    <MapPin className="w-8 h-8 text-indigo-600" /> 장소 좌표 확인
-                </h1>
-                <p className="text-neutral-500 mt-2">
+            <div className="pt-8">
+                <h1 className="pica-display text-[25px] leading-tight text-ink">장소 좌표 확인</h1>
+                <p className="mt-1 text-[13px] text-ink-soft">
                     「내 주변」 거리 계산에 쓰는 장소 좌표입니다. 확정된 장소만 공개 화면에 거리가 표시됩니다.
                 </p>
 
                 <div className="mt-6 flex flex-wrap gap-2">
                     {(["pending", "failed", "confirmed", "all"] as const).map(f => (
                         <button key={f} type="button" onClick={() => setFilter(f)}
-                            className={`px-4 py-2 rounded-xl text-sm font-bold ${filter === f ? "bg-indigo-600 text-white" : "bg-white ring-1 ring-neutral-200 text-neutral-700"}`}>
+                            className={`h-9 rounded-full px-3.5 text-[14px] font-bold ${filter === f ? "bg-accent text-white" : "bg-card text-ink shadow-[0_1px_5px_rgba(30,26,21,.13)]"}`}>
                             {f === "all" ? `전체 ${venues.length}` : `${STATUS_KO[f]} ${n(f)}`}
                         </button>
                     ))}
                 </div>
 
-                {error && <p className="mt-6 text-red-600 font-bold">{error}</p>}
-                {loading ? <p className="mt-6 text-neutral-500">불러오는 중…</p> : (
+                {error && <p className="pica-err mt-6" role="alert">{error}</p>}
+                {loading ? <p className="mt-6 text-[14px] text-ink-soft">불러오는 중…</p> : (
                     <ul className="mt-6 flex flex-col gap-4">
                         {shown.map(v => (
-                            <li key={v.id} className="bg-white p-5 rounded-2xl ring-1 ring-neutral-200">
+                            <li key={v.id} className="rounded-[14px] bg-card p-4 shadow-[0_1px_4px_rgba(30,26,21,.08)]">
                                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                                    <span className="text-lg font-black text-neutral-900">{v.name}</span>
-                                    <span className="text-sm text-neutral-500">{v.region || "-"} · 행사 {counts[v.id] || 0}건</span>
-                                    <span className={`text-xs font-bold px-2 py-0.5 rounded ${v.geo_status === "confirmed" ? "bg-green-100 text-green-700" : v.geo_status === "failed" ? "bg-neutral-200 text-neutral-700" : "bg-amber-100 text-amber-800"}`}>
+                                    <span className="text-[17px] font-bold text-ink">{v.name}</span>
+                                    <span className="text-[13px] text-ink-soft">{v.region || "-"} · 행사 {counts[v.id] || 0}건</span>
+                                    <span className={`text-xs font-bold px-2 py-0.5 rounded ${v.geo_status === "confirmed" ? "bg-[#e6efe9] text-accent" : v.geo_status === "failed" ? "bg-[#ebe4d7] text-ink-soft" : "bg-amber-100 text-amber-800"}`}>
                                         {STATUS_KO[v.geo_status]}{v.geo_source ? ` · ${v.geo_source}` : ""}
                                     </span>
-                                    <a className="text-sm text-indigo-600 underline" href={naverSearch(v)} target="_blank" rel="noopener noreferrer">네이버지도에서 찾기</a>
+                                    <a className="text-[13px] font-semibold text-accent underline" href={naverSearch(v)} target="_blank" rel="noopener noreferrer">네이버지도에서 찾기</a>
                                 </div>
-                                {v.aliases?.length > 0 && <p className="mt-1 text-xs text-neutral-500">원래 표기: {v.aliases.join(" / ")}</p>}
+                                {v.aliases?.length > 0 && <p className="mt-1 text-xs text-ink-soft">원래 표기: {v.aliases.join(" / ")}</p>}
                                 {v.geo_status === "confirmed" && (
-                                    <p className="mt-1 text-sm text-neutral-700">{v.address || "-"} ({v.lat?.toFixed(5)}, {v.lng?.toFixed(5)})</p>
+                                    <p className="mt-1 text-[14px] text-ink">{v.address || "-"} ({v.lat?.toFixed(5)}, {v.lng?.toFixed(5)})</p>
                                 )}
-                                {v.checked_by && <p className="mt-1 text-xs text-neutral-400">확인: {v.checked_by} · {v.checked_at?.slice(0, 16).replace("T", " ")}</p>}
+                                {v.checked_by && <p className="mt-1 text-xs text-ink-soft">확인: {v.checked_by} · {v.checked_at?.slice(0, 16).replace("T", " ")}</p>}
                                 {v.geo_status === "confirmed" && <VenueInfo v={v} onSaved={(patch) => setVenues(list => list.map(x => x.id === v.id ? { ...x, ...patch } : x))} />}
 
                                 {v.candidates && v.candidates.length > 0 && (
                                     <div className="mt-3 flex flex-col gap-1">
-                                        <span className="text-xs font-bold text-neutral-500">검색 후보</span>
+                                        <span className="text-xs font-bold text-ink-soft">검색 후보</span>
                                         {v.candidates.map((c, i) => (
                                             <div key={i} className="flex flex-wrap items-center gap-2 text-sm">
                                                 <span className="font-bold">{c.name}</span>
-                                                <span className="text-neutral-500">{c.address}</span>
+                                                <span className="text-ink-soft">{c.address}</span>
                                                 {c.lat !== null && (
-                                                    <button type="button" className="px-2 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-bold text-xs" onClick={() => confirmCandidate(v, c)}>
+                                                    <button type="button" className="rounded-full bg-[#e6efe9] px-2.5 py-1 text-xs font-bold text-accent" onClick={() => confirmCandidate(v, c)}>
                                                         이 위치로 확정
                                                     </button>
                                                 )}
@@ -195,20 +192,20 @@ export default function AdminVenuesPage() {
 
                                 <div className="mt-3 flex flex-wrap items-center gap-2">
                                     <input
-                                        className="h-9 px-3 rounded-lg bg-neutral-50 ring-1 ring-neutral-200 text-sm w-56"
+                                        className="h-9 w-56 rounded-lg border border-line bg-card px-3 text-[14px] text-ink"
                                         placeholder="위도,경도 (예: 35.1532,129.1186)"
                                         value={paste[v.id] || ""}
                                         onChange={e => setPaste({ ...paste, [v.id]: e.target.value })}
                                     />
-                                    <button type="button" className="px-3 h-9 rounded-lg bg-indigo-600 text-white text-xs font-bold" onClick={() => confirmPasted(v)}>좌표로 확정</button>
+                                    <button type="button" className="h-9 rounded-full bg-accent px-3.5 text-[13px] font-bold text-white" onClick={() => confirmPasted(v)}>좌표로 확정</button>
                                     {v.geo_status !== "failed" && (
-                                        <button type="button" className="px-3 h-9 rounded-lg bg-neutral-200 text-neutral-800 text-xs font-bold" onClick={() => update(v.id, { geo_status: "failed" })}>찾을 수 없음</button>
+                                        <button type="button" className="h-9 rounded-full bg-white px-3.5 text-[13px] font-bold text-ink shadow-[inset_0_0_0_1.5px_#CFC5B4]" onClick={() => update(v.id, { geo_status: "failed" })}>찾을 수 없음</button>
                                     )}
                                     {v.geo_status === "confirmed" && (
-                                        <button type="button" className="px-3 h-9 rounded-lg bg-amber-100 text-amber-800 text-xs font-bold" onClick={() => update(v.id, { geo_status: "pending" })}>다시 확인</button>
+                                        <button type="button" className="h-9 rounded-full bg-white px-3.5 text-[13px] font-bold text-ink shadow-[inset_0_0_0_1.5px_#CFC5B4]" onClick={() => update(v.id, { geo_status: "pending" })}>다시 확인</button>
                                     )}
                                     <select
-                                        className="h-9 max-w-full px-2 rounded-lg bg-neutral-50 ring-1 ring-neutral-200 text-sm"
+                                        className="h-9 max-w-full rounded-lg border border-line bg-card px-2 text-[14px] text-ink"
                                         value={mergeTo[v.id] || ""}
                                         onChange={e => setMergeTo({ ...mergeTo, [v.id]: e.target.value })}
                                         aria-label="합칠 장소"
@@ -219,7 +216,7 @@ export default function AdminVenuesPage() {
                                         ))}
                                     </select>
                                     {mergeTo[v.id] && (
-                                        <button type="button" className="px-3 h-9 rounded-lg bg-red-50 text-red-700 text-xs font-bold" onClick={() => merge(v)}>합치기</button>
+                                        <button type="button" className="h-9 rounded-full bg-[#fbeae7] px-3.5 text-[13px] font-bold text-[#8f2218]" onClick={() => merge(v)}>합치기</button>
                                     )}
                                 </div>
                             </li>

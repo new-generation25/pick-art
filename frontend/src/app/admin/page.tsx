@@ -39,17 +39,17 @@ function Routine({ r }: { r: RoutineLine }) {
     const missed = r.missed.state === "missed";
     const bad = missed || alerts.length > 0;
     return (
-        <Link href="/admin/status" className={`mt-4 block rounded-[14px] border-[1.5px] bg-card px-4 py-3 no-underline ${bad ? "border-[#b5432f]" : "border-line"}`}>
+        <Link href="/admin/status" className={`mt-4 block rounded-[14px] px-4 py-3 no-underline ${bad ? "bg-[#fbeae7]" : "bg-card shadow-[0_1px_4px_rgba(30,26,21,.08)]"}`}>
             <div className="flex items-center justify-between gap-3">
                 <p className="text-[14.5px] text-ink">
                     {r.missed.state === "none" ? (
                         <b>정기 실행 기록이 아직 없습니다</b>
                     ) : missed ? (
-                        <b className="text-[#b5432f]">마지막 정기 실행이 {Math.round(r.missed.hours)}시간 전입니다 ({dayTime(r.missed.lastRunAt)})</b>
+                        <b className="text-[#8f2218]">마지막 정기 실행이 {Math.round(r.missed.hours)}시간 전입니다 ({dayTime(r.missed.lastRunAt)})</b>
                     ) : (
-                        <><b>{dayTime(r.missed.lastRunAt)} 실행 끝</b> · 출처 {r.lastRunSources}곳{r.lastRunFailed ? <> · <b className="text-[#b5432f]">실패 {r.lastRunFailed}</b></> : " 정상"}</>
+                        <><b>{dayTime(r.missed.lastRunAt)} 실행 끝</b> · 출처 {r.lastRunSources}곳{r.lastRunFailed ? <> · <b className="text-[#8f2218]">실패 {r.lastRunFailed}</b></> : " 정상"}</>
                     )}
-                    {alerts.length > 0 && <> · <b className="text-[#b5432f]">경고 {alerts.length}건</b></>}
+                    {alerts.length > 0 && <> · <b className="text-[#8f2218]">경고 {alerts.length}건</b></>}
                     <span className="text-ink-soft"> · 다음 {nextRun()}</span>
                 </p>
                 <ChevronRight size={18} className="shrink-0 text-ink-soft" aria-hidden />
@@ -87,12 +87,12 @@ export default function AdminTodoPage() {
     const refresh = async () => { setBusy(true); try { await reload(); } finally { setBusy(false); } };
 
     if (!counts) {
-        return <div className="mx-auto max-w-3xl px-4 pt-6"><p className="text-[15px] font-semibold text-ink-soft" role="status">할 일을 세는 중…</p></div>;
+        return <div className="pt-6"><p className="text-[15px] font-semibold text-ink-soft" role="status">할 일을 세는 중…</p></div>;
     }
 
     const total = counts.items.reduce((n, i) => n + i.count, 0);
     return (
-        <div className="mx-auto max-w-3xl px-4 pt-5">
+        <div className="pt-5">
             <div className="flex items-end justify-between gap-3">
                 <div>
                     <h1 className="pica-display text-[27px] leading-tight text-ink">오늘 할 일</h1>
@@ -128,9 +128,9 @@ export default function AdminTodoPage() {
             })}
 
             {counts.errors.length > 0 && (
-                <div className="mt-6 rounded-[14px] border-[1.5px] border-[#b5432f] bg-card px-4 py-3 text-[13px] text-ink" role="alert">
+                <div className="mt-6 rounded-[14px] bg-[#fbeae7] px-4 py-3 text-[13px] text-[#8f2218]" role="alert">
                     <b>읽지 못한 것이 있습니다.</b> 아래 숫자는 0으로 보일 수 있습니다.
-                    <ul className="mt-1 list-none space-y-0.5 p-0 text-ink-soft">{counts.errors.map((e, i) => <li key={i}>· {e}</li>)}</ul>
+                    <ul className="mt-1 list-none space-y-0.5 p-0">{counts.errors.map((e, i) => <li key={i}>· {e}</li>)}</ul>
                 </div>
             )}
 

@@ -8,4 +8,4 @@
 - [x] T006 [US2] 관리자 메뉴 `AdminHeader.tsx`, 관리자 첫 화면 «협약 신청·철회 요청 N건» `admin/page.tsx`
 - [x] T007 개인정보처리방침 수집 항목 `frontend/src/app/privacy/page.tsx`
 - [x] T008 확인: 익명 REST, SQL 역할 흉내, 로컬 휴대폰 크기 캡처·보내기→관리자→확인 → `verification.md`
-- [ ] T009 운영자 휴대폰 화면 검토·승인 → 배포 → SNS콘텐츠 제작 세션에 주소(https://picka.news/partners#join) 알림
+- [x] T009 운영자 휴대폰 화면 검토·승인 → 배포 → SNS콘텐츠 제작 세션에 주소(https://picka.news/partners#join) 알림

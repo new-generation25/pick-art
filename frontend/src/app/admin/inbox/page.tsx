@@ -147,7 +147,7 @@ function AdminInbox() {
     const go = (t: Tab) => router.replace(`/admin/inbox?tab=${t}`, { scroll: false });
 
     return (
-        <div className="mx-auto max-w-5xl px-4 pt-4">
+        <div className="pt-4">
             <div className="flex items-end justify-between gap-3">
                 <div>
                     <h1 className="pica-display text-[25px] leading-tight text-ink">공개 판단</h1>
@@ -173,7 +173,7 @@ function AdminInbox() {
                 <Info size={14} aria-hidden />판단 기준 한눈에 보기 — 어떤 글이 어느 갈래로 오는지
             </button>
 
-            {error && <p className="mt-3 rounded-xl border-[1.5px] border-[#b5432f] bg-card px-3 py-2 text-[13.5px] text-ink" role="alert">{error}</p>}
+            {error && <p className="pica-err mt-3" role="alert">{error}</p>}
 
             <div className="mt-4">
                 {tab === "candidate" && <ReviewQueue bucket="candidate" posts={bucket("candidate")} loading={loading} onChanged={onReviewChanged} actor={email} onOpen={open} />}
@@ -190,7 +190,7 @@ function AdminInbox() {
                                         const c = r.content || {};
                                         const failed = c.publish_failed_at && String(c.publish_failed_at) >= String(c.publish_approved_at);
                                         const state = r.status === "PUBLISHED" ? { text: "공개됨", tone: "text-accent" }
-                                            : r.status === "REVIEW" && failed ? { text: `검증에 걸림 — ${String(c.review_reason || "").replace("publish_failed: ", "")}`, tone: "text-[#b5432f]" }
+                                            : r.status === "REVIEW" && failed ? { text: `검증에 걸림 — ${String(c.review_reason || "").replace("publish_failed: ", "")}`, tone: "text-[#8f2218]" }
                                                 : r.status === "REVIEW" ? { text: "다음 정기 실행 대기", tone: "text-ink-soft" }
                                                     : { text: r.status === "DUPLICATE" ? "이미 공개된 행사와 같음" : r.status === "EXPIRED" ? "기간이 지나 만료" : r.status === "REJECTED" ? "반영 안 함" : r.status, tone: "text-ink-soft" };
                                         return (
@@ -240,7 +240,8 @@ function AdminInbox() {
                 )}
             </div>
 
-            <PostDetailModal post={detail} actor={email} onClose={() => setDetailId(null)} onSaved={onNoteSaved} />
+            <PostDetailModal post={detail} actor={email} onClose={() => setDetailId(null)} onSaved={onNoteSaved}
+                onReview={onReviewChanged} onCollected={onCollectedChanged} onRestore={p => restore(p as Row)} />
             <CriteriaModal opened={criteria} onClose={() => setCriteria(false)} />
 
             <p className="mt-6 px-1 text-[12.5px] text-ink-soft">공개된 행사를 찾아 고치거나 숨기려면 <Link href="/admin/events" className="text-ink underline underline-offset-4">행사</Link> 메뉴로 가세요.</p>

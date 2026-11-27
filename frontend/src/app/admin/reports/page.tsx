@@ -157,7 +157,7 @@ export default function AdminReportsPage() {
         : "아직 신고·제보가 없습니다.";
 
     return (
-        <Container size="lg" pt={32} pb={80}>
+        <Container fluid px={0} pt={32} pb={80}>
             <Group justify="space-between" align="flex-end" mb="lg">
                 <div>
                     <Title order={1} fw={900}>신고·제보</Title>
@@ -181,7 +181,7 @@ export default function AdminReportsPage() {
                     </Text>
                 </Paper>
             )}
-            {error && <Text c="red" mb="md">{error}</Text>}
+            {error && <Text className="pica-err" mb="md">{error}</Text>}
             {rows === null ? <Loader size="sm" /> : rows.length === 0 ? (
                 <Text c="dimmed">{emptyText}</Text>
             ) : (

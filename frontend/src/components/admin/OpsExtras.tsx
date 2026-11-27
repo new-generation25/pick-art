@@ -37,7 +37,7 @@ export function RoutineSteps() {
         <Paper withBorder radius="md" p="md" id="routine-steps">
             <Title order={4}>회차 요약 — 자동화가 한 일</Title>
             <Text size="xs" c="dimmed" mb="sm">정기 실행(매일 08:20·15:00)이 끝날 때 단계마다 한 줄씩 남깁니다. 최근 14회.</Text>
-            {error && <Text size="sm" c="red">읽지 못했습니다: {error}</Text>}
+            {error && <Text size="sm" className="pica-err">읽지 못했습니다: {error}</Text>}
             {runs && runs.length === 0 && !error && <Text size="sm" c="dimmed">아직 남긴 회차가 없습니다. 다음 정기 실행부터 쌓입니다.</Text>}
             {(runs || []).map((r, i) => (
                 <details key={r.run_at} open={i === 0} style={{ borderTop: i ? "1px solid var(--mantine-color-gray-2)" : undefined, padding: "8px 0" }}>
@@ -97,7 +97,7 @@ export function PushMemberStats() {
             <Paper withBorder radius="md" p="md" id="push-stats">
                 <Title order={4}>휴대폰 알림</Title>
                 <Text size="xs" c="dimmed" mb="sm">켠 기기 수와 최근 보낸 알림 수입니다. 누구에게 보냈는지는 여기 나오지 않습니다.</Text>
-                {error && <Text size="sm" c="red">읽지 못했습니다: {error}</Text>}
+                {error && <Text size="sm" className="pica-err">읽지 못했습니다: {error}</Text>}
                 {push && (
                     <>
                         <SimpleGrid cols={3} spacing="sm">

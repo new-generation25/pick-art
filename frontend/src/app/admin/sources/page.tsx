@@ -177,7 +177,7 @@ export default function SourcesPage() {
 
     return (
         <Box py={24}>
-            <Container size="lg">
+            <Container fluid px={0}>
                 <Group justify="space-between" mb="lg" wrap="wrap">
                     <Stack gap={0}>
                         <Title order={2} fw={900}>출처</Title>
@@ -209,7 +209,7 @@ export default function SourcesPage() {
                     )}
                 </Group>
 
-                {error && <Text c="red" size="sm" mb="md" role="alert">{error}</Text>}
+                {error && <Text className="pica-err" size="sm" mb="md" role="alert">{error}</Text>}
 
                 <Box pos="relative" mih={120}>
                     <LoadingOverlay visible={isLoading} />
@@ -293,7 +293,7 @@ export default function SourcesPage() {
                             description="이유를 적으면 다음 회차부터 건너뛰고 경고를 켜지 않습니다. 예: 누리집 개편 중, 행사 게시판 없음" />
                     )}
                     {form.type === "webpage" && !editingItem && <Text size="xs" c="dimmed">웹 출처는 정의 파일(collector/sources)이 있어야 읽힙니다. 주소만 넣으면 다음 회차에 «정의 파일 없음» 경고가 켜집니다.</Text>}
-                    {saveError && <Text size="sm" c="red" role="alert">{saveError}</Text>}
+                    {saveError && <Text size="sm" className="pica-err" role="alert">{saveError}</Text>}
                     <Button onClick={handleSave}>저장</Button>
                 </Stack>
             </Modal>

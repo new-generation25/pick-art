@@ -52,13 +52,13 @@ function ConsentBox({ source, onSaved }: { source: Source; onSaved: (s: Source) 
     };
 
     return (
-        <div className="mb-3 rounded-xl border border-dashed border-line px-3 py-2.5">
+        <div className="mb-3 rounded-xl bg-paper px-3 py-2.5">
             <div className="flex flex-wrap items-center gap-2">
                 <span className="text-[13px] font-semibold text-ink">계정의 동의 단계</span>
-                <select className="h-9 max-w-full rounded-lg border border-line bg-paper px-2 text-[14px] text-ink" value={tier} onChange={e => setTier(e.currentTarget.value as Consent)} aria-label="동의 단계">
+                <select className="h-9 max-w-full rounded-lg border border-line bg-card px-2 text-[14px] text-ink" value={tier} onChange={e => setTier(e.currentTarget.value as Consent)} aria-label="동의 단계">
                     {(Object.keys(CONSENT_LABEL) as Consent[]).map(c => <option key={c} value={c}>{CONSENT_LABEL[c]}</option>)}
                 </select>
-                <input className="h-9 min-w-0 flex-1 basis-[220px] rounded-lg border border-line bg-paper px-2 text-[14px] text-ink" placeholder="근거: 받은 댓글·DM 주소, 받은 날" value={evidence} onChange={e => setEvidence(e.currentTarget.value)} maxLength={500} aria-label="동의 근거" />
+                <input className="h-9 min-w-0 flex-1 basis-[220px] rounded-lg border border-line bg-card px-2 text-[14px] text-ink" placeholder="근거: 받은 댓글·DM 주소, 받은 날" value={evidence} onChange={e => setEvidence(e.currentTarget.value)} maxLength={500} aria-label="동의 근거" />
                 <button type="button" disabled={busy || (tier === source.consent && evidence === (source.consent_evidence || ""))} onClick={save} className="h-9 rounded-full bg-accent px-3.5 text-[13.5px] font-bold text-on-accent disabled:opacity-40">저장</button>
             </div>
             <p className="mt-1.5 text-[12.5px] text-ink-soft" role="status">

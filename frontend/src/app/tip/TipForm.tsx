@@ -156,30 +156,32 @@ export function TipForm() {
         );
     }
 
-    const field = "w-full rounded-[10px] border border-line bg-card px-3 py-3 text-[16px] text-ink";
-    const label = "mb-1.5 block text-[15px] font-bold text-ink";
+    // 칸 높이 44px, 이름표 아래 4px, 묶음 사이 12px (운영자 2026-11-28 «간격이 너무 크고 넓어»). 글자는 16px 그대로(아이폰이 화면을 확대하지 않게)
+    const field = "w-full rounded-[10px] border border-line bg-card px-3 py-2.5 text-[16px] text-ink";
+    const line = `${field} h-11`;   // 한 줄 입력칸
+    const label = "mb-1 block text-[15px] font-bold text-ink";
     const hint = "mt-1 text-[13px] leading-relaxed text-ink-soft";
-    const fold = "rounded-[12px] border border-line bg-card px-4 py-3";
+    const fold = "rounded-[12px] border border-line bg-card px-3.5 py-2.5";
     const foldTitle = "cursor-pointer text-[15px] font-bold text-ink";
     return (
         <>
-        <form onSubmit={send} className="flex flex-col gap-5" noValidate>
+        <form onSubmit={send} className="flex flex-col gap-3" noValidate>
             <div>
                 <label htmlFor="tip-title" className={label}>행사 이름</label>
-                <input id="tip-title" value={form.title} onChange={set("title")} maxLength={120} className={field} placeholder="예) 골목 버스킹 〈겨울밤 어쿠스틱〉" />
+                <input id="tip-title" value={form.title} onChange={set("title")} maxLength={120} className={line} placeholder="예) 골목 버스킹 〈겨울밤 어쿠스틱〉" />
             </div>
 
-            <fieldset className="flex flex-col gap-2.5">
+            <fieldset className="flex flex-col gap-2">
                 <legend className={label}>원문 링크나 사진 <span className="font-normal text-ink-soft">(둘 중 하나는 꼭)</span></legend>
                 {/* 이름표가 안 보이면 빈 상자가 링크 칸인지 알 수 없다 — «링크 입력란이 없는데 링크가 없다고 한다»(운영자 2026-11-28) */}
                 <div>
                     <label htmlFor="tip-url" className="mb-1 block text-[13px] font-semibold text-ink-soft">링크 붙여 넣기</label>
-                    <input id="tip-url" type="text" inputMode="url" autoCapitalize="none" autoCorrect="off" value={form.url} onChange={set("url")} maxLength={500} className={field} placeholder="https://… 인스타그램 게시물·예매 페이지 주소" />
+                    <input id="tip-url" type="text" inputMode="url" autoCapitalize="none" autoCorrect="off" value={form.url} onChange={set("url")} maxLength={500} className={line} placeholder="https://… 인스타그램 게시물·예매 페이지 주소" />
                 </div>
                 <div>
                     <input id="tip-photo" type="file" accept="image/jpeg,image/png,image/webp,image/*" onChange={pick} className="peer sr-only" />
-                    <label htmlFor="tip-photo" className="flex min-h-12 cursor-pointer items-center justify-center rounded-full border border-dashed border-ink-soft bg-card px-4 text-[15px] font-semibold text-ink peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-[var(--pk-accent)]">
-                        {file ? "다른 사진으로 바꾸기" : "또는 포스터·현수막 사진 올리기"}
+                    <label htmlFor="tip-photo" className="flex min-h-11 cursor-pointer items-center justify-center rounded-full border border-dashed border-ink-soft bg-card px-4 text-[15px] font-semibold text-ink peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-[var(--pk-accent)]">
+                        {file ? "다른 사진으로 바꾸기" : "또는 포스터·리플렛 사진 올리기"}
                     </label>
                     {preview && <img src={preview} alt="올릴 사진 미리보기" className="mt-2 max-h-64 w-auto rounded-[8px] border border-line" />}
                     <p className={hint}>사진은 운영자만 봐요.</p>
@@ -188,27 +190,31 @@ export function TipForm() {
 
             <details className={fold}>
                 <summary className={foldTitle}>더 알려 주기 <span className="font-normal text-ink-soft">(선택 — 날짜·장소{coupon ? "·쿠폰 연락처" : ""}·이름)</span></summary>
-                <div className="mt-3 flex flex-col gap-3">
+                <div className="mt-2.5 flex flex-col gap-2.5">
                     {/* 날짜 칸은 휴대폰에서 한 줄에 하나씩: 두 칸을 나란히 두면 폭 150px 에 날짜 글자와 달력 그림이 겹친다(운영자 2026-11-28).
                         아이폰은 빈 날짜 칸이 납작해지거나 칸 밖으로 넘치므로 block·최소 높이·max-w-full 을 준다 */}
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                         <div className="min-w-0">
                             <label htmlFor="tip-start" className="mb-1 block text-[13px] font-semibold text-ink-soft">시작 날짜</label>
-                            <input id="tip-start" type="date" value={form.date_start} onChange={set("date_start")} className={`${field} block min-h-[51px] min-w-0 max-w-full`} />
+                            <div className="pica-date-wrap" data-empty={!form.date_start}>
+                                <input id="tip-start" type="date" value={form.date_start} onChange={set("date_start")} className={`${line} pica-date`} />
+                            </div>
                         </div>
                         <div className="min-w-0">
                             <label htmlFor="tip-end" className="mb-1 block text-[13px] font-semibold text-ink-soft">끝나는 날짜</label>
-                            <input id="tip-end" type="date" value={form.date_end} onChange={set("date_end")} className={`${field} block min-h-[51px] min-w-0 max-w-full`} />
+                            <div className="pica-date-wrap" data-empty={!form.date_end}>
+                                <input id="tip-end" type="date" value={form.date_end} onChange={set("date_end")} className={`${line} pica-date`} />
+                            </div>
                         </div>
                     </div>
-                    <div className="grid grid-cols-[minmax(0,1fr)_110px] gap-3">
+                    <div className="grid grid-cols-[minmax(0,1fr)_110px] gap-2.5">
                         <div>
                             <label htmlFor="tip-venue" className="mb-1 block text-[13px] font-semibold text-ink-soft">장소</label>
-                            <input id="tip-venue" value={form.venue} onChange={set("venue")} maxLength={120} className={field} placeholder="예) 봉황동 ○○카페 2층" />
+                            <input id="tip-venue" value={form.venue} onChange={set("venue")} maxLength={120} className={line} placeholder="예) 봉황동 ○○카페 2층" />
                         </div>
                         <div>
                             <label htmlFor="tip-region" className="mb-1 block text-[13px] font-semibold text-ink-soft">지역</label>
-                            <select id="tip-region" value={form.region} onChange={set("region")} className={field}>
+                            <select id="tip-region" value={form.region} onChange={set("region")} className={`${line} min-w-0`}>
                                 <option value="">고르기</option>
                                 {GN_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
                             </select>
@@ -216,16 +222,16 @@ export function TipForm() {
                     </div>
                     <div>
                         <label htmlFor="tip-body" className="mb-1 block text-[13px] font-semibold text-ink-soft">덧붙일 말</label>
-                        <textarea id="tip-body" value={form.body} onChange={set("body")} maxLength={2000} rows={3} className={field} placeholder="시간, 관람료, 아이와 갈 만한지 등" />
+                        <textarea id="tip-body" value={form.body} onChange={set("body")} maxLength={2000} rows={2} className={field} placeholder="시간, 관람료, 아이와 갈 만한지 등" />
                     </div>
                 </div>
                 {/* 쿠폰 연락처·이름 남기기도 같은 칸 안에 둔다 (접힌 칸을 하나로 — 운영자 2026-11-28 «너무 화면이 긴것 아니야») */}
-                <div className="mt-4 flex flex-col gap-4 border-t border-line pt-4">
+                <div className="mt-3 flex flex-col gap-3 border-t border-line pt-3">
                     {coupon && (
-                        <div className="flex flex-col gap-3">
+                        <div className="flex flex-col gap-2">
                             <div>
                                 <label htmlFor="tip-contact" className="mb-1 block text-[13px] font-semibold text-ink-soft">커피 쿠폰을 받을 전화번호나 이메일</label>
-                                <input id="tip-contact" value={form.contact} onChange={set("contact")} maxLength={100} autoComplete="off" className={field} placeholder="쿠폰을 받을 곳" />
+                                <input id="tip-contact" value={form.contact} onChange={set("contact")} maxLength={100} autoComplete="off" className={line} placeholder="쿠폰을 받을 곳" />
                                 <p className={hint}>{COUPON_DETAIL} 연락처는 운영자만 봐요. 적지 않아도 제보는 똑같이 받고 포인트도 똑같이 쌓여요.</p>
                             </div>
                             <label className="flex cursor-pointer items-start gap-2.5 text-[14px] leading-relaxed text-ink">
@@ -237,7 +243,7 @@ export function TipForm() {
                     )}
                     <div>
                         <label htmlFor="tip-credit" className="mb-1 block text-[13px] font-semibold text-ink-soft">행사 화면에 보일 이름이나 아이디</label>
-                        <input id="tip-credit" value={form.credit} onChange={set("credit")} maxLength={30} autoComplete="off" className={field} placeholder="예) 봉황동 주민, @pica_fan" />
+                        <input id="tip-credit" value={form.credit} onChange={set("credit")} maxLength={30} autoComplete="off" className={line} placeholder="예) 봉황동 주민, @pica_fan" />
                         <p className={hint}>적으면 행사 화면에 「제보: ○○」로 보여요. 비우면 이름은 어디에도 나오지 않아요.</p>
                     </div>
                 </div>
@@ -254,7 +260,7 @@ export function TipForm() {
                     {errors.map(e => <li key={e}>{e}</li>)}
                 </ul>
             )}
-            <button type="submit" disabled={sending} className="h-14 rounded-full bg-accent px-6 text-[17px] font-bold text-on-accent disabled:opacity-50">
+            <button type="submit" disabled={sending} className="h-[52px] rounded-full bg-accent px-6 text-[17px] font-bold text-on-accent disabled:opacity-50">
                 {sending ? "보내는 중…" : "제보 보내기"}
             </button>
             <p className="text-center text-[13px] leading-relaxed text-ink-soft">

@@ -8,7 +8,7 @@ import { PlaceholderCandidates } from "@/components/admin/PlaceholderCandidates"
 // 예전에는 대시보드 중간에 끼어 있었다
 export default function RefinePage() {
     return (
-        <Container size="lg" pt={24} pb={40}>
+        <Container fluid px={0} pt={24} pb={40}>
             <Stack gap="lg">
                 <div>
                     <Title order={2} fw={900}>세부 갈래 · 안내 그림</Title>

@@ -30,14 +30,14 @@ export function GenrePending() {
                 <Title order={4}>세부 판정 대기 {rows ? `${rows.length}건` : ""}</Title>
                 <Text size="xs" c="dimmed">규칙으로 갈래를 못 정한 진행 중·예정 행사 · 고르면 운영자 확정</Text>
             </Group>
-            {error && <Text size="sm" c="red">불러오지 못했습니다: {error}</Text>}
+            {error && <Text size="sm" className="pica-err">불러오지 못했습니다: {error}</Text>}
             {rows && rows.length === 0 && <Text size="sm" c="dimmed">대기 중인 행사가 없습니다.</Text>}
-            <div className="flex max-h-[420px] flex-col divide-y divide-neutral-200 overflow-y-auto">
+            <div className="flex max-h-[420px] flex-col divide-y divide-line overflow-y-auto">
                 {(rows || []).map(r => (
                     <div key={r.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2 text-sm">
-                        <span className="w-10 shrink-0 text-xs font-bold text-neutral-500">{r.category}</span>
+                        <span className="w-10 shrink-0 text-xs font-bold text-ink-soft">{r.category}</span>
                         <Link href={`/events/${r.id}`} target="_blank" className="min-w-0 flex-1 truncate hover:underline">{r.title}</Link>
-                        <span className="hidden max-w-[220px] truncate text-xs text-neutral-400 sm:inline">{r.subcategory_evidence}</span>
+                        <span className="hidden max-w-[220px] truncate text-xs text-ink-soft sm:inline">{r.subcategory_evidence}</span>
                         <AdminGenreControl compact eventId={r.id} category={r.category} sub={r.subcategory} by={r.subcategory_by} pending onSaved={load} />
                     </div>
                 ))}

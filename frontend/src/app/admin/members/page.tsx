@@ -71,7 +71,7 @@ export default function AdminMembersPage() {
 
     const sel = "h-9 max-w-full rounded-full border-0 bg-card px-3 text-[13.5px] font-semibold text-ink shadow-[0_1px_4px_rgba(30,26,21,.1)]";
     return (
-        <div className="mx-auto max-w-5xl px-4 pt-4">
+        <div className="pt-4">
             <h1 className="pica-display text-[25px] leading-tight text-ink">회원</h1>
             <p className="mt-0.5 text-[13px] text-ink-soft">가입한 회원입니다. 최근 가입한 순서로 보입니다. 이메일·전화번호와 찜한 행사·장소는 이 화면에 나오지 않습니다. 별명 옆 숫자는 활동 포인트(제보가 실리면 100P)입니다.</p>
 
@@ -86,7 +86,7 @@ export default function AdminMembersPage() {
                 <button type="submit" className="h-9 rounded-full bg-ink px-3.5 text-[13.5px] font-bold text-paper">찾기</button>
             </form>
 
-            {error && <p className="mt-3 rounded-xl border-[1.5px] border-[#b5432f] bg-card px-3 py-2 text-[13.5px] text-ink" role="alert">{error}</p>}
+            {error && <p className="pica-err mt-3" role="alert">{error}</p>}
             <p className="mt-3 px-1 text-[13px] text-ink-soft" role="status">
                 {loading ? "찾는 중…" : <><b className="pica-num text-ink">{total.toLocaleString("ko-KR")}</b>명{rows.length < total ? ` 중 ${rows.length}명 보는 중` : ""}</>}
             </p>

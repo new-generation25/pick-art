@@ -239,10 +239,7 @@ export function ReviewQueue({ bucket, posts, loading, onChanged, compact = false
     return (
         <Box mb={compact ? 8 : 40}>
             {!compact && <Group justify="space-between" mb="xs" wrap="wrap">
-                <Group>
-                    <Box w={4} h={24} bg={bucket === "candidate" ? "teal" : bucket === "consent" ? "orange" : "gray"} style={{ borderRadius: 999 }} />
-                    <Title order={2} size="h3" fw={900}>{BUCKET_LABEL[bucket]} ({posts.length})</Title>
-                </Group>
+                <Title order={2} size="h3">{BUCKET_LABEL[bucket]} <span className="pica-num text-accent">{posts.length}</span></Title>
                 {bucket === "candidate" && selectable.length > 0 && (
                     <Group gap="xs">
                         <Checkbox
@@ -259,7 +256,7 @@ export function ReviewQueue({ bucket, posts, loading, onChanged, compact = false
                             loading={busy}
                             onClick={approveSelected}
                         >
-                            선택한 것 공개 승인 ({picked.length})
+                            선택한 {picked.length}건 공개 승인
                         </Button>
                     </Group>
                 )}
@@ -267,11 +264,9 @@ export function ReviewQueue({ bucket, posts, loading, onChanged, compact = false
             {!compact && <Text size="sm" c="dimmed" mb="lg">{BUCKET_NOTE[bucket]}</Text>}
 
             {loading ? (
-                <Text ta="center" c="dimmed" py={60} fw={700}>데이터를 불러오는 중...</Text>
+                <p className="pica-empty">불러오는 중…</p>
             ) : posts.length === 0 ? (
-                <Paper p={60} radius="xl" withBorder style={{ borderStyle: "dashed" }} ta="center">
-                    <Text size="xl" fw={700} c="dimmed">이 무더기에 남은 후보가 없습니다.</Text>
-                </Paper>
+                <p className="pica-empty">이 무더기에 남은 후보가 없습니다.</p>
             ) : (
                 <Stack gap="md">
                     {posts.slice(0, shown).map((post) => {

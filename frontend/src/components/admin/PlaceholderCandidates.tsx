@@ -39,15 +39,15 @@ export function PlaceholderCandidates() {
                 <Title order={4}>안내 그림 후보</Title>
                 <Text size="xs" c="dimmed">같은 그림을 4건 넘게 쓰는 공개 행사 · 표시하면 글자 포스터로 보임</Text>
             </Group>
-            {error && <Text size="sm" c="red">불러오지 못했습니다: {error}</Text>}
+            {error && <Text size="sm" className="pica-err">불러오지 못했습니다: {error}</Text>}
             {rows && rows.length === 0 && <Text size="sm" c="dimmed">후보가 없습니다.</Text>}
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
                 {(rows || []).map(r => (
-                    <div key={r.sha256} className="flex flex-col gap-1.5 rounded-md border border-neutral-200 p-2">
+                    <div key={r.sha256} className="flex flex-col gap-1.5 rounded-[10px] border border-line p-2">
                         {r.sample_url
                             // eslint-disable-next-line @next/next/no-img-element
                             ? <img src={r.sample_url} alt="" className="aspect-[4/5] w-full rounded object-cover" loading="lazy" />
-                            : <div className="aspect-[4/5] w-full rounded bg-neutral-100" />}
+                            : <div className="aspect-[4/5] w-full rounded bg-[#ebe4d7]" />}
                         <Group gap={6} justify="space-between">
                             <Text size="xs" fw={700}>{r.n}건</Text>
                             {r.marked && <Badge size="xs" color="green">표시됨</Badge>}

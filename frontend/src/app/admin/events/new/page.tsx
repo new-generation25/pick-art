@@ -81,7 +81,7 @@ function NewEvent() {
 
     if (doneId) {
         return (
-            <div className="mx-auto max-w-2xl px-4 pt-6">
+            <div className="max-w-2xl pt-6">
                 <h1 className="pica-display text-[25px] text-ink">등록했습니다</h1>
                 <p className="mt-2 text-[14.5px] text-ink">공개 화면에는 몇 분 안에 나옵니다.{reportId ? " 넘어온 제보는 «반영함»으로 닫았습니다." : ""}</p>
                 <div className="mt-4 flex flex-wrap gap-2">
@@ -94,7 +94,7 @@ function NewEvent() {
     }
 
     return (
-        <div className="mx-auto max-w-2xl px-4 pt-4">
+        <div className="max-w-2xl pt-4">
             <h1 className="pica-display text-[25px] leading-tight text-ink">새 행사</h1>
             <p className="mt-0.5 text-[13px] text-ink-soft">
                 수집되지 않은 행사를 직접 넣습니다. 원본 안내에서 확인한 내용만 적고, 모르는 칸은 비워 둡니다.
@@ -110,7 +110,7 @@ function NewEvent() {
                         <Checkbox checked={showCredit} onChange={e => setShowCredit(e.currentTarget.checked)}
                             label={`행사 화면에 «제보: ${credit}» 보이기`} description="제보한 분이 이름을 남겼습니다. 끄면 이름이 나오지 않습니다." />
                     )}
-                    {msg && <Text size="sm" c="red" role="alert">{msg}</Text>}
+                    {msg && <Text size="sm" className="pica-err" role="alert">{msg}</Text>}
                     <Group justify="flex-end">
                         <Button component={Link} href="/admin/events" variant="default">취소</Button>
                         <Button loading={busy} onClick={save}>공개로 등록</Button>

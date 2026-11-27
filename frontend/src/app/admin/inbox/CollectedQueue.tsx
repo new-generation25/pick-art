@@ -91,8 +91,8 @@ function Card({ p, reason, today, onDone, onOpen }: { p: CollectedPost; reason: 
                 {reason !== "nodate" && <> · {a.date_start} ~ {a.date_end}</>}
             </p>
             <div className="mt-3 flex flex-wrap items-end gap-2">
-                <label className="text-[12px] text-ink-soft">시작일<br /><input type="date" className={input} value={start} onChange={e => setStart(e.currentTarget.value)} /></label>
-                <label className="text-[12px] text-ink-soft">끝나는 날<br /><input type="date" className={input} value={end} min={start || undefined} onChange={e => setEnd(e.currentTarget.value)} /></label>
+                <label className="text-[12px] text-ink-soft">시작일<br /><input type="date" className={`${input} pica-date`} value={start} onChange={e => setStart(e.currentTarget.value)} /></label>
+                <label className="text-[12px] text-ink-soft">끝나는 날<br /><input type="date" className={`${input} pica-date`} value={end} min={start || undefined} onChange={e => setEnd(e.currentTarget.value)} /></label>
                 <button type="button" disabled={busy} onClick={saveDates} className="h-9 rounded-full bg-accent px-3.5 text-[13.5px] font-bold text-on-accent disabled:opacity-50">날짜 저장</button>
                 <button type="button" disabled={busy} onClick={reject} className="h-9 rounded-full border border-line px-3.5 text-[13.5px] font-semibold text-ink disabled:opacity-50">반영 안 함</button>
                 <a href={p.source_url} target="_blank" rel="noopener noreferrer" className="flex h-9 items-center gap-1 px-1 text-[13px] font-semibold text-accent">원문 열기 <ExternalLink size={13} aria-hidden /></a>
