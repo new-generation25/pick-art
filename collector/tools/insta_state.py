@@ -9,6 +9,7 @@
   python tools/insta_state.py candidates --n 12           안 쓴 ok 후보(오늘 다른 에이전트가 맡은 계정 제외)
   python tools/insta_state.py recent-texts --days 7       지난 n일 피카가 쓴 댓글·답글 문장(되풀이 방지)
   python tools/insta_state.py approved                    허락(yes)받고 아직 안 올린 행사
+  python tools/insta_state.py threads-today               오늘 Threads 로도 공유한 피드 수와 남은 수(하루 3개)
   python tools/insta_state.py posted-ids                  올린 event_id + 최근 7일 묶음·릴스에 든 event_id(게시 후보에서 뺀다)
   python tools/insta_state.py standing-due [--n 3]        한 달 넘게 안 가 본 상시 동의 계정(오래된 순)
   python tools/insta_state.py standing-visited @계정 --found n  상시 동의 계정을 다녀온 기록
@@ -30,6 +31,10 @@
 
 posted 줄에 "format": "story" 가 있으면 스토리 기록이다(2026-11-27 피드 5건 + 스토리). 스토리 줄은 피드 중복 점검·posted-ids·DB 반영에서
 빠지고, 같은 행사를 같은 날 피드와 스토리로 겹쳐 올리는 것만 막는다. format 이 없으면 피드다.
+
+posted 피드 줄의 "threads": true 는 인스타 공유 화면에서 Threads 공유를 켠 게시물이다. 올리기 전에 threads-today 로 남은 수를 보고
+켤지 정한다. 넘겨서 기록하면 받되 "threads_over_limit": true 를 붙이고 경고를 낸다(기록을 버리면 같은 행사가 다시 뽑히므로).
+"facebook_url" 은 같은 카드를 페이스북 페이지(피카 pica)에 올린 주소다(2026-11-27 운영자 지시: 인스타에 올리면 페이스북도 같이).
 
 feedback.kind 는 맞팔로우·새 팔로워·댓글 답글·댓글 좋아요·게시물 좋아요·DM 답장·멘션·기타 중 하나(영어 값은 바꿔 넣는다).
 engaged 의 comment·reply 줄에는 liked(true|false)가 있어야 한다.
@@ -257,6 +262,7 @@ def cmd_standing_visited(a):
     out({"ok": True, "account": acc, "next_after": (date.today() + timedelta(days=30)).isoformat()})
 
 
+THREADS_PER_DAY = 3  # Threads 에는 하루 3개만 함께 올린다(2026-11-27 운영자 지시)
 ROUNDUP_GAP_DAYS = 7  # 묶음(roundup)·릴스에 든 행사는 7일 지나야 단독으로 다시 올린다(2026-11-26 운영자 결정)
 
 
@@ -269,6 +275,17 @@ def posted_on(event_id, day, story=None):
     """그 행사를 그날 올린 줄이 있는지. story=True 스토리만, False 피드만, None 둘 다."""
     return any(r.get("event_id") == event_id and (r.get("posted_at") or "")[:10] == day
                and (story is None or is_story(r) == story) for r in load("posted"))
+
+
+def threads_today() -> int:
+    """오늘 Threads 로도 공유한 피드 게시물 수(게시물 주소 기준, 순회 묶음의 여러 줄은 하나로 센다)."""
+    return len({r.get("post_url") for r in load("posted")
+                if r.get("threads") is True and not is_story(r) and (r.get("posted_at") or "")[:10] == today()})
+
+
+def cmd_threads_today(a):
+    n = threads_today()
+    out({"date": today(), "threads": n, "limit": THREADS_PER_DAY, "left": max(0, THREADS_PER_DAY - n)})
 
 
 def cmd_posted_ids(a):
@@ -386,6 +403,15 @@ def _check_new(file, rec, rows):
         return "event_id 가 피카 DB 행사 번호(UUID)가 아니다 — 먼저 DB에 넣고 그 번호로 올린다"
     if file == "posted" and rec.get("format") not in (None, "feed", "story"):
         return "format 은 feed(생략 가능) 또는 story"
+    if file == "posted" and "threads" in rec and not isinstance(rec["threads"], bool):
+        return "threads 칸은 true 또는 false"
+    if file == "posted" and rec.get("threads") is True and str(rec["posted_at"])[:10] == today():
+        same = {r.get("post_url") for r in rows if r.get("threads") is True and not is_story(r)
+                and (r.get("posted_at") or "")[:10] == today()}
+        if rec.get("post_url") not in same and len(same) >= THREADS_PER_DAY:
+            # 이미 올라간 게시물이라 기록은 받는다(안 받으면 같은 행사가 다시 뽑힌다). 넘친 것만 표시해 보고에 나오게 한다
+            rec["threads_over_limit"] = True
+            print(f"[경고] 오늘 Threads 공유가 {THREADS_PER_DAY}개를 넘었다 — 보고에 적는다", file=sys.stderr)
     if file == "posted" and any(r.get("event_id") == rec["event_id"] and (r.get("posted_at") or "")[:10] == str(rec["posted_at"])[:10]
                                 for r in rows):
         return "같은 날 이미 피드나 스토리로 올린 행사(같은 날 겹쳐 올리지 않는다)"
@@ -542,6 +568,7 @@ def main():
     p = sub.add_parser("recent-texts"); p.add_argument("--days", type=int, default=7); p.set_defaults(f=cmd_recent_texts)
     sub.add_parser("approved").set_defaults(f=cmd_approved)
     sub.add_parser("posted-ids").set_defaults(f=cmd_posted_ids)
+    sub.add_parser("threads-today").set_defaults(f=cmd_threads_today)
     sub.add_parser("standing").set_defaults(f=cmd_standing)
     p = sub.add_parser("standing-due"); p.add_argument("--n", type=int, default=3); p.add_argument("--days", type=int, default=30)
     p.set_defaults(f=cmd_standing_due)
