@@ -39,6 +39,7 @@ from rule_extractor import parse_period  # noqa: E402  수집기 정의 파일(p
 BUCKET = "leaflets"
 CACHE_DIR = os.path.join(HERE, ".cache", "leaflets")
 KEEP_DAYS = 365
+TIP_CONTACT_DAYS = 90   # 제보의 쿠폰 연락처(specs/020): 쿠폰을 보내지 않았어도 90일 뒤 비운다
 PAGE = 1000
 MAX_LEN = 300
 READ_BY = "claude-scheduled"
@@ -138,6 +139,25 @@ class Store:
     def clear_image_path(self, sid, path):
         res = (self.sb.table("leaflet_submissions").update({"image_path": None})
                .eq("id", sid).eq("image_path", path).execute())
+        return bool(res.data)
+
+    def expire_tip_contacts(self, before_iso, apply):
+        """90일 지난 제보의 쿠폰 연락처(specs/020) 수. apply 면 비운다"""
+        n = (self.sb.table("reports").select("id", count="exact")
+             .lt("created_at", before_iso).not_.is_("reward_contact", "null").limit(1).execute().count or 0)
+        if apply and n:
+            (self.sb.table("reports").update({"reward_contact": None})
+             .lt("created_at", before_iso).not_.is_("reward_contact", "null").execute())
+        return n
+
+    def expired_tip_photos(self, before_iso):
+        return (self.sb.table("reports").select("id,photo_path,created_at")
+                .lt("created_at", before_iso).not_.is_("photo_path", "null")
+                .order("created_at").limit(PAGE).execute().data or [])
+
+    def clear_tip_photo(self, rid, path):
+        res = (self.sb.table("reports").update({"photo_path": None})
+               .eq("id", rid).eq("photo_path", path).execute())
         return bool(res.data)
 
     def venues(self):
@@ -474,8 +494,24 @@ def cleanup(store, apply, now=None):
         out["kakao_senders"], out["kakao_sender_keys"] = store.expire_kakao(before, apply)
     except Exception as e:  # 017 마이그레이션 전 DB 등: 이미지 정리는 계속한다
         out["errors"].append(f"kakao: {str(e)[:180]}")
+    # 제보(specs/020): 쿠폰 연락처는 90일, 제보 사진은 리플렛과 같이 1년
+    tip_before = ((now or datetime.now(timezone.utc)) - timedelta(days=TIP_CONTACT_DAYS)).isoformat(timespec="seconds")
+    out.update(tip_contacts=0, tip_photos=0, tip_photos_removed=0)
+    tip_rows = []
+    try:
+        out["tip_contacts"] = store.expire_tip_contacts(tip_before, apply)
+        tip_rows = store.expired_tip_photos(before)
+        out["tip_photos"] = len(tip_rows)
+    except Exception as e:  # 020 마이그레이션 전 DB 등: 리플렛 정리는 계속한다
+        out["errors"].append(f"tip: {str(e)[:180]}")
     if not apply:
         return out
+    if tip_rows:
+        try:
+            store.remove_files([r["photo_path"] for r in tip_rows])
+            out["tip_photos_removed"] = sum(1 for r in tip_rows if store.clear_tip_photo(r["id"], r["photo_path"]))
+        except Exception as e:
+            out["errors"].append(f"tip: {str(e)[:180]}")
     for i in range(0, len(rows), 100):
         chunk = rows[i:i + 100]
         try:
@@ -533,6 +569,7 @@ def main(argv):
         verb = "지움" if a.apply else "지울 대상(dry-run, --apply 로 적용)"
         print(f"1년 지난 리플렛 이미지 {out['expired']}건 {verb} · 파일 {out['files_removed']} · 경로 비움 "
               f"{out['rows_cleared']} · 카카오 구분값 동의 {out['kakao_senders']}·제출 {out['kakao_sender_keys']}"
+              f" · 제보 연락처(90일) {out['tip_contacts']} · 제보 사진(1년) {out['tip_photos']}"
               + (f" · 오류 {len(out['errors'])}" if out["errors"] else ""))
         return 1 if out["errors"] else 0
     except ValidationError as e:

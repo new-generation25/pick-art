@@ -25,7 +25,7 @@ import { CountedLink, EventViewCounter } from "@/components/ui/EventCounter";
 import { getEventOrgs } from "@/lib/places";
 import { isGroupProvided } from "@/lib/leaflets";
 import { maskPersonalPhones } from "@/lib/privacy";
-import { Users, Building2 } from "lucide-react";
+import { Users, Building2, MessageCircleHeart } from "lucide-react";
 import { VenueFollowButton } from "@/components/ui/VenueFollowButton";
 
 interface EventPageProps {
@@ -96,6 +96,8 @@ export default async function EventDetailPage({ params }: EventPageProps) {
         { icon: Ticket, label: "관람료", value: event.price_info || (event.is_free ? "무료" : "정보 없음") },
         { icon: Info, label: "출처", value: event.source || "정보 없음" },
     ];
+    // 제보로 등록한 행사: 제보한 분이 이름을 남겼을 때만 (specs/020)
+    if (typeof event.tip_credit === "string" && event.tip_credit.trim()) facts.push({ icon: MessageCircleHeart, label: "제보", value: event.tip_credit.trim() });
     // 원본에 관람 연령이 적혀 있으면 원문 그대로 (specs/004 FR-008). 운영자 수정 전의 규칙 결과는 관리자 칸에 보인다
     const kids = kidsInfo(event);
     const ruleKids = kidsInfo({ ...event, kids_override: null });

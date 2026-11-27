@@ -4,10 +4,10 @@
 // 제보(/admin/reports)에서 넘어오면 제보에 적힌 제목·날짜·장소·주소가 채워져 열린다(?title=&start=&end=&venue=&region=&url=&report=).
 // 헌장 I: 원본에서 확인한 내용만 넣는다. 원본 안내 주소가 없으면 다른 사람이 확인할 길이 없으므로 주소를 꼭 받는다.
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button, FileInput, Group, Stack, Text, TextInput } from "@mantine/core";
+import { Button, Checkbox, FileInput, Group, Stack, Text, TextInput } from "@mantine/core";
 import { supabase } from "@/lib/supabase";
 import { GN_REGIONS, regionFromText } from "@/lib/regions";
 import { EMPTY_EVENT, EventFields, checkEvent, eventColumns, type EventDraft } from "@/components/admin/EventFields";
@@ -39,6 +39,15 @@ function NewEvent() {
     const [busy, setBusy] = useState(false);
     const [msg, setMsg] = useState("");
     const [doneId, setDoneId] = useState<string | null>(null);
+    // 제보자가 «제보: ○○»로 보여도 된다고 적은 이름(specs/020). 켜 둔 채 저장하면 행사 화면에 보인다
+    const [credit, setCredit] = useState("");
+    const [showCredit, setShowCredit] = useState(true);
+
+    useEffect(() => {
+        if (!reportId) return;
+        supabase.from("reports").select("credit_name").eq("id", reportId).maybeSingle()
+            .then(({ data }) => setCredit(((data as { credit_name?: string | null } | null)?.credit_name || "").trim()));
+    }, [reportId]);
 
     const save = async () => {
         const bad = checkEvent(draft);
@@ -58,6 +67,7 @@ function NewEvent() {
             ...eventColumns(draft),
             poster_image_url: poster || null,
             source: "manual", status: "PUBLISHED", published_at: new Date().toISOString(),
+            ...(credit && showCredit ? { tip_credit: credit } : {}),
             ...(draft.subcategory ? { subcategory_by: "admin", subcategory_pending: false, subcategory_evidence: "운영자 확정" } : {}),
         }).select("id").single();
         if (error || !data) { setBusy(false); setMsg(`저장하지 못했습니다: ${error?.message || "권한 확인"}`); return; }
@@ -76,7 +86,7 @@ function NewEvent() {
                 <p className="mt-2 text-[14.5px] text-ink">공개 화면에는 몇 분 안에 나옵니다.{reportId ? " 넘어온 제보는 «반영함»으로 닫았습니다." : ""}</p>
                 <div className="mt-4 flex flex-wrap gap-2">
                     <a href={`/events/${doneId}`} target="_blank" rel="noopener noreferrer" className="flex h-10 items-center rounded-full bg-accent px-4 text-[14px] font-bold text-on-accent no-underline">행사 보기</a>
-                    <button type="button" onClick={() => { setDoneId(null); setDraft(EMPTY_EVENT); setPosterUrl(""); setFile(null); router.replace("/admin/events/new"); }} className="h-10 rounded-full border border-line bg-card px-4 text-[14px] font-semibold text-ink">하나 더 넣기</button>
+                    <button type="button" onClick={() => { setDoneId(null); setDraft(EMPTY_EVENT); setPosterUrl(""); setFile(null); setCredit(""); router.replace("/admin/events/new"); }} className="h-10 rounded-full border border-line bg-card px-4 text-[14px] font-semibold text-ink">하나 더 넣기</button>
                     <Link href="/admin/events" className="flex h-10 items-center rounded-full border border-line bg-card px-4 text-[14px] font-semibold text-ink no-underline">행사 목록</Link>
                 </div>
             </div>
@@ -96,6 +106,10 @@ function NewEvent() {
                     <FileInput label="포스터 파일" placeholder="공식 포스터 파일 고르기(없어도 됨)" accept="image/*" value={file} onChange={setFile} clearable
                         description="공식 출처의 포스터만. 현장 사진·휴대폰으로 찍은 사진은 쓰지 않습니다." />
                     {!file && <TextInput label="또는 포스터 그림 주소" value={posterUrl} onChange={e => setPosterUrl(e.currentTarget.value)} placeholder="https://" />}
+                    {credit && (
+                        <Checkbox checked={showCredit} onChange={e => setShowCredit(e.currentTarget.checked)}
+                            label={`행사 화면에 «제보: ${credit}» 보이기`} description="제보한 분이 이름을 남겼습니다. 끄면 이름이 나오지 않습니다." />
+                    )}
                     {msg && <Text size="sm" c="red" role="alert">{msg}</Text>}
                     <Group justify="flex-end">
                         <Button component={Link} href="/admin/events" variant="default">취소</Button>

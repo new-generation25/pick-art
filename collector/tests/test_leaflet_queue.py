@@ -76,6 +76,26 @@ class FakeStore:
                 r["sender_key"] = None
         return len(old), len(rows)
 
+    tips = None  # [{id, created_at, reward_contact, photo_path}]
+
+    def expire_tip_contacts(self, before_iso, apply):
+        old = [t for t in (self.tips or []) if t.get("reward_contact") and t["created_at"] < before_iso]
+        if apply:
+            for t in old:
+                t["reward_contact"] = None
+        return len(old)
+
+    def expired_tip_photos(self, before_iso):
+        return [{"id": t["id"], "photo_path": t["photo_path"], "created_at": t["created_at"]}
+                for t in (self.tips or []) if t.get("photo_path") and t["created_at"] < before_iso]
+
+    def clear_tip_photo(self, rid, path):
+        for t in (self.tips or []):
+            if t["id"] == rid and t.get("photo_path") == path:
+                t["photo_path"] = None
+                return True
+        return False
+
     def clear_image_path(self, sid, path):
         r = self.rows.get(sid)
         if r and r.get("image_path") == path:
@@ -510,3 +530,23 @@ def test_long_dash_period_keeps_end(raw, expect):
 ])
 def test_listed_dates_keep_last_day(raw, expect):
     assert lq.parse_dates(raw) == expect
+
+
+def test_cleanup_expires_tip_contacts_and_photos():
+    """specs/020: 제보의 쿠폰 연락처는 90일, 제보 사진은 1년 지나면 지운다. 그 안의 것은 그대로 둔다"""
+    tips = [
+        {"id": "t-old", "created_at": "2025-10-01T00:00:00+00:00", "reward_contact": "010-0000-0000", "photo_path": "tips/old.jpg"},
+        {"id": "t-100d", "created_at": "2026-08-10T00:00:00+00:00", "reward_contact": "a@example.com", "photo_path": "tips/mid.jpg"},
+        {"id": "t-new", "created_at": "2026-11-20T00:00:00+00:00", "reward_contact": "b@example.com", "photo_path": "tips/new.jpg"},
+    ]
+    store = FakeStore([], {"tips/old.jpg": b"o", "tips/mid.jpg": b"m", "tips/new.jpg": b"n"})
+    store.tips = tips
+    now = lq.datetime(2026, 11, 26, tzinfo=lq.timezone.utc)
+    dry = lq.cleanup(store, False, now=now)
+    assert (dry["tip_contacts"], dry["tip_photos"], dry["tip_photos_removed"]) == (2, 1, 0)
+    assert tips[0]["reward_contact"] and tips[0]["photo_path"]
+    out = lq.cleanup(store, True, now=now)
+    assert (out["tip_contacts"], out["tip_photos"], out["tip_photos_removed"]) == (2, 1, 1) and not out["errors"]
+    assert [t["reward_contact"] for t in tips] == [None, None, "b@example.com"]
+    assert [t["photo_path"] for t in tips] == [None, "tips/mid.jpg", "tips/new.jpg"]
+    assert store.removed == ["tips/old.jpg"]

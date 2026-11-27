@@ -4,6 +4,7 @@ import { AppShell, Burger, Group, ScrollArea } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { Header } from "./ui/Header";
 import { SiteFooter } from "./ui/SiteFooter";
+import { TipBand, showTipBand } from "./ui/TipBand";
 import { usePathname } from "next/navigation";
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
@@ -29,6 +30,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
 
             <AppShell.Main>
                 {children}
+                {showTipBand(pathname) && <TipBand />}
                 <SiteFooter />
             </AppShell.Main>
         </AppShell>

@@ -1,25 +1,30 @@
 import type { Metadata } from "next";
 import { TipForm } from "./TipForm";
 
-// 행사 제보하기 (specs/007). 로그인 회원이 보내고, 관리자가 공식 안내로 확인한 뒤에만 공개된다(헌장 I)
+// 행사 제보하기 (specs/007 → 020). 로그인 없이 보내고, 관리자가 원문을 확인한 뒤에만 공개된다(헌장 I)
 export const metadata: Metadata = {
     title: "행사 제보하기 | 피카 pica",
-    description: "가까운 곳에서 열리는 공연·전시·축제를 알려 주세요. 공식 안내로 확인한 뒤 피카에 올립니다.",
+    description: "피카에 아직 없는 공연·전시·축제를 알려 주세요. 행사 이름과 링크(또는 사진) 하나면 돼요. 매주 5명께 커피 쿠폰을 드려요.",
     alternates: { canonical: "/tip" },
 };
 
 export default function TipPage() {
     return (
         <main className="min-h-screen pb-20">
-            <div className="mx-auto max-w-2xl px-4 pt-20 sm:px-6 sm:pt-24">
+            <div className="mx-auto max-w-xl px-4 pt-20 sm:px-6 sm:pt-24">
                 <h1 className="pica-display text-[32px] leading-[1.2] text-ink sm:text-[40px]">행사 제보하기</h1>
-                <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
-                    작은 공연, 동네 전시, 버스킹, 팝업 — 피카에 아직 없는 행사를 알려 주세요.
-                    공식 안내(단체 누리집·인스타그램·예매 페이지)로 날짜와 장소를 확인한 뒤 올립니다.
+                <p className="mt-3 text-[16px] leading-relaxed text-ink">
+                    작은 공연, 동네 전시, 버스킹, 팝업 — 피카에 아직 없는 행사를 알려 주세요. 행사 이름과 링크(또는 사진) 하나면 돼요.
                 </p>
-                <div className="mt-8">
+                <p className="mt-4 rounded-[12px] bg-[var(--pk-accent-soft)] px-4 py-3 text-[15px] leading-relaxed text-ink">
+                    <b>매주 5명께 커피 쿠폰을 드려요.</b> 그 주에 확인해서 피카에 실린 제보 가운데 골라요.
+                </p>
+                <div className="mt-7">
                     <TipForm />
                 </div>
+                <p className="mt-8 text-[13px] leading-relaxed text-ink-soft">
+                    피카는 부산·경남 행사를 실어요. 보내 주신 내용은 운영자가 원문으로 날짜와 장소를 확인한 뒤 올립니다.
+                </p>
             </div>
         </main>
     );
