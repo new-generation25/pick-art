@@ -65,12 +65,13 @@ export const CONSENT_SUMMARY = {
  * 체크하면 네 값(agree_listing·agree_collect·agree_confirm·agree_privacy)이 모두 동의로 저장된다.
  * 담당 연락처(개인정보)는 다른 동의와 구분해 알려야 해서 화면에서 따로 보인다(CONSENT_PRIVACY + PRIVACY_NOTICE).
  */
+// 운영자 2026-11-28 «동의 부분을 축약 통합해 너무 많고 복잡해»: 항목마다 한 줄. 긴 풀이(CONSENT_SUMMARY·PRIVACY_NOTICE·전문)는 «자세히 보기» 안에 둔다
 export const CONSENT_ITEMS = [
-    { title: "게재", text: CONSENT_SUMMARY.listing.text },
-    { title: "자동 수집", text: CONSENT_SUMMARY.collect.text },
-    { title: "사실·권리 확인", text: CONSENT_SUMMARY.confirm },
+    { title: "게재", text: "공연·전시 정보를 피카 사이트와 인스타그램에 실어요." },
+    { title: "자동 수집", text: "공식 SNS·누리집 공지를 피카가 찾아 확인한 뒤 실어요." },
+    { title: "확인", text: "보낸 정보는 사실이고, 포스터·사진의 권리를 확인했어요." },
 ] as const;
-export const CONSENT_PRIVACY = { title: "담당 연락처 이용 (개인정보)", text: "담당 연락처를 협약 확인과 연락에만 써요." } as const;
+export const CONSENT_PRIVACY = { title: "연락처(개인정보)", text: "담당 연락처는 협약 확인과 연락에만 쓰고, 협약이 끝난 뒤 1년 지나면 지워요." } as const;
 export const CONSENT_KEYS = ["agree_listing", "agree_collect", "agree_confirm", "agree_privacy"] as const;
 
 /** 제출 뒤 안내 */

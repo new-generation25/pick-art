@@ -35,11 +35,15 @@ export function AgreementForm() {
     const [state, setState] = useState<"idle" | "sending" | "sent">("idle");
     const [loggedIn, setLoggedIn] = useState<boolean | undefined>(undefined);   // undefined = 확인 중
     const [mine, setMine] = useState<Mine[]>([]);
+    const [uid, setUid] = useState<string | null>(null);
     const [trap, setTrap] = useState("");  // 사람 눈에는 안 보이는 칸. 채워져 있으면 자동 프로그램으로 보고 보내지 않는다
 
-    const loadMine = useCallback(async () => {
+    // 내가 보낸 것만 고른다. 일반 회원은 DB 정책으로도 자기 것만 읽히지만, 관리자는 모든 신청이 읽혀서
+    // 걸러 주지 않으면 남이 보낸 신청까지 «내가 보낸 신청»에 보인다 (운영자 2026-11-28 «내가 보낸것도 아니고 나는 관리자인데»)
+    const loadMine = useCallback(async (uid: string) => {
         const { data } = await supabase.from("partner_agreements")
             .select("id, org_name, status, created_at, withdraw_requested_at")
+            .eq("user_id", uid)
             .order("created_at", { ascending: false }).limit(20);
         setMine((data || []) as Mine[]);
     }, []);
@@ -47,7 +51,7 @@ export function AgreementForm() {
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session } }) => {
             setLoggedIn(!!session?.user);
-            if (session?.user) loadMine();
+            if (session?.user) { setUid(session.user.id); loadMine(session.user.id); }
         });
         // 로그인하러 가기 전에 적던 내용을 되살린다(이 탭에서만, 보낸 뒤에는 지운다)
         try {
@@ -93,14 +97,14 @@ export function AgreementForm() {
         setState("sent");
         setForm(EMPTY_AGREEMENT);
         try { sessionStorage.removeItem(DRAFT_KEY); } catch { /* 무시 */ }
-        loadMine();
+        if (uid) loadMine(uid);
     };
 
     const withdraw = async (m: Mine) => {
         if (!window.confirm(`«${m.org_name}» 협약 철회를 요청할까요? 피카가 7일 안에 단체 정보를 내리고 협약 표시를 지워요.`)) return;
         const { data, error } = await supabase.rpc("request_partner_withdrawal", { p_id: m.id });
         if (error || !data) { window.alert(`요청하지 못했어요. 메일(${CONTACT_EMAIL})로 알려 주세요.`); return; }
-        loadMine();
+        if (uid) loadMine(uid);
     };
 
     const myList = mine.length > 0 && (
@@ -145,39 +149,36 @@ export function AgreementForm() {
     return (
         <div>
             <form onSubmit={send} className="flex flex-col gap-6" noValidate>
-                <fieldset className="flex flex-col gap-3">
-                    <legend className="mb-3 text-[18px] font-bold text-ink">① 무엇에 동의하나요</legend>
+                <fieldset>
+                    <legend className="mb-3 text-[18px] font-bold text-ink">① 동의</legend>
                     <div className="border-[1.5px] border-line bg-[var(--pk-card)] p-4">
-                        <label className="flex cursor-pointer gap-3">
+                        <label className="flex cursor-pointer items-center gap-3">
                             <input type="checkbox" className={check} checked={allAgreed} onChange={setAll} />
-                            <span className="text-[16px] font-bold leading-relaxed text-ink">아래 내용에 모두 동의해요 *</span>
+                            <span className="text-[16px] font-bold leading-snug text-ink">아래 내용에 모두 동의해요 *</span>
                         </label>
-                        <ul className="mt-3 flex flex-col gap-2 border-t border-line pt-3 text-[14.5px] leading-relaxed text-ink">
-                            {CONSENT_ITEMS.map(it => <li key={it.title}><b>{it.title}</b> — {it.text}</li>)}
+                        <ul className="mt-3 flex flex-col gap-1.5 text-[14.5px] leading-relaxed text-ink">
+                            {CONSENT_ITEMS.map(it => <li key={it.title}><b>{it.title}</b> · {it.text}</li>)}
+                            <li><b>{CONSENT_PRIVACY.title}</b> · {CONSENT_PRIVACY.text}</li>
                         </ul>
-                        <div className="mt-3 border-l-4 border-[var(--pk-accent)] bg-[var(--pk-accent-soft)] px-3 py-2.5 text-[14.5px] leading-relaxed text-ink">
-                            <b>{CONSENT_PRIVACY.title}</b> — {CONSENT_PRIVACY.text}
-                            <span className="mt-1 block text-[13px] text-ink-soft">{PRIVACY_NOTICE} <Link href="/privacy" className="underline underline-offset-2">개인정보처리방침</Link></span>
+                        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-line pt-3 text-[15px] text-ink" role="radiogroup" aria-label="포스터·사진 사용">
+                            <b>포스터·사진 *</b>
+                            <label className="flex min-h-11 cursor-pointer items-center gap-2"><input type="radio" name="pa-image" className="h-5 w-5 accent-[var(--pk-accent)]" checked={form.image_use === "yes"} onChange={() => setForm(f => ({ ...f, image_use: "yes" }))} />써도 돼요</label>
+                            <label className="flex min-h-11 cursor-pointer items-center gap-2"><input type="radio" name="pa-image" className="h-5 w-5 accent-[var(--pk-accent)]" checked={form.image_use === "no"} onChange={() => setForm(f => ({ ...f, image_use: "no" }))} />글 정보만</label>
                         </div>
-                        <details className="mt-3 text-[14px] leading-relaxed text-ink">
-                            <summary className="min-h-8 cursor-pointer text-[15px] font-bold">동의서 전문 보기{IS_DRAFT ? " (초안)" : ""}</summary>
+                        <details className="mt-1 text-[14px] leading-relaxed text-ink">
+                            <summary className="flex min-h-11 cursor-pointer items-center text-[14px] font-bold text-ink-soft underline underline-offset-4">자세히 보기{IS_DRAFT ? " (동의서 초안)" : ""}</summary>
+                            <p className="mt-1"><b>개인정보 안내</b> — {PRIVACY_NOTICE} <Link href="/privacy" className="underline underline-offset-2">개인정보처리방침</Link></p>
+                            <p className="mt-2"><b>이미지</b> — {CONSENT_SUMMARY.image.text}</p>
                             {IS_DRAFT && <p className="mt-2 text-ink-soft">법률 검토 전 초안이에요({TERMS_VERSION}). 문구가 바뀌면 신청한 단체에 먼저 알려 드려요.</p>}
-                            {TERMS_SECTIONS.map(s => (
-                                <section key={s.title} className="mt-3">
-                                    <h4 className="font-bold">{s.title}</h4>
+                            {TERMS_SECTIONS.map(sec => (
+                                <section key={sec.title} className="mt-3">
+                                    <h4 className="font-bold">{sec.title}</h4>
                                     <ol className="mt-1 list-decimal space-y-1 pl-5">
-                                        {s.items.map((it, i) => <li key={i}>{it.strong && <b>{it.strong}</b>}{it.strong && it.text ? " " : ""}{it.text}</li>)}
+                                        {sec.items.map((it, k) => <li key={k}>{it.strong && <b>{it.strong}</b>}{it.strong && it.text ? " " : ""}{it.text}</li>)}
                                     </ol>
                                 </section>
                             ))}
                         </details>
-                    </div>
-                    <div className="border-[1.5px] border-line bg-[var(--pk-card)] p-4 text-[15px] leading-relaxed text-ink">
-                        <b className="block text-[16px]">{CONSENT_SUMMARY.image.title} *</b>{CONSENT_SUMMARY.image.text}
-                        <div className="mt-3 flex flex-col gap-2">
-                            <label className="flex min-h-11 items-center gap-3"><input type="radio" name="pa-image" className="h-6 w-6 accent-[var(--pk-accent)]" checked={form.image_use === "yes"} onChange={() => setForm(f => ({ ...f, image_use: "yes" }))} />포스터·사진도 써도 돼요</label>
-                            <label className="flex min-h-11 items-center gap-3"><input type="radio" name="pa-image" className="h-6 w-6 accent-[var(--pk-accent)]" checked={form.image_use === "no"} onChange={() => setForm(f => ({ ...f, image_use: "no" }))} />글 정보만 실어 주세요</label>
-                        </div>
                     </div>
                 </fieldset>
 
