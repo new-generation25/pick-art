@@ -112,7 +112,7 @@ export async function fetchAdminCounts(): Promise<AdminCounts> {
     return { loadedAt: new Date().toISOString(), items, routine, errors };
 }
 
-/** 메뉴 숫자: 대기함에는 사람이 보내고 기다리는 것(받은 것)만, 현황에는 켜진 경고 수 */
+/** 메뉴 숫자: «할 일»에는 사람이 보내고 기다리는 것(받은 것)만, 현황에는 켜진 경고 수 */
 export function menuBadges(c: AdminCounts | null): { queue: number; status: number } {
     if (!c) return { queue: 0, status: 0 };
     return {

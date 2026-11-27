@@ -3,14 +3,16 @@
 import Link from "next/link";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, Building2, CalendarDays, Inbox, ListChecks, type LucideIcon } from "lucide-react";
+import { Activity, Building2, CalendarDays, ListChecks, type LucideIcon } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { isLoggingOut } from "@/lib/logout";
 import { Avatar } from "@/components/ui/Avatar";
 import { fetchAdminCounts, menuBadges, type AdminCounts } from "@/lib/adminCounts";
 
 /**
- * 관리자 틀 (specs/019 A1). 메뉴 다섯: 오늘 할 일 · 대기함 · 행사 · 출처·단체 · 현황.
+ * 관리자 틀 (specs/019 A1). 메뉴 넷: 할 일 · 행사 · 출처·단체 · 현황.
+ * «오늘 할 일»과 «대기함»은 같은 일을 가리켜 «할 일» 하나로 합쳤다(운영자 2026-11-28 «오늘할일과 대기함이 같은 역할 아니야?» → «A안: 하나로 합쳐»):
+ *   첫 칩 «오늘 할 일»(/admin)은 모든 칸의 숫자를 모은 요약, 나머지 칩은 실제로 처리하는 화면이다.
  * 맨 위 줄은 공개 화면 머리 줄과 같은 짜임이다(운영자 2026-11-28 «상단은 메인페이지 디자인을 따라가야»):
  *   왼쪽 까치 그림 + pica. + «관리» 꼬리표(누르면 사이트 홈 — 운영자 2026-11-28 «피카 로고 누르면 홈으로 가기»), 오른쪽 관리자 원 하나(누르면 /me — 로그아웃은 거기 있다). «사이트 보기» 알약은 뺐다(운영자 2026-11-28 «빼» — 로고가 사이트 홈으로 간다).
  * 메뉴는 공개 홈의 칩 줄과 같은 흰 알약. PC는 머리 줄 아래 한 줄, 휴대폰은 아래 탭. 한 메뉴에 화면이 여럿이면 그 아래 줄에 칩으로 보인다.
@@ -18,14 +20,14 @@ import { fetchAdminCounts, menuBadges, type AdminCounts } from "@/lib/adminCount
  * 데이터 보호 자체는 DB 정책(profiles.role='admin')이 맡는다.
  */
 // count: 메뉴 숫자를 이루는 건수가 이 화면의 것일 때, 둘째 줄 칩에도 같은 숫자를 보인다(운영자 11/27)
-//   대기함 숫자 = 리플렛 + 신고·제보 + 협약 신청(사람이 보내고 기다리는 것), 현황 숫자 = 켜진 경고(운영 현황 화면 맨 위)
+//   할 일 숫자 = 리플렛 + 신고·제보 + 협약 신청(사람이 보내고 기다리는 것), 현황 숫자 = 켜진 경고(운영 현황 화면 맨 위)
 type Page = { href: string; label: string; count?: "leaflets" | "reports" | "partners" | "alerts" };
 type Section = { key: string; label: string; short: string; icon: LucideIcon; pages: Page[] };
 
 export const ADMIN_SECTIONS: Section[] = [
-    { key: "todo", label: "오늘 할 일", short: "할 일", icon: ListChecks, pages: [{ href: "/admin", label: "오늘 할 일" }] },
     {
-        key: "queue", label: "대기함", short: "대기함", icon: Inbox, pages: [
+        key: "queue", label: "할 일", short: "할 일", icon: ListChecks, pages: [
+            { href: "/admin", label: "오늘 할 일" },
             { href: "/admin/inbox", label: "공개 판단" },
             { href: "/admin/leaflets", label: "리플렛", count: "leaflets" },
             { href: "/admin/reports", label: "신고·제보", count: "reports" },
@@ -106,7 +108,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     const current = sectionOf(pathname);
     const badges = menuBadges(counts);
     const badgeOf = (key: string) => key === "queue" ? badges.queue : key === "status" ? badges.status : 0;
-    // 메뉴 숫자에 붙는 글자와 풀이: 대기함은 건수, 현황은 «경고 n»(숫자만 있으면 뜻을 알 수 없다 — 운영자 11/27)
+    // 메뉴 숫자에 붙는 글자와 풀이: 할 일은 건수, 현황은 «경고 n»(숫자만 있으면 뜻을 알 수 없다 — 운영자 11/27)
     const badgeText = (key: string, n: number) => key === "status" ? `경고 ${n}` : String(n);
     const firstAlert = counts?.routine.openAlerts[0]?.text || (counts?.routine.missed.state === "missed" ? "정기 실행이 제때 돌지 않았습니다" : "");
     const badgeHint = (key: string, n: number) => key === "status"
@@ -170,7 +172,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                         <div className="mx-auto max-w-6xl px-4 sm:px-6">{children}</div>
                     </main>
 
-                    <nav className="fixed inset-x-0 bottom-0 z-[100] grid grid-cols-5 border-t border-line bg-card pb-[env(safe-area-inset-bottom,0px)] md:hidden" aria-label="관리자 메뉴">
+                    <nav className="fixed inset-x-0 bottom-0 z-[100] grid grid-cols-4 border-t border-line bg-card pb-[env(safe-area-inset-bottom,0px)] md:hidden" aria-label="관리자 메뉴">
                         {ADMIN_SECTIONS.map(s => {
                             const on = s.key === current.key;
                             const n = badgeOf(s.key);

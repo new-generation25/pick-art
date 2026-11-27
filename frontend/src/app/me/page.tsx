@@ -205,7 +205,7 @@ export default function MePage() {
             {/* 관리자 페이지로 가는 길 (운영자 2026-11-28: 머리 줄 메뉴를 없애 이 줄이 유일한 입구다). 관리자에게만 보인다 */}
             {isAdmin && (
                 <div className={card}>
-                    <Link href="/admin" className="no-underline text-ink"><Line icon={LayoutDashboard} title="관리자 페이지" sub="대기함·행사·출처 관리" right={<ChevronRight className="h-5 w-5 text-ink-soft" />} /></Link>
+                    <Link href="/admin" className="no-underline text-ink"><Line icon={LayoutDashboard} title="관리자 페이지" sub="할 일·행사·출처 관리" right={<ChevronRight className="h-5 w-5 text-ink-soft" />} /></Link>
                 </div>
             )}
 
