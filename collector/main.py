@@ -132,11 +132,17 @@ async def run_crawlers(specific_target=None):
     
     try:
         configs = []
+        paused_sources = []
         if specific_target:
             configs = [specific_target]
         else:
             whitelist_items = db.get_whitelist()
             for item in whitelist_items:
+                # 관리자 화면에서 «쉬게 함»으로 둔 출처(whitelist.paused_reason, specs/019 A5)는 읽지 않고 이유만 보고한다
+                if (item.get('paused_reason') or '').strip() and 'instagram.com' not in (item.get('value') or ''):
+                    paused_sources.append({"name": item.get('name') or item.get('value'), "status": "SUCCESS",
+                                           "summary": f"⏸️ 일시 중지: {item['paused_reason'].strip()}"})
+                    continue
                 value = item.get('value') or ''
                 target_type = 'website'
                 if 'instagram.com' in value: target_type = 'instagram'
@@ -160,6 +166,7 @@ async def run_crawlers(specific_target=None):
             results = await public.scrape([c for c in configs if c['target_type'] == 'website'])
             # KOPIS(공연 API)는 화이트리스트와 무관하게 정기 크롤마다 돈다
             results.append(await KopisScraper(db).scrape())
+            results += paused_sources
             # 지자체 공식 블로그(RSS + 본문의 📅/📍 블록, AI 없음). 발행은 아래 자동 공개가 맡는다
             for c in configs:
                 if c['target_type'] != 'naver_blog':
@@ -282,6 +289,12 @@ async def run_crawlers(specific_target=None):
                 rows = ops_log.to_rows(results, run_at, blog_names, publish_line)
                 res = ops_log.record(db, rows, quiet=quiet_runs(configs))
                 lines.append("• 실행 기록: " + ops_log.summary_line(res))
+                # 관리자 «현황»의 회차 요약(specs/019 A6): 이 회차의 단계별 한 줄을 남긴다. 실패해도 루틴은 계속한다
+                try:
+                    step_lines = [l for block in (publish_line, review_line, geo_line, backup_line) for l in block.split("\n")]
+                    ops_log.record_steps(db, run_at, step_lines, head=lines[0])
+                except Exception as e:
+                    lines.append(f"• 회차 요약 저장 실패: {e}")
                 outgoing = []
                 alert = ops_log.alert_message(res["opened"], res["resolved"])
                 if alert:

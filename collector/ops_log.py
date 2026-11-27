@@ -279,6 +279,23 @@ def record(db, new_rows, quiet=None, suffix="", now=None):
             "open": open_alerts, "runs": len({r["run_at"] for r in rows})}
 
 
+def record_steps(db, run_at, step_lines, head="", keep=14, now=None):
+    """routine_steps 스냅숏: 회차마다 단계별 한 줄(«• 이름: 내용»)을 남기고 최근 keep 회만 둔다 (specs/019 A6)"""
+    now = now or datetime.now(timezone.utc).isoformat()
+    steps = []
+    for line in step_lines:
+        line = (line or "").strip()
+        if line.startswith("• "):
+            line = line[2:]
+        if not line:
+            continue
+        name, sep, text = line.partition(": ")
+        steps.append({"name": name if sep else "", "text": text if sep else line})
+    prev = _read(db, "routine_steps").get("rows", [])
+    rows = ([{"run_at": run_at, "head": head, "steps": steps}] + [r for r in prev if r.get("run_at") != run_at])[:keep]
+    return _write(db, "routine_steps", {"rows": rows, "meta": [{"label": "보존", "value": f"최근 {keep}회"}]}, now)
+
+
 def summary_line(res):
     mark = "✅" if res["ok"] else "❌"
     return (f"{mark} 실행 기록 {res['runs']}회 보존 · 켜진 경고 {len(res['open'])}건"

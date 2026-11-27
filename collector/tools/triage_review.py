@@ -62,10 +62,13 @@ class Store:
         return self._all(self.sb.table("events").select("id,title,event_date_start").order("id"))
 
     def standing_accounts(self):
-        """상시 동의 계정(@계정 소문자). whitelist.score_detail 에 「상시동의:」 꼬리가 있는 인스타 출처 − 철회 계정(docs/insta/dm.json withdrawn)"""
+        """상시 동의 계정(@계정 소문자). whitelist.consent='standing'(없으면 score_detail 「상시동의:」 꼬리)인 인스타 출처
+        − 철회 계정(whitelist.consent='withdrawn' 은 위에서 빠진다, docs/insta/dm.json withdrawn)"""
         out = set()
-        for w in self._all(self.sb.table("whitelist").select("value,score_detail").order("id")):
-            if "상시동의:" in (w.get("score_detail") or ""):
+        for w in self._all(self.sb.table("whitelist").select("value,score_detail,consent").order("id")):
+            consent = w.get("consent") or "none"
+            # 동의 칸(specs/019 A5)이 기준이다. 칸이 «없음»인데 예전 글자 표시가 있으면 그것도 상시 동의로 본다
+            if consent == "standing" or (consent == "none" and "상시동의:" in (w.get("score_detail") or "")):
                 m = re.search(r"instagram\.com/([A-Za-z0-9._]+)", w.get("value") or "", re.I)
                 if m:
                     out.add("@" + m.group(1).lower())

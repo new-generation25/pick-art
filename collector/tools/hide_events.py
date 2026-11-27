@@ -43,7 +43,11 @@ def hide(a):
     done, errors = [], []
     for r in rows:
         try:
-            db.supabase.table("events").update({"status": a.status}).eq("id", r["id"]).execute()
+            patch = {"status": a.status}
+            if a.status == "HIDDEN":  # 관리자 «행사 › 숨김»에 이유가 보이게 남긴다(specs/019 A4)
+                patch.update({"hidden_reason": (a.why or "")[:300], "hidden_by": "세션: hide_events",
+                              "hidden_at": datetime.now().astimezone().isoformat(timespec="seconds")})
+            db.supabase.table("events").update(patch).eq("id", r["id"]).execute()
             done.append(r["id"])
         except Exception as e:  # 체크 제약 위반 등 — 그 자리에서 멈춘다
             errors.append({"id": r["id"], "error": str(e)[:300]}); break

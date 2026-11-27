@@ -25,7 +25,7 @@ load_dotenv(".env.local")
 from database import Database  # noqa: E402
 from dedupe import keep_rank, same_event  # noqa: E402
 
-COLS = "id,title,source,region,venue,event_date_start,event_date_end,status,original_url,created_at"
+COLS = "id,title,source,region,venue,event_date_start,event_date_end,status,original_url,created_at,keep_visible"
 
 
 def published(sb):
@@ -51,6 +51,8 @@ def find_dupes(rows):
         for a, b in itertools.combinations(grp, 2):
             if a["id"] in hidden or b["id"] in hidden:
                 continue
+            if a.get("keep_visible") or b.get("keep_visible"):
+                continue  # 운영자가 관리자 화면에서 되돌린 행사: 같은 행사가 아니라고 본 것이므로 다시 숨기지 않는다(specs/019 A4)
             if same_event(a, b):
                 pairs.append((a, b))  # a 가 순위가 높다(정렬 순서)
                 hidden.add(b["id"])
@@ -75,8 +77,12 @@ def main():
                   "rows": [d for _, d in pairs], "kept": [{"id": k["id"], "title": k["title"]} for k, _ in pairs]}
         with open(path, "w", encoding="utf-8") as f:
             json.dump(backup, f, ensure_ascii=False, indent=1)
-        for _, d in pairs:
-            sb.table("events").update({"status": "HIDDEN"}).eq("id", d["id"]).execute()
+        now = datetime.now().astimezone().isoformat(timespec="seconds")
+        for k, d in pairs:
+            sb.table("events").update({
+                "status": "HIDDEN", "hidden_by": "자동: 중복 정리", "hidden_at": now,
+                "hidden_reason": f"중복: «{(k.get('title') or '')[:80]}»({k.get('source') or '출처 모름'})과 같은 행사"[:300],
+            }).eq("id", d["id"]).execute()
         print(f"  백업: {path}")
     print(f"공개 후 중복 점검{'(적용)' if a.apply else '(미리보기)'}: 공개 {len(rows)}건 중 중복 {len(pairs)}쌍"
           f"{' → 숨김 ' + str(len(pairs)) + '건' if a.apply and pairs else ''}")
