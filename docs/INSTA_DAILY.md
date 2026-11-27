@@ -33,7 +33,17 @@
 - 피드에 넣지 못한 그날 후보, 당일 아침 열리는 행사 재공유, 마감 임박(오늘·내일 끝남)은 **스토리**로 올린다. 스토리는 피드에 쌓이지 않고 24시간 뒤 사라져 팔로워 부담이 적다.
 - 하루 최대 5개(브랜드 가이드 스토리 칸 「매일 1~3개」를 운영자 결정으로 5개까지 넓힘). 규격 1080×1920. 사실 확인·허락 기준은 피드와 같다(허락 없는 소규모 행사는 스토리에도 올리지 않는다).
 - 스토리에는 게시물 링크 스티커 또는 피카 행사 링크를 단다. 기록은 `posted.json`에 `"format": "story"`로 남긴다(같은 행사를 피드로 다시 올리는 것은 「묶음과 단독」처럼 허용하되 같은 날은 피한다).
-- 인스타 웹(PC 화면)에서 스토리 올리기가 되는지는 SNS콘텐츠 세션이 시험해 이 절에 방법을 적는다. 방법이 정해지기 전에는 피드 5건만 올리고 스토리는 건너뛴다(보고에 「스토리 미시행」).
+- **올리는 곳: Meta Business Suite 스토리 만들기** (2026-11-27 SNS콘텐츠 세션 시험). instagram.com PC 화면의 「만들기」에는 게시물·라이브 방송·광고만 있고 스토리가 없다. Claude in Chrome 은 모바일 UA로 바꿀 수 없다. 앱 안 브라우저 창의 모바일 흉내는 인스타 로그인이 안 돼 있어 쓰지 않는다. 그래서 피카 비즈니스 포트폴리오의 스토리 작성 화면으로 올린다.
+  - 브라우저: pica 브라우저(deviceId 03e1d81e). 조작마다 `select_browser` 를 함께 부른다(다른 브라우저로 돌아가는 문제).
+  - 주소: `https://business.facebook.com/latest/home` → 홈의 「스토리 만들기」. 첫 화면에 안내 창이 뜨면 닫는다.
+  - 「공유 대상」은 `피카 pica, picka.news`(페이스북 페이지 + 인스타). **인스타만 올린다** — 공유 대상에서 페이스북을 끈다(페이스북 스토리를 올릴지는 운영자가 정하면 바꾼다).
+  - 사진 넣기: 「사진/동영상 추가」를 누르면 운영체제 파일 창이 떠서 조작할 수 없다. 누르기 **전에** 아래 JS 로 파일 창 대신 파일 입력칸이 페이지에 남게 한 뒤 버튼을 누르고, `find` 로 찾은 file-input 에 `file_upload` 로 `jpeg_for_api/<slug>_story.jpg` 를 넣는다(10MB 이하).
+    `const o=HTMLInputElement.prototype.click;HTMLInputElement.prototype.click=function(){if(this.type==='file'){if(!this.isConnected)document.body.appendChild(this);return}return o.call(this)}`
+  - 링크: 「링크 추가」(위로 밀어 올리기)는 페이스북 스토리에만 붙는다. 인스타 링크는 「수정」 → 「스티커 더 보기」 → 「링크」 스티커로 단다. 주최 계정은 같은 창의 「언급」 스티커로 단다.
+  - 올리기: 「공유하기」(지금 공유) 또는 「예약」. 올린 뒤 `https://www.instagram.com/stories/picka.news/` 를 열어 주소가 `/stories/picka.news/<번호>/` 로 바뀌면 그 주소를 `post_url` 로 적는다. 프로필로 돌아가면 올라가지 않은 것이다.
+  - 시험 범위: 사진 넣기·인스타 미리보기·링크/언급 스티커 메뉴까지 확인하고 취소했다. **실제 공유는 하지 않았다** — 첫 게시 회차에서 올린 뒤 위 주소로 확인한다.
+- **카드 만들기**: `python tools/make_insta_cards.py <event_id> --story --facts <facts.json> --out docs/insta/<날짜> --slug <번호_이름>` → `<slug>_story.png` 와 `jpeg_for_api/<slug>_story.jpg`(1080×1920). 피드 카드와 같은 facts 를 쓰고, 세로용 훅이 따로 필요하면 facts 에 `story_hook` 을 넣는다. 위 250px·아래 340px 은 인스타 화면이 덮으므로 글자를 두지 않았다.
+- **기록·중복**: 맡기 `python tools/insta_state.py claim story <event_id> --by 게시`, 기록 `add posted '{..., "format": "story"}'`. 스토리 줄은 피드 중복 점검·`posted-ids`(그날 것만 뺀다)·DB `insta_post_url` 반영·리포트의 피드 게시 수에서 빠진다. 같은 행사를 **같은 날** 피드와 스토리로 겹쳐 올리는 것만 막힌다.
 
 ## 지켜야 할 것 (먼저 읽기)
 
