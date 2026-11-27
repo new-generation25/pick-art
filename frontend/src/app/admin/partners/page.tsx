@@ -8,6 +8,7 @@ import { appendOrgNote } from "@/lib/orgNotes";
 import { todayKST } from "@/lib/utils";
 import { STATUS_LABEL, orgNormName } from "@/lib/partnerAgreement";
 import { agreementHandle, setSourceConsent } from "@/lib/siteConsent";
+import { useAdmin } from "@/components/admin/AdminShell";
 
 // 정식 협약 신청 검토 (specs/016). 관리자 RLS 로 읽고 고친다.
 // «협약 확인»을 눌러야만 단체(orgs)에 partner_since 가 생긴다 — 신청만으로는 협약 표시를 하지 않는다(헌장 I).
@@ -144,12 +145,16 @@ export default function AdminPartnersPage() {
 
     useEffect(() => { load(); }, [load]);
 
+    // 처리한 뒤에는 목록과 함께 메뉴의 대기 숫자도 다시 읽는다 (운영자 2026-11-28 «협약이 완료되면 숫자1 지워져야 함»)
+    const { reload: reloadCounts } = useAdmin();
+    const refresh = useCallback(() => { load(); reloadCounts(); }, [load, reloadCounts]);
+
     const setStatus = async (a: Agreement, status: "rejected" | "new") => {
         const { data, error } = await supabase.from("partner_agreements")
             .update({ status, admin_note: notes[a.id] ?? a.admin_note, handled_at: status === "new" ? null : new Date().toISOString() })
             .eq("id", a.id).select("id");
         if (error || !data?.length) { setError(error?.message || "저장하지 못했습니다(권한 확인)"); return; }
-        load();
+        refresh();
     };
 
     /** 철회 처리: 신청은 withdrawn, 연결한 단체의 협약 표시를 푼다 */
@@ -167,7 +172,7 @@ export default function AdminPartnersPage() {
             .eq("id", a.id).select("id");
         if (error || !data?.length) { setError(error?.message || "저장하지 못했습니다(권한 확인)"); return; }
         setNotice(`«${a.org_name}» 협약을 철회 처리했습니다. ${await switchConsent(a, "withdrawn")}`);
-        load();
+        refresh();
     };
 
     return (
@@ -226,7 +231,7 @@ export default function AdminPartnersPage() {
                                 )}
                             </Group>
                             {open === a.id && a.status === "new" && (
-                                <ConfirmBox a={a} note={notes[a.id] ?? ""} onError={setError} onDone={(m) => { setOpen(null); setNotice(m); load(); }} />
+                                <ConfirmBox a={a} note={notes[a.id] ?? ""} onError={setError} onDone={(m) => { setOpen(null); setNotice(m); refresh(); }} />
                             )}
                         </Paper>
                     ))}

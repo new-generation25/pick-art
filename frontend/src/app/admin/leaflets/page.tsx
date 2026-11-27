@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Container, Title, Text, Paper, Group, Badge, Button, SegmentedControl, Stack, TextInput, Textarea, Checkbox, Loader, Anchor, SimpleGrid } from "@mantine/core";
 import { supabase } from "@/lib/supabase";
+import { useAdmin } from "@/components/admin/AdminShell";
 import { GN_REGIONS, regionFromText } from "@/lib/regions";
 import { EventFields, checkEvent, eventColumns, type EventDraft } from "@/components/admin/EventFields";
 import { leafletSource, RIGHTS_CHECKS, RIGHTS_VERSION } from "@/lib/leaflets";
@@ -123,6 +124,10 @@ export default function AdminLeafletsPage() {
     }, [filter]);
     useEffect(() => { load(); }, [load]);
 
+    // 처리한 뒤에는 목록과 함께 메뉴의 대기 숫자도 다시 읽는다 (운영자 2026-11-28 «협약이 완료되면 숫자1 지워져야 함»)
+    const { reload: reloadCounts } = useAdmin();
+    const refresh = useCallback(() => { load(); reloadCounts(); }, [load, reloadCounts]);
+
     const setD = (id: string, k: keyof Draft, value: string | boolean) => setDrafts(d => ({ ...d, [id]: { ...d[id], [k]: value } }));
 
     const publish = async (s: Sub) => {
@@ -149,12 +154,12 @@ export default function AdminLeafletsPage() {
         if (error || !ev) { setMsg(m => ({ ...m, [s.id]: `등록하지 못했습니다: ${error?.message ?? ""}` })); return; }
         await supabase.from("leaflet_submissions").update({ status: "published", event_id: ev.id, group_name: d.group_name.trim().slice(0, 80), handled_at: new Date().toISOString() }).eq("id", s.id);
         setMsg(m => ({ ...m, [s.id]: "등록했습니다" }));
-        load();
+        refresh();
     };
 
     const reject = async (s: Sub) => {
         const { error } = await supabase.from("leaflet_submissions").update({ status: "rejected", admin_note: msg[`note-${s.id}`] || null, handled_at: new Date().toISOString() }).eq("id", s.id);
-        if (!error) load();
+        if (!error) refresh();
     };
 
     return (
