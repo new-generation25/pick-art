@@ -248,6 +248,7 @@ body { background: #888; }
 .intro .feats span { border: 3px solid %(ink)s; background: %(card)s; padding: 12px 22px; font-size: 30px; font-weight: 800; }
 .intro .gocta { background: %(blue)s; color: #fff; font-size: 40px; font-weight: 700; line-height: 1.4; padding: 30px 36px; border: 4px solid %(ink)s; }
 .intro .gocta b { font-weight: 900; }
+.intro .gocta .cnt { display: inline-block; margin-top: 18px; font-size: 32px; font-weight: 700; opacity: .92; }
 
 /* 5. CTA */
 .cta { background: %(blue)s; color: #fff; }
@@ -334,11 +335,11 @@ def slides_html(f: dict, poster: str, handle: str) -> list:
 <div class="slide intro">{top(5)}
   <div class="pad disp h2 print" style="top:170px">피카는<br>이래서 만들었어요</div>
   <div class="pad story-txt" style="top:420px">
-    <p>동네 극단, 작은 합창단, 작가 모임이 몇 달 준비한 공연도 포스터 한 장 붙이고 끝나는 일이 많아요.</p>
-    <p>피카(픽아트)는 흩어진 공지를 매일 모아 <b>공식 출처로 확인한 것만</b> 날짜순으로 보여 드려요.</p>
+    <p>몇 달 동안 준비한 동네 극단, 작은 합창단, 예술가의 전시가 포스터 몇 장 붙이고 소리 소문 없이 끝나는 일이 많아요.</p>
+    <p>피카(pick art)는 흩어진 이런 소식을 매일 모아 <b>출처로 하고</b> 여러분들에게 전해 드려요.</p>
   </div>
   <div class="pad feats" style="top:900px"><span>오늘·이번 주</span><span>지역·분야로 고르기</span><span>지도로 보기</span></div>
-  <div class="pad gocta" style="bottom:120px">가까운 공연·전시·축제 전체는<br><b>프로필 링크 → 피카</b>에서 볼 수 있어요</div>
+  <div class="pad gocta" style="bottom:120px">가까운 공연·전시·축제 전체는<br><b>프로필 링크 → 피카</b>에서 볼 수 있어요{f'<br><span class="cnt">현재 등록된 부산경남 소식 {f["live_count"]:,}개</span>' if f.get("live_count") else ''}</div>
   {credit}
 </div>""")
 
@@ -352,20 +353,20 @@ def slides_html(f: dict, poster: str, handle: str) -> list:
     <div><b>피카 사이트</b> 「행사 제보하기」</div>
     <div><b>카카오톡 채널 «피카»</b> 「행사 알리기」</div>
   </div>
-  <div class="pad small" style="bottom:110px">그 주에 확인해서 피카에 실린 제보 가운데 골라요 · 당첨은 스토리로 알려요<br>이 이벤트는 인스타그램이 후원·보증·관리하지 않으며, 인스타그램과 관련이 없습니다.</div>
+  <div class="pad small" style="bottom:110px">그 주에 확인해서 피카에 실린 제보 가운데 골라요 · 당첨은 스토리로 알려요<br>제일 많이 알리신 두 분은 무조건 당첨.<br>이 이벤트는 인스타그램이 후원·보증·관리하지 않으며, 인스타그램과 관련이 없습니다.</div>
 </div>""")
 
     # 7. 단체·예술가 안내(2026-11-27 운영자 결정, 같은 문서 12-3)
     out.append(f"""
 <div class="slide group">{top(7)}
-  <div class="pad" style="top:160px"><span class="chip pink">단체·예술가 안내</span></div>
+  <div class="pad" style="top:160px"><span class="chip pink">단체·예술가 대상 안내</span></div>
   <div class="pad disp h2 print" style="top:250px">작은 공연·전시,<br>무료로 실어 드려요</div>
   <div class="pad gl" style="top:540px">
     <div>신청하신 행사는 그 주에 먼저 소개해요</div>
     <div>한 번 동의하면 앞으로의 소식도 계속 실어요</div>
     <div>원하지 않으시면 언제든 그만두실 수 있어요</div>
   </div>
-  <div class="pad gocta" style="bottom:120px">신청: <b>프로필 링크 → 피카</b> 「동의하고 실리기」<br>또는 카카오톡 채널 «피카» 「행사 알리기」</div>
+  <div class="pad gocta" style="bottom:120px">신청: <b>프로필 링크 → 피카</b> 「동의하고 파트너십 맺기」<br>또는 카카오톡 채널 «피카» 「행사 알리기」</div>
 </div>""")
     return out
 
@@ -534,6 +535,11 @@ def main():
         with open(a.facts, encoding="utf-8") as fh:
             facts = json.load(fh)
     f = build_facts(ev, facts)
+    # 5장 「현재 등록된 … 소식 N개」: 카드를 만드는 날 공개 중이고 아직 끝나지 않은 행사 수(2026-11-27 운영자 문구)
+    try:
+        f["live_count"] = db.supabase.table("events").select("id", count="exact").eq("status", "PUBLISHED")             .gte("event_date_end", date.today().isoformat()).limit(1).execute().count
+    except Exception:
+        f["live_count"] = None
     slug = a.slug or a.event_id[:8]
     os.makedirs(a.out, exist_ok=True)
     poster = poster_data_uri(facts.get("poster") or ev.get("poster_image_url"))
