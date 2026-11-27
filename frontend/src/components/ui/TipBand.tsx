@@ -2,15 +2,16 @@ import Link from "next/link";
 import { KAKAO_CHAT, TIP_EVENT_NAME, TIP_POINTS, couponOpen } from "@/lib/reports";
 import { todayKST } from "@/lib/utils";
 
-/** 이 경로로 시작하는 화면에는 띠를 두지 않는다(제보 화면 자신, 로그인·가입 흐름) */
-const HIDDEN = ["/tip", "/login", "/signup", "/welcome", "/auth"];
-
+/**
+ * 띠는 홈에만 둔다 (specs/023, 운영자 2026-11-27 «제보하기 기능이나 내용이 너무 많은데 좀 줄일 수 있는지»).
+ * 홈 = `/` 와 지역 홈 `/region/…`(내 지역이 있는 사람은 그 화면이 홈이다). 상세·소개·단체 안내 등에는 두지 않는다
+ */
 export function showTipBand(pathname: string | null): boolean {
     const p = pathname || "/";
-    return !HIDDEN.some(h => p === h || p.startsWith(h + "/"));
+    return p === "/" || p.startsWith("/region/");
 }
 
-/** 공개 화면 꼬리말 위 제보 띠 (specs/020, 이름·포인트 021). 사이트에서 직접 보내기 + 카카오톡 채널로 보내기 */
+/** 홈 꼬리말 위 제보 띠 (specs/020, 이름·포인트 021). 사이트에서 직접 보내기 + 카카오톡 채널로 보내기 */
 export function TipBand() {
     return (
         <section aria-labelledby="tip-band-title" className="border-t-2 border-line bg-[var(--pk-accent-soft)]">

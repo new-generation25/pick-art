@@ -20,7 +20,6 @@ export function SiteFooter() {
                         <Link href="/about" className={linkClass}>피카 소개</Link>
                         <Link href="/partners" className={linkClass}>단체·공간 안내</Link>
                         <Link href="/tip" className={linkClass}>행사 제보하기</Link>
-                        <Link href="/tip/leaflet" className={linkClass}>리플렛으로 알리기</Link>
                         <Link href="/calendar" className={linkClass}>캘린더로 받아 보기</Link>
                         <Link href="/terms" className={linkClass}>이용약관</Link>
                         <Link href="/privacy" className={linkClass}>개인정보처리방침</Link>

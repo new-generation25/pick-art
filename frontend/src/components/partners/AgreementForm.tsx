@@ -5,13 +5,17 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { GN_REGIONS } from "@/lib/regions";
 import {
-    AFTER_SUBMIT, CONSENT_SUMMARY, CONTACT_EMAIL, EMPTY_AGREEMENT, EXTRAS, IS_DRAFT, PRIVACY_NOTICE, STATUS_LABEL,
+    AFTER_SUBMIT, CONSENT_ITEMS, CONSENT_KEYS, CONSENT_PRIVACY, CONSENT_SUMMARY, CONTACT_EMAIL, EMPTY_AGREEMENT, EXTRAS, IS_DRAFT, PRIVACY_NOTICE, STATUS_LABEL,
     TERMS_SECTIONS, TERMS_VERSION, checkAgreement, toRow, type AgreementInput,
 } from "@/lib/partnerAgreement";
+import { loginHref } from "@/lib/reports";
+import { InAppNotice } from "@/components/ui/InAppNotice";
 
 // 정보 제공 협약(동의) 받기 (specs/016). /partners 맨 끝 #join 에 들어간다.
-// 로그인 없이도 보낼 수 있다: 인스타 앱 안 브라우저에서는 구글 로그인이 막히기 때문.
-// 보내기는 DB 함수 submit_partner_agreement() 로만(익명 하루 20건·같은 연락처 하루 1번). 운영자가 확인해야 협약으로 표시된다.
+// 로그인한 사람만 보낸다 (specs/023, 운영자 2026-11-27 «카톡은 채널구독, 피카에서는 로그인»). 인스타 앱 안 브라우저에서는
+// 구글 로그인이 막히므로 그때는 «외부 브라우저로 열기» 안내(InAppNotice)를 먼저 보인다.
+// 보내기는 DB 함수 submit_partner_agreement() 로만(회원 하루 3건·같은 연락처 하루 1번). 운영자가 확인해야 협약으로 표시된다.
+// 필수 동의 체크는 «전체 동의» 하나다(네 항목은 그 아래 목록, 개인정보는 따로 구분).
 type Mine = { id: string; org_name: string; status: string; created_at: string; withdraw_requested_at: string | null };
 
 function day(iso: string) {
@@ -27,7 +31,7 @@ export function AgreementForm() {
     const [form, setForm] = useState<AgreementInput>(EMPTY_AGREEMENT);
     const [errors, setErrors] = useState<string[]>([]);
     const [state, setState] = useState<"idle" | "sending" | "sent">("idle");
-    const [loggedIn, setLoggedIn] = useState(false);
+    const [loggedIn, setLoggedIn] = useState<boolean | undefined>(undefined);   // undefined = 확인 중
     const [mine, setMine] = useState<Mine[]>([]);
     const [trap, setTrap] = useState("");  // 사람 눈에는 안 보이는 칸. 채워져 있으면 자동 프로그램으로 보고 보내지 않는다
 
@@ -40,7 +44,8 @@ export function AgreementForm() {
 
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session } }) => {
-            if (session?.user) { setLoggedIn(true); loadMine(); }
+            setLoggedIn(!!session?.user);
+            if (session?.user) loadMine();
         });
     }, [loadMine]);
 
@@ -65,7 +70,8 @@ export function AgreementForm() {
         if (error) {
             setState("idle");
             setErrors([
-                error.message.includes("daily_limit") ? "오늘 신청이 많아 더 받을 수 없어요. 내일 다시 보내 주시거나 메일로 알려 주세요."
+                error.message.includes("login_required") ? "로그인이 풀렸어요. 화면을 새로 고쳐 다시 로그인한 뒤 보내 주세요."
+                    : error.message.includes("daily_limit") ? "오늘 신청이 많아 더 받을 수 없어요. 내일 다시 보내 주시거나 메일로 알려 주세요."
                     : error.message.includes("duplicate") ? "같은 이름·연락처로 오늘 이미 받았어요. 확인한 뒤 연락드릴게요."
                         : `보내지 못했어요. 잠시 뒤 다시 해 주시거나 메일(${CONTACT_EMAIL})로 알려 주세요.`,
             ]);
@@ -73,7 +79,7 @@ export function AgreementForm() {
         }
         setState("sent");
         setForm(EMPTY_AGREEMENT);
-        if (loggedIn) loadMine();
+        loadMine();
     };
 
     const withdraw = async (m: Mine) => {
@@ -100,6 +106,17 @@ export function AgreementForm() {
         </div>
     );
 
+    if (loggedIn === undefined) return null;
+    if (!loggedIn) {
+        return (
+            <div className="border-[1.5px] border-line bg-[var(--pk-card)] p-5 text-[15px] leading-relaxed text-ink">
+                <p>협약 신청은 로그인한 뒤 보낼 수 있어요. 로그인하면 이 화면으로 돌아와요.</p>
+                <InAppNotice className="mt-3" />
+                <Link href={loginHref("/partners#join")} className="mt-4 flex h-14 items-center justify-center bg-[var(--pk-accent)] px-5 text-[17px] font-bold text-[var(--pk-on-accent)] no-underline">로그인하고 신청하기</Link>
+            </div>
+        );
+    }
+
     if (state === "sent") {
         return (
             <div>
@@ -116,20 +133,42 @@ export function AgreementForm() {
         );
     }
 
-    const consentRow = (k: "agree_listing" | "agree_collect", s: { title: string; text: string }) => (
-        <label className="flex gap-3 border-[1.5px] border-line bg-[var(--pk-card)] p-4">
-            <input type="checkbox" className={check} checked={form[k]} onChange={setCheck(k)} />
-            <span className="text-[15px] leading-relaxed text-ink"><b className="block text-[16px]">{s.title}에 동의해요 *</b>{s.text}</span>
-        </label>
-    );
+    const allAgreed = CONSENT_KEYS.every(k => form[k]);
+    const setAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const v = e.currentTarget.checked;
+        setForm(f => ({ ...f, agree_listing: v, agree_collect: v, agree_confirm: v, agree_privacy: v }));
+    };
 
     return (
         <div>
             <form onSubmit={send} className="flex flex-col gap-6" noValidate>
                 <fieldset className="flex flex-col gap-3">
                     <legend className="mb-3 text-[18px] font-bold text-ink">① 무엇에 동의하나요</legend>
-                    {consentRow("agree_listing", CONSENT_SUMMARY.listing)}
-                    {consentRow("agree_collect", CONSENT_SUMMARY.collect)}
+                    <div className="border-[1.5px] border-line bg-[var(--pk-card)] p-4">
+                        <label className="flex cursor-pointer gap-3">
+                            <input type="checkbox" className={check} checked={allAgreed} onChange={setAll} />
+                            <span className="text-[16px] font-bold leading-relaxed text-ink">아래 내용에 모두 동의해요 *</span>
+                        </label>
+                        <ul className="mt-3 flex flex-col gap-2 border-t border-line pt-3 text-[14.5px] leading-relaxed text-ink">
+                            {CONSENT_ITEMS.map(it => <li key={it.title}><b>{it.title}</b> — {it.text}</li>)}
+                        </ul>
+                        <div className="mt-3 border-l-4 border-[var(--pk-accent)] bg-[var(--pk-accent-soft)] px-3 py-2.5 text-[14.5px] leading-relaxed text-ink">
+                            <b>{CONSENT_PRIVACY.title}</b> — {CONSENT_PRIVACY.text}
+                            <span className="mt-1 block text-[13px] text-ink-soft">{PRIVACY_NOTICE} <Link href="/privacy" className="underline underline-offset-2">개인정보처리방침</Link></span>
+                        </div>
+                        <details className="mt-3 text-[14px] leading-relaxed text-ink">
+                            <summary className="min-h-8 cursor-pointer text-[15px] font-bold">동의서 전문 보기{IS_DRAFT ? " (초안)" : ""}</summary>
+                            {IS_DRAFT && <p className="mt-2 text-ink-soft">법률 검토 전 초안이에요({TERMS_VERSION}). 문구가 바뀌면 신청한 단체에 먼저 알려 드려요.</p>}
+                            {TERMS_SECTIONS.map(s => (
+                                <section key={s.title} className="mt-3">
+                                    <h4 className="font-bold">{s.title}</h4>
+                                    <ol className="mt-1 list-decimal space-y-1 pl-5">
+                                        {s.items.map((it, i) => <li key={i}>{it.strong && <b>{it.strong}</b>}{it.strong && it.text ? " " : ""}{it.text}</li>)}
+                                    </ol>
+                                </section>
+                            ))}
+                        </details>
+                    </div>
                     <div className="border-[1.5px] border-line bg-[var(--pk-card)] p-4 text-[15px] leading-relaxed text-ink">
                         <b className="block text-[16px]">{CONSENT_SUMMARY.image.title} *</b>{CONSENT_SUMMARY.image.text}
                         <div className="mt-3 flex flex-col gap-2">
@@ -196,32 +235,6 @@ export function AgreementForm() {
                     </div>
                 </fieldset>
 
-                <fieldset className="flex flex-col gap-3">
-                    <legend className="mb-3 text-[18px] font-bold text-ink">③ 확인</legend>
-                    <label className="flex gap-3 text-[15px] leading-relaxed text-ink">
-                        <input type="checkbox" className={check} checked={form.agree_confirm} onChange={setCheck("agree_confirm")} />
-                        <span>{CONSENT_SUMMARY.confirm} *</span>
-                    </label>
-                    <label className="flex gap-3 text-[15px] leading-relaxed text-ink">
-                        <input type="checkbox" className={check} checked={form.agree_privacy} onChange={setCheck("agree_privacy")} />
-                        <span>담당 연락처를 협약 확인과 연락에만 쓰는 데 동의해요. *
-                            <span className="mt-1 block text-[13px] text-ink-soft">{PRIVACY_NOTICE} <Link href="/privacy" className="underline underline-offset-2">개인정보처리방침</Link></span>
-                        </span>
-                    </label>
-                    <details className="border-[1.5px] border-line bg-[var(--pk-card)] px-4 py-3 text-[14px] leading-relaxed text-ink">
-                        <summary className="min-h-8 cursor-pointer text-[15px] font-bold">동의서 전문 보기{IS_DRAFT ? " (초안)" : ""}</summary>
-                        {IS_DRAFT && <p className="mt-2 text-ink-soft">법률 검토 전 초안이에요({TERMS_VERSION}). 문구가 바뀌면 신청한 단체에 먼저 알려 드려요.</p>}
-                        {TERMS_SECTIONS.map(s => (
-                            <section key={s.title} className="mt-3">
-                                <h4 className="font-bold">{s.title}</h4>
-                                <ol className="mt-1 list-decimal space-y-1 pl-5">
-                                    {s.items.map((it, i) => <li key={i}>{it.strong && <b>{it.strong}</b>}{it.strong && it.text ? " " : ""}{it.text}</li>)}
-                                </ol>
-                            </section>
-                        ))}
-                    </details>
-                </fieldset>
-
                 {errors.length > 0 && (
                     <ul className="list-disc border-l-4 border-[var(--pk-accent)] py-1 pl-8 text-[15px] text-ink" role="alert">
                         {errors.map(e => <li key={e}>{e}</li>)}
@@ -231,8 +244,7 @@ export function AgreementForm() {
                     {state === "sending" ? "보내는 중…" : "동의하고 보내기"}
                 </button>
                 <p className="text-[14px] leading-relaxed text-ink-soft">
-                    보내면 운영자가 확인한 뒤 일주일 안에 연락드려요. 로그인하지 않아도 돼요.
-                    {loggedIn ? " 로그인해 있어서 아래 «내가 보낸 신청»에서 진행 상황을 볼 수 있어요." : ""}
+                    보내면 운영자가 확인한 뒤 일주일 안에 연락드려요. 아래 «내가 보낸 신청»에서 진행 상황을 볼 수 있어요.
                 </p>
             </form>
             {myList}

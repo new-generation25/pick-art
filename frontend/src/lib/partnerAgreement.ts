@@ -8,7 +8,8 @@
  * (원본 초안의 사이트 주소 pick-art.vercel.app 은 지금 주소 picka.news 로 적었다)
  */
 
-export const TERMS_VERSION = "2026-11-26-draft";
+// 2026-11-27: 동의서 글은 그대로, 받는 방법이 바뀌었다(필수 체크 4개 → «전체 동의» 하나, 로그인 필수 — specs/023)
+export const TERMS_VERSION = "2026-11-27-draft";
 export const IS_DRAFT = true;
 export const CONTACT_EMAIL = "pick.art.pica@gmail.com";
 
@@ -59,11 +60,24 @@ export const CONSENT_SUMMARY = {
     confirm: "보낸 정보가 사실이고, 포스터·사진에 다른 권리자(사진가·디자이너)가 있으면 허락을 받았어요. 관객·출연자 개인 연락처는 보내지 않아요.",
 } as const;
 
+/**
+ * «전체 동의» 체크 하나 아래에 한 줄씩 보이는 항목 (specs/023, 운영자 2026-11-27 «동의 체크도 통합해서 줄여»).
+ * 체크하면 네 값(agree_listing·agree_collect·agree_confirm·agree_privacy)이 모두 동의로 저장된다.
+ * 담당 연락처(개인정보)는 다른 동의와 구분해 알려야 해서 화면에서 따로 보인다(CONSENT_PRIVACY + PRIVACY_NOTICE).
+ */
+export const CONSENT_ITEMS = [
+    { title: "게재", text: CONSENT_SUMMARY.listing.text },
+    { title: "자동 수집", text: CONSENT_SUMMARY.collect.text },
+    { title: "사실·권리 확인", text: CONSENT_SUMMARY.confirm },
+] as const;
+export const CONSENT_PRIVACY = { title: "담당 연락처 이용 (개인정보)", text: "담당 연락처를 협약 확인과 연락에만 써요." } as const;
+export const CONSENT_KEYS = ["agree_listing", "agree_collect", "agree_confirm", "agree_privacy"] as const;
+
 /** 제출 뒤 안내 */
 export const AFTER_SUBMIT = [
     "운영자가 공식 SNS·누리집으로 단체를 확인해요. 일주일 안에 적어 주신 연락처로 결과를 알려 드려요.",
     "확인되면 단체 페이지에 «협약» 표시가 붙고, 그 뒤 공지는 따로 묻지 않고 실어요.",
-    "그만두고 싶으면 메일 한 통이면 돼요(로그인해 보냈다면 «내가 보낸 신청»의 «철회 요청»도 돼요). 7일 안에 내려요.",
+    "그만두고 싶으면 «내가 보낸 신청»의 «철회 요청»이나 메일 한 통이면 돼요. 7일 안에 내려요.",
 ];
 
 /** 5 선택 항목(둘 다 준비 중) */
@@ -119,10 +133,8 @@ export function checkAgreement(a: AgreementInput): string[] {
     if (!/^https?:\/\/\S+\.\S+/.test(a.official_url.trim())) errs.push("공식 SNS·누리집 주소(https로 시작)를 넣어 주세요.");
     if (a.insta_handle.trim() && !normInsta(a.insta_handle)) errs.push("인스타그램 계정은 @계정 또는 instagram.com/계정 모양으로 적어 주세요.");
     if (a.contact_private.trim().length < 3) errs.push("담당 연락처(전화 또는 메일)를 적어 주세요.");
-    if (!a.agree_listing || !a.agree_collect) errs.push("① 게재·자동 수집에 동의해 주셔야 실을 수 있어요.");
+    if (CONSENT_KEYS.some(k => !a[k])) errs.push("① «전체 동의»에 체크해 주셔야 실을 수 있어요.");
     if (!a.image_use) errs.push("① 이미지를 써도 되는지 골라 주세요.");
-    if (!a.agree_confirm) errs.push("③ 확인의 첫 칸에 체크해 주세요.");
-    if (!a.agree_privacy) errs.push("③ 확인의 연락처 칸에 체크해 주세요.");
     return errs;
 }
 

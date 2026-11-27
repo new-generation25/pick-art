@@ -5,11 +5,12 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { GN_REGIONS } from "@/lib/regions";
 import {
-    checkTip, couponOpen, loginHref, normalizeTipUrl, tipErrorText, EMPTY_TIP, KAKAO_CHAT, POINTS_NOTE, REWARD_CONSENT_TEXT, REWARD_CONSENT_VERSION,
+    checkTip, couponOpen, loginHref, normalizeTipUrl, tipErrorText, COUPON_DETAIL, EMPTY_TIP, KAKAO_CHAT, POINTS_NOTE, REWARD_CONSENT_TEXT, REWARD_CONSENT_VERSION,
     TIP_PHOTO_MAX, TIP_POINTS, type TipInput,
 } from "@/lib/reports";
 import { todayKST } from "@/lib/utils";
 import { shrink } from "./leaflet/LeafletForm";
+import { InAppNotice } from "@/components/ui/InAppNotice";
 
 // 행사 제보 「숨은 행사 찾기」 (specs/020 → 021). 로그인 회원이 보낸다. 꼭 받는 것은 행사 이름 + 원문 링크나 사진 하나.
 // 접수는 submit_tip() 으로만 하고, 사진은 그 함수가 돌려준 경로(tips/<id>.jpg)에 한 번 올린다. 공개는 관리자가 확인한 뒤(헌장 I)
@@ -134,6 +135,7 @@ export function TipForm() {
         return (
             <div className="rounded-[14px] bg-card p-5 text-[15px] shadow-[0_1px_4px_rgba(30,26,21,.08)]">
                 <p className="leading-relaxed text-ink">제보는 로그인한 뒤 보낼 수 있어요. 로그인하면 이 화면으로 돌아와요.</p>
+                <InAppNotice className="mt-3" />
                 <Link href={loginHref("/tip")} className="mt-4 flex h-14 items-center justify-center rounded-full bg-accent px-6 text-[17px] font-bold text-on-accent no-underline">로그인하고 제보하기</Link>
             </div>
         );
@@ -218,28 +220,29 @@ export function TipForm() {
                 </div>
             </details>
 
-            {coupon && <details className={fold}>
-                <summary className={foldTitle}>커피 쿠폰 받기 <span className="font-normal text-ink-soft">(선택 — 연락처, 12월까지)</span></summary>
-                <div className="mt-3 flex flex-col gap-3">
-                    <div>
-                        <label htmlFor="tip-contact" className="mb-1 block text-[13px] font-semibold text-ink-soft">전화번호나 이메일</label>
-                        <input id="tip-contact" value={form.contact} onChange={set("contact")} maxLength={100} autoComplete="off" className={field} placeholder="쿠폰을 받을 곳" />
-                    </div>
-                    <label className="flex cursor-pointer items-start gap-2.5 text-[14px] leading-relaxed text-ink">
-                        <input type="checkbox" checked={form.consent} className="mt-1 h-4 w-4 flex-none"
-                            onChange={e => { const v = e.currentTarget.checked; setForm(f => ({ ...f, consent: v })); }} />
-                        <span>{REWARD_CONSENT_TEXT} <Link href="/privacy" className="underline underline-offset-2">개인정보처리방침</Link></span>
-                    </label>
-                    <p className={hint}>연락처는 운영자만 봐요. 적지 않아도 제보는 똑같이 받고 포인트도 똑같이 쌓여요.</p>
-                </div>
-            </details>}
-
+            {/* 선택 항목 하나로 (specs/023): 쿠폰 연락처(12월까지) + 이름 남기기 */}
             <details className={fold}>
-                <summary className={foldTitle}>이름 남기기 <span className="font-normal text-ink-soft">(선택 — 「제보: ○○」)</span></summary>
-                <div className="mt-3">
-                    <label htmlFor="tip-credit" className="mb-1 block text-[13px] font-semibold text-ink-soft">보일 이름이나 아이디</label>
-                    <input id="tip-credit" value={form.credit} onChange={set("credit")} maxLength={30} autoComplete="off" className={field} placeholder="예) 봉황동 주민, @pica_fan" />
-                    <p className={hint}>적으면 행사 화면에 「제보: ○○」로 보여요. 비우면 이름은 어디에도 나오지 않아요.</p>
+                <summary className={foldTitle}>선택 항목 <span className="font-normal text-ink-soft">({coupon ? "커피 쿠폰 연락처 · 이름 남기기" : "이름 남기기"})</span></summary>
+                <div className="mt-3 flex flex-col gap-4">
+                    {coupon && (
+                        <div className="flex flex-col gap-3">
+                            <div>
+                                <label htmlFor="tip-contact" className="mb-1 block text-[13px] font-semibold text-ink-soft">커피 쿠폰을 받을 전화번호나 이메일</label>
+                                <input id="tip-contact" value={form.contact} onChange={set("contact")} maxLength={100} autoComplete="off" className={field} placeholder="쿠폰을 받을 곳" />
+                                <p className={hint}>{COUPON_DETAIL} 연락처는 운영자만 봐요. 적지 않아도 제보는 똑같이 받고 포인트도 똑같이 쌓여요.</p>
+                            </div>
+                            <label className="flex cursor-pointer items-start gap-2.5 text-[14px] leading-relaxed text-ink">
+                                <input type="checkbox" checked={form.consent} className="mt-1 h-4 w-4 flex-none"
+                                    onChange={e => { const v = e.currentTarget.checked; setForm(f => ({ ...f, consent: v })); }} />
+                                <span>{REWARD_CONSENT_TEXT} <Link href="/privacy" className="underline underline-offset-2">개인정보처리방침</Link></span>
+                            </label>
+                        </div>
+                    )}
+                    <div>
+                        <label htmlFor="tip-credit" className="mb-1 block text-[13px] font-semibold text-ink-soft">행사 화면에 보일 이름이나 아이디</label>
+                        <input id="tip-credit" value={form.credit} onChange={set("credit")} maxLength={30} autoComplete="off" className={field} placeholder="예) 봉황동 주민, @pica_fan" />
+                        <p className={hint}>적으면 행사 화면에 「제보: ○○」로 보여요. 비우면 이름은 어디에도 나오지 않아요.</p>
+                    </div>
                 </div>
             </details>
 

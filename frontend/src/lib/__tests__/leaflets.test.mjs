@@ -1,9 +1,9 @@
 // 실행(frontend 폴더): node --experimental-strip-types --test src/lib/__tests__/leaflets.test.mjs
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { checkLeaflet, givenFields, leafletSource, isGroupProvided, RIGHTS_CHECKS } from "../leaflets.ts";
+import { checkLeaflet, givenFields, leafletSource, isGroupProvided } from "../leaflets.ts";
 
-const ok = { image_kind: "file", group_name: "극단 예시", official_url: "", title: "", date_text: "", venue: "", note: "", rights: RIGHTS_CHECKS.map(() => true) };
+const ok = { image_kind: "file", group_name: "극단 예시", official_url: "", title: "", date_text: "", venue: "", note: "", rights: [true] };
 const img = { size: 1000, type: "image/jpeg" };
 
 test("checkLeaflet: 다 채우면 통과", () => {
@@ -11,7 +11,7 @@ test("checkLeaflet: 다 채우면 통과", () => {
 });
 
 test("checkLeaflet: 이미지·종류·단체 이름·권리 체크가 빠지면 막는다", () => {
-    const errs = checkLeaflet({ ...ok, image_kind: "", group_name: " ", rights: [true, false] }, null);
+    const errs = checkLeaflet({ ...ok, image_kind: "", group_name: " ", rights: [false] }, null);
     assert.equal(errs.length, 4);
     assert.ok(checkLeaflet(ok, { size: 10, type: "application/pdf" }).length === 1);
     assert.ok(checkLeaflet({ ...ok, official_url: "instagram.com/x" }, img).length === 1);

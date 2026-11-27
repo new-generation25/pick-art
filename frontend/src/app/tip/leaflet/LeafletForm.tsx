@@ -4,11 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { loginHref } from "@/lib/reports";
+import { InAppNotice } from "@/components/ui/InAppNotice";
 import {
-    checkLeaflet, givenFields, DAILY_LIMIT, IMAGE_KINDS, PRIVACY_NOTE, RIGHTS_CHECKS, RIGHTS_VERSION, type LeafletInput,
+    checkLeaflet, givenFields, DAILY_LIMIT, IMAGE_KINDS, PRIVACY_NOTE, RIGHTS_CHECKS, RIGHTS_ONE, RIGHTS_VERSION_SITE, type LeafletInput,
 } from "@/lib/leaflets";
 
-const EMPTY: LeafletInput = { image_kind: "", group_name: "", official_url: "", title: "", date_text: "", venue: "", note: "", rights: RIGHTS_CHECKS.map(() => false) };
+const EMPTY: LeafletInput = { image_kind: "", group_name: "", official_url: "", title: "", date_text: "", venue: "", note: "", rights: [false] };
 
 type Mine = { id: string; status: "uploaded" | "read" | "published" | "rejected"; created_at: string; group_name: string | null; given: Record<string, string>; event_id: string | null; ai_result: any };
 const STATUS = { uploaded: "올림 — 글자 읽기 기다리는 중", read: "읽음 — 운영자 확인 중", published: "피카에 올라감", rejected: "반영하지 않음" } as const;
@@ -75,7 +76,7 @@ export function LeafletForm() {
             const { error } = await supabase.from("leaflet_submissions").insert({
                 id, image_path: path, image_kind: form.image_kind, group_name: form.group_name.trim(),
                 official_url: form.official_url.trim() || null, given: givenFields(form), note: form.note.trim() || null,
-                rights_version: RIGHTS_VERSION,
+                rights_version: RIGHTS_VERSION_SITE,
             });
             if (error) throw new Error(error.message.includes("row-level security") ? "limit" : "insert");
             setState("sent");
@@ -98,6 +99,7 @@ export function LeafletForm() {
         return (
             <div className="pica-box p-5 text-[15px]">
                 <p className="text-ink">리플렛은 로그인한 뒤 올릴 수 있어요. 누가 보냈는지 알아야 확인할 때 다시 여쭐 수 있습니다.</p>
+                <InAppNotice className="mt-3" />
                 <Link href={loginHref("/tip/leaflet")} className="mt-4 inline-flex h-12 items-center border-[1.5px] border-ink bg-accent px-5 font-bold text-on-accent">로그인하고 올리기</Link>
             </div>
         );
@@ -152,14 +154,15 @@ export function LeafletForm() {
                     </details>
 
                     <fieldset className="flex flex-col gap-2 border-[1.5px] border-ink p-3">
-                        <legend className="px-1 text-[15px] font-bold text-ink">권리 확인 (둘 다 필요)</legend>
-                        {RIGHTS_CHECKS.map((text, i) => (
-                            <label key={i} className="flex cursor-pointer items-start gap-2.5 text-[14px] leading-relaxed text-ink">
-                                <input type="checkbox" checked={form.rights[i]} className="mt-1"
-                                    onChange={e => { const v = e.currentTarget.checked; setForm(f => ({ ...f, rights: f.rights.map((r, j) => j === i ? v : r) })); }} />
-                                <span>{text}</span>
-                            </label>
-                        ))}
+                        <legend className="px-1 text-[15px] font-bold text-ink">권리 확인</legend>
+                        <label className="flex cursor-pointer items-start gap-2.5 text-[15px] font-semibold leading-relaxed text-ink">
+                            <input type="checkbox" checked={form.rights[0]} className="mt-1 h-5 w-5 flex-none"
+                                onChange={e => { const v = e.currentTarget.checked; setForm(f => ({ ...f, rights: [v] })); }} />
+                            <span>{RIGHTS_ONE}</span>
+                        </label>
+                        <ul className="list-disc space-y-1 pl-9 text-[13px] leading-relaxed text-ink-soft">
+                            {RIGHTS_CHECKS.map(text => <li key={text}>{text}</li>)}
+                        </ul>
                         <p className="text-[13px] text-ink-soft">{PRIVACY_NOTE} 이미지는 1년 동안 보관한 뒤 지웁니다.</p>
                     </fieldset>
 

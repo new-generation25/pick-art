@@ -40,6 +40,7 @@ export default function MePage() {
     const [photoBusy, setPhotoBusy] = useState(false);
     const [points, setPoints] = useState<MyPoints | null>(null);
     const [ledger, setLedger] = useState<LedgerRow[]>([]);
+    const [tipCount, setTipCount] = useState(0);   // 내가 보낸 제보 수 (specs/023: 포인트 카드를 보일지)
     const [msg, setMsg] = useState("");
 
     useEffect(() => {
@@ -50,6 +51,8 @@ export default function MePage() {
             // 활동 포인트 (specs/021): 못 읽어도 나머지 화면은 그대로 그린다
             fetchMyPoints().then(setPoints);
             fetchMyLedger(session.user.id).then(setLedger);
+            supabase.from("reports").select("id", { count: "exact", head: true }).eq("kind", "tip").eq("user_id", session.user.id)
+                .then(({ count }) => setTipCount(count || 0));
             const [{ data: profile }, { data: favs }, { data: follows }] = await Promise.all([
                 supabase.from("profiles").select("*").eq("id", session.user.id).maybeSingle(),
                 supabase.from("favorites")
@@ -197,8 +200,9 @@ export default function MePage() {
                 )}
             </div>
 
-            {/* 활동 포인트 (specs/021): 제보가 피카에 실리면 100P. 쓰임은 운영자가 정한 문구 그대로 */}
-            <div id="points" className={`${card} scroll-mt-20 !py-3.5`}>
+            {/* 활동 포인트 (specs/021): 제보가 피카에 실리면 100P. 쓰임은 운영자가 정한 문구 그대로.
+                포인트 기록이나 보낸 제보가 있는 회원에게만 보인다 (specs/023) */}
+            {((points?.points ?? 0) > 0 || ledger.length > 0 || tipCount > 0) && <div id="points" className={`${card} scroll-mt-20 !py-3.5`}>
                 <div className="flex items-center gap-3">
                     <Sparkles className="h-5 w-5 flex-none text-accent" aria-hidden />
                     <div className="min-w-0 flex-1">
@@ -224,7 +228,7 @@ export default function MePage() {
                         <Link href="/tip" className="font-bold text-accent underline underline-offset-4">{TIP_EVENT_NAME}</Link>에서 피카에 없는 행사를 알려 주세요. 피카에 실리면 {TIP_POINTS}포인트가 쌓여요.
                     </p>
                 )}
-            </div>
+            </div>}
 
             {/* 찜한 행사 */}
             <div id="saved" className="flex scroll-mt-20 items-baseline justify-between px-4 pb-2.5 pt-6">
@@ -296,12 +300,13 @@ export default function MePage() {
             </div>
             <p className="mx-4 mt-2 h-5 text-[12.5px] text-accent" aria-live="polite">{msg}</p>
 
-            <KakaoLinkCard className={card} />
-
             <div className={card}>
                 <Link href="/partners" className="no-underline text-ink"><Line icon={Info} title="단체·공간 안내" sub="공연·전시 정보를 보내는 방법" right={<ChevronRight className="h-5 w-5 text-ink-soft" />} /></Link>
                 <Link href="/about" className="no-underline text-ink"><Line icon={Info} title="피카가 고르는 기준" right={<ChevronRight className="h-5 w-5 text-ink-soft" />} /></Link>
             </div>
+
+            {/* 카카오톡 제보 연결은 계정 쪽에 둔다 (specs/023) */}
+            <KakaoLinkCard className={card} />
 
             <div className={card}>
                 <Line icon={UserRound} title="계정 정보" sub={`가입일 ${user?.created_at ? new Date(user.created_at).toLocaleDateString("ko-KR") : "-"}`} />

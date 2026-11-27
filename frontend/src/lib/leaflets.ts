@@ -10,6 +10,13 @@ export const RIGHTS_CHECKS = [
     "이 리플렛·포스터를 피카에 올릴 권한이 있습니다. 우리 단체가 만들었거나, 디자이너·사진가 등 권리자에게 허락을 받았습니다.",
     "피카가 이 이미지에 담긴 행사 정보(제목·날짜·장소·요금 등)를 정리해 피카 사이트와 SNS에 알리는 데 쓰는 것에 동의합니다. 리플렛·포스터 파일이면 행사 포스터로도 씁니다. 요청하시면 7일 안에 내립니다.",
 ] as const;
+/**
+ * 사이트 리플렛 등록의 권리 확인 (specs/023, 운영자 2026-11-27 «동의 체크도 통합해서 줄여»): 체크는 이 한 줄 하나,
+ * 위 두 문장(RIGHTS_CHECKS)은 그 아래 풀이로 보인다. 사이트에서 보낸 것은 RIGHTS_VERSION_SITE 판으로 저장한다.
+ * (RIGHTS_VERSION·RIGHTS_CHECKS 는 카카오톡 채널과 관리자 «채팅으로 받은 것» 등록이 그대로 쓴다)
+ */
+export const RIGHTS_ONE = "보낸 정보가 사실이고, 이미지 권리를 확인했어요.";
+export const RIGHTS_VERSION_SITE = "r2-2026-11-27";
 export const PRIVACY_NOTE = "개인 휴대전화 번호·계좌번호는 공개하지 않습니다. 가능하면 그런 정보가 없는 판으로 올려 주세요.";
 
 export const IMAGE_KINDS = [
@@ -44,7 +51,7 @@ export function checkLeaflet(f: LeafletInput, file: { size: number; type: string
     if (f.group_name.trim().length > 80) errs.push("단체 이름은 80자 이내로 적어 주세요.");
     if (f.official_url.trim() && !/^https?:\/\/\S+$/.test(f.official_url.trim())) errs.push("공식 안내 주소는 http로 시작하는 주소로 적어 주세요.");
     if (f.note.length > 1000) errs.push("더 알려 줄 것은 1000자 이내로 적어 주세요.");
-    if (f.rights.length !== RIGHTS_CHECKS.length || f.rights.some(r => !r)) errs.push("권리 확인 두 가지에 모두 체크해 주세요.");
+    if (!f.rights.length || f.rights.some(r => !r)) errs.push("권리 확인에 체크해 주세요.");
     return errs;
 }
 
