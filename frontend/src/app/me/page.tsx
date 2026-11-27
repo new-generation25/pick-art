@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ArrowLeft, Bell, Building2, CalendarPlus, ChevronRight, Heart, Info, MapPin, Sparkles, Sun, UserRound } from "lucide-react";
 import { PushButton } from "@/components/ui/PushButton";
 import { supabase } from "@/lib/supabase";
+import { logoutAndReload } from "@/lib/logout";
 import { GN_REGIONS } from "@/lib/regions";
 import { CATEGORIES } from "@/lib/categories";
 import { SITE_URL } from "@/lib/site";
@@ -28,7 +28,6 @@ type Profile = {
  * 예전 /saved · /settings 의 기능을 한 화면에 모았다. 저장하는 칸(profiles·favorites)은 예전과 같고, 바꾸면 바로 저장한다.
  */
 export default function MePage() {
-    const router = useRouter();
     const [state, setState] = useState<"loading" | "login" | "ready">("loading");
     const [user, setUser] = useState<any>(null);
     const [p, setP] = useState<Profile | null>(null);
@@ -102,7 +101,7 @@ export default function MePage() {
         setMsg(error ? `저장하지 못했습니다: ${error.message}` : "저장했습니다");
         setTimeout(() => setMsg(""), 2500);
     };
-    const logout = async () => { await supabase.auth.signOut(); router.push("/"); };
+    const logout = logoutAndReload;
 
     const pickPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.currentTarget.files?.[0];

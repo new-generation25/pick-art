@@ -5,6 +5,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 import { usePathname, useRouter } from "next/navigation";
 import { Activity, Building2, CalendarDays, ExternalLink, Inbox, ListChecks, LogOut, type LucideIcon } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { isLoggingOut, logoutAndReload } from "@/lib/logout";
 import { fetchAdminCounts, menuBadges, type AdminCounts } from "@/lib/adminCounts";
 
 /**
@@ -82,7 +83,16 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         return () => { cancelled = true; };
     }, [router]);
 
-    const logout = async () => { await supabase.auth.signOut(); router.push("/"); };
+    // 다른 탭에서 로그아웃했거나 로그인 기한이 끝나면 관리자 화면에 머물지 않는다. 그대로 두면 화면은 남고
+    // 저장만 «row-level security» 오류로 실패한다(운영자 2026-11-27 «협약확인 선택했는데 확정이 안됨»)
+    useEffect(() => {
+        const { data } = supabase.auth.onAuthStateChange((event) => {
+            if (event === "SIGNED_OUT" && !isLoggingOut()) window.location.assign(`/login?next=${encodeURIComponent(window.location.pathname)}`);
+        });
+        return () => data.subscription.unsubscribe();
+    }, []);
+
+    const logout = logoutAndReload;
 
     if (state !== "admin") {
         return (

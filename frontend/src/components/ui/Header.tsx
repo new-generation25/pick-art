@@ -4,19 +4,18 @@ import Link from "next/link";
 import { LogOut, LayoutDashboard, Settings, Search, Heart, UserRound, CalendarPlus } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { useRouter } from "next/navigation";
 import { Menu } from "@mantine/core";
 import { INSTAGRAM_URL, InstagramIcon } from "./InstagramLink";
 import { HeaderSearch } from "./HeaderSearch";
 import { Avatar } from "./Avatar";
 import { AVATAR_EVENT, providerPhoto } from "@/lib/avatar";
+import { logoutAndReload } from "@/lib/logout";
 
 /**
  * 맨 위 한 줄 (specs/014 시안 f01 → 운영자 11/27 머리 줄 시안 h01-B): 왼쪽 까치 그림 + 글자 로고 pica(끝 점만 초록), 오른쪽 찾기 · 내 정보(흰 원).
  * 내 정보 메뉴 안에 찜·설정·캘린더·인스타그램·관리자·로그아웃을 둔다. 로그인 전이면 인물 원 대신 «로그인» 글자 버튼.
  */
 export function Header() {
-    const router = useRouter();
     const [user, setUser] = useState<any>(null);
     const [nickname, setNickname] = useState("");
     const [isAdmin, setIsAdmin] = useState(false);
@@ -47,13 +46,13 @@ export function Header() {
         // «내 정보»에서 사진을 바꾸거나 지우면 바로 따라 바뀐다
         const onAvatar = (e: Event) => setAvatarPath((e as CustomEvent<string | null>).detail);
         window.addEventListener(AVATAR_EVENT, onAvatar);
-        return () => window.removeEventListener(AVATAR_EVENT, onAvatar);
+        // 다른 탭에서 로그아웃했거나 로그인 기한이 끝나면 이 줄도 «로그인» 버튼으로 바꾼다
+        const { data: auth } = supabase.auth.onAuthStateChange((event) => {
+            if (event === "SIGNED_OUT") { setUser(null); setIsAdmin(false); setAdminRole(false); setAvatarPath(null); }
+        });
+        return () => { window.removeEventListener(AVATAR_EVENT, onAvatar); auth.subscription.unsubscribe(); };
     }, []);
 
-    const handleLogout = async () => {
-        await supabase.auth.signOut();
-        router.push('/');
-    };
 
     const iconBtn = "grid h-11 w-11 place-items-center rounded-full text-ink transition-colors hover:bg-soft";
 
@@ -93,7 +92,7 @@ export function Header() {
                                     <Menu.Item leftSection={<LayoutDashboard size={14} />} component={Link} href="/admin">관리자 페이지</Menu.Item>
                                 )}
                                 <Menu.Divider />
-                                <Menu.Item leftSection={<LogOut size={14} />} onClick={handleLogout}>로그아웃</Menu.Item>
+                                <Menu.Item leftSection={<LogOut size={14} />} onClick={logoutAndReload}>로그아웃</Menu.Item>
                             </Menu.Dropdown>
                         </Menu>
                     ) : (
