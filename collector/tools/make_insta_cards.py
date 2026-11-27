@@ -11,6 +11,9 @@ Playwright(Chromium)로 HTML 을 렌더링해 PNG 를 찍고, Graph API 발행�
 사용:
   python tools/make_insta_cards.py <event_id> [--facts f.json] [--out DIR] [--slug NAME]
   python tools/make_insta_cards.py --today 2026-11-01      (오늘 열리는 후보만 출력)
+  python tools/make_insta_cards.py <event_id> --story [--facts f.json] [--slug NAME]
+      스토리 1장(1080x1920) <slug>_story.png + jpeg_for_api/<slug>_story.jpg 만 만든다(2026-11-27 피드 5건 + 스토리).
+      facts 의 story_hook(없으면 hook)·chip·poster 를 쓴다. 위 250px·아래 340px 은 인스타 화면이 덮어 글자를 두지 않는다.
 
 facts JSON 키(모두 선택): hook, kicker, title, date_label, time, venue, address, price,
   audience, what[], how[], contact, notice, cover_note, chip(표지 분홍 칩, 기본 "오늘 날짜"), poster(로컬 경로·URL, DB 포스터 대신), source_name, source_url, poster_credit,
@@ -34,6 +37,7 @@ load_dotenv(".env.local")
 from database import Database  # noqa: E402
 
 W, H = 1080, 1350
+STORY_H = 1920
 WEEK = "월화수목금토일"
 # 인스타그램은 2025-12 부터 게시물·릴스 캡션의 해시태그를 5개까지로 줄이고 있다
 MAX_TAGS = 5
@@ -200,6 +204,19 @@ body { background: #888; }
 .how li { counter-increment: n; display: grid; grid-template-columns: 90px 1fr; align-items: start; gap: 26px; margin-bottom: 48px; font-size: 44px; font-weight: 700; line-height: 1.38; }
 .how li::before { content: counter(n); font-family: 'Black Han Sans', sans-serif; font-size: 52px; width: 84px; height: 84px; display: flex; align-items: center; justify-content: center; background: %(blue)s; color: #fff; box-shadow: 5px 4px 0 %(pink)s; }
 
+/* 스토리 1장 (1080x1920). 위 250px·아래 340px 은 인스타 화면(프로필 줄·답장 칸)이 덮는다 */
+.story { height: 1920px; }
+.story .top { top: 270px; }
+.story .chips { position: absolute; left: 72px; top: 350px; display: flex; gap: 14px; z-index: 3; }
+.story .hook { position: absolute; left: 72px; right: 72px; top: 430px; font-size: 82px; line-height: 1.06; }
+.story .poster { position: absolute; left: 50%%; top: 780px; transform: translateX(-50%%) rotate(2deg);
+  border: 4px solid %(ink)s; box-shadow: 14px 14px 0 %(blue)s; background: #fff; }
+.story .poster img { display: block; height: 640px; width: auto; max-width: 860px; object-fit: contain; }
+.story .titlebox { position: absolute; left: 0; right: 0; top: 1470px; padding: 24px 72px; }
+.story .titlebox .t { font-size: 46px; font-weight: 900; line-height: 1.22; }
+.story .titlebox .s { font-size: 32px; margin-top: 6px; opacity: .92; font-weight: 600; }
+.story .more { position: absolute; left: 72px; right: 72px; top: 1640px; font-size: 28px; font-weight: 700; color: %(ink_soft)s; }
+
 /* 5. CTA */
 .cta { background: %(blue)s; color: #fff; }
 .cta::before { background-image: radial-gradient(rgba(255,255,255,.10) 1.2px, transparent 1.3px); }
@@ -290,6 +307,21 @@ def slides_html(f: dict, poster: str, handle: str) -> list:
     return out
 
 
+def story_html(f: dict, poster: str, handle: str) -> str:
+    """스토리 1장. 표지와 같은 말(때·훅·포스터·제목)을 세로 판에 맞게 다시 놓는다."""
+    brand = f'<div class="brand">픽아트 <b>pica</b>{(" · " + esc(handle)) if handle else ""}</div>'
+    hook = f.get("story_hook") or f["hook"]
+    sub = " · ".join(x for x in [f["date_label"], f["time"], f["venue"]] if x)
+    return f"""
+<div class="slide story"><div class="top">{brand}</div>
+  <div class="chips"><span class="chip pink">{esc(f['chip'])}</span><span class="chip">{esc(f['kicker'])}</span></div>
+  <div class="hook disp print">{esc(hook)}</div>
+  {f'<div class="poster"><img src="{poster}"></div>' if poster else ''}
+  <div class="titlebox band"><div class="t">{esc(f['title'])}</div><div class="s">{esc(sub)}</div></div>
+  <div class="more">{esc(f['poster_credit'])}<br>자세한 안내는 프로필 링크(피카)에서 · 방문 전 공식 안내 확인</div>
+</div>"""
+
+
 def caption_text(f: dict, handle: str) -> str:
     tags = [t if t.startswith("#") else f"#{t}" for t in f["hashtags"]][:MAX_TAGS]
     pool = [t if t.startswith("#") else f"#{t}" for t in f["hashtags_pool"] if t not in tags]
@@ -320,7 +352,7 @@ def _strip(s: str) -> str:
     return re.sub(r"<[^>]+>", "", re.sub(r"<br\s*/?>", " ", s))
 
 
-def render(pages: list, out_dir: str, slug: str) -> list:
+def render(pages: list, out_dir: str, slug: str, height: int = H, names: list = None) -> list:
     from playwright.sync_api import sync_playwright
     css = CSS % {"W": W, "H": H, **RISO}
     doc = f"<!doctype html><html><head><meta charset='utf-8'><style>{css}</style></head><body>" + \
@@ -331,12 +363,12 @@ def render(pages: list, out_dir: str, slug: str) -> list:
     files = []
     with sync_playwright() as p:
         b = p.chromium.launch()
-        pg = b.new_page(viewport={"width": W, "height": H}, device_scale_factor=1)
+        pg = b.new_page(viewport={"width": W, "height": height}, device_scale_factor=1)
         pg.goto("file:///" + os.path.abspath(html_path).replace("\\", "/"), wait_until="networkidle")
         pg.evaluate("document.fonts.ready")
         pg.wait_for_function("document.fonts.check(\"40px 'Black Han Sans'\") && document.fonts.check(\"40px 'Pretendard Variable'\")", timeout=20000)
         for i, el in enumerate(pg.query_selector_all(".slide"), 1):
-            png = os.path.join(out_dir, f"{slug}_{i:02d}.png")
+            png = os.path.join(out_dir, f"{slug}_{names[i - 1]}.png" if names else f"{slug}_{i:02d}.png")
             el.screenshot(path=png)
             files.append(png)
         b.close()
@@ -367,6 +399,7 @@ def main():
     ap.add_argument("--slug")
     ap.add_argument("--handle", default="")
     ap.add_argument("--today")
+    ap.add_argument("--story", action="store_true", help="스토리 1장(1080x1920)만 만든다")
     a = ap.parse_args()
     db = Database()
     if a.today:
@@ -381,7 +414,12 @@ def main():
     f = build_facts(ev, facts)
     slug = a.slug or a.event_id[:8]
     os.makedirs(a.out, exist_ok=True)
-    pages = slides_html(f, poster_data_uri(facts.get("poster") or ev.get("poster_image_url")), a.handle)
+    poster = poster_data_uri(facts.get("poster") or ev.get("poster_image_url"))
+    if a.story:
+        for x in render([story_html(f, poster, a.handle)], a.out, slug, height=STORY_H, names=["story"]):
+            print(x)
+        return
+    pages = slides_html(f, poster, a.handle)
     files = render(pages, a.out, slug)
     cap = os.path.join(a.out, f"{slug}_caption.txt")
     with open(cap, "w", encoding="utf-8") as fh:
