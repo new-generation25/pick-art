@@ -19,6 +19,7 @@ import { orderFeed } from "@/lib/feedOrder";
 import { ageLabel, fitsAge, kidsInfo, readKidsParam } from "@/lib/kids";
 import { isEndingSoon } from "@/lib/eventDetails";
 import { CATEGORIES, SUBCATEGORIES, normalizeCategory } from "@/lib/categories";
+import { homeDate } from "@/lib/homeDate";
 
 const DATE_LABEL: Record<string, string> = { today: "오늘", week: "이번 주", month: "이번 달", ending: "곧 끝남" };
 
@@ -43,13 +44,15 @@ export async function HomeFeed({ params: resolvedParams, region, district }: { p
   if (gus.length && !regions.includes("부산")) regions.push("부산");
   // 예전 «체험·교육» 주소도 «체험»으로 (specs/015)
   const cats = [...new Set(splitList(resolvedParams.category).map(c => normalizeCategory(c)))].filter(c => (CATEGORIES as readonly string[]).includes(c));
+  // 기간: 주소에 없으면 «이번 주»가 기본, «전체»는 date=all (lib/homeDate.ts)
+  const dateKey = homeDate(resolvedParams.date, resolvedParams.q, resolvedParams.section);
   const filters = {
     region: regions.length === 1 ? regions[0] : undefined,
     regions: regions.length > 1 ? regions : undefined,
     category: cats.length === 1 ? cats[0] : undefined,
     categories: cats.length > 1 ? cats : undefined,
     search: resolvedParams.q,
-    date: resolvedParams.date,
+    date: dateKey === "all" ? undefined : dateKey,
     ended: resolvedParams.ended
   };
 
@@ -158,7 +161,12 @@ export async function HomeFeed({ params: resolvedParams, region, district }: { p
   const sectionKey = resolvedParams.section as SectionKey | undefined;
   const one = sectionKey && SECTION_LABELS[sectionKey] ? ordered.find(s => s.key === sectionKey) : undefined;
 
-  const hasFilter = !!((regions.length && !region) || cats.length || sub || filters.search || filters.date || kids.on);
+  // 기본값(이번 주)만 걸린 상태는 «필터를 건» 것으로 치지 않는다
+  const hasFilter = !!((regions.length && !region) || cats.length || sub || filters.search || resolvedParams.date || kids.on);
+  // 기간 때문에 비어 보일 때 «전체 기간 보기»로 갈 주소(다른 조건은 그대로)
+  const keepAllDates = new URLSearchParams(keep);
+  keepAllDates.set("date", "all");
+  const allDatesHref = `${base}?${keepAllDates.toString()}`;
   // 경남 18곳을 모두 골랐으면 «경남 전체»로 줄여 쓴다
   const GN_ONLY = GN_REGIONS.filter(r => r !== "부산");
   const allGn = GN_ONLY.every(r => regions.includes(r));
@@ -199,7 +207,10 @@ export async function HomeFeed({ params: resolvedParams, region, district }: { p
         ) : shown.length === 0 ? (
           <div className="px-4 py-16 text-center">
             <p className="text-[16px] font-bold text-ink">조건에 맞는 행사가 없어요</p>
-            {hasFilter && <a href={base} className="mt-3 inline-block rounded-full bg-accent px-5 py-2.5 text-[14px] font-bold text-on-accent">필터 풀기</a>}
+            <div className="mt-3 flex flex-wrap justify-center gap-2">
+              {filters.date && <a href={allDatesHref} className="inline-block rounded-full bg-accent px-5 py-2.5 text-[14px] font-bold text-on-accent">전체 기간 보기</a>}
+              {hasFilter && <a href={base} className="inline-block rounded-full border border-line bg-card px-5 py-2.5 text-[14px] font-bold text-ink">필터 풀기</a>}
+            </div>
           </div>
         ) : (
           <FeedSections sections={shown} moreBase={moreBase} folded={extraSections.map(s => s.key)} foldedMoreBase={extraMoreBase} />
@@ -210,6 +221,7 @@ export async function HomeFeed({ params: resolvedParams, region, district }: { p
       {/* «지도» 버튼 (specs/014 US3): 누르면 지금 필터 결과의 장소를 지도 시트로 */}
       {!one && (
         <MapButton
+          showTip
           summary={[DATE_LABEL[filters.date || ""] || "", place || "", cats.length ? (sub ? `${cats[0]} · ${sub}` : cats.join("·")) : "", kids.on ? "아이와" : ""].filter(Boolean).join(" · ")}
           events={dbEvents.map((e: any) => ({ ...toShelf(e), venueId: e.venue_id ?? null, today: (e.event_date_start || e.event_date_end || today) <= today }))}
         />

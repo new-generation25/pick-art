@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { homeDate } from "@/lib/homeDate";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Checkbox, Drawer, Menu } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
@@ -71,7 +72,8 @@ export function FilterBar({ subs = [], total }: { subs?: { name: string; n: numb
     const currentRegion = regions.length === 1 ? regions[0] : regions.length ? "여럿" : "전체";
     const currentCategory = cats.length === 1 ? cats[0] : cats.length ? "여럿" : "전체";
     const currentSub = searchParams.get("sub") || "";
-    const currentDate = searchParams.get("date") || "all";
+    // 주소에 기간이 없으면 «이번 주»가 기본이다(lib/homeDate.ts). «전체»는 date=all 로 주소에 남긴다
+    const currentDate = homeDate(searchParams.get("date"), searchParams.get("q"), searchParams.get("section"));
     const currentKids = searchParams.get("kids") || "전체";
     const showEnded = searchParams.get("ended") === "1";
     const [myRegion, setMyRegion] = useState<string | null>(null);
@@ -139,6 +141,8 @@ export function FilterBar({ subs = [], total }: { subs?: { name: string; n: numb
             gs = [];
         } else if (key === "district") {
             gs = value === "전체" ? [] : [value];
+        } else if (key === "date") {
+            params.set(key, value);   // «전체»(all)도 주소에 남겨 기본값(이번 주)과 구분한다
         } else if (value === "전체" || value === "all") {
             params.delete(key);
             if (key === "category") params.delete("sub"); // 분야를 바꾸면 세부도 푼다 (specs/015)

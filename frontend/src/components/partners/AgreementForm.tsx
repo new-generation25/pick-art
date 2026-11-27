@@ -9,13 +9,15 @@ import {
     TERMS_SECTIONS, TERMS_VERSION, checkAgreement, toRow, type AgreementInput,
 } from "@/lib/partnerAgreement";
 import { loginHref } from "@/lib/reports";
-import { InAppNotice } from "@/components/ui/InAppNotice";
 
 // 정보 제공 협약(동의) 받기 (specs/016). /partners 맨 끝 #join 에 들어간다.
-// 로그인한 사람만 보낸다 (specs/023, 운영자 2026-11-27 «카톡은 채널구독, 피카에서는 로그인»). 인스타 앱 안 브라우저에서는
-// 구글 로그인이 막히므로 그때는 «외부 브라우저로 열기» 안내(InAppNotice)를 먼저 보인다.
+// 로그인한 사람만 보낸다 (specs/023, 운영자 2026-11-27 «카톡은 채널구독, 피카에서는 로그인»).
+// 다만 양식은 로그인 없이 그대로 보인다(운영자 «프로필에서의 링크는 클릭하자마자 구글로그인이 뜨면 안되고. 피카가 먼저 떠야지»).
+// 로그인하지 않았으면 맨 아래 버튼이 «로그인하고 보내기»이고, 적던 내용은 이 탭에 잠깐 넣어 두었다가(DRAFT_KEY) 돌아오면 되살린다.
+// 앱 안 브라우저 안내는 로그인 화면(/login)에서만 보인다.
 // 보내기는 DB 함수 submit_partner_agreement() 로만(회원 하루 3건·같은 연락처 하루 1번). 운영자가 확인해야 협약으로 표시된다.
 // 필수 동의 체크는 «전체 동의» 하나다(네 항목은 그 아래 목록, 개인정보는 따로 구분).
+const DRAFT_KEY = "pica-agreement-draft";
 type Mine = { id: string; org_name: string; status: string; created_at: string; withdraw_requested_at: string | null };
 
 function day(iso: string) {
@@ -47,7 +49,17 @@ export function AgreementForm() {
             setLoggedIn(!!session?.user);
             if (session?.user) loadMine();
         });
+        // 로그인하러 가기 전에 적던 내용을 되살린다(이 탭에서만, 보낸 뒤에는 지운다)
+        try {
+            const saved = sessionStorage.getItem(DRAFT_KEY);
+            if (saved) setForm({ ...EMPTY_AGREEMENT, ...(JSON.parse(saved) as Partial<AgreementInput>) });
+        } catch { /* 저장소를 못 쓰면 빈 양식으로 */ }
     }, [loadMine]);
+
+    const goLogin = () => {
+        try { sessionStorage.setItem(DRAFT_KEY, JSON.stringify(form)); } catch { /* 못 넣으면 돌아와서 다시 적는다 */ }
+        window.location.assign(loginHref("/partners#join"));
+    };
 
     // 값은 이벤트 처리 중에 먼저 읽는다(나중에 도는 상태 갱신 함수 안에서는 currentTarget 이 비어 있다)
     const setText = (k: keyof AgreementInput) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -62,6 +74,7 @@ export function AgreementForm() {
     const send = async (e: React.FormEvent) => {
         e.preventDefault();
         if (trap) return;
+        if (!loggedIn) { goLogin(); return; }
         const errs = checkAgreement(form);
         setErrors(errs);
         if (errs.length) return;
@@ -79,6 +92,7 @@ export function AgreementForm() {
         }
         setState("sent");
         setForm(EMPTY_AGREEMENT);
+        try { sessionStorage.removeItem(DRAFT_KEY); } catch { /* 무시 */ }
         loadMine();
     };
 
@@ -105,17 +119,6 @@ export function AgreementForm() {
             </ul>
         </div>
     );
-
-    if (loggedIn === undefined) return null;
-    if (!loggedIn) {
-        return (
-            <div className="border-[1.5px] border-line bg-[var(--pk-card)] p-5 text-[15px] leading-relaxed text-ink">
-                <p>협약 신청은 로그인한 뒤 보낼 수 있어요. 로그인하면 이 화면으로 돌아와요.</p>
-                <InAppNotice className="mt-3" />
-                <Link href={loginHref("/partners#join")} className="mt-4 flex h-14 items-center justify-center bg-[var(--pk-accent)] px-5 text-[17px] font-bold text-[var(--pk-on-accent)] no-underline">로그인하고 신청하기</Link>
-            </div>
-        );
-    }
 
     if (state === "sent") {
         return (
@@ -240,11 +243,13 @@ export function AgreementForm() {
                         {errors.map(e => <li key={e}>{e}</li>)}
                     </ul>
                 )}
-                <button type="submit" disabled={state === "sending"} className="h-14 w-full bg-[var(--pk-accent)] px-5 text-[17px] font-bold text-[var(--pk-on-accent)] disabled:opacity-50">
-                    {state === "sending" ? "보내는 중…" : "동의하고 보내기"}
+                <button type="submit" disabled={state === "sending" || loggedIn === undefined} className="h-14 w-full bg-[var(--pk-accent)] px-5 text-[17px] font-bold text-[var(--pk-on-accent)] disabled:opacity-50">
+                    {state === "sending" ? "보내는 중…" : loggedIn ? "동의하고 보내기" : "로그인하고 보내기"}
                 </button>
                 <p className="text-[14px] leading-relaxed text-ink-soft">
-                    보내면 운영자가 확인한 뒤 일주일 안에 연락드려요. 아래 «내가 보낸 신청»에서 진행 상황을 볼 수 있어요.
+                    {loggedIn
+                        ? "보내면 운영자가 확인한 뒤 일주일 안에 연락드려요. 아래 «내가 보낸 신청»에서 진행 상황을 볼 수 있어요."
+                        : "보내려면 로그인이 필요해요. 누르면 로그인 화면으로 가고, 적은 내용은 돌아와도 남아 있어요."}
                 </p>
             </form>
             {myList}

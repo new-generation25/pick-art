@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { loginHref } from "@/lib/reports";
-import { InAppNotice } from "@/components/ui/InAppNotice";
 import {
     checkLeaflet, givenFields, DAILY_LIMIT, IMAGE_KINDS, PRIVACY_NOTE, RIGHTS_CHECKS, RIGHTS_ONE, RIGHTS_VERSION_SITE, type LeafletInput,
 } from "@/lib/leaflets";
@@ -99,7 +98,6 @@ export function LeafletForm() {
         return (
             <div className="pica-box p-5 text-[15px]">
                 <p className="text-ink">리플렛은 로그인한 뒤 올릴 수 있어요. 누가 보냈는지 알아야 확인할 때 다시 여쭐 수 있습니다.</p>
-                <InAppNotice className="mt-3" />
                 <Link href={loginHref("/tip/leaflet")} className="mt-4 inline-flex h-12 items-center border-[1.5px] border-ink bg-accent px-5 font-bold text-on-accent">로그인하고 올리기</Link>
             </div>
         );

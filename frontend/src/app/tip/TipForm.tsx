@@ -10,7 +10,6 @@ import {
 } from "@/lib/reports";
 import { todayKST } from "@/lib/utils";
 import { shrink } from "./leaflet/LeafletForm";
-import { InAppNotice } from "@/components/ui/InAppNotice";
 
 // 행사 제보 「숨은 행사 찾기」 (specs/020 → 021). 로그인 회원이 보낸다. 꼭 받는 것은 행사 이름 + 원문 링크나 사진 하나.
 // 접수는 submit_tip() 으로만 하고, 사진은 그 함수가 돌려준 경로(tips/<id>.jpg)에 한 번 올린다. 공개는 관리자가 확인한 뒤(헌장 I)
@@ -135,7 +134,6 @@ export function TipForm() {
         return (
             <div className="rounded-[14px] bg-card p-5 text-[15px] shadow-[0_1px_4px_rgba(30,26,21,.08)]">
                 <p className="leading-relaxed text-ink">제보는 로그인한 뒤 보낼 수 있어요. 로그인하면 이 화면으로 돌아와요.</p>
-                <InAppNotice className="mt-3" />
                 <Link href={loginHref("/tip")} className="mt-4 flex h-14 items-center justify-center rounded-full bg-accent px-6 text-[17px] font-bold text-on-accent no-underline">로그인하고 제보하기</Link>
             </div>
         );
