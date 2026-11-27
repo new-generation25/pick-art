@@ -19,6 +19,7 @@
   python tools/insta_state.py has-account candidates @계정 목록에 이미 있는지(feedback·engaged·dm·candidates)
   python tools/insta_state.py claim account @계정 --by 참여  오늘 이 계정을 맡는다(다른 에이전트가 맡았으면 실패)
   python tools/insta_state.py claim event <event_id> --by 게시
+  python tools/insta_state.py claim story <event_id> --by 게시   스토리로 올릴 행사를 맡는다(피드에 나간 행사도 되고, 같은 날만 막힌다)
   python tools/insta_state.py add engaged '<json>'        한 줄 더하기(posted·engaged·dm·feedback·candidates·stats)
   python tools/insta_state.py add-many feedback '[...]'   여러 줄 한 번에 더하기(문제 있는 줄만 빠짐)
   python tools/insta_state.py liked-many @a @b ...        여러 계정의 7일 안 답례 좋아요 여부
@@ -26,6 +27,9 @@
   python tools/insta_state.py mark-used @계정             candidates 의 used 를 오늘로
   python tools/insta_state.py update dm --match '{"account":"@x","post_url":"..."}' --set '{"status":"yes"}'
   python tools/insta_state.py withdraw @계정 --reply "받은 글"  허락 철회: 상시 동의 해제, 다시 묻지 않음, 내릴 게시물 주소
+
+posted 줄에 "format": "story" 가 있으면 스토리 기록이다(2026-11-27 피드 5건 + 스토리). 스토리 줄은 피드 중복 점검·posted-ids·DB 반영에서
+빠지고, 같은 행사를 같은 날 피드와 스토리로 겹쳐 올리는 것만 막는다. format 이 없으면 피드다.
 
 feedback.kind 는 맞팔로우·새 팔로워·댓글 답글·댓글 좋아요·게시물 좋아요·DM 답장·멘션·기타 중 하나(영어 값은 바꿔 넣는다).
 engaged 의 comment·reply 줄에는 liked(true|false)가 있어야 한다.
@@ -256,9 +260,24 @@ def cmd_standing_visited(a):
 ROUNDUP_GAP_DAYS = 7  # 묶음(roundup)·릴스에 든 행사는 7일 지나야 단독으로 다시 올린다(2026-11-26 운영자 결정)
 
 
+def is_story(r) -> bool:
+    """posted.json 의 스토리 줄인지. format 이 없으면 피드다."""
+    return (r.get("format") or "feed") == "story"
+
+
+def posted_on(event_id, day, story=None):
+    """그 행사를 그날 올린 줄이 있는지. story=True 스토리만, False 피드만, None 둘 다."""
+    return any(r.get("event_id") == event_id and (r.get("posted_at") or "")[:10] == day
+               and (story is None or is_story(r) == story) for r in load("posted"))
+
+
 def cmd_posted_ids(a):
-    """올린 event_id + 최근 7일 묶음·릴스(roundups.json)에 든 event_id. 게시 후보에서 뺄 목록이다."""
-    ids = [r["event_id"] for r in load("posted") if r.get("event_id")]
+    """피드로 올린 event_id + 오늘 스토리로 올린 event_id + 최근 7일 묶음·릴스(roundups.json)에 든 event_id. 피드 후보에서 뺄 목록이다.
+    스토리로 올린 행사는 다음 날부터 다시 피드 후보가 된다."""
+    rows = load("posted")
+    ids = [r["event_id"] for r in rows if r.get("event_id") and not is_story(r)]
+    ids += [r["event_id"] for r in rows if r.get("event_id") and is_story(r)
+            and (r.get("posted_at") or "")[:10] == today() and r["event_id"] not in ids]
     p = os.path.join(BASE, "roundups.json")
     since = (date.today() - timedelta(days=ROUNDUP_GAP_DAYS - 1)).isoformat()
     recent = []
@@ -300,7 +319,7 @@ def _dup_posted(event_id, title=None, region=None):
     DB 를 못 읽으면 제목·지역만으로 판단한다(게시를 막는 쪽이 안전)."""
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     from dedupe import loose, similar
-    rows = [r for r in load("posted") if r.get("event_id") and r.get("event_id") != event_id]
+    rows = [r for r in load("posted") if r.get("event_id") and r.get("event_id") != event_id and not is_story(r)]
     try:
         from dotenv import load_dotenv
         load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env.local"))
@@ -335,7 +354,12 @@ def cmd_claim(a):
                 fail(f"{key} 는 오늘 「{c.get('by')}」 가 맡았다")
         if a.kind == "account" and key in accounts_acted_today():
             fail(f"{key} 에는 오늘 이미 댓글·허락 댓글을 달았다")
-        if a.kind == "event" and key in {r.get("event_id") for r in load("posted")}:
+        if a.kind in ("event", "story") and any(c.get("date") == today() and c.get("kind") in ("event", "story")
+                                                and c.get("key") == key for c in rows):
+            fail(f"{key} 는 오늘 이미 피드나 스토리로 맡아 둔 행사다(같은 날 겹쳐 올리지 않는다)")
+        if a.kind in ("event", "story") and posted_on(key, today()):
+            fail(f"{key} 는 오늘 이미 피드나 스토리로 올린 행사다(같은 날 겹쳐 올리지 않는다)")
+        if a.kind == "event" and key in {r.get("event_id") for r in load("posted") if not is_story(r)}:
             fail(f"{key} 는 이미 올린 행사다")
         if a.kind == "event":
             dup = _dup_posted(key)
@@ -360,7 +384,14 @@ def _check_new(file, rec, rows):
         rec["at"] = datetime.now().astimezone().isoformat(timespec="seconds")  # 리포트에 실제 시각이 나오게
     if file == "posted" and not re.fullmatch(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", str(rec["event_id"])):
         return "event_id 가 피카 DB 행사 번호(UUID)가 아니다 — 먼저 DB에 넣고 그 번호로 올린다"
-    if file == "posted" and any(r.get("event_id") == rec["event_id"] for r in rows):
+    if file == "posted" and rec.get("format") not in (None, "feed", "story"):
+        return "format 은 feed(생략 가능) 또는 story"
+    if file == "posted" and any(r.get("event_id") == rec["event_id"] and (r.get("posted_at") or "")[:10] == str(rec["posted_at"])[:10]
+                                for r in rows):
+        return "같은 날 이미 피드나 스토리로 올린 행사(같은 날 겹쳐 올리지 않는다)"
+    if file == "posted" and is_story(rec):
+        return None  # 스토리는 피드에 나간 행사도 올릴 수 있다(다른 날)
+    if file == "posted" and any(r.get("event_id") == rec["event_id"] for r in rows if not is_story(r)):
         return "이미 posted.json 에 있는 event_id"
     if file == "posted":
         dup = _dup_posted(rec["event_id"], rec.get("title"), rec.get("region"))
@@ -525,7 +556,7 @@ def main():
     p = sub.add_parser("last-check"); p.add_argument("--set", help="처리한 회차 이름(예: 11/24 2차)"); p.set_defaults(f=cmd_last_check)
     p = sub.add_parser("has-account"); p.add_argument("file", choices=["candidates", "engaged", "dm", "feedback"])
     p.add_argument("account"); p.set_defaults(f=cmd_has_account)
-    p = sub.add_parser("claim"); p.add_argument("kind", choices=["account", "event"]); p.add_argument("key")
+    p = sub.add_parser("claim"); p.add_argument("kind", choices=["account", "event", "story"]); p.add_argument("key")
     p.add_argument("--by", required=True); p.set_defaults(f=cmd_claim)
     p = sub.add_parser("add"); p.add_argument("file", choices=list(REQUIRED)); p.add_argument("record")
     p.set_defaults(f=cmd_add)

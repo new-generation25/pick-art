@@ -50,7 +50,8 @@ def at_of(v):
 def main():
     rows = []
     for p in load("posted.json"):
-        rows.append({"date": p.get("posted_at", "")[:10], "at": at_of(p.get("posted_at")), "kind": "게시", "account": "@picka.news",
+        rows.append({"date": p.get("posted_at", "")[:10], "at": at_of(p.get("posted_at")),
+                     "kind": "스토리" if p.get("format") == "story" else "게시", "account": "@picka.news",
                      "detail": f"{p.get('region', '')} · {p.get('title', '')}", "link": p.get("post_url", ""),
                      "result": p.get("note", "올림")})
     role_ko = {"official": "기관", "group": "단체", "artist": "예술인"}
@@ -168,7 +169,7 @@ def build_daily(runs):
     def day(date):
         date = (date or "")[:10]
         if date not in days:
-            days[date] = {"date": date, "posts": 0, "posts_small": 0, "posts_public": 0, "posts_other": 0,
+            days[date] = {"date": date, "posts": 0, "posts_small": 0, "posts_public": 0, "posts_other": 0, "stories": 0,
                           "follows": 0, "comments": 0, "ask_comments": 0, "dms": 0, "new_permits": 0,
                           "feedback": 0, "thanks_like": 0, "thanks_reply": 0}
         return days[date]
@@ -180,6 +181,9 @@ def build_daily(runs):
             continue
         seen_posts.add(key)
         d = day(p.get("posted_at"))
+        if p.get("format") == "story":  # 스토리는 피드 게시 수에 넣지 않는다(2026-11-27 피드 5건 + 스토리)
+            d["stories"] += 1
+            continue
         d["posts"] += 1
         sc = p.get("scale")
         d["posts_small" if sc == "소규모" else "posts_public" if sc == "공공" else "posts_other"] += 1
@@ -244,7 +248,7 @@ ENV = os.path.join(os.path.dirname(__file__), "..", "..", "frontend", ".env.loca
 SIGUNGU = ["부산", "창원", "진주", "통영", "사천", "김해", "밀양", "거제", "양산", "의령", "함안", "창녕",
            "고성", "남해", "하동", "산청", "함양", "거창", "합천"]
 SMALL_POST_TARGET = 50   # 게시 소규모:공공 = 5:5 (운영매뉴얼 1.2)
-POSTS_PER_DAY_TARGET = 10  # 하루 게시 목표 10 (대시보드 「그날 활동」 게시 칸)
+POSTS_PER_DAY_TARGET = 5  # 하루 피드 게시 목표 5 (2026-11-27 운영자 결정 「피드5건+스토리」, 옛 값 10). 스토리는 세지 않는다
 PENDING_DAYS = 7         # 허락 댓글 7일 무응답 → none 으로 정리 (dm.json status 규칙)
 STANDING_VISIT_DAYS = 30  # 상시 동의 계정은 한 달에 한 번 찾아간다 (insta_state.py standing-due)
 LOGS = os.path.join(os.path.dirname(__file__), "..", "logs")  # 정기 수집 로그 scheduled_YYYYMMDD_HHMM.log
@@ -390,6 +394,8 @@ def build_metrics(runs):
     # 게시물 하나 = post_url 하나 (순회공연은 회차마다 줄이 있다)
     posts = {}
     for p in posted:
+        if p.get("format") == "story":  # 지표의 게시 수·소규모 비율·선행일은 피드만 센다(2026-11-27 피드 5건 + 스토리)
+            continue
         k = p.get("post_url") or id(p)
         posts.setdefault(k, p)
     post_day = {k: (p.get("posted_at") or "")[:10] for k, p in posts.items()}

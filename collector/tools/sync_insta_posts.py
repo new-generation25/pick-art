@@ -31,6 +31,8 @@ def latest_posts(rows):
     """event_id → (post_url, posted_at). posted_at 이 가장 늦은 줄."""
     best = {}
     for r in rows:
+        if r.get("format") == "story":  # 스토리는 24시간 뒤 사라진다 — 행사 화면의 인스타 링크로 쓰지 않는다
+            continue
         eid, url, at = r.get("event_id"), r.get("post_url"), (r.get("posted_at") or "")[:10]
         if not (eid and UUID.match(eid) and url and url.startswith("https://www.instagram.com/") and DATE.match(at)):
             continue
