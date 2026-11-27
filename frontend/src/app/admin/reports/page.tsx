@@ -170,7 +170,7 @@ export default function AdminReportsPage() {
                 <Paper withBorder p="sm" radius="md" mb="md">
                     <Text size="sm" style={{ overflowWrap: "anywhere" }}>
                         <b>이번 주(월~일) 반영한 제보 {week.done}건</b> · 연락처를 남긴 제보 {week.withContact}건 · 쿠폰 보냄 {week.sent}건.
-                        {" "}12월까지 매주 5명에게 커피 쿠폰을 보냅니다(같은 사람 한 주 1장, 당첨은 카카오톡 채널에 공지). 보낸 뒤 «쿠폰 보냄 · 연락처 지우기»를 눌러 주세요. 보내지 않은 연락처는 {CONTACT_KEEP_DAYS}일 뒤 지워집니다.
+                        {" "}12월까지 매주 5명에게 커피 쿠폰을 보냅니다(같은 사람 한 주 1장, 당첨은 인스타그램과 카카오톡 채널에 공지). 보낸 뒤 «쿠폰 보냄 · 연락처 지우기»를 눌러 주세요. 보내지 않은 연락처는 {CONTACT_KEEP_DAYS}일 뒤 지워집니다.
                     </Text>
                     <Text size="sm" mt={6} style={{ overflowWrap: "anywhere" }}>
                         <b>이번 주 많이 알린 회원</b>(반영된 제보 수, 위 두 사람은 무조건 당첨):{" "}

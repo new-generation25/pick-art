@@ -146,7 +146,7 @@ export function TipForm() {
                 <p className="pica-display text-[22px] text-ink">고맙습니다. 제보를 받았어요.</p>
                 <p className="mt-2 leading-relaxed text-ink-soft">원문을 확인한 뒤 피카에 올려요. 확인이 안 되면 올리지 않을 수 있어요.</p>
                 <p className="mt-1 leading-relaxed text-ink">피카에 실리면 <b>{TIP_POINTS}포인트</b>가 쌓여요. <Link href="/me#points" className="underline underline-offset-2">내 정보</Link>에서 볼 수 있어요.</p>
-                {sent.withContact && <p className="mt-1 leading-relaxed text-ink-soft">커피 쿠폰은 매주 5명께, 적어 주신 연락처로 보내요. 당첨은 카카오톡 채널 «피카»에서 알려요.</p>}
+                {sent.withContact && <p className="mt-1 leading-relaxed text-ink-soft">커피 쿠폰은 매주 5명께, 적어 주신 연락처로 보내요. 당첨은 인스타그램과 카카오톡 채널 «피카»에서 알려요.</p>}
                 {sent.photoFailed && <p className="mt-2 font-semibold leading-relaxed text-ink">사진은 올라가지 않았어요. 링크를 알면 한 번 더 보내 주세요.</p>}
                 <div className="mt-4 flex flex-wrap gap-2">
                     <button type="button" onClick={() => setSent(null)} className="h-12 rounded-full bg-accent px-5 text-[15px] font-bold text-on-accent">하나 더 제보하기</button>
