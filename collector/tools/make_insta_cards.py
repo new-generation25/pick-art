@@ -228,9 +228,9 @@ body { background: #888; }
 .group .gocta { background: %(blue)s; color: #fff; font-size: 36px; font-weight: 700; line-height: 1.5; padding: 30px 36px; border: 4px solid %(ink)s; }
 
 /* 4. 반으로 나눈 장 */
-.how .half { position: absolute; left: 72px; right: 72px; }
+.how .half { position: absolute; left: 72px; right: 72px; display: flex; flex-direction: column; justify-content: center; }  /* 칸마다 내용을 세로 가운데로(2026-11-27 운영자 「위치수정 1번」) */
 .how .half.up { top: 150px; height: 520px; }
-.how .half.down { top: 700px; height: 520px; border-top: 4px solid %(ink)s; padding-top: 50px; }
+.how .half.down { top: 700px; height: 520px; border-top: 4px solid %(ink)s; }
 .how .h3 { font-size: 68px; line-height: 1.1; margin-bottom: 34px; }
 .how .half li { font-size: 38px; margin-bottom: 26px; }
 .how .half li::before { width: 72px; height: 72px; font-size: 44px; }
