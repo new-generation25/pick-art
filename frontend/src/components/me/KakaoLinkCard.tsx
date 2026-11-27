@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { MessageCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
-/** 카카오톡 채널 «행사 알리기» 제보를 이 회원과 잇는다(specs/017, 운영자 11/27 «연결 코드 방식»).
+/** 카카오톡 채널 «행사 제보하기» 제보를 이 회원과 잇는다(specs/017, 운영자 11/27 «연결 코드 방식»).
  *  회원이 6자리 코드(10분)를 받아 피카 채널 채팅방에 «연결 123456»을 보내면, 그 뒤 카카오로 보낸 제보가 이 회원 것으로 기록된다.
  *  포인트 약속은 여기서 하지 않는다(021 적용 전). */
 const KAKAO_CHAT = "https://pf.kakao.com/_xoxdxkvX/chat";

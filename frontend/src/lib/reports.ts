@@ -8,7 +8,7 @@
 
 export const ERROR_CATEGORIES = ["날짜·시간", "장소", "관람료", "링크", "취소·변경", "포스터", "기타"] as const;
 
-/** 카카오톡 채널 «피카» 1:1 채팅(「행사 알리기」 챗봇, specs/017) */
+/** 카카오톡 채널 «피카» 1:1 채팅(「행사 제보하기」 챗봇, specs/017) */
 export const KAKAO_CHAT = "https://pf.kakao.com/_xoxdxkvX/chat";
 
 /** 쿠폰 연락처 수집·이용 동의 문구와 그 판. 문구를 바꾸면 판도 바꾼다(개인정보처리방침과 같은 내용이어야 한다) */

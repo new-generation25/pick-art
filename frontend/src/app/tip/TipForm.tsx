@@ -259,7 +259,7 @@ export function TipForm() {
                 {sending ? "보내는 중…" : "제보 보내기"}
             </button>
             <p className="text-center text-[14px] leading-relaxed text-ink-soft">
-                카카오톡이 편하면 채널 «피카»의 「행사 알리기」로 사진·글을 보내도 돼요.{" "}
+                카카오톡이 편하면 채널 «피카»의 「행사 제보하기」로 사진·글을 보내도 돼요.{" "}
                 <a href={KAKAO_CHAT} target="_blank" rel="noopener noreferrer" className="font-bold text-ink underline underline-offset-4">카카오톡으로 보내기</a>
             </p>
             <p className="text-center text-[13px] leading-relaxed text-ink-soft">{POINTS_NOTE}</p>

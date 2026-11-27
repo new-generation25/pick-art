@@ -66,7 +66,8 @@ export async function POST(request: Request) {
     if (!req) return NextResponse.json({ error: "bad request" }, { status: 400 });
     const { userKey, action } = req;
 
-    // 채널로 오는 말은 제보만이 아니다: 웰컴·제보 시간 밖의 말에는 문의 길(메일·인스타그램 메시지)·«행사 알리기» 두 갈래를 보인다(상담원 연결은 운영자 11/27 요청으로 뺌)
+    // 채널로 오는 말은 제보만이 아니다: 웰컴·제보 시간 밖의 말에는 «피카 보기»·«행사 제보하기»·«문의하기» 세 갈래를 보인다.
+    // «문의하기»는 «메시지 남기기»(1:1 채팅, 파트너센터 «내 채팅») 버튼 카드로 답한다(운영자 11/27)
     if (action.kind === "welcome") {
         const r = await intake(secret, userKey, "status");
         if (r.error === "auth") return NextResponse.json({ error: "forbidden" }, { status: 403 });

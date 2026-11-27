@@ -13,9 +13,12 @@
  * https://kakaobusiness.gitbook.io/main/tool/chatbot/skill_guide/answer_json_format.md
  *
  * 채널로 오는 말은 제보만이 아니다(운영자 11/26 «일반 사용자들도 있잖아», «제보는 메뉴형태로»).
- * «행사 알리기»를 누른 뒤 30분 동안 보낸 사진·글만 제보로 받는다(DB kakao_senders.tip_until).
- * 그 밖의 말은 저장하지 않고 문의 길(메일·인스타그램 메시지)과 «행사 알리기»를 보인다.
- * 상담원 연결(버튼 action "operator", 채널 1:1 채팅으로 넘김)은 운영자 11/27 «상담원 연결 기능은 없애»로 뺐다.
+ * «행사 제보하기»(옛 이름 «행사 알리기», 운영자 11/27 이름 바꿈)를 누른 뒤 10분 동안 보낸 사진·글만 제보로 받는다
+ * (DB kakao_senders.tip_until, 운영자 11/27 «30분 너무 길어 10분으로»).
+ * 그 밖의 말은 저장하지 않고 «피카 보기»·«행사 제보하기»·«문의하기» 세 갈래를 보인다.
+ * «문의하기»는 «메시지를 남기면 늦더라도 답한다»는 안내와 «메시지 남기기» 버튼(action "operator" = 채널 1:1 채팅,
+ * 파트너센터 «내 채팅»으로 들어감)을 보인다(운영자 11/27 «문의하기 > 메시지를 남겨 놓으시면 추후 응답 > 내채팅 연결»).
+ * 버튼 순서는 «피카 보기»가 먼저(운영자 11/27 «피카 서비스 이용자를 늘려야지»).
  */
 import { RIGHTS_CHECKS, RIGHTS_VERSION, PRIVACY_NOTE } from "./leaflets";
 
@@ -24,20 +27,22 @@ export const SKILL_KEY_HEADER = "x-pica-skill-key";
 export const AGREE_TEXT = "동의하고 보내기";
 /** 사진 받기 버튼이 보내는 말. 오픈빌더 «사진 보내기» 블록(보안 이미지 파라미터)의 발화와 같아야 한다 */
 export const PHOTO_TEXT = "사진 보내기";
-/** 제보 메뉴. 웰컴 카드 버튼·채팅방 메뉴가 보내는 말 */
-export const TIP_TEXT = "행사 알리기";
-const TIP_WORDS = new Set([TIP_TEXT, "제보", "제보하기", "행사 제보", PHOTO_TEXT, "리플렛 보내기", "포스터 보내기"]);
-/** 오픈빌더 «행사 알리기» 블록 이름. 이 블록에서 온 요청은 발화와 상관없이 제보 시작으로 읽는다 */
+/** 제보 메뉴. 카드 버튼·채팅방 메뉴가 보내는 말 (운영자 11/27 «행사 알리기 말고 행사 제보하기로») */
+export const TIP_TEXT = "행사 제보하기";
+/** 제보 시간(분). DB kakao_intake 의 tip_until 과 같아야 한다 */
+export const TIP_MINUTES = 10;
+const TIP_WORDS = new Set([TIP_TEXT, "행사 알리기", "제보", "제보하기", "행사 제보", PHOTO_TEXT, "리플렛 보내기", "포스터 보내기"]);
+/** 오픈빌더 제보 블록 이름(블록 이름은 옛 이름 그대로). 이 블록에서 온 요청은 발화와 상관없이 제보 시작으로 읽는다 */
 export const TIP_BLOCK = "행사 알리기";
-/** 예전 상담 연결 버튼 이름. 옛 카드의 버튼을 누르면 이 말이 올 수 있어 문의 안내로 받는다 */
-export const OPERATOR_LABEL = "운영자에게 문의";
-/** «문의»·«상담» 같은 말을 받는 오픈빌더 블록 이름. 이 블록은 연락 길(메일·인스타그램 메시지)만 알려 준다(상담 창구 아님) */
+/** 문의 메뉴·버튼이 보내는 말 */
+export const ASK_TEXT = "문의하기";
+/** 1:1 채팅으로 넘기는 버튼 이름(스킬 응답 버튼 action "operator") */
+export const OPERATOR_LABEL = "메시지 남기기";
+/** «문의»·«상담» 같은 말을 받는 오픈빌더 블록 이름 */
 export const ASK_BLOCK = "운영자 문의";
-/** 문의 길: 사이트 소개·약관과 같은 메일, 인스타그램 메시지 */
-export const CONTACT_MAIL = "pick.art.pica@gmail.com";
 /** 카드의 «피카 보기» 버튼 주소(채팅방 메뉴 «피카 보기»와 같음) */
 export const PICA_URL = "https://picka.news";
-const ASK_WORDS = new Set([OPERATOR_LABEL, ASK_BLOCK, "문의", "문의하기", "상담", "상담원 연결", "운영자 연결"]);
+const ASK_WORDS = new Set([ASK_TEXT, OPERATOR_LABEL, "운영자에게 문의", ASK_BLOCK, "문의", "상담", "상담원 연결", "운영자 연결"]);
 export const MAX_IMAGES = 10;
 /** 카카오에서 내려받을 때 상한(PC에서 보낸 원본 PNG 7.5MB 확인). 저장 전에 긴 변 2048px JPEG 로 줄인다 */
 export const MAX_IMAGE_BYTES = 25 * 1024 * 1024;
@@ -138,11 +143,18 @@ export function parseSkillRequest(body: unknown): SkillRequest | null {
 // ---------- 답 ----------
 
 type QuickReply = { label: string; action: "message"; messageText: string };
-type Button = { label: string; action: "message"; messageText: string } | { label: string; action: "webLink"; webLinkUrl: string };
-type Output = { simpleText: { text: string } } | { textCard: { title: string; description: string; buttons: Button[]; buttonLayout: "vertical" } };
+type Button =
+    | { label: string; action: "message"; messageText: string }
+    | { label: string; action: "webLink"; webLinkUrl: string }
+    | { label: string; action: "operator" };
+type TextCard = { textCard: { title?: string; description: string; buttons: Button[]; buttonLayout: "vertical" } };
+type Output = { simpleText: { text: string } } | TextCard;
 export type SkillResponse = { version: "2.0"; template: { outputs: Output[]; quickReplies?: QuickReply[] } };
 
 const qr = (label: string): QuickReply => ({ label, action: "message", messageText: label });
+const PICA_BTN: Button = { label: "피카 보기", action: "webLink", webLinkUrl: PICA_URL };
+const TIP_BTN: Button = { label: TIP_TEXT, action: "message", messageText: TIP_TEXT };
+const ASK_BTN: Button = { label: ASK_TEXT, action: "message", messageText: ASK_TEXT };
 
 export function reply(texts: string[], quick: string[] = []): SkillResponse {
     return {
@@ -154,59 +166,56 @@ export function reply(texts: string[], quick: string[] = []): SkillResponse {
     };
 }
 
-/** 두 갈래 카드: 행사 알리기 · 피카 보기 (textCard 단일형은 제목+설명 400자까지) */
-function menu(title: string, description: string): SkillResponse {
-    return {
-        version: "2.0",
-        template: {
-            outputs: [{
-                textCard: {
-                    title: title.slice(0, 50),
-                    description: description.slice(0, 400 - title.length),
-                    buttons: [
-                        // 운영자 11/27: 채널은 주로 제보용, 상담하기 꼴 버튼은 두지 않는다. 카드에도 «피카 보기»
-                        { label: TIP_TEXT, action: "message", messageText: TIP_TEXT },
-                        { label: "피카 보기", action: "webLink", webLinkUrl: PICA_URL },
-                    ],
-                    buttonLayout: "vertical",
-                },
-            }],
-        },
-    };
+/** 카드 하나 (textCard 단일형은 제목+설명 400자까지, 버튼 3개까지) */
+function card(title: string, description: string, buttons: Button[]): TextCard {
+    // 제목은 비워도 된다(제목·설명 중 하나만 있으면 됨). 비우면 보내지 않는다
+    return { textCard: { ...(title ? { title: title.slice(0, 50) } : {}), description: description.slice(0, 400 - title.length), buttons: buttons.slice(0, 3), buttonLayout: "vertical" } };
 }
+const one = (c: TextCard): SkillResponse => ({ version: "2.0", template: { outputs: [c] } });
+/** 세 갈래 카드: 피카 보기 · 행사 제보하기 · 문의하기 (피카 보기가 먼저 — 운영자 11/27 «피카 서비스 이용자를 늘려야지») */
+const menu = (title: string, description: string) => one(card(title, description, [PICA_BTN, TIP_BTN, ASK_BTN]));
+
+/** 제보를 받은 뒤 붙이는 카드: 사이트로 보내고, 회원이면 카카오톡 제보 연결을 권한다(포인트 약속은 021 적용·확인 뒤) */
+const AFTER_TIP = card(
+    "",
+    "피카에서 이번 주 공연·전시도 둘러보세요.\n피카 회원이면 «내 정보»(picka.news/me)에서 «카카오톡 제보 연결»을 해 두면 보낸 제보가 내 기록에 남아요.",
+    [PICA_BTN],
+);
+const withAfterTip = (r: SkillResponse): SkillResponse => ({ ...r, template: { ...r.template, outputs: [...r.template.outputs, AFTER_TIP].slice(0, 3) } });
 
 export const MSG = {
-    /** 웰컴: 채널 소개 + 두 갈래 */
+    /** 웰컴: 채널 소개 + 세 갈래 */
     welcome: () => menu(
         "피카 카카오톡 채널이에요",
-        `가까운 공연·전시·축제를 날짜순으로 알려 드려요(picka.news).\n\n궁금한 것은 메일 ${CONTACT_MAIL}이나 인스타그램 @picka.news 메시지로 보내 주세요.\n공연·전시를 알리고 싶은 단체·예술가는 «행사 알리기»를 눌러 주세요.`,
+        "가까운 공연·전시·축제를 날짜순으로 알려 드려요(picka.news).\n\n공연·전시를 알리고 싶은 단체·예술가는 «행사 제보하기», 운영자에게 남길 말이 있으면 «문의하기»를 눌러 주세요.",
     ),
-    /** «문의»·«상담» 같은 말: 상담 창구가 아니라는 것과 연락 길만 알린다 (이 채팅창은 챗봇이라 사람이 답하지 않는다) */
-    ask: () => menu(
-        "피카 카카오톡 채널이에요",
-        `이 채널은 공연·전시 정보를 받는 곳이라 자동으로 답해요.\n궁금한 것은 메일 ${CONTACT_MAIL}이나 인스타그램 @picka.news 메시지로 보내 주세요. 운영자가 확인하고 답해요.\n\n공연·전시를 알리려면 «행사 알리기»를 눌러 주세요.`,
-    ),
-    /** 제보 시간이 아닐 때 온 말·사진: 저장하지 않았음을 밝히고 두 갈래 */
+    /** «문의하기»: 메시지를 남기면 늦더라도 답한다 + «메시지 남기기»(1:1 채팅 → 파트너센터 «내 채팅») */
+    ask: () => one(card(
+        "문의하기",
+        "메시지를 남겨 놓으시면 운영자가 확인하고 답을 드려요. 답이 조금 늦을 수 있어요.\n아래 «메시지 남기기»를 누른 뒤 보내 주세요.",
+        [{ label: OPERATOR_LABEL, action: "operator" }, PICA_BTN],
+    )),
+    /** 제보 시간이 아닐 때 온 말·사진: 저장하지 않았음을 밝히고 세 갈래 */
     notTip: () => menu(
         "무엇을 도와드릴까요?",
-        `방금 보낸 내용은 저장하거나 운영자에게 넘기지 않았어요.\n\n문의는 메일 ${CONTACT_MAIL}이나 인스타그램 @picka.news 메시지로 보내 주세요.\n행사를 알리려면 «행사 알리기»를 누른 뒤 사진·글을 보내 주세요.`,
+        "방금 보낸 내용은 저장하지 않았어요.\n\n행사를 알리려면 «행사 제보하기»를 누른 뒤 사진·글을 보내 주세요. 운영자에게 남길 말이 있으면 «문의하기»를 눌러 주세요.",
     ),
     consent: () => reply([
         "피카(picka.news)는 경남·부산의 공연·전시·축제를 날짜순으로 알려 드려요.\n리플렛·포스터 사진이나 일정 글을 보내 주시면 운영자가 확인한 뒤에 피카에 올립니다. 자동으로 올라가지 않아요.",
         `보내기 전에 아래 두 가지에 동의해 주세요.\n\n1. ${RIGHTS_CHECKS[0]}\n\n2. ${RIGHTS_CHECKS[1]}\n\n${PRIVACY_NOTE} 사진은 1년 동안 보관한 뒤 지웁니다. 카카오 이름·전화번호는 받지 않아요. 자세한 내용: picka.news/privacy`,
     ], [AGREE_TEXT]),
     ready: () => reply([
-        "지금부터 30분 동안 보내는 사진·글을 행사 제보로 받아요.\n리플렛·포스터 사진을 이 채팅창에 그냥 보내 주세요(여러 장도 돼요). 단체 이름·행사 이름·날짜는 글로 보내 주셔도 돼요. 사진 바로 뒤 10분 안에 보낸 글은 같은 제보로 묶어요.",
+        `지금부터 ${TIP_MINUTES}분 동안 보내는 사진·글을 행사 제보로 받아요.\n리플렛·포스터 사진을 이 채팅창에 그냥 보내 주세요(여러 장도 돼요). 단체 이름·행사 이름·날짜는 글로 보내 주셔도 돼요. 사진 바로 뒤에 보낸 글은 같은 제보로 묶어요.`,
     ]),
-    agreed: () => reply(["동의해 주셔서 고맙습니다. 지금부터 30분 동안 보내는 리플렛·포스터 사진이나 일정 글을 행사 제보로 받아요. 이 채팅창에 보내 주세요."]),
-    gotImages: (n: number, refused: number) => reply([
+    agreed: () => reply([`동의해 주셔서 고맙습니다. 지금부터 ${TIP_MINUTES}분 동안 보내는 리플렛·포스터 사진이나 일정 글을 행사 제보로 받아요. 이 채팅창에 보내 주세요.`]),
+    gotImages: (n: number, refused: number) => withAfterTip(reply([
         `사진 ${n}장 받았어요. 운영자가 확인한 뒤에 피카에 올립니다.` +
         (refused ? `\n하루 5장까지 받아서 ${refused}장은 받지 못했어요. 내일 다시 보내 주세요.` : "") +
         "\n단체 이름이 사진에 없으면 지금 글로 보내 주세요.",
-    ]),
-    gotText: (attached: boolean) => reply([
-        attached ? "방금 보낸 사진과 함께 받았어요. 운영자가 확인한 뒤에 피카에 올립니다." : "글로 받았어요. 운영자가 확인한 뒤에 피카에 올립니다. 리플렛·포스터 사진이 있으면 이 채팅창에 함께 보내 주세요.",
-    ]),
+    ])),
+    gotText: (attached: boolean) => attached
+        ? reply(["방금 보낸 사진과 함께 받았어요. 운영자가 확인한 뒤에 피카에 올립니다."])
+        : withAfterTip(reply(["글로 받았어요. 운영자가 확인한 뒤에 피카에 올립니다. 리플렛·포스터 사진이 있으면 이 채팅창에 함께 보내 주세요."])),
     linked: () => reply(["피카 회원과 연결했어요. 이 채팅방에서 보내는 행사 제보는 회원님이 보낸 것으로 기록돼요.\n연결을 끊으려면 피카 «내 정보»(picka.news/me)에서 «연결 끊기»를 눌러 주세요."]),
     badCode: () => reply(["연결 코드가 맞지 않거나 10분이 지났어요. 피카 «내 정보»(picka.news/me)에서 새 코드를 받아 «연결 123456»처럼 보내 주세요."]),
     linkLimit: () => reply(["오늘은 연결을 더 시도할 수 없어요. 내일 다시 해 주세요."]),
