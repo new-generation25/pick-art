@@ -83,7 +83,7 @@ export default function PartnersPage() {
                         소극장, 작은 극단, 동네 갤러리 행사도 큰 기관 행사와 같은 크기로 실어요.
                     </p>
                     <div className="mt-2 flex flex-wrap gap-x-3">
-                        <CtaLink href="#join" label="동의하고 실리기" />
+                        <CtaLink href="#join" label="동의하고 파트너십 맺기" />
                         <CtaLink href="/tip/leaflet" label="리플렛 한 장으로 알리기" invert />
                     </div>
                 </header>
@@ -175,7 +175,7 @@ export default function PartnersPage() {
                 </section>
 
                 <section id="join" className="scroll-mt-20">
-                    <h2 className="pica-display text-[26px] leading-tight text-ink">동의하고 실리기</h2>
+                    <h2 className="pica-display text-[26px] leading-tight text-ink">동의하고 파트너십 맺기</h2>
                     <p className="mt-2 text-[15px] leading-relaxed text-ink">
                         한 번 동의해 주시면 그다음 공지부터는 묻지 않고 바로 실어요. 무료이고, 언제든 그만둘 수 있어요.
                     </p>

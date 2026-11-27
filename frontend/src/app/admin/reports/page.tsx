@@ -21,7 +21,8 @@ type Report = {
     events?: { title: string } | null;
 };
 type Filter = "new" | "reward" | "all";
-type Week = { done: number; withContact: number; sent: number };
+// top: 이번 주에 반영된 제보가 많은 회원 순(운영자 11/27 «제일 많이 알리신 두 분은 무조건 당첨»). 로그인 없이 온 제보는 사람을 알 수 없어 뺀다
+type Week = { done: number; withContact: number; sent: number; top: { user_id: string; name: string; count: number; hasContact: boolean }[] };
 
 const STATUS = { new: { label: "새로 옴", color: "red" }, done: { label: "반영함", color: "teal" }, rejected: { label: "반영 안 함", color: "gray" } } as const;
 const CONTACT_KEEP_DAYS = 90;
@@ -94,9 +95,25 @@ export default function AdminReportsPage() {
         if (error) setError(error.message);
         setRows((data || []) as Report[]);
         // 이번 주(월~일) 반영한 제보: 쿠폰 5명을 고르는 바탕
-        const { data: w } = await supabase.from("reports").select("reward_contact,reward_sent_at")
+        const { data: w } = await supabase.from("reports").select("user_id,reward_contact,reward_sent_at")
             .eq("kind", "tip").eq("status", "done").gte("handled_at", weekStartISO()).limit(500);
-        if (w) setWeek({ done: w.length, withContact: w.filter(x => x.reward_contact).length, sent: w.filter(x => x.reward_sent_at).length });
+        if (w) {
+            const by = new Map<string, { count: number; hasContact: boolean }>();
+            for (const x of w as { user_id: string | null; reward_contact: string | null }[]) {
+                if (!x.user_id) continue;
+                const cur = by.get(x.user_id) || { count: 0, hasContact: false };
+                by.set(x.user_id, { count: cur.count + 1, hasContact: cur.hasContact || !!x.reward_contact });
+            }
+            const ranked = [...by.entries()].sort((a, b) => b[1].count - a[1].count).slice(0, 5);
+            const { data: names } = ranked.length
+                ? await supabase.from("profiles").select("id,nickname").in("id", ranked.map(r => r[0]))
+                : { data: [] as { id: string; nickname: string | null }[] };
+            const nameOf = new Map((names || []).map(n => [n.id as string, (n.nickname as string | null)?.trim() || "별명 없음"]));
+            setWeek({
+                done: w.length, withContact: w.filter(x => x.reward_contact).length, sent: w.filter(x => x.reward_sent_at).length,
+                top: ranked.map(([user_id, v]) => ({ user_id, name: nameOf.get(user_id) || "별명 없음", ...v })),
+            });
+        }
     }, [filter]);
 
     // 90일 지난 쿠폰 연락처는 화면을 열 때 비운다(개인정보처리방침). 정리 작업(leaflet_queue.py --cleanup)도 같은 일을 한다
@@ -154,6 +171,13 @@ export default function AdminReportsPage() {
                     <Text size="sm" style={{ overflowWrap: "anywhere" }}>
                         <b>이번 주(월~일) 반영한 제보 {week.done}건</b> · 연락처를 남긴 제보 {week.withContact}건 · 쿠폰 보냄 {week.sent}건.
                         {" "}12월까지 매주 5명에게 커피 쿠폰을 보냅니다(같은 사람 한 주 1장, 당첨은 카카오톡 채널에 공지). 보낸 뒤 «쿠폰 보냄 · 연락처 지우기»를 눌러 주세요. 보내지 않은 연락처는 {CONTACT_KEEP_DAYS}일 뒤 지워집니다.
+                    </Text>
+                    <Text size="sm" mt={6} style={{ overflowWrap: "anywhere" }}>
+                        <b>이번 주 많이 알린 회원</b>(반영된 제보 수, 위 두 사람은 무조건 당첨):{" "}
+                        {week.top.length === 0 ? "아직 없음" : week.top.map((t, i) => (
+                            <span key={t.user_id}>{i > 0 && " · "}{i < 2 ? <b>{i + 1}. {t.name} {t.count}건</b> : <>{i + 1}. {t.name} {t.count}건</>}{!t.hasContact && <Text span c="dimmed"> (연락처 없음)</Text>}</span>
+                        ))}
+                        {week.top.length > 2 && week.top[1].count === week.top[2].count && <Text span c="dimmed"> — 2위와 3위가 같은 건수입니다. 누구를 넣을지는 직접 정해 주세요.</Text>}
                     </Text>
                 </Paper>
             )}

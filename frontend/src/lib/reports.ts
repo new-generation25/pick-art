@@ -24,7 +24,7 @@ export const TIP_POINTS = 100;
 export const POINTS_NOTE = "활동 포인트예요. 랭킹에 쓰이고, 앞으로 공연·전시 등에 쓸 수 있게 할 예정이에요.";
 /** 커피 쿠폰은 이 날짜(한국 날짜)까지만 안내하고 연락처를 받는다(운영자 «12월까지») */
 export const COUPON_UNTIL = "2026-12-31";
-export const COUPON_NOTE = "12월까지는 매주 5명께 커피 쿠폰도 드려요. 당첨은 카카오톡 채널 «피카»에서 알려요.";
+export const COUPON_NOTE = "12월까지는 매주 5명께 커피 쿠폰도 드려요. 제일 많이 알리신 두 분은 무조건 당첨이에요. 당첨은 카카오톡 채널 «피카»에서 알려요.";
 /** today: 한국 날짜 YYYY-MM-DD (lib/utils todayKST) */
 export function couponOpen(today: string): boolean {
     return today <= COUPON_UNTIL;

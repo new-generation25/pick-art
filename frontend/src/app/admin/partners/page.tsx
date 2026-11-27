@@ -160,7 +160,7 @@ export default function AdminPartnersPage() {
                 <div>
                     <Title order={1} fw={900}>협약 신청</Title>
                     <Text c="dimmed" size="sm">
-                        /partners 맨 아래 «동의하고 실리기»에서 단체가 보낸 정보 제공 협약 신청. 공식 누리집·SNS로 단체를 확인한 뒤 단체(orgs)에 연결해 «협약 확인»합니다.
+                        /partners 맨 아래 «동의하고 파트너십 맺기»에서 단체가 보낸 정보 제공 협약 신청. 공식 누리집·SNS로 단체를 확인한 뒤 단체(orgs)에 연결해 «협약 확인»합니다.
                         철회 요청은 7일 안에 «철회 처리»하고 단체 행사 정보를 내립니다.
                     </Text>
                 </div>
