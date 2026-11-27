@@ -168,6 +168,12 @@ async def run_crawlers(specific_target=None):
                     blog_id = re.search(r"blog\.naver\.com/([\w-]+)", c['value']).group(1)
                     region = next((r for r in BLOG_REGIONS if r in c['name']), "경남")
                     res = await scrape_blog(blog_id, region, c['name'], db)
+                    if not res['found'] and res.get('roundups') == 0:
+                        # 월간 「행사 모음」 글이 없는 블로그(단체·기관 블로그의 낱개 행사 글)는 이 수집 방식이 읽지 못한다.
+                        # 발견 0건 경고 대신 미구현으로 건너뛴 것으로 적는다(2026-11-27, 경고 19건 정리)
+                        results.append({"name": c['name'], "status": "SUCCESS",
+                                        "summary": "⏭️ 블로그 건너뜀: 최근 50개 글에 월간 행사 모음 글이 없음 — 낱개 행사 글 수집은 미구현"})
+                        continue
                     results.append({"name": c['name'], "status": "SUCCESS",
                                     "summary": f"✅ 블로그 행사 {len(res['found'])}건 (신규 {res['new']}, 중복 {res['dup']})"})
                 except Exception as e:

@@ -131,6 +131,7 @@ def _norm(title):
 async def scrape_blog(blog_id, region, source_name, db=None, limit=50):
     """블로그 글에서 행사를 뽑아 raw_posts 에 넣는다. db 가 없으면 뽑은 목록만 돌려준다(dry-run)."""
     found, new, dup = [], 0, 0
+    roundups = 0  # 이 블로그에서 읽을 대상(월간 행사 모음 글)이 몇 개였는지. 0이면 이 수집 방식이 맞지 않는 블로그다
     # 이미 공개된 행사와 같은 날 시작하고 제목 한쪽이 다른 쪽을 포함하면 같은 행사로 본다
     # (블로그는 '준공식 및 부곡주민 어울림축제'처럼 다른 출처보다 제목을 길게 쓴다)
     published = {}
@@ -142,6 +143,7 @@ async def scrape_blog(blog_id, region, source_name, db=None, limit=50):
             # 단일 행사 소개 글은 세부 프로그램·교통통제 줄까지 📅 로 적어 오탐이 많다. 월간 모음 글만 읽는다
             if not ROUNDUP.search(p["title"]):
                 continue
+            roundups += 1
             lines = await fetch_lines(session, blog_id, p["no"])
             for e in extract_events(lines, p["pub"], p["url"]):
                 e["post"] = p["title"]
@@ -167,4 +169,4 @@ async def scrape_blog(blog_id, region, source_name, db=None, limit=50):
                 }
                 if db.save_raw_post(post):
                     new += 1
-    return {"found": found, "new": new, "dup": dup}
+    return {"found": found, "new": new, "dup": dup, "roundups": roundups}
