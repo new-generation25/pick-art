@@ -30,7 +30,9 @@ export const GROUP_LABEL: Record<QueueGroup, string> = { publish: "공개 판단
 type Counted = { count: number; oldest: string | null };
 
 async function reviewBucket(bucket: string): Promise<Counted> {
-    const base = () => supabase.from("raw_posts").select("collected_at", { count: "exact" }).eq("status", "REVIEW").eq("content->>review_bucket", bucket);
+    // 공개 승인해 다음 실행을 기다리는 글은 세지 않는다(승인 뒤 검증에 걸린 글은 센다) — 공개 판단 목록과 같은 기준
+    const base = () => supabase.from("raw_posts").select("collected_at", { count: "exact" }).eq("status", "REVIEW").eq("content->>review_bucket", bucket)
+        .or("content->>publish_approved_at.is.null,content->>publish_failed_at.not.is.null");
     const { data, count, error } = await base().order("collected_at", { ascending: true }).limit(1);
     if (error) throw new Error(error.message);
     return { count: count || 0, oldest: (data?.[0]?.collected_at as string) || null };

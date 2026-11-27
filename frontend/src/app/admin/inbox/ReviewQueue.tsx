@@ -88,7 +88,7 @@ export function reasonText(reason?: string): string {
 }
 
 /** 승인 상태: none(승인 전) · waiting(승인됨, 다음 실행 대기) · failed(승인 뒤 검증 실패, 다음 실행에서 다시 봄) */
-function approvalState(c: ReviewContent): "none" | "waiting" | "failed" {
+export function approvalState(c: ReviewContent): "none" | "waiting" | "failed" {
     if (!c?.publish_approved_at) return "none";
     const approved = Date.parse(c.publish_approved_at);
     const failed = c.publish_failed_at ? Date.parse(c.publish_failed_at) : NaN;

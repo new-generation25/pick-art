@@ -12,7 +12,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ExternalLink, Info, RefreshCw, Undo2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAdmin } from "@/components/admin/AdminShell";
-import { ReviewQueue, type ReviewChange, type ReviewContent, type ReviewPost } from "./ReviewQueue";
+import { ReviewQueue, approvalState, type ReviewChange, type ReviewContent, type ReviewPost } from "./ReviewQueue";
 import { ConsentGroups } from "./ConsentGroups";
 import { CollectedQueue, type CollectedPost } from "./CollectedQueue";
 import { PostDetailModal } from "./PostDetail";
@@ -106,6 +106,10 @@ function AdminInbox() {
         const gone = review.filter(p => by.has(p.id) && by.get(p.id)!.status !== "REVIEW").map(p => ({ ...p, status: by.get(p.id)!.status, content: by.get(p.id)!.content }));
         setReview(prev => prev.filter(p => !by.has(p.id) || by.get(p.id)!.status === "REVIEW").map(p => by.has(p.id) ? { ...p, content: by.get(p.id)!.content } : p));
         if (gone.length) { setRejected(prev => [...gone, ...prev]); setRejectedTotal(n => n + gone.length); }
+        // 공개 승인한 글은 «최근 결과» 맨 위로 (갈래 목록에서는 아래 bucket() 이 뺀다)
+        const approved = review.filter(p => by.has(p.id) && by.get(p.id)!.status === "REVIEW" && approvalState(by.get(p.id)!.content) === "waiting" && approvalState(p.content) !== "waiting")
+            .map(p => ({ ...p, content: by.get(p.id)!.content }));
+        if (approved.length) setResults(prev => [...approved, ...prev.filter(r => !approved.some(a => a.id === r.id))]);
         reloadCounts();
     };
 
@@ -138,7 +142,9 @@ function AdminInbox() {
         setReview(put); setCollected(put); setRejected(put); setResults(put);
     };
 
-    const bucket = useCallback((b: string) => review.filter(p => p.content?.review_bucket === b), [review]);
+    // 갈래 목록에는 아직 판단하지 않은 글만 둔다: 공개 승인해 다음 정기 실행을 기다리는 글은 «최근 결과»로 간다
+    // (운영자 2026-11-28 «공개 승인되면 리스트에서 없어져야지». 승인 뒤 검증에 걸린 글은 다시 판단하도록 남긴다)
+    const bucket = useCallback((b: string) => review.filter(p => p.content?.review_bucket === b && approvalState(p.content || {}) !== "waiting"), [review]);
     const counts = useMemo<Record<Tab, number | null>>(() => ({
         candidate: bucket("candidate").length, human: bucket("human").length, consent: bucket("consent").length,
         pending: collected.length, results: null, rejected: rejectedTotal,
