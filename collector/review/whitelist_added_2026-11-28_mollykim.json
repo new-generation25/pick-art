@@ -1,0 +1,19 @@
+[
+ {
+  "id": "5a6bc6c0-d7b3-4766-8b4f-8e0f31a1dba7",
+  "type": "instagram",
+  "value": "https://www.instagram.com/mollykim_artist/",
+  "name": "몰리킴 (김명희, 화가)",
+  "auto_publish": false,
+  "schedule": "daily",
+  "created_at": "2026-11-27T14:22:52.881709+00:00",
+  "role": "artist",
+  "score": null,
+  "score_detail": "2026-11-28 Claude 판단(사이트 협약 신청 1512f2ec + 프로필 확인) 분야:전시 지역:부산 · 화가(소개글 「Painting is what i do」), 2026 브리즈 참여·작가노트 〈도하: 3겹의 시간〉, 포트폴리오 https://mollykim.myportfolio.com · 전시세부:회화·드로잉(화가) · 팔로워 4,696 · 협약 신청 2026-11-27 접수(status new) — 운영자 «협약 확인» 뒤 상시 동의로 전환",
+  "field": "전시",
+  "consent": "none",
+  "consent_at": null,
+  "consent_evidence": null,
+  "paused_reason": null
+ }
+]
