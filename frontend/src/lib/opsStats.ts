@@ -11,6 +11,7 @@ export type OpsEvent = {
     poster_image_url: string | null;
     source: string | null;
     created_at: string | null;
+    venue_id?: string | null;
 };
 
 export type SourceKind = "KOPIS" | "기관 공식" | "인스타그램" | "큐레이션";
@@ -210,4 +211,28 @@ export function runStatusTone(status: string | null | undefined): "ok" | "bad" |
     if (s === "SUCCESS" || s === "OK") return "ok";
     if (s.includes("FAIL") || s.includes("ERROR")) return "bad";
     return "other";
+}
+
+/** 날짜별 활성 행사 수(최근 n일). 지금 공개된 행사로 되짚은 값이다: 그날까지 등록됐고(created_at) 그날 끝나지 않은 행사.
+ *  그사이 숨기거나 지운 행사는 빠져 있어 지난 날 숫자는 실제보다 조금 적을 수 있다 */
+export function activeByDay(events: OpsEvent[], today: string, n: number): { day: string; v: number }[] {
+    const rows = events.map(e => ({ made: e.created_at ? kstDay(e.created_at) : "", last: e.event_date_end || e.event_date_start || "" }))
+        .filter(r => r.made && r.last);
+    const out: { day: string; v: number }[] = [];
+    for (let i = n - 1; i >= 0; i--) {
+        const day = addDaysISO(today, -i);
+        out.push({ day, v: rows.reduce((c, r) => c + (r.made <= day && r.last >= day ? 1 : 0), 0) });
+    }
+    return out;
+}
+
+/** 날짜별 누적 수(가입 회원 등). stamps = 만든 때(UTC ISO) 목록 */
+export function cumulativeByDay(stamps: string[], today: string, n: number): { day: string; v: number }[] {
+    const days = stamps.map(kstDay).sort();
+    const out: { day: string; v: number }[] = [];
+    for (let i = n - 1; i >= 0; i--) {
+        const day = addDaysISO(today, -i);
+        out.push({ day, v: days.filter(d => d <= day).length });
+    }
+    return out;
 }

@@ -46,7 +46,6 @@ export function SiteVisitsPanel({ data, updatedAt }: { data?: SiteVisits; update
             </Paper>
         );
     }
-    const max = Math.max(1, ...data.daily.map(d => d.visitors));
     const tile = (t: string, c: Count) => (
         <div>
             <Text size="xs" c="dimmed">{t}</Text>
@@ -68,13 +67,6 @@ export function SiteVisitsPanel({ data, updatedAt }: { data?: SiteVisits; update
                 {tile("최근 30일", data.summary.d30)}
                 {tile("이번 달", data.summary.month)}
             </SimpleGrid>
-            <Text size="xs" c="dimmed" mt="md" mb={4}>최근 30일 날짜별 방문자</Text>
-            <div style={{ display: "flex", alignItems: "flex-end", gap: 2, height: 56 }} aria-label="최근 30일 날짜별 방문자">
-                {data.daily.map(d => (
-                    <div key={d.date} title={`${d.date} ${d.visitors}명 · ${d.pageviews}뷰`}
-                        style={{ flex: 1, height: `${Math.max(2, (d.visitors / max) * 100)}%`, background: d.visitors ? "var(--mantine-color-indigo-5)" : "var(--mantine-color-gray-3)" }} />
-                ))}
-            </div>
             <SimpleGrid cols={{ base: 1, sm: 3 }} mt="md" spacing="md">
                 <TopTable title="많이 본 페이지(30일)" rows={data.pages} />
                 <TopTable title="들어온 곳(30일)" rows={data.referrers} />
