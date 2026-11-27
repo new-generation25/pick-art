@@ -152,16 +152,19 @@ export function ReviewQueue({ bucket, posts, loading, onChanged, compact = false
     const selectable = posts.filter((p) => approvalState(p.content) !== "waiting").map((p) => p.id);
     const picked = selected.filter((id) => selectable.includes(id));
 
-    const approveSelected = async () => {
-        if (picked.length === 0) return;
-        if (!confirm(`선택한 ${picked.length}건을 공개 승인할까요?\n\n다음 정기 실행에서 날짜·원본 링크·중복을 확인한 뒤 공개합니다. 확인에 걸리면 이 목록에 «검증 실패»로 남습니다.`)) return;
+    const AFTER_APPROVE = "다음 정기 실행에서 날짜·원본 링크·중복을 확인한 뒤 공개합니다. 확인에 걸리면 이 목록에 «검증 실패»로 남습니다.";
+
+    // 공개 승인: 고른 여러 건(위 단추) 또는 카드 하나(카드의 «공개 승인» — 운영자 2026-11-28 «카드 밖에서도 반영 버튼 만들어»)
+    const approveIds = async (ids: string[], ask: string) => {
+        if (ids.length === 0) return;
+        if (!confirm(`${ask}\n\n${AFTER_APPROVE}`)) return;
         setBusy(true);
         const now = new Date().toISOString();
         const changes: ReviewChange[] = [];
         const failed: string[] = [];
         try {
-            const fresh = await freshContents(picked);
-            for (const id of picked) {
+            const fresh = await freshContents(ids);
+            for (const id of ids) {
                 const c = fresh[id];
                 if (!c) { failed.push(`${id}: 이미 처리됨`); continue; }
                 const next = { ...c, publish_approved_at: now, publish_approved_by: actor || undefined };
@@ -176,10 +179,12 @@ export function ReviewQueue({ bucket, posts, loading, onChanged, compact = false
             failed.push(errMsg(e));
         }
         onChanged(changes);
-        setSelected([]);
+        setSelected((s) => s.filter((x) => !ids.includes(x)));
         setBusy(false);
         if (failed.length) alert(`승인 ${changes.length}건, 실패 ${failed.length}건\n\n${failed.slice(0, 10).join("\n")}`);
     };
+    const approveSelected = () => approveIds(picked, `선택한 ${picked.length}건을 공개 승인할까요?`);
+    const approveOne = (post: ReviewPost) => approveIds([post.id], `«${post.content?.title || "제목 없음"}»을(를) 공개 승인할까요?`);
 
     const reject = async (post: ReviewPost) => {
         if (!confirm(`«${post.content?.title || "제목 없음"}»을(를) 반영하지 않을까요?\n\n휴지통(거절됨)으로 갑니다. 휴지통에서 되돌리면 이 목록으로 돌아옵니다.`)) return;
@@ -371,6 +376,11 @@ export function ReviewQueue({ bucket, posts, loading, onChanged, compact = false
                                             <Button variant="default" size="xs" radius="xl" disabled={busy} onClick={() => reject(post)} leftSection={<XCircle size={14} />}>
                                                 반영 안 함
                                             </Button>
+                                            {bucket === "candidate" && state !== "waiting" && (
+                                                <Button color="teal" size="xs" radius="xl" disabled={busy} onClick={() => approveOne(post)} leftSection={<CheckCircle size={14} />}>
+                                                    공개 승인
+                                                </Button>
+                                            )}
                                             {bucket !== "candidate" && (
                                                 <Button color="teal" variant="light" size="xs" radius="xl" disabled={busy} onClick={() => moveToCandidate(post)} rightSection={<ArrowRight size={14} />}>
                                                     공개 후보로 옮기기
