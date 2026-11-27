@@ -226,6 +226,8 @@ export default function AdminLeafletsPage() {
                                                 disabled={s.image_kind !== "file" || !!a.personal_info_visible}
                                                 checked={d.use_poster && s.image_kind === "file" && !a.personal_info_visible}
                                                 onChange={e => setD(s.id, "use_poster", e.currentTarget.checked)} />
+                                            <TextInput label="메모(관리자만 봄)" description="반영하지 않을 때 이유를 적어 둡니다." value={msg[`note-${s.id}`] || ""}
+                                                onChange={e => { const v = e.currentTarget.value; setMsg(m => ({ ...m, [`note-${s.id}`]: v })); }} />
                                             <Group mt={6}>
                                                 <Button onClick={() => publish(s)}>등록</Button>
                                                 <Button variant="subtle" color="red" onClick={() => reject(s)}>반영 안 함</Button>

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Container, Title, Text, Paper, Group, Badge, Button, SegmentedControl, Stack, Textarea, TextInput, Radio, Anchor, Loader } from "@mantine/core";
 import { supabase } from "@/lib/supabase";
+import { appendOrgNote } from "@/lib/orgNotes";
 import { todayKST } from "@/lib/utils";
 import { STATUS_LABEL, orgNormName } from "@/lib/partnerAgreement";
 
@@ -27,7 +28,6 @@ function when(iso: string) {
     return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 const safeUrl = (u?: string | null) => (u && /^https?:\/\//.test(u) ? u : null);
-const appendNote = (prev: string | null, add: string) => [prev, add].filter(Boolean).join(" / ").slice(-200);
 
 /** 단체 찾기 + 고르기 + 협약 확인 */
 function ConfirmBox({ a, note, onDone, onError }: { a: Agreement; note: string; onDone: () => void; onError: (m: string) => void }) {
@@ -54,7 +54,7 @@ function ConfirmBox({ a, note, onDone, onError }: { a: Agreement; note: string; 
         setBusy(true);
         try {
             let orgId = pick;
-            let org: Partial<Org> & { partner_note?: string | null } = {};
+            let org: Partial<Org> = {};
             if (pick === NEW_ORG) {
                 const { data, error } = await supabase.from("orgs")
                     .insert({ name: a.org_name.trim(), norm_name: orgNormName(a.org_name), kind: "단체", insta_handle: a.insta_handle })
@@ -62,17 +62,20 @@ function ConfirmBox({ a, note, onDone, onError }: { a: Agreement; note: string; 
                 if (error || !data) throw new Error(`단체 만들기 실패: ${error?.message || "권한"} (같은 이름·인스타 계정의 단체가 이미 있으면 검색해서 고르세요)`);
                 orgId = data.id;
             } else {
-                const { data } = await supabase.from("orgs").select("partner_since,partner_note,insta_handle").eq("id", orgId).maybeSingle();
+                const { data } = await supabase.from("orgs").select("partner_since,insta_handle").eq("id", orgId).maybeSingle();
                 org = data || {};
             }
             const today = todayKST();
-            const patch: Record<string, unknown> = {
-                partner_note: appendNote(org.partner_note ?? null, `${today} 협약 신청 ${a.id.slice(0, 8)} 확인(${a.terms_version})`),
-            };
+            const patch: Record<string, unknown> = {};
             if (!org.partner_since) patch.partner_since = today;
             if (a.insta_handle && !org.insta_handle) patch.insta_handle = a.insta_handle;
-            const o = await supabase.from("orgs").update(patch).eq("id", orgId).select("id");
-            if (o.error || !o.data?.length) throw new Error(`단체 협약 표시 실패: ${o.error?.message || "권한"}`);
+            if (Object.keys(patch).length) {
+                const o = await supabase.from("orgs").update(patch).eq("id", orgId).select("id");
+                if (o.error || !o.data?.length) throw new Error(`단체 협약 표시 실패: ${o.error?.message || "권한"}`);
+            }
+            // 메모는 관리자만 읽는 표에 남긴다(orgs 는 누구나 읽는 표라 메모 칸을 두지 않는다, specs/019 A0)
+            const noteErr = await appendOrgNote(orgId, `${today} 협약 신청 ${a.id.slice(0, 8)} 확인(${a.terms_version})`);
+            if (noteErr) throw new Error(`단체 메모 저장 실패: ${noteErr}`);
             const r = await supabase.from("partner_agreements")
                 .update({ status: "confirmed", org_id: orgId, handled_at: new Date().toISOString(), admin_note: note || a.admin_note })
                 .eq("id", a.id).select("id");
@@ -138,11 +141,11 @@ export default function AdminPartnersPage() {
     const withdraw = async (a: Agreement) => {
         if (!window.confirm(`«${a.org_name}» 협약을 철회 처리할까요? 연결한 단체의 협약 표시를 지웁니다. 단체 행사 정보 내리기는 따로 해야 합니다.`)) return;
         if (a.org_id) {
-            const { data: org } = await supabase.from("orgs").select("partner_note").eq("id", a.org_id).maybeSingle();
-            const o = await supabase.from("orgs")
-                .update({ partner_since: null, partner_note: appendNote(org?.partner_note ?? null, `${todayKST()} 철회(신청 ${a.id.slice(0, 8)})`) })
-                .eq("id", a.org_id).select("id");
+            const { data: org } = await supabase.from("orgs").select("partner_since").eq("id", a.org_id).maybeSingle();
+            const o = await supabase.from("orgs").update({ partner_since: null }).eq("id", a.org_id).select("id");
             if (o.error || !o.data?.length) { setError(`단체 협약 표시 풀기 실패: ${o.error?.message || "권한"}`); return; }
+            const noteErr = await appendOrgNote(a.org_id, `${org?.partner_since ? org.partner_since + "~" : ""}${todayKST()} 철회(신청 ${a.id.slice(0, 8)})`);
+            if (noteErr) { setError(`단체 메모 저장 실패: ${noteErr}`); return; }
         }
         const { data, error } = await supabase.from("partner_agreements")
             .update({ status: "withdrawn", handled_at: new Date().toISOString(), admin_note: notes[a.id] ?? a.admin_note })

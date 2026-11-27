@@ -102,13 +102,6 @@ export function AdminHeader() {
                             직접등록
                         </Button>
                         <Button
-                            component={Link} href="/admin/subscribers"
-                            variant={isActive('/subscribers') ? "filled" : "subtle"}
-                            color="indigo" size="xs" leftSection={<Users size={14} />}
-                        >
-                            구독자 관리
-                        </Button>
-                        <Button
                             component={Link} href="/admin/venues"
                             variant={isActive('/venues') ? "filled" : "subtle"}
                             color="indigo" size="xs" leftSection={<MapPin size={14} />}
@@ -171,7 +164,6 @@ export function AdminHeader() {
                             <Menu.Dropdown>
                                 <Menu.Label>관리자님 환영합니다</Menu.Label>
                                 <Menu.Item leftSection={<BarChart3 size={14} />} component={Link} href="/admin">관리자 홈</Menu.Item>
-                                <Menu.Item leftSection={<Settings size={14} />} component={Link} href="/admin/configs">시스템 설정</Menu.Item>
                                 <Menu.Divider />
                                 <Menu.Item color="red" leftSection={<LogOut size={14} />} onClick={handleLogout}>로그아웃</Menu.Item>
                             </Menu.Dropdown>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AdminHeader } from "@/components/ui/AdminHeader";
 import { HardDrive, Database, Image as ImageIcon, AlertTriangle, RefreshCw, CalendarX, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Box, Container, Title, Text, SimpleGrid, Paper, ThemeIcon, Progress, Group, Stack, Badge, Anchor, Table, Button, Alert, Modal, ScrollArea, rem } from "@mantine/core";
@@ -109,8 +108,7 @@ export default function AdminStoragePage() {
 
     return (
         <Box bg="gray.0" mih="100vh" pb={80}>
-            <AdminHeader />
-            <Container size="lg" pt={120}>
+            <Container size="lg" pt={32}>
                 <Group justify="space-between" align="end" mb={40}>
                     <Group gap="sm">
                         <ThemeIcon size={48} radius="xl" color="indigo" variant="light">

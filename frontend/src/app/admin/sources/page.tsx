@@ -1,30 +1,28 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import {
-    Plus, Search, Trash2, Edit2, Check, X,
-    RefreshCcw, AlertCircle, Clock, Loader2, StopCircle, Sparkles
-} from "lucide-react";
+import { Plus, Search, Trash2, Edit2 } from "lucide-react";
 import {
     Container, Title, Text, Button, Group, Stack,
     TextInput, Select, Badge, ActionIcon, Paper,
     SimpleGrid, Modal, SegmentedControl,
-    LoadingOverlay, Timeline, Box, Alert, Progress, Tooltip
+    LoadingOverlay, Box, Tooltip
 } from "@mantine/core";
+import { latestRunRows, runStatusTone, type CollectorRun } from "@/lib/opsStats";
 
-type SourceType = "trusted" | "blocked";
+// 출처(whitelist) 목록. 수집은 이 PC의 정기 실행(매일 08:20·15:00)이 한다.
+// 예전의 «실행»·«중지»·«Collector ON/OFF»·크롤링 로그·차단 목록은 없앴다(specs/019 A0):
+// 운영 주소에서는 이 PC의 수집기에 닿지 않아 동작하지 않았고, 차단 목록은 0건이었다.
+// 대신 출처마다 마지막 정기 실행 결과(ops_snapshots.collector_runs)를 보여 준다.
 
 interface SourceItem {
-    id: number;
+    id: string;
     name?: string;
     value: string;
     type: string;
-    reason?: string;
     created_at: string;
-    schedule?: string;
-    role?: string | null;          // official 기관 · group 단체 · artist 예술인 · informant 인플루언서 · dormant 휴면
+    role?: string | null;          // official 기관 · group 단체 · artist 예술인 · informant 정보 계정 · dormant 휴면
     score?: number | null;         // 인스타그램 계정 채점(100점)
     score_detail?: string | null;  // 채점 근거
 }
@@ -33,377 +31,185 @@ const ROLE_LABEL: Record<string, { label: string; color: string }> = {
     official: { label: "공식", color: "blue" },
     group: { label: "단체", color: "teal" },
     artist: { label: "예술인", color: "grape" },
-    informant: { label: "정보제공", color: "orange" },
+    informant: { label: "정보 계정", color: "orange" },
     dormant: { label: "휴면", color: "gray" },
 };
 
-export default function SourcesPage() {
-    const [activeTab, setActiveTab] = useState<SourceType>("trusted");
-    const [items, setItems] = useState<SourceItem[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState("");
+const TYPE_LABEL: Record<string, string> = { webpage: "웹", naver_blog: "블로그", instagram: "인스타", facebook: "페이스북" };
+const TYPE_OPTIONS = [
+    { value: "webpage", label: "웹(행사 게시판)" },
+    { value: "naver_blog", label: "네이버 블로그" },
+    { value: "instagram", label: "인스타그램" },
+];
+type TypeFilter = "webpage" | "naver_blog" | "instagram" | "all";
 
-    const [logs, setLogs] = useState<any[]>([]);
-    const [collectorStatus, setCollectorStatus] = useState<{ running: boolean; message: string } | null>(null);
+function runTime(iso: string): string {
+    const d = new Date(iso);
+    return Number.isNaN(d.getTime()) ? "" : d.toLocaleString("ko-KR", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Seoul" });
+}
+
+export default function SourcesPage() {
+    const [items, setItems] = useState<SourceItem[]>([]);
+    const [runs, setRuns] = useState<Map<string, CollectorRun>>(new Map());
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState("");
+    const [searchTerm, setSearchTerm] = useState("");
+    const [typeFilter, setTypeFilter] = useState<TypeFilter>("webpage");
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<SourceItem | null>(null);
-    const [formData, setFormData] = useState({
-        name: "", url: "", type: "webpage", value: "", reason: "", schedule: "daily",
-    });
-
-    useEffect(() => {
-        fetchItems();
-    }, [activeTab]);
-
-    // 실시간 로그 업데이트 (2초마다)
-    useEffect(() => {
-        fetchLogs();
-        const interval = setInterval(fetchLogs, 2000);
-        return () => clearInterval(interval);
-    }, []);
-
-    // Collector 상태 확인 (5초마다)
-    useEffect(() => {
-        const checkCollectorStatus = async () => {
-            try {
-                const res = await fetch('/api/collector/status');
-                const data = await res.json();
-                setCollectorStatus(data);
-            } catch (err) {
-                setCollectorStatus({ running: false, message: 'Failed to check status' });
-            }
-        };
-
-        checkCollectorStatus();
-        const interval = setInterval(checkCollectorStatus, 5000);
-        return () => clearInterval(interval);
-    }, []);
+    const [formData, setFormData] = useState({ name: "", value: "", type: "webpage" });
+    const [deleting, setDeleting] = useState<SourceItem | null>(null);
+    const [saveError, setSaveError] = useState("");
 
     const fetchItems = async () => {
-        setIsLoading(true);
-        try {
-            const table = activeTab === "trusted" ? "whitelist" : "blacklist";
-            const { data, error } = await supabase.from(table).select("*").order("created_at", { ascending: false });
-            if (!error && data) setItems(data);
-        } catch (e) {
-            console.error(e);
-        } finally {
-            setIsLoading(false);
-        }
+        const [w, snap] = await Promise.all([
+            supabase.from("whitelist").select("id,name,value,type,created_at,role,score,score_detail").order("created_at", { ascending: false }).limit(2000),
+            supabase.from("ops_snapshots").select("data").eq("name", "collector_runs").maybeSingle(),
+        ]);
+        setError(w.error ? `출처를 읽지 못했습니다: ${w.error.message}` : "");
+        setItems((w.data || []) as SourceItem[]);
+        const rows = (snap.data?.data as { rows?: CollectorRun[] } | undefined)?.rows;
+        const latest = latestRunRows(Array.isArray(rows) ? rows : []);
+        setRuns(new Map(latest.map(r => [r.source, r])));
+        setIsLoading(false);
     };
 
-    const fetchLogs = async () => {
-        try {
-            const { data, error } = await supabase
-                .from('crawl_logs')
-                .select('*')
-                .order('started_at', { ascending: false })
-                .limit(10);
-            if (!error && data) setLogs(data);
-        } catch (err) {
-            // Silence errors
-        }
-    };
+    useEffect(() => {
+        (async () => { await fetchItems(); })();
+    }, []);
 
-    const handleOpenModal = (item?: SourceItem) => {
-        if (item) {
-            setEditingItem(item);
-            setFormData({
-                name: item.name || "",
-                url: item.value || "",
-                type: item.type || "webpage",
-                value: item.value || "",
-                reason: item.reason || "",
-                schedule: (item as any).schedule || "daily"
-            });
-        } else {
-            setEditingItem(null);
-            setFormData({
-                name: "", url: "", type: activeTab === 'trusted' ? "webpage" : "domain",
-                value: "", reason: "", schedule: "daily"
-            });
-        }
+    const openModal = (item?: SourceItem) => {
+        setEditingItem(item || null);
+        setFormData(item ? { name: item.name || "", value: item.value || "", type: item.type || "webpage" } : { name: "", value: "", type: typeFilter === "all" ? "webpage" : typeFilter });
+        setSaveError("");
         setIsModalOpen(true);
     };
 
     const handleSave = async () => {
-        const table = activeTab === "trusted" ? "whitelist" : "blacklist";
-        const payload: any = activeTab === "trusted"
-            ? { name: formData.name, value: formData.url, type: formData.type, schedule: formData.schedule }
-            : { type: formData.type, value: formData.value, reason: formData.reason };
-
-        if (!payload.value) return alert("필수 항목을 입력해주세요.");
-
+        const payload = { name: formData.name.trim(), value: formData.value.trim(), type: formData.type };
+        if (!payload.value) { setSaveError("주소를 넣어 주세요."); return; }
         const result = editingItem
-            ? await supabase.from(table).update(payload).eq("id", editingItem.id)
-            : await supabase.from(table).insert([payload]);
-
-        if (result.error) alert(result.error.message);
-        else { setIsModalOpen(false); fetchItems(); }
-    };
-
-    const handleDelete = async (id: number) => {
-        if (!confirm("정말 삭제하시겠습니까?")) return;
-        await supabase.from(activeTab === "trusted" ? "whitelist" : "blacklist").delete().eq("id", id);
+            ? await supabase.from("whitelist").update(payload).eq("id", editingItem.id)
+            : await supabase.from("whitelist").insert([payload]);
+        if (result.error) { setSaveError(result.error.message); return; }
+        setIsModalOpen(false);
         fetchItems();
     };
 
-    const handleRunCrawl = async (item: SourceItem) => {
-        // 이미 실행 중인지 확인
-        const isRunning = logs.some(log =>
-            (log.status === 'RUNNING' || log.status === 'REQUESTED') &&
-            log.target_name === (item.name || item.value)
-        );
-
-        if (isRunning) {
-            alert(`${item.name || item.value}는 이미 크롤링이 진행 중입니다.\n\n중복 실행을 방지하기 위해 대기 중입니다.`);
-            return;
-        }
-
-        try {
-            // 1. Collector 상태 확인
-            const statusRes = await fetch('/api/collector/status');
-            const status = await statusRes.json();
-
-            // 2. Collector가 실행 중이 아니면 자동 시작
-            if (!status.running) {
-                const confirmStart = confirm(
-                    `⚠️ Collector 서비스가 실행 중이 아닙니다.\n\n자동으로 시작하시겠습니까?\n\n(취소 시 수동으로 Collector를 실행해야 합니다)`
-                );
-
-                if (confirmStart) {
-                    // Collector 시작
-                    const startRes = await fetch('/api/collector/status', { method: 'POST' });
-                    const startResult = await startRes.json();
-
-                    if (!startResult.success) {
-                        alert(`Collector 시작 실패: ${startResult.message}\n\n수동으로 Collector를 실행해주세요.`);
-                        return;
-                    }
-
-                    alert('✅ Collector가 시작되었습니다.\n\n잠시 후 크롤링이 시작됩니다.');
-                } else {
-                    return; // 사용자가 취소한 경우
-                }
-            }
-
-            // 3. 크롤링 요청 생성
-            await supabase.from('crawl_logs').insert([{
-                target_name: item.name || item.value,
-                started_at: new Date().toISOString(),
-                result_summary: '수동 실행 요청됨',
-                status: 'REQUESTED'
-            }]);
-
-            alert(`${item.name || item.value} 크롤링 요청이 등록되었습니다.\n\n아래 로그 영역에서 진행 상황을 확인하세요.`);
-        } catch (e) {
-            alert(`크롤링 요청 중 오류 발생: ${e}`);
-        }
+    const handleDelete = async () => {
+        if (!deleting) return;
+        const { error: err } = await supabase.from("whitelist").delete().eq("id", deleting.id);
+        if (err) setError(`지우지 못했습니다: ${err.message}`);
+        setDeleting(null);
+        fetchItems();
     };
 
-    const handleStopCrawl = async (logId: string, targetName: string) => {
-        if (!confirm(`${targetName} 크롤링을 중지하시겠습니까?`)) return;
+    const counts = useMemo(() => {
+        const c: Record<string, number> = {};
+        for (const i of items) c[i.type] = (c[i.type] || 0) + 1;
+        return c;
+    }, [items]);
 
-        try {
-            await supabase.from('crawl_logs').update({
-                status: 'CANCELLED',
-                result_summary: '사용자가 수동으로 중지함',
-                finished_at: new Date().toISOString()
-            }).eq('id', logId);
-
-            alert(`${targetName} 크롤링이 중지되었습니다.`);
-            fetchLogs(); // 즉시 로그 갱신
-        } catch (e) {
-            alert(`크롤링 중지 중 오류 발생: ${e}`);
-        }
-    };
-
-    // 진행 중인 크롤링 로그
-    const runningLogs = logs.filter(log => log.status === 'RUNNING' || log.status === 'REQUESTED');
-    const recentLogs = logs.slice(0, 5);
-
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'SUCCESS': return 'green';
-            case 'FAIL': return 'red';
-            case 'RUNNING': return 'blue';
-            case 'REQUESTED': return 'yellow';
-            case 'CANCELLED': return 'gray';
-            default: return 'gray';
-        }
-    };
-
-    const getStatusIcon = (status: string) => {
-        switch (status) {
-            case 'SUCCESS': return <Check size={14} />;
-            case 'FAIL': return <X size={14} />;
-            case 'RUNNING': return <Loader2 size={14} className="animate-spin" />;
-            case 'REQUESTED': return <Clock size={14} />;
-            case 'CANCELLED': return <StopCircle size={14} />;
-            default: return <AlertCircle size={14} />;
-        }
-    };
-
-    const filteredItems = items.filter(item => {
-        const s = searchTerm.toLowerCase();
-        return (item.name?.toLowerCase().includes(s) || item.value?.toLowerCase().includes(s));
-    });
+    const shown = useMemo(() => {
+        const s = searchTerm.trim().toLowerCase();
+        return items
+            .filter(i => typeFilter === "all" || i.type === typeFilter)
+            .filter(i => !s || i.name?.toLowerCase().includes(s) || i.value?.toLowerCase().includes(s));
+    }, [items, typeFilter, searchTerm]);
 
     return (
-        <Box mih="100vh" py={120}>
+        <Box mih="100vh" py={32}>
             <Container size="lg">
-                <Group justify="space-between" mb="xl">
+                <Group justify="space-between" mb="lg" wrap="wrap">
                     <Stack gap={0}>
-                        <Title order={2} fw={900}>출처 관리</Title>
-                        <Group gap="xs">
-                            <Text c="dimmed" size="sm">수집 소스 및 차단 대상을 관리합니다.</Text>
-                            {collectorStatus && (
-                                <Badge
-                                    size="sm"
-                                    color={collectorStatus.running ? 'green' : 'red'}
-                                    variant="dot"
-                                >
-                                    Collector {collectorStatus.running ? 'ON' : 'OFF'}
-                                </Badge>
-                            )}
-                        </Group>
+                        <Title order={2} fw={900}>출처</Title>
+                        <Text c="dimmed" size="sm">정기 실행(매일 08:20·15:00)이 읽는 곳입니다. 카드의 «마지막 실행»은 가장 최근 회차의 결과입니다.</Text>
                     </Stack>
-                    <Group gap="sm">
-                        <Button
-                            component={Link}
-                            href="/admin/ai-prompt"
-                            variant="light"
-                            color="grape"
-                            leftSection={<Sparkles size={16} />}
-                        >
-                            AI 프롬프트 설정
-                        </Button>
-                        <Button leftSection={<Plus size={16} />} onClick={() => handleOpenModal()}>
-                            출처 추가
-                        </Button>
-                    </Group>
+                    <Button leftSection={<Plus size={16} />} onClick={() => openModal()}>출처 추가</Button>
                 </Group>
 
-                {/* 실시간 크롤링 상태 영역 */}
-                {runningLogs.length > 0 && (
-                    <Alert icon={<Loader2 size={16} className="animate-spin" />} title="크롤링 진행 중" color="blue" mb="xl">
-                        <Stack gap="xs">
-                            {runningLogs.map(log => (
-                                <Group key={log.id} justify="space-between">
-                                    <Group gap="xs">
-                                        <Text size="sm" fw={500}>{log.target_name}</Text>
-                                        <Badge size="sm" color={getStatusColor(log.status)} leftSection={getStatusIcon(log.status)}>
-                                            {log.status}
-                                        </Badge>
-                                    </Group>
-                                    <Button
-                                        size="compact-xs"
-                                        variant="light"
-                                        color="red"
-                                        leftSection={<StopCircle size={12} />}
-                                        onClick={() => handleStopCrawl(log.id, log.target_name)}
-                                    >
-                                        중지
-                                    </Button>
-                                </Group>
-                            ))}
-                            <Progress value={100} size="xs" animated striped />
-                        </Stack>
-                    </Alert>
-                )}
-
-                {/* 최근 로그 영역 */}
-                <Paper withBorder p="md" mb="xl" radius="md">
-                    <Group justify="space-between" mb="md">
-                        <Text fw={700} size="sm">최근 크롤링 로그</Text>
-                        <Button variant="subtle" size="compact-xs" onClick={fetchLogs} leftSection={<RefreshCcw size={12} />}>
-                            새로고침
-                        </Button>
-                    </Group>
-                    {recentLogs.length > 0 ? (
-                        <Timeline active={-1} bulletSize={20} lineWidth={2}>
-                            {recentLogs.map((log) => (
-                                <Timeline.Item
-                                    key={log.id}
-                                    bullet={getStatusIcon(log.status)}
-                                    title={
-                                        <Group justify="space-between">
-                                            <Text size="sm" fw={600}>{log.target_name}</Text>
-                                            <Badge size="xs" color={getStatusColor(log.status)}>{log.status}</Badge>
-                                        </Group>
-                                    }
-                                >
-                                    <Text size="xs" c="dimmed">{log.result_summary || '처리 중...'}</Text>
-                                    <Text size="xs" c="dimmed">{new Date(log.started_at).toLocaleString('ko-KR')}</Text>
-                                    {log.finished_at && (
-                                        <Text size="xs" c="dimmed">
-                                            완료: {new Date(log.finished_at).toLocaleString('ko-KR')}
-                                        </Text>
-                                    )}
-                                    {log.error_msg && (
-                                        <Text size="xs" c="red" mt={4}>⚠️ {log.error_msg}</Text>
-                                    )}
-                                </Timeline.Item>
-                            ))}
-                        </Timeline>
-                    ) : (
-                        <Text size="sm" c="dimmed" ta="center" py="lg">아직 크롤링 로그가 없습니다.</Text>
-                    )}
-                </Paper>
-
-                <Group justify="space-between" mb="xl">
-                    <SegmentedControl value={activeTab} onChange={(v) => setActiveTab(v as SourceType)} data={['trusted', 'blocked']} radius="xl" />
-                    <TextInput placeholder="검색..." leftSection={<Search size={16} />} value={searchTerm} onChange={(e) => setSearchTerm(e.currentTarget.value)} radius="xl" w={300} />
+                <Group justify="space-between" mb="lg" wrap="wrap" gap="sm">
+                    <SegmentedControl
+                        value={typeFilter}
+                        onChange={(v) => setTypeFilter(v as TypeFilter)}
+                        radius="xl"
+                        data={[
+                            { value: "webpage", label: `웹 ${counts.webpage || 0}` },
+                            { value: "naver_blog", label: `블로그 ${counts.naver_blog || 0}` },
+                            { value: "instagram", label: `인스타 ${counts.instagram || 0}` },
+                            { value: "all", label: `전체 ${items.length}` },
+                        ]}
+                    />
+                    <TextInput placeholder="이름·주소로 찾기" leftSection={<Search size={16} />} value={searchTerm} onChange={(e) => setSearchTerm(e.currentTarget.value)} radius="xl" style={{ flex: "1 1 220px", maxWidth: 320 }} />
                 </Group>
 
-                <Box pos="relative">
+                {error && <Text c="red" size="sm" mb="md" role="alert">{error}</Text>}
+
+                <Box pos="relative" mih={120}>
                     <LoadingOverlay visible={isLoading} />
+                    {!isLoading && shown.length === 0 && <Text c="dimmed" ta="center" py="xl">조건에 맞는 출처가 없습니다.</Text>}
                     <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
-                        {filteredItems.map((item) => (
-                            <Paper key={item.id} withBorder p="md" radius="md">
-                                <Stack gap="xs">
-                                    <Group justify="space-between">
-                                        <Group gap={4}>
-                                            <Badge variant="light" size="sm">{item.type}</Badge>
-                                            {item.role && ROLE_LABEL[item.role] && (
-                                                <Badge variant="light" size="sm" color={ROLE_LABEL[item.role].color}>{ROLE_LABEL[item.role].label}</Badge>
-                                            )}
-                                            {item.score != null && (
-                                                <Badge variant="filled" size="sm" color={item.score >= 80 ? "green" : item.score >= 60 ? "yellow" : "gray"}>{item.score}점</Badge>
-                                            )}
+                        {shown.map((item) => {
+                            const run = runs.get(item.name || "");
+                            const tone = run ? runStatusTone(run.status) : null;
+                            return (
+                                <Paper key={item.id} withBorder p="md" radius="md">
+                                    <Stack gap="xs">
+                                        <Group justify="space-between" wrap="nowrap">
+                                            <Group gap={4}>
+                                                <Badge variant="light" size="sm">{TYPE_LABEL[item.type] || item.type}</Badge>
+                                                {item.role && ROLE_LABEL[item.role] && (
+                                                    <Badge variant="light" size="sm" color={ROLE_LABEL[item.role].color}>{ROLE_LABEL[item.role].label}</Badge>
+                                                )}
+                                                {item.score != null && (
+                                                    <Badge variant="filled" size="sm" color={item.score >= 80 ? "green" : item.score >= 60 ? "yellow" : "gray"}>{item.score}점</Badge>
+                                                )}
+                                            </Group>
+                                            <Group gap={4} wrap="nowrap">
+                                                <ActionIcon variant="subtle" size="md" aria-label="고치기" onClick={() => openModal(item)}><Edit2 size={15} /></ActionIcon>
+                                                <ActionIcon variant="subtle" color="red" size="md" aria-label="지우기" onClick={() => setDeleting(item)}><Trash2 size={15} /></ActionIcon>
+                                            </Group>
                                         </Group>
-                                        <Group gap={4}>
-                                            <ActionIcon variant="subtle" size="sm" onClick={() => handleOpenModal(item)}><Edit2 size={14} /></ActionIcon>
-                                            <ActionIcon variant="subtle" color="red" size="sm" onClick={() => handleDelete(item.id)}><Trash2 size={14} /></ActionIcon>
-                                        </Group>
-                                    </Group>
-                                    <Text fw={700} lineClamp={1}>{item.name || item.value}</Text>
-                                    <Text size="xs" c="dimmed" lineClamp={1}>{item.value}</Text>
-                                    {item.score_detail && (
-                                        <Tooltip label={item.score_detail} multiline w={280}>
-                                            <Text size="xs" c="dimmed" lineClamp={2}>{item.score_detail}</Text>
-                                        </Tooltip>
-                                    )}
-                                    {activeTab === 'trusted' && (
-                                        <Group justify="space-between" mt="sm">
-                                            <Group gap={4}><Clock size={12} /><Text size="xs" c="dimmed">{item.schedule || 'daily'}</Text></Group>
-                                            <Button size="compact-xs" variant="light" onClick={() => handleRunCrawl(item)}>실행</Button>
-                                        </Group>
-                                    )}
-                                </Stack>
-                            </Paper>
-                        ))}
+                                        <Text fw={700} lineClamp={1}>{item.name || item.value}</Text>
+                                        <Text size="xs" c="dimmed" lineClamp={1} style={{ wordBreak: "break-all" }}>{item.value}</Text>
+                                        {item.score_detail && (
+                                            <Tooltip label={item.score_detail} multiline w={280}>
+                                                <Text size="xs" c="dimmed" lineClamp={2}>{item.score_detail}</Text>
+                                            </Tooltip>
+                                        )}
+                                        {run && (
+                                            <Text size="xs" c={tone === "bad" ? "red" : tone === "ok" ? "teal" : "dimmed"} mt={4}>
+                                                마지막 실행 {runTime(run.run_at)} · {tone === "ok" ? `발견 ${run.found ?? 0}건(새 ${run.new ?? 0})` : (run.note || run.status || "기록 없음")}
+                                                {run.expired_def ? " · 정의 만료 의심" : ""}
+                                            </Text>
+                                        )}
+                                    </Stack>
+                                </Paper>
+                            );
+                        })}
                     </SimpleGrid>
                 </Box>
             </Container>
 
-            <Modal opened={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingItem ? "수정" : "추가"}>
+            <Modal opened={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingItem ? "출처 고치기" : "출처 추가"}>
                 <Stack>
                     <TextInput label="이름" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
-                    <TextInput label="URL/값" value={formData.url || formData.value} onChange={(e) => setFormData({ ...formData, url: e.target.value, value: e.target.value })} required />
-                    <Select label="유형" data={['webpage', 'facebook', 'instagram', 'source']} value={formData.type} onChange={(v) => setFormData({ ...formData, type: v || 'webpage' })} />
+                    <TextInput label="주소" value={formData.value} onChange={(e) => setFormData({ ...formData, value: e.target.value })} required />
+                    <Select label="종류" data={TYPE_OPTIONS} value={formData.type} onChange={(v) => setFormData({ ...formData, type: v || "webpage" })} allowDeselect={false} />
+                    {formData.type === "webpage" && <Text size="xs" c="dimmed">웹 출처는 정의 파일(collector/sources)이 있어야 읽힙니다. 주소만 넣으면 다음 회차에 «정의 파일 없음» 경고가 켜집니다.</Text>}
+                    {saveError && <Text size="sm" c="red" role="alert">{saveError}</Text>}
                     <Button onClick={handleSave}>저장</Button>
+                </Stack>
+            </Modal>
+
+            <Modal opened={!!deleting} onClose={() => setDeleting(null)} title="출처 지우기" centered>
+                <Stack>
+                    <Text size="sm">«{deleting?.name || deleting?.value}»를 출처 목록에서 지웁니다. 되돌릴 수 없습니다. 이미 수집·공개된 행사는 그대로 남습니다.</Text>
+                    <Group justify="flex-end">
+                        <Button variant="default" onClick={() => setDeleting(null)}>취소</Button>
+                        <Button color="red" onClick={handleDelete}>지우기</Button>
+                    </Group>
                 </Stack>
             </Modal>
         </Box>

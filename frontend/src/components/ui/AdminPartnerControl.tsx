@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { todayKST } from "@/lib/utils";
+import { appendOrgNote } from "@/lib/orgNotes";
 
 /**
- * 협약 표시 (specs/014 US5). 관리자에게만 보인다. 공간(venues)·단체(orgs)의 partner_since(맺은 날)·partner_note(메모·해지 기록).
- * 표시가 있는 곳에만 «협약» 배지가 보인다. 풀면 partner_since 를 비우고 partner_note 에 «YYYY-MM-DD 해지»를 덧붙인다(≤200자).
+ * 협약 표시 (specs/014 US5). 관리자에게만 보인다. 공간(venues)·단체(orgs)의 partner_since(맺은 날).
+ * 표시가 있는 곳에만 «협약» 배지가 보인다. 풀면 partner_since 를 비우고 메모에 «맺은 날~오늘 해지»를 덧붙인다.
+ * 메모 자리: 공간은 venues.partner_note(관리자만 읽는 표), 단체는 org_admin_notes(orgs 는 누구나 읽는 표라 메모 칸을 쓰지 않는다, specs/019 A0).
  */
 export function AdminPartnerControl({ table, id, since }: { table: "venues" | "orgs"; id: string; since: string | null }) {
     const router = useRouter();
@@ -34,9 +36,14 @@ export function AdminPartnerControl({ table, id, since }: { table: "venues" | "o
         if (on) {
             patch = { partner_since: date };
         } else {
-            const { data } = await supabase.from(table).select("partner_note").eq("id", id).maybeSingle();
-            const note = [data?.partner_note, `${todayKST()} 해지`].filter(Boolean).join(" / ").slice(-200);
-            patch = { partner_since: null, partner_note: note };
+            const line = `${since ? since + "~" : ""}${todayKST()} 해지`;   // 맺은 날을 남긴다(풀면 partner_since 가 지워지므로)
+            if (table === "orgs") {
+                if (await appendOrgNote(id, line)) { setState("error"); return; }
+                patch = { partner_since: null };
+            } else {
+                const { data } = await supabase.from(table).select("partner_note").eq("id", id).maybeSingle();
+                patch = { partner_since: null, partner_note: [data?.partner_note, line].filter(Boolean).join(" / ").slice(-200) };
+            }
         }
         const { data, error } = await supabase.from(table).update(patch).eq("id", id).select("id");
         if (error || !data?.length) { setState("error"); return; }

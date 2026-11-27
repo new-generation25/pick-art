@@ -14,6 +14,10 @@ const nextConfig: NextConfig = {
     return [
       { source: "/join", destination: "/partners#join", permanent: true },
       { source: "/partners%23join", destination: "/partners#join", permanent: true },
+      // 없앤 관리자 화면(specs/019 A0: 이메일 구독자·시스템 설정·AI 프롬프트)을 즐겨찾기로 열면 관리자 첫 화면으로
+      { source: "/admin/subscribers", destination: "/admin", permanent: false },
+      { source: "/admin/configs", destination: "/admin", permanent: false },
+      { source: "/admin/ai-prompt", destination: "/admin", permanent: false },
     ];
   },
   // 서비스 워커(public/sw.js)는 브라우저가 늘 새 판을 확인하도록 캐시하지 않는다

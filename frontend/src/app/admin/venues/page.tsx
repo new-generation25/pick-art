@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { AdminHeader } from "@/components/ui/AdminHeader";
 import { MapPin } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
@@ -106,8 +105,7 @@ export default function AdminVenuesPage() {
 
     return (
         <main className="min-h-screen bg-neutral-50 pb-20">
-            <AdminHeader />
-            <div className="container mx-auto px-4 pt-28">
+            <div className="container mx-auto px-4 pt-8">
                 <h1 className="text-3xl font-black text-neutral-900 flex items-center gap-3">
                     <MapPin className="w-8 h-8 text-indigo-600" /> 장소 좌표 확인
                 </h1>

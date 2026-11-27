@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
-import { AdminHeader } from "@/components/ui/AdminHeader";
 import {
     Inbox, CheckCircle, XCircle, ExternalLink,
     Image as ImageIcon, Edit3,
-    Copy, Check, Save, MapPin, Tag, Calendar, Clock,
-    Settings, List, BookOpen, Search, Trash2, RefreshCcw, Maximize2
+    Copy, Check, Save, MapPin, Tag, Calendar,
+    BookOpen, Search, Trash2, RefreshCcw, Maximize2
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { EventList } from "@/components/ui/EventList";
@@ -52,17 +51,9 @@ export default function AdminInboxPage() {
         event_date_end: "",
         imageUrl: "",
     });
-    const [scheduledAt, setScheduledAt] = useState<string>("");
 
     // UI States
     const [isImageModalOpen, { open: openImageModal, close: closeImageModal }] = useDisclosure(false);
-    const [isScheduleOpen, setIsScheduleOpen] = useState(false);
-    // New modal states
-    const [isReportModalOpen, { open: openReportModal, close: closeReportModal }] = useDisclosure(false);
-    const [reportLogs, setReportLogs] = useState<any[]>([]);
-    const [isSettingsModalOpen, { open: openSettingsModal, close: closeSettingsModal }] = useDisclosure(false);
-    const [promptText, setPromptText] = useState('');
-    const [promptLoading, setPromptLoading] = useState(false);
 
     const [rejectedPosts, setRejectedPosts] = useState<RawPost[]>([]);
     const [reviewPosts, setReviewPosts] = useState<RawPost[]>([]);
@@ -157,9 +148,7 @@ export default function AdminInboxPage() {
     const handlePublish = async () => {
         if (!editingPost) return;
 
-        const isScheduled = !!scheduledAt;
-        const status = isScheduled ? "SCHEDULED" : "PUBLISHED";
-
+        // 예약 발행은 없앴다(specs/019 A0): 예약 상태를 공개로 바꾸는 코드가 어디에도 없어 예약한 행사가 끝내 공개되지 않았다
         // 1. Insert into events
         // Remove UI-only fields (imageUrl) before inserting
         const { imageUrl, ...eventData } = editForm;
@@ -169,10 +158,9 @@ export default function AdminInboxPage() {
             poster_image_url: imageUrl || "", // Use extracted imageUrl for the correct column
             source: editingPost.source,
             original_url: editingPost.source_url,
-            status: status,
-            scheduled_at: isScheduled ? scheduledAt : null,
+            status: "PUBLISHED",
             raw_post_id: editingPost.id,
-            published_at: isScheduled ? null : new Date().toISOString()
+            published_at: new Date().toISOString()
         }]);
 
         if (insertError) {
@@ -190,7 +178,6 @@ export default function AdminInboxPage() {
             rejected: prev.rejected // Keep rejected count
         }));
         setEditingPost(null);
-        setScheduledAt("");
     };
 
     const handleReject = async (postId: string) => {
@@ -349,7 +336,7 @@ export default function AdminInboxPage() {
     const copyDMMessage = (post: RawPost) => {
         const author = post.content.username || "작가";
         const title = post.content.title || "작품/행사";
-        const message = `안녕하세요, 픽아트(pica)입니다.\n@${author}님께서 올리신 '${title}' 정보를 저희 사이트에 소개하고 싶어 연락드렸습니다.\n\n출처 표기 및 원본 링크를 함께 게시하며, 언제든 삭제 요청이 가능합니다.\n내용 확인차 연락드렸는데, 혹시 게시를 허락해 주실 수 있을까요?\n감사합니다!`;
+        const message = `안녕하세요, 피카(pica)입니다.\n@${author}님께서 올리신 '${title}' 정보를 저희 사이트에 소개하고 싶어 연락드렸습니다.\n\n출처 표기 및 원본 링크를 함께 게시하며, 언제든 삭제 요청이 가능합니다.\n내용 확인차 연락드렸는데, 혹시 게시를 허락해 주실 수 있을까요?\n감사합니다!`;
 
         navigator.clipboard.writeText(message);
         setCopiedId(post.id);
@@ -358,8 +345,7 @@ export default function AdminInboxPage() {
 
     return (
         <Box bg="gray.0" mih="100vh" pb={80}>
-            <AdminHeader />
-            <Container size="lg" pt={120}>
+            <Container size="lg" pt={32}>
 
                 {/* Header Section */}
                 <Group justify="space-between" align="end" mb={40}>
@@ -369,7 +355,7 @@ export default function AdminInboxPage() {
                         </ThemeIcon>
                         <Box>
                             <Title order={1} size={rem(32)} fw={900}>수집 인박스</Title>
-                            <Text c="dimmed" fw={500}>수집된 원본 데이터를 픽아트 스타일로 검토하고 발행합니다.</Text>
+                            <Text c="dimmed" fw={500}>자동 공개에서 빠진 수집분과 인스타 후보를 검토합니다.</Text>
                         </Box>
                     </Group>
 
@@ -391,39 +377,6 @@ export default function AdminInboxPage() {
                             >
                                 <RefreshCcw size={18} />
                             </ActionIcon>
-                            <Button
-                                variant="light"
-                                color="gray"
-                                radius="xl"
-                                leftSection={<Settings size={16} />}
-                                onClick={async () => {
-                                    setPromptLoading(true);
-                                    const res = await fetch('/api/getPrompt');
-                                    const data = await res.json();
-                                    setPromptText(data.prompt || '');
-                                    setPromptLoading(false);
-                                    openSettingsModal();
-                                }}
-                            >
-                                설정
-                            </Button>
-                            <Button
-                                variant="light"
-                                color="gray"
-                                radius="xl"
-                                leftSection={<List size={16} />}
-                                onClick={async () => {
-                                    const { data } = await supabase
-                                        .from('crawl_logs')
-                                        .select('*')
-                                        .order('started_at', { ascending: false })
-                                        .limit(20);
-                                    setReportLogs(data || []);
-                                    openReportModal();
-                                }}
-                            >
-                                리포트
-                            </Button>
                         </Group>
                     </Group>
                 </Group>
@@ -434,7 +387,7 @@ export default function AdminInboxPage() {
                         value={activeTab}
                         onChange={(value) => setActiveTab(value as TabType)}
                         data={[
-                            { label: `인박스(COLLECTED) (${stats.pending})`, value: 'pending' },
+                            { label: `자동 공개 대기 (${stats.pending})`, value: 'pending' },
                             ...REVIEW_BUCKETS.map(b => ({ label: `${BUCKET_LABEL[b]} (${reviewCount(b)})`, value: b })),
                             { label: `현재 노출 (${stats.published})`, value: 'published' },
                         ]}
@@ -823,29 +776,6 @@ export default function AdminInboxPage() {
                                     )}
                                 </Box>
 
-                                <Paper p="md" radius="lg" withBorder>
-                                    <Group justify="space-between" mb="xs">
-                                        <Group gap="xs">
-                                            <Clock size={16} />
-                                            <Text fw={700} size="sm">예약 발행 설정</Text>
-                                        </Group>
-                                        <Badge variant="light" color={isScheduleOpen ? "indigo" : "gray"}>{isScheduleOpen ? "ON" : "OFF"}</Badge>
-                                    </Group>
-                                    <Button variant="default" size="xs" fullWidth onClick={() => setIsScheduleOpen(!isScheduleOpen)} mb={isScheduleOpen ? "sm" : 0}>
-                                        {isScheduleOpen ? "예약 끄기" : "예약 설정하기"}
-                                    </Button>
-                                    {isScheduleOpen && (
-                                        <Box>
-                                            <TextInput
-                                                type="datetime-local"
-                                                value={scheduledAt}
-                                                onChange={(e) => setScheduledAt(e.target.value)}
-                                                size="xs"
-                                            />
-                                            <Text size="xs" c="indigo" mt={4} fw={700}>지정된 시간에 자동 발행됩니다</Text>
-                                        </Box>
-                                    )}
-                                </Paper>
                             </Stack>
 
                             <Stack mt="xl">

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { AdminHeader } from "@/components/ui/AdminHeader";
 import { PlusCircle, Image as ImageIcon, Save, ArrowLeft, Upload, X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
@@ -135,8 +134,7 @@ export default function AdminManualAddPage() {
 
     return (
         <Box bg="gray.0" mih="100vh" pb={80}>
-            <AdminHeader />
-            <Container size="lg" pt={120}>
+            <Container size="lg" pt={32}>
                 <Group justify="space-between" align="end" mb={40}>
                     <Group gap="sm">
                         <ThemeIcon size={48} radius="xl" color="indigo" variant="light">
@@ -167,7 +165,7 @@ export default function AdminManualAddPage() {
                             {/* Title Section */}
                             <TextInput
                                 label="행사 제목"
-                                placeholder="예: 2024 경남 아트 페스티벌"
+                                placeholder="예: 봄밤 재즈 콘서트"
                                 required
                                 value={formData.title}
                                 onChange={e => setFormData({ ...formData, title: e.target.value })}
