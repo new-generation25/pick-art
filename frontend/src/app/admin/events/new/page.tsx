@@ -71,9 +71,9 @@ function NewEvent() {
             ...(draft.subcategory ? { subcategory_by: "admin", subcategory_pending: false, subcategory_evidence: "운영자 확정" } : {}),
         }).select("id").single();
         if (error || !data) { setBusy(false); setMsg(`저장하지 못했습니다: ${error?.message || "권한 확인"}`); return; }
-        // 제보에서 넘어왔으면 그 제보를 «반영함»으로 닫는다
+        // 제보에서 넘어왔으면 그 제보를 «반영함»으로 닫고, 등록한 행사를 event_id 칸으로 잇는다(주간 쿠폰 집계가 이 칸을 본다, specs/020)
         if (reportId) {
-            await supabase.from("reports").update({ status: "done", handled_at: new Date().toISOString(), admin_note: `행사로 등록 ${data.id.slice(0, 8)}` }).eq("id", reportId).eq("status", "new");
+            await supabase.from("reports").update({ status: "done", handled_at: new Date().toISOString(), event_id: data.id, admin_note: `행사로 등록 ${data.id.slice(0, 8)}` }).eq("id", reportId).eq("status", "new");
         }
         setBusy(false);
         setDoneId(data.id);

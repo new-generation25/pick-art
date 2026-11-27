@@ -8,8 +8,11 @@
 --   submit_tip(jsonb)    : 유일한 접수 입구(anon·authenticated). 로그인 없는 제보는 사이트 전체 하루 40건, 회원은 하루 10건,
 --                          같은 이름·같은 링크는 하루 한 번. 접속 주소(IP)는 저장하지 않는다
 --   tips/ 사진 올리기    : submit_tip 이 방금(10분 안) 만든 제보가 그 경로를 가리킬 때만 한 번 넣을 수 있다(덮어쓰기 없음)
+--   reports.event_id     : 제보(kind=tip)는 관리자가 «행사로 등록»하면 그 행사 id 가 들어간다(오류 신고는 처음부터 대상 행사 id). handled_at = 처리한 때
+--   tip_entries (보기)   : 사이트 제보(reports)와 카카오톡 채널 제보(leaflet_submissions 의 kakao_bot·kakao_chat)를 한 줄 모양으로 모은 것.
+--                          주간 집계용이며 수집기(service_role)만 읽는다. 연락처 값은 넣지 않는다(있는지만)
 -- 읽기 권한은 그대로다: 회원은 자기 것, 관리자는 전부, 익명은 0줄.
--- 되돌리기: DROP POLICY "Tip upload pending photo" ON storage.objects;
+-- 되돌리기: DROP VIEW public.tip_entries; DROP POLICY "Tip upload pending photo" ON storage.objects;
 --           DROP FUNCTION public.submit_tip(jsonb); DROP FUNCTION public.tip_upload_allowed(text); DROP FUNCTION public.tip_photo_failed(uuid);
 --           ALTER TABLE public.events DROP COLUMN tip_credit;
 --           DELETE FROM public.reports WHERE user_id IS NULL;  (그 뒤에) ALTER TABLE public.reports ALTER COLUMN user_id SET NOT NULL;
@@ -219,3 +222,20 @@ SELECT json_build_object(
     )
 );
 $$;
+
+-- 제보를 한 곳에서 세기: 사이트(/tip) + 카카오톡 채널 «행사 알리기». 한 주에 «확인돼 실린» 제보 = done AND handled_at 이 그 주
+--   channel   : site · kakao_bot · kakao_chat        entry_id : reports.id 또는 leaflet_submissions.id
+--   done      : 반영됨(reports.status='done' / leaflet_submissions.status='published')   event_id : 등록된 행사(없을 수 있음)
+--   has_contact : 쿠폰 연락처가 아직 남아 있는지(카카오 제보는 연락처를 받지 않아 늘 false)   reward_sent_at : 쿠폰 보낸 때
+CREATE OR REPLACE VIEW public.tip_entries WITH (security_invoker = true) AS
+    SELECT 'site'::text AS channel, r.id AS entry_id, r.created_at, r.status = 'done' AS done, r.event_id, r.handled_at,
+           r.tip->>'title' AS title, r.tip->>'url' AS url, r.user_id IS NOT NULL AS member,
+           r.reward_contact IS NOT NULL AS has_contact, r.reward_sent_at, r.credit_name
+    FROM public.reports r WHERE r.kind = 'tip'
+    UNION ALL
+    SELECT l.channel, l.id, l.created_at, l.status = 'published', l.event_id, l.handled_at,
+           coalesce(l.given->>'title', l.ai_result->'title'->>'value'), l.official_url, false,
+           false, NULL::timestamptz, NULL::text
+    FROM public.leaflet_submissions l WHERE l.channel IN ('kakao_bot', 'kakao_chat');
+REVOKE ALL ON public.tip_entries FROM public, anon, authenticated;
+GRANT SELECT ON public.tip_entries TO service_role;

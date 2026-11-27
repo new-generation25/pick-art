@@ -52,6 +52,13 @@
 - `tip_photo_failed(id)`: 사진 올리기가 실패했을 때 브라우저가 부른다. 10분 안의 제보이고 파일이 실제로 없을 때만 `photo_path`를 비우고 관리자 메모에 «사진 올리기 실패»를 남긴다
 - `storage_usage()`: `reports.photo_path`를 «쓰는 파일»로 센다(저장공간 화면의 «안 쓰는 이미지»에 잡히지 않게)
 
+### 주간 집계 (수집 쪽이 읽는 칸)
+
+- 제보 ↔ 행사: `reports.event_id`(«행사로 등록»할 때 들어감), 처리 시각 `reports.handled_at`, 반영 여부 `reports.status = 'done'`
+- 한 곳에서 세기: 보기 `public.tip_entries` — `channel`(site·kakao_bot·kakao_chat) · `entry_id` · `created_at` · `done` · `event_id` · `handled_at` · `title` · `url` · `member` · `has_contact` · `reward_sent_at` · `credit_name`. service_role 만 읽는다
+- 카카오톡 채널 제보는 specs/017 흐름(`leaflet_submissions`, 권리 확인·글자 읽기)을 그대로 쓴다. 연락처를 받지 않으므로 쿠폰은 채널 1:1 채팅으로만 건넬 수 있다
+- 동의 시각 칸은 따로 없다: 동의는 제보를 보낼 때 함께 받으므로 `reports.created_at`이 동의한 때이고, 문구 판은 `reward_consent`에 남는다(연락처를 지워도 남음)
+
 ### 보관·파기
 
 | 무엇 | 언제 지우나 | 누가 |

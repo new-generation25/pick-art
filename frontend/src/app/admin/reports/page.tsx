@@ -166,6 +166,7 @@ export default function AdminReportsPage() {
                                                 ) : <Button size="xs" variant="default" mt={4} w="fit-content" onClick={() => openPhoto(r)}>사진 보기</Button>
                                         ) : <Text size="sm" c="dimmed">사진 없음(올리기 실패했거나 보관 기간이 지나 지움)</Text>
                                     )}
+                                    {r.event_id && <Anchor component={Link} href={`/events/${r.event_id}`} target="_blank" size="sm">등록한 행사 보기</Anchor>}
                                     {r.credit_name && <Text size="sm">표시 이름: <b>제보: {r.credit_name}</b> <Text span c="dimmed">(«행사로 등록»할 때 행사 화면에 넣을 수 있음)</Text></Text>}
                                 </Stack>
                             )}

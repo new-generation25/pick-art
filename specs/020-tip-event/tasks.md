@@ -31,6 +31,12 @@
 - [X] T041 [US4] `frontend/src/app/admin/events/new/page.tsx`: 제보의 `credit_name`을 읽어 «행사 화면에 제보: ○○ 보이기» → `events.tip_credit`
 - [X] T042 [US4] `frontend/src/app/events/[id]/page.tsx`: `tip_credit`이 있으면 «제보» 줄
 
+## 5-1. 수집 쪽 요청(「문화정보 수집」 세션, 11/27) — 주간 집계를 칸으로
+
+- [X] T045 «행사로 등록»이 제보에 행사 id 를 남김(`reports.event_id`, 처리 시각은 `handled_at`): `frontend/src/app/admin/events/new/page.tsx`. 관리자 «신고·제보»에 «등록한 행사 보기»
+- [X] T046 보기 `public.tip_entries`(사이트 제보 + 카카오톡 채널 제보를 한 줄 모양으로, `security_invoker`, 수집기 service_role 만 읽음, 연락처 값 없음): 같은 마이그레이션. 카카오 제보는 017 흐름(`leaflet_submissions`) 그대로 둠
+- [X] T047 운영 DB 되돌림 시험 다시(11/27): 28개 항목 모두 통과(보기의 사이트·카카오 줄 수, 익명·회원 읽기 막힘, 행사 id 잇기 포함). 뒤에 `reports` 2줄·새 칸·보기 없음 확인
+
 ## 6. 확인·마무리
 
 - [X] T050 `npx tsc --noEmit` + `next build --webpack`
