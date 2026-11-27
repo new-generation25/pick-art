@@ -342,10 +342,10 @@ def slides_html(f: dict, poster: str, handle: str) -> list:
   {credit}
 </div>""")
 
-    # 6. 숨은 행사 제보 이벤트(2026-11-27 운영자 결정, docs/PLAN_community_2026-11.md 12-1)
+    # 6. 숨은 행사 찾기 — 제보 이벤트(2026-11-27 운영자 결정, 이름 「숨은 행사 찾기」, docs/PLAN_community_2026-11.md 12-1)
     out.append(f"""
 <div class="slide event">{top(6)}
-  <div class="pad" style="top:160px"><span class="chip pink">숨은 행사 제보 이벤트</span></div>
+  <div class="pad" style="top:160px"><span class="chip pink">숨은 행사 찾기</span></div>
   <div class="pad disp h2 print" style="top:250px">우리 동네 행사,<br>알려 주세요</div>
   <div class="pad ev-big" style="top:480px"><span class="n">5</span><span>명께 매주<br>커피 쿠폰</span></div>
   <div class="pad ways" style="top:760px">
