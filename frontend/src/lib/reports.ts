@@ -1,7 +1,8 @@
 /**
  * 오류 신고·행사 제보 (specs/007, 020). 표: public.reports
  *   오류 신고: 로그인 회원만(표에 직접 넣는다, supabase/migrations/20261126020000_reports.sql)
- *   행사 제보: 로그인 없이도 보낸다. 접수는 submit_tip() 함수로만(20261127130000_tip_event.sql)
+ *   행사 제보(「숨은 행사 찾기」): 로그인 회원이 보낸다(specs/021). 접수는 submit_tip() 함수로만(20261127140000_points.sql)
+ *     피카에 실리면 100포인트가 쌓인다(DB 트리거). 커피 쿠폰은 2026-12-31 까지
  * 관리자가 확인한 뒤에만 공개 피드에 반영한다(헌장 I).
  */
 
@@ -15,6 +16,19 @@ export const REWARD_CONSENT_VERSION = "tip-reward-r1-2026-11-27";
 export const REWARD_CONSENT_TEXT = "커피 쿠폰을 보내는 데만 쓰고, 보낸 뒤 지워요. 쿠폰을 받지 못한 연락처도 90일 뒤 지웁니다. 이 내용으로 연락처를 받는 데 동의해요.";
 
 export const TIP_PHOTO_MAX = 10 * 1024 * 1024;
+
+/** 이벤트 이름과 보상 (운영자 2026-11-27) */
+export const TIP_EVENT_NAME = "숨은 행사 찾기";
+export const TIP_POINTS = 100;
+/** 포인트의 쓰임(운영자 문구 «활동포인트(랭킹)와 추후 공연, 전시 등에 사용가능(예정)») */
+export const POINTS_NOTE = "활동 포인트예요. 랭킹에 쓰이고, 앞으로 공연·전시 등에 쓸 수 있게 할 예정이에요.";
+/** 커피 쿠폰은 이 날짜(한국 날짜)까지만 안내하고 연락처를 받는다(운영자 «12월까지») */
+export const COUPON_UNTIL = "2026-12-31";
+export const COUPON_NOTE = "12월까지는 매주 5명께 커피 쿠폰도 드려요. 당첨은 카카오톡 채널 «피카»에서 알려요.";
+/** today: 한국 날짜 YYYY-MM-DD (lib/utils todayKST) */
+export function couponOpen(today: string): boolean {
+    return today <= COUPON_UNTIL;
+}
 
 export type TipInput = {
     title: string;
@@ -60,8 +74,8 @@ export function checkTip(t: TipInput, hasPhoto: boolean): string[] {
 
 /** submit_tip() 이 돌려준 오류를 화면 문구로 */
 export function tipErrorText(message: string): string {
+    if (message.includes("login_required")) return "로그인한 뒤 보낼 수 있어요. 다시 로그인해 주세요.";
     if (message.includes("duplicate")) return "오늘 이미 받은 제보예요. 고맙습니다.";
-    if (message.includes("site_limit")) return "오늘은 제보가 많이 들어와 더 받지 못해요. 내일 다시 보내거나 카카오톡으로 보내 주세요.";
     if (message.includes("daily_limit")) return "오늘은 더 보낼 수 없어요(하루 10건). 내일 다시 알려 주세요.";
     if (message.includes("need_source")) return "링크나 사진 가운데 하나는 필요해요.";
     if (message.includes("need_consent")) return "연락처를 남기려면 동의가 필요해요.";

@@ -3,14 +3,15 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Bell, Building2, CalendarPlus, ChevronRight, Heart, Info, MapPin, Sun, UserRound } from "lucide-react";
+import { ArrowLeft, Bell, Building2, CalendarPlus, ChevronRight, Heart, Info, MapPin, Sparkles, Sun, UserRound } from "lucide-react";
 import { PushButton } from "@/components/ui/PushButton";
 import { supabase } from "@/lib/supabase";
 import { GN_REGIONS } from "@/lib/regions";
 import { CATEGORIES } from "@/lib/categories";
 import { SITE_URL } from "@/lib/site";
 import { todayKST } from "@/lib/utils";
-import { loginHref } from "@/lib/reports";
+import { loginHref, POINTS_NOTE, TIP_EVENT_NAME, TIP_POINTS } from "@/lib/reports";
+import { fetchMyLedger, fetchMyPoints, POINT_REASON, type LedgerRow, type MyPoints } from "@/lib/points";
 import { ShelfTile, type ShelfCard } from "@/components/ui/Shelf";
 
 type Profile = {
@@ -31,6 +32,8 @@ export default function MePage() {
     const [saved, setSaved] = useState<ShelfCard[]>([]);
     const [venues, setVenues] = useState<{ id: string; name: string; region: string | null }[]>([]);
     const [editing, setEditing] = useState(false);
+    const [points, setPoints] = useState<MyPoints | null>(null);
+    const [ledger, setLedger] = useState<LedgerRow[]>([]);
     const [msg, setMsg] = useState("");
 
     useEffect(() => {
@@ -38,6 +41,9 @@ export default function MePage() {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session?.user) { setState("login"); return; }
             setUser(session.user);
+            // 활동 포인트 (specs/021): 못 읽어도 나머지 화면은 그대로 그린다
+            fetchMyPoints().then(setPoints);
+            fetchMyLedger(session.user.id).then(setLedger);
             const [{ data: profile }, { data: favs }, { data: follows }] = await Promise.all([
                 supabase.from("profiles").select("*").eq("id", session.user.id).maybeSingle(),
                 supabase.from("favorites")
@@ -139,6 +145,35 @@ export default function MePage() {
                         <label className="text-[13px] font-semibold text-ink-soft">연락처 (선택 · 공개되지 않음)
                             <input defaultValue={p!.phone} onBlur={e => save({ phone: e.currentTarget.value.trim() })} className="mt-1 w-full rounded-lg border border-line bg-paper px-3 py-2 text-[15px] text-ink" /></label>
                     </div>
+                )}
+            </div>
+
+            {/* 활동 포인트 (specs/021): 제보가 피카에 실리면 100P. 쓰임은 운영자가 정한 문구 그대로 */}
+            <div id="points" className={`${card} scroll-mt-20 !py-3.5`}>
+                <div className="flex items-center gap-3">
+                    <Sparkles className="h-5 w-5 flex-none text-accent" aria-hidden />
+                    <div className="min-w-0 flex-1">
+                        <p className="text-[13px] font-bold text-ink-soft">활동 포인트</p>
+                        <p className="pica-num text-[26px] font-bold leading-[1.15] text-ink">{(points?.points ?? 0).toLocaleString()}<span className="ml-0.5 text-[16px]">P</span></p>
+                    </div>
+                    {points?.rank != null && (
+                        <p className="flex-none text-right text-[13px] leading-[1.4] text-ink-soft">순위<br /><b className="pica-num text-[17px] text-accent">{points.rank}위</b><span className="text-[12px]"> / {points.ranked}명</span></p>
+                    )}
+                </div>
+                <p className="mt-2 text-[13px] leading-relaxed text-ink-soft">{POINTS_NOTE}</p>
+                {ledger.length > 0 ? (
+                    <ul className="mt-2 border-t border-line pt-1.5">
+                        {ledger.map(l => (
+                            <li key={l.id} className="flex items-baseline justify-between gap-3 py-1 text-[13.5px]">
+                                <span className="min-w-0 text-ink">{POINT_REASON[l.reason] || "포인트"}<span className="ml-2 text-[12px] text-ink-soft">{new Date(l.created_at).toLocaleDateString("ko-KR")}</span></span>
+                                <b className="pica-num flex-none text-accent">{l.amount > 0 ? "+" : ""}{l.amount.toLocaleString()}P</b>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p className="mt-2 border-t border-line pt-2.5 text-[13.5px] leading-relaxed text-ink">
+                        <Link href="/tip" className="font-bold text-accent underline underline-offset-4">{TIP_EVENT_NAME}</Link>에서 피카에 없는 행사를 알려 주세요. 피카에 실리면 {TIP_POINTS}포인트가 쌓여요.
+                    </p>
                 )}
             </div>
 

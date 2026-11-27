@@ -32,6 +32,16 @@ export default function AdminMembersPage() {
     const [loading, setLoading] = useState(true);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState("");
+    // 활동 포인트 (specs/021): 회원 id → 합계. 포인트가 있는 회원만 들어 있다
+    const [points, setPoints] = useState<Record<string, number>>({});
+
+    useEffect(() => {
+        supabase.rpc("admin_member_points").then(({ data }) => {
+            const map: Record<string, number> = {};
+            for (const r of (data || []) as { user_id: string; points: number }[]) map[r.user_id] = Number(r.points);
+            setPoints(map);
+        });
+    }, []);
 
     const fetchRows = useCallback(async (from: number) => {
         let qy = supabase.from("profiles").select(COLS, { count: "exact" });
@@ -63,7 +73,7 @@ export default function AdminMembersPage() {
     return (
         <div className="mx-auto max-w-5xl px-4 pt-4">
             <h1 className="pica-display text-[25px] leading-tight text-ink">회원</h1>
-            <p className="mt-0.5 text-[13px] text-ink-soft">가입한 회원입니다. 최근 가입한 순서로 보입니다. 이메일·전화번호와 찜한 행사·장소는 이 화면에 나오지 않습니다.</p>
+            <p className="mt-0.5 text-[13px] text-ink-soft">가입한 회원입니다. 최근 가입한 순서로 보입니다. 이메일·전화번호와 찜한 행사·장소는 이 화면에 나오지 않습니다. 별명 옆 숫자는 활동 포인트(제보가 실리면 100P)입니다.</p>
 
             <form className="mt-3 flex flex-wrap items-center gap-1.5" onSubmit={e => { e.preventDefault(); setLoading(true); setQ(typed); }}>
                 <label className="flex h-9 min-w-0 flex-1 basis-[220px] items-center gap-2 rounded-full bg-card px-3 shadow-[0_1px_4px_rgba(30,26,21,.1)]">
@@ -90,6 +100,7 @@ export default function AdminMembersPage() {
                             <span className="min-w-0 flex-1 basis-[200px]">
                                 <span className="text-[15px] font-semibold text-ink" style={{ wordBreak: "break-word" }}>{m.nickname?.trim() || "별명 없음"}</span>
                                 {m.role === "admin" && <span className="ml-2 rounded-md bg-[var(--pk-accent-soft)] px-1.5 py-0.5 text-[11.5px] font-bold text-accent">관리자</span>}
+                                {points[m.id] ? <span className="pica-num ml-2 text-[13px] font-bold text-accent">{points[m.id].toLocaleString("ko-KR")}P</span> : null}
                                 <span className="mt-0.5 block text-[12.5px] text-ink-soft">
                                     가입 {day(m.created_at)} · 내 지역 {m.region || "정하지 않음"}{m.region && m.auto_region ? " (먼저 보기 켬)" : ""}
                                 </span>

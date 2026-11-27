@@ -13,7 +13,9 @@ import { fetchAdminCounts, menuBadges, type AdminCounts } from "@/lib/adminCount
  * 관리자 확인이 끝나기 전에는 화면(children)을 그리지 않는다 — 화면이 그려지지 않으면 그 화면의 조회도 나가지 않는다.
  * 데이터 보호 자체는 DB 정책(profiles.role='admin')이 맡는다.
  */
-type Page = { href: string; label: string };
+// count: 메뉴 숫자를 이루는 건수가 이 화면의 것일 때, 둘째 줄 칩에도 같은 숫자를 보인다(운영자 11/27)
+//   대기함 숫자 = 리플렛 + 신고·제보 + 협약 신청(사람이 보내고 기다리는 것), 현황 숫자 = 켜진 경고(운영 현황 화면 맨 위)
+type Page = { href: string; label: string; count?: "leaflets" | "reports" | "partners" | "alerts" };
 type Section = { key: string; label: string; short: string; icon: LucideIcon; pages: Page[] };
 
 export const ADMIN_SECTIONS: Section[] = [
@@ -21,9 +23,9 @@ export const ADMIN_SECTIONS: Section[] = [
     {
         key: "queue", label: "대기함", short: "대기함", icon: Inbox, pages: [
             { href: "/admin/inbox", label: "공개 판단" },
-            { href: "/admin/leaflets", label: "리플렛" },
-            { href: "/admin/reports", label: "신고·제보" },
-            { href: "/admin/partners", label: "협약 신청" },
+            { href: "/admin/leaflets", label: "리플렛", count: "leaflets" },
+            { href: "/admin/reports", label: "신고·제보", count: "reports" },
+            { href: "/admin/partners", label: "협약 신청", count: "partners" },
             { href: "/admin/refine", label: "세부 갈래·안내 그림" },
         ],
     },
@@ -37,7 +39,7 @@ export const ADMIN_SECTIONS: Section[] = [
     },
     {
         key: "status", label: "현황", short: "현황", icon: Activity, pages: [
-            { href: "/admin/status", label: "운영 현황" },
+            { href: "/admin/status", label: "운영 현황", count: "alerts" },
             { href: "/admin/insta", label: "인스타그램" },
             { href: "/admin/counts", label: "노출·클릭" },
             { href: "/admin/members", label: "회원" },
@@ -93,6 +95,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     const current = sectionOf(pathname);
     const badges = menuBadges(counts);
     const badgeOf = (key: string) => key === "queue" ? badges.queue : key === "status" ? badges.status : 0;
+    // 메뉴 숫자에 붙는 글자와 풀이: 대기함은 건수, 현황은 «경고 n»(숫자만 있으면 뜻을 알 수 없다 — 운영자 11/27)
+    const badgeText = (key: string, n: number) => key === "status" ? `경고 ${n}` : String(n);
+    const firstAlert = counts?.routine.openAlerts[0]?.text || (counts?.routine.missed.state === "missed" ? "정기 실행이 제때 돌지 않았습니다" : "");
+    const badgeHint = (key: string, n: number) => key === "status"
+        ? `켜진 경고 ${n}건${firstAlert ? ` — ${firstAlert}` : ""} (운영 현황 맨 위에서 확인)`
+        : `받고 기다리는 것 ${n}건 (리플렛·신고·제보·협약 신청)`;
+    const pageCount = (pg: Page) => !pg.count ? 0 : pg.count === "alerts" ? badges.status : (counts?.items.find(i => i.key === pg.count)?.count || 0);
     // 둘째 줄 칩은 주소가 가장 길게 맞는 하나만 켠다(/admin/events/new 에서 «찾기·고치기»까지 켜지지 않게)
     const matches = (href: string) => href === "/admin" ? pathname === "/admin" : !!pathname && (pathname === href || pathname.startsWith(href + "/"));
     const best = current.pages.filter(pg => matches(pg.href)).sort((a, b) => b.href.length - a.href.length)[0]?.href;
@@ -112,10 +121,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                                     const on = s.key === current.key;
                                     const n = badgeOf(s.key);
                                     return (
-                                        <Link key={s.key} href={s.pages[0].href} aria-current={on ? "page" : undefined}
+                                        <Link key={s.key} href={s.pages[0].href} aria-current={on ? "page" : undefined} title={n > 0 ? badgeHint(s.key, n) : undefined}
                                             className={`flex h-9 items-center gap-1.5 rounded-full px-3.5 text-[14px] font-semibold no-underline ${on ? "bg-accent text-on-accent" : "text-ink hover:bg-soft"}`}>
                                             <s.icon size={15} aria-hidden />{s.label}
-                                            {n > 0 && <span className={`pica-num rounded-full px-1.5 text-[11.5px] font-bold ${on ? "bg-on-accent text-accent" : "bg-accent text-on-accent"}`}>{n}</span>}
+                                            {n > 0 && <span className={`pica-num whitespace-nowrap rounded-full px-1.5 text-[11.5px] font-bold ${on ? "bg-on-accent text-accent" : "bg-accent text-on-accent"}`}>{badgeText(s.key, n)}</span>}
                                         </Link>
                                     );
                                 })}
@@ -131,12 +140,17 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                         </div>
                         {current.pages.length > 1 && (
                             <nav className="mx-auto flex max-w-6xl gap-1.5 overflow-x-auto px-4 pb-2 [scrollbar-width:none]" aria-label={`${current.label} 안의 화면`}>
-                                {current.pages.map(pg => (
-                                    <Link key={pg.href} href={pg.href} aria-current={isPage(pg.href) ? "page" : undefined}
-                                        className={`flex h-8 shrink-0 items-center rounded-full px-3 text-[13px] font-semibold no-underline ${isPage(pg.href) ? "bg-ink text-paper" : "bg-card text-ink shadow-[0_1px_4px_rgba(30,26,21,.1)]"}`}>
-                                        {pg.label}
-                                    </Link>
-                                ))}
+                                {current.pages.map(pg => {
+                                    const n = pageCount(pg);
+                                    return (
+                                        <Link key={pg.href} href={pg.href} aria-current={isPage(pg.href) ? "page" : undefined}
+                                            title={n > 0 && pg.count === "alerts" ? badgeHint("status", n) : undefined}
+                                            className={`flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-[13px] font-semibold no-underline ${isPage(pg.href) ? "bg-ink text-paper" : "bg-card text-ink shadow-[0_1px_4px_rgba(30,26,21,.1)]"}`}>
+                                            {pg.label}
+                                            {n > 0 && <span className="pica-num whitespace-nowrap rounded-full bg-accent px-1.5 text-[11px] font-bold leading-[17px] text-on-accent">{pg.count === "alerts" ? `경고 ${n}` : n}</span>}
+                                        </Link>
+                                    );
+                                })}
                             </nav>
                         )}
                     </header>
@@ -150,7 +164,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                             const on = s.key === current.key;
                             const n = badgeOf(s.key);
                             return (
-                                <Link key={s.key} href={s.pages[0].href} aria-current={on ? "page" : undefined}
+                                <Link key={s.key} href={s.pages[0].href} aria-current={on ? "page" : undefined} aria-label={n > 0 ? `${s.label} — ${badgeHint(s.key, n)}` : undefined}
                                     className={`relative flex h-[58px] flex-col items-center justify-center gap-0.5 text-[11.5px] font-semibold no-underline ${on ? "text-accent" : "text-ink-soft"}`}>
                                     <s.icon size={20} aria-hidden strokeWidth={on ? 2.4 : 1.9} />
                                     {s.short}

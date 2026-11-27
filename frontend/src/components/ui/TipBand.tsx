@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { KAKAO_CHAT } from "@/lib/reports";
+import { KAKAO_CHAT, TIP_EVENT_NAME, TIP_POINTS, couponOpen } from "@/lib/reports";
+import { todayKST } from "@/lib/utils";
 
 /** 이 경로로 시작하는 화면에는 띠를 두지 않는다(제보 화면 자신, 로그인·가입 흐름) */
 const HIDDEN = ["/tip", "/login", "/signup", "/welcome", "/auth"];
@@ -9,15 +10,15 @@ export function showTipBand(pathname: string | null): boolean {
     return !HIDDEN.some(h => p === h || p.startsWith(h + "/"));
 }
 
-/** 공개 화면 꼬리말 위 제보 띠 (specs/020). 사이트에서 직접 보내기 + 카카오톡 채널로 보내기 */
+/** 공개 화면 꼬리말 위 제보 띠 (specs/020, 이름·포인트 021). 사이트에서 직접 보내기 + 카카오톡 채널로 보내기 */
 export function TipBand() {
     return (
         <section aria-labelledby="tip-band-title" className="border-t-2 border-line bg-[var(--pk-accent-soft)]">
             <div className="mx-auto flex max-w-[1320px] flex-col gap-5 px-4 py-9 sm:px-6 md:flex-row md:items-center md:justify-between md:py-11">
                 <div className="min-w-0">
-                    <h2 id="tip-band-title" className="pica-display text-[26px] leading-[1.25] text-ink sm:text-[30px]">피카에 없는 행사, 알려 주세요</h2>
+                    <h2 id="tip-band-title" className="pica-display text-[26px] leading-[1.25] text-ink sm:text-[30px]">{TIP_EVENT_NAME}</h2>
                     <p className="mt-2 text-[15.5px] leading-relaxed text-ink">
-                        <b>매주 5명께 커피 쿠폰을 드려요.</b> 행사 이름과 링크(또는 사진) 하나면 돼요.
+                        피카에 없는 행사를 알려 주세요. <b>피카에 실리면 {TIP_POINTS}포인트</b>{couponOpen(todayKST()) && <>, 12월까지는 <b>매주 5명께 커피 쿠폰</b>도 드려요</>}.
                     </p>
                 </div>
                 <div className="flex flex-none flex-col gap-2.5 sm:flex-row">

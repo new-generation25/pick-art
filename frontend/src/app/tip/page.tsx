@@ -1,23 +1,29 @@
 import type { Metadata } from "next";
 import { TipForm } from "./TipForm";
+import { COUPON_NOTE, TIP_EVENT_NAME, TIP_POINTS, couponOpen } from "@/lib/reports";
+import { todayKST } from "@/lib/utils";
 
-// 행사 제보하기 (specs/007 → 020). 로그인 없이 보내고, 관리자가 원문을 확인한 뒤에만 공개된다(헌장 I)
+// 「숨은 행사 찾기」 행사 제보 (specs/007 → 020 → 021). 로그인 회원이 보내고, 관리자가 원문을 확인한 뒤에만 공개된다(헌장 I)
 export const metadata: Metadata = {
-    title: "행사 제보하기 | 피카 pica",
-    description: "피카에 아직 없는 공연·전시·축제를 알려 주세요. 행사 이름과 링크(또는 사진) 하나면 돼요. 매주 5명께 커피 쿠폰을 드려요.",
+    title: "숨은 행사 찾기 — 행사 제보하기 | 피카 pica",
+    description: "피카에 아직 없는 공연·전시·축제를 알려 주세요. 행사 이름과 링크(또는 사진) 하나면 돼요. 피카에 실리면 100포인트가 쌓여요.",
     alternates: { canonical: "/tip" },
 };
+
+// 쿠폰 안내는 2026-12-31 까지만 보인다. 미리 그려 둔 화면이 날짜를 넘겨도 남지 않게 한 시간마다 다시 그린다
+export const revalidate = 3600;
 
 export default function TipPage() {
     return (
         <main className="min-h-screen pb-20">
             <div className="mx-auto max-w-xl px-4 pt-20 sm:px-6 sm:pt-24">
-                <h1 className="pica-display text-[32px] leading-[1.2] text-ink sm:text-[40px]">행사 제보하기</h1>
+                <p className="text-[13px] font-bold text-accent">행사 제보하기</p>
+                <h1 className="pica-display mt-1 text-[32px] leading-[1.2] text-ink sm:text-[40px]">{TIP_EVENT_NAME}</h1>
                 <p className="mt-3 text-[16px] leading-relaxed text-ink">
                     작은 공연, 동네 전시, 버스킹, 팝업 — 피카에 아직 없는 행사를 알려 주세요. 행사 이름과 링크(또는 사진) 하나면 돼요.
                 </p>
                 <p className="mt-4 rounded-[12px] bg-[var(--pk-accent-soft)] px-4 py-3 text-[15px] leading-relaxed text-ink">
-                    <b>매주 5명께 커피 쿠폰을 드려요.</b> 그 주에 확인해서 피카에 실린 제보 가운데 골라요.
+                    <b>피카에 실리면 {TIP_POINTS}포인트가 쌓여요.</b>{couponOpen(todayKST()) && ` ${COUPON_NOTE}`}
                 </p>
                 <div className="mt-7">
                     <TipForm />

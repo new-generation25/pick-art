@@ -1,16 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { GN_REGIONS } from "@/lib/regions";
 import {
-    checkTip, normalizeTipUrl, tipErrorText, EMPTY_TIP, KAKAO_CHAT, REWARD_CONSENT_TEXT, REWARD_CONSENT_VERSION, TIP_PHOTO_MAX, type TipInput,
+    checkTip, couponOpen, loginHref, normalizeTipUrl, tipErrorText, EMPTY_TIP, KAKAO_CHAT, POINTS_NOTE, REWARD_CONSENT_TEXT, REWARD_CONSENT_VERSION,
+    TIP_PHOTO_MAX, TIP_POINTS, type TipInput,
 } from "@/lib/reports";
+import { todayKST } from "@/lib/utils";
 import { shrink } from "./leaflet/LeafletForm";
 
-// 행사 제보 (specs/020). 로그인 없이 보낸다. 꼭 받는 것은 행사 이름 + 원문 링크나 사진 하나.
+// 행사 제보 「숨은 행사 찾기」 (specs/020 → 021). 로그인 회원이 보낸다. 꼭 받는 것은 행사 이름 + 원문 링크나 사진 하나.
 // 접수는 submit_tip() 으로만 하고, 사진은 그 함수가 돌려준 경로(tips/<id>.jpg)에 한 번 올린다. 공개는 관리자가 확인한 뒤(헌장 I)
+// 피카에 실리면(관리자 «반영함») 보낸 회원에게 100포인트가 쌓인다 — DB 트리거가 한다
+type Mine = { id: string; status: "new" | "done" | "rejected"; created_at: string; event_id: string | null; tip: { title?: string } | null };
+const MINE_STATUS = { new: "확인 중", done: `피카에 실림 · +${TIP_POINTS}P`, rejected: "반영하지 않음" } as const;
 type TextKey = "title" | "url" | "date_start" | "date_end" | "venue" | "region" | "body" | "contact" | "credit" | "website";
 type Sent = { photoFailed: boolean; withContact: boolean };
 
@@ -21,6 +26,19 @@ export function TipForm() {
     const [errors, setErrors] = useState<string[]>([]);
     const [sending, setSending] = useState(false);
     const [sent, setSent] = useState<Sent | null>(null);
+    const [userId, setUserId] = useState<string | null | undefined>(undefined);   // undefined = 확인 중
+    const [mine, setMine] = useState<Mine[]>([]);
+    const coupon = couponOpen(todayKST());
+
+    useEffect(() => {
+        supabase.auth.getSession().then(({ data: { session } }) => setUserId(session?.user?.id ?? null));
+    }, []);
+    const loadMine = useCallback(async (uid: string) => {
+        const { data } = await supabase.from("reports").select("id,status,created_at,event_id,tip")
+            .eq("kind", "tip").eq("user_id", uid).order("created_at", { ascending: false }).limit(10);
+        setMine((data || []) as Mine[]);
+    }, []);
+    useEffect(() => { if (userId) loadMine(userId); }, [userId, loadMine]);
 
     // 값은 이벤트 처리 중에 먼저 읽는다(나중에 도는 상태 갱신 함수 안에서는 currentTarget 이 비어 있다)
     const set = (k: TextKey) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -62,7 +80,7 @@ export function TipForm() {
                 return;
             }
         }
-        const contact = form.contact.trim();
+        const contact = coupon ? form.contact.trim() : "";
         const { data, error } = await supabase.rpc("submit_tip", {
             p: {
                 title: form.title.trim(), url: normalizeTipUrl(form.url), has_photo: blob ? "true" : "false",
@@ -89,19 +107,52 @@ export function TipForm() {
         setSending(false);
         setSent({ photoFailed, withContact: !!contact });
         reset();
+        if (userId) loadMine(userId);
     };
+
+    const mineList = mine.length > 0 && (
+        <section className="mt-8">
+            <h2 className="pica-display text-[20px] text-ink">내가 보낸 제보</h2>
+            <ul className="mt-2 divide-y divide-line border-y border-line">
+                {mine.map(m => (
+                    <li key={m.id} className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 py-2.5 text-[14px]">
+                        <span className="min-w-0 font-semibold text-ink" style={{ overflowWrap: "anywhere" }}>
+                            {m.tip?.title || "제보"}
+                            <span className="ml-2 font-normal text-ink-soft">{new Date(m.created_at).toLocaleDateString("ko-KR")}</span>
+                        </span>
+                        {m.status === "done" && m.event_id
+                            ? <Link href={`/events/${m.event_id}`} className="font-bold text-accent underline underline-offset-4">{MINE_STATUS.done} →</Link>
+                            : <span className={m.status === "done" ? "font-bold text-accent" : "text-ink-soft"}>{MINE_STATUS[m.status]}</span>}
+                    </li>
+                ))}
+            </ul>
+        </section>
+    );
+
+    if (userId === undefined) return null;
+    if (userId === null) {
+        return (
+            <div className="rounded-[14px] bg-card p-5 text-[15px] shadow-[0_1px_4px_rgba(30,26,21,.08)]">
+                <p className="leading-relaxed text-ink">제보는 로그인한 뒤 보낼 수 있어요. 보낸 행사가 피카에 실리면 그 계정에 <b>{TIP_POINTS}포인트</b>가 쌓여요.</p>
+                <p className="mt-1 text-[13.5px] leading-relaxed text-ink-soft">로그인하면 이 화면으로 돌아와요. 적을 것은 행사 이름과 링크(또는 사진) 하나예요.</p>
+                <Link href={loginHref("/tip")} className="mt-4 flex h-14 items-center justify-center rounded-full bg-accent px-6 text-[17px] font-bold text-on-accent no-underline">로그인하고 제보하기</Link>
+            </div>
+        );
+    }
 
     if (sent) {
         return (
             <div className="rounded-[14px] bg-card p-5 text-[15px] shadow-[0_1px_4px_rgba(30,26,21,.08)]" role="status">
                 <p className="pica-display text-[22px] text-ink">고맙습니다. 제보를 받았어요.</p>
                 <p className="mt-2 leading-relaxed text-ink-soft">원문을 확인한 뒤 피카에 올려요. 확인이 안 되면 올리지 않을 수 있어요.</p>
-                {sent.withContact && <p className="mt-1 leading-relaxed text-ink-soft">커피 쿠폰은 매주 5명께, 적어 주신 연락처로 보내요.</p>}
+                <p className="mt-1 leading-relaxed text-ink">피카에 실리면 <b>{TIP_POINTS}포인트</b>가 쌓여요. <Link href="/me#points" className="underline underline-offset-2">내 정보</Link>에서 볼 수 있어요.</p>
+                {sent.withContact && <p className="mt-1 leading-relaxed text-ink-soft">커피 쿠폰은 매주 5명께, 적어 주신 연락처로 보내요. 당첨은 카카오톡 채널 «피카»에서 알려요.</p>}
                 {sent.photoFailed && <p className="mt-2 font-semibold leading-relaxed text-ink">사진은 올라가지 않았어요. 링크를 알면 한 번 더 보내 주세요.</p>}
                 <div className="mt-4 flex flex-wrap gap-2">
                     <button type="button" onClick={() => setSent(null)} className="h-12 rounded-full bg-accent px-5 text-[15px] font-bold text-on-accent">하나 더 제보하기</button>
                     <Link href="/" className="flex h-12 items-center rounded-full border border-line bg-paper px-5 text-[15px] font-semibold text-ink no-underline">피카 둘러보기</Link>
                 </div>
+                {mineList}
             </div>
         );
     }
@@ -112,6 +163,7 @@ export function TipForm() {
     const fold = "rounded-[12px] border border-line bg-card px-4 py-3";
     const foldTitle = "cursor-pointer text-[15px] font-bold text-ink";
     return (
+        <>
         <form onSubmit={send} className="flex flex-col gap-5" noValidate>
             <div>
                 <label htmlFor="tip-title" className={label}>행사 이름</label>
@@ -167,8 +219,8 @@ export function TipForm() {
                 </div>
             </details>
 
-            <details className={fold}>
-                <summary className={foldTitle}>커피 쿠폰 받기 <span className="font-normal text-ink-soft">(선택 — 연락처)</span></summary>
+            {coupon && <details className={fold}>
+                <summary className={foldTitle}>커피 쿠폰 받기 <span className="font-normal text-ink-soft">(선택 — 연락처, 12월까지)</span></summary>
                 <div className="mt-3 flex flex-col gap-3">
                     <div>
                         <label htmlFor="tip-contact" className="mb-1 block text-[13px] font-semibold text-ink-soft">전화번호나 이메일</label>
@@ -179,9 +231,9 @@ export function TipForm() {
                             onChange={e => { const v = e.currentTarget.checked; setForm(f => ({ ...f, consent: v })); }} />
                         <span>{REWARD_CONSENT_TEXT} <Link href="/privacy" className="underline underline-offset-2">개인정보처리방침</Link></span>
                     </label>
-                    <p className={hint}>연락처는 운영자만 봐요. 적지 않아도 제보는 똑같이 받아요.</p>
+                    <p className={hint}>연락처는 운영자만 봐요. 적지 않아도 제보는 똑같이 받고 포인트도 똑같이 쌓여요.</p>
                 </div>
-            </details>
+            </details>}
 
             <details className={fold}>
                 <summary className={foldTitle}>이름 남기기 <span className="font-normal text-ink-soft">(선택 — 「제보: ○○」)</span></summary>
@@ -210,6 +262,9 @@ export function TipForm() {
                 카카오톡이 편하면 채널 «피카»의 「행사 알리기」로 사진·글을 보내도 돼요.{" "}
                 <a href={KAKAO_CHAT} target="_blank" rel="noopener noreferrer" className="font-bold text-ink underline underline-offset-4">카카오톡으로 보내기</a>
             </p>
+            <p className="text-center text-[13px] leading-relaxed text-ink-soft">{POINTS_NOTE}</p>
         </form>
+        {mineList}
+        </>
     );
 }
