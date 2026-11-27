@@ -182,6 +182,10 @@ const qr = (label: string): QuickReply => ({ label, action: "message", messageTe
 const PICA_BTN: Button = { label: "피카 보기", action: "webLink", webLinkUrl: PICA_URL };
 const TIP_BTN: Button = { label: TIP_TEXT, action: "message", messageText: TIP_TEXT };
 const ASK_BTN: Button = { label: ASK_TEXT, action: "message", messageText: ASK_TEXT };
+/** 제보 전에 이미 올라온 행사인지 찾아보게 한다(운영자 11/28 «카카오톡 제보 하기 전에 이미 있는 행사인지 검토하라고 메시지 넣는것이 좋겠어»).
+ *  picka.news 첫 화면 맨 위에 찾기 칸이 있다(/?q=) */
+const CHECK_FIRST = "보내기 전에 피카에 이미 올라온 행사인지 찾아봐 주세요. 이미 있으면 보내지 않아도 돼요.";
+const SEARCH_BTN: Button = { label: "피카에서 찾아보기", action: "webLink", webLinkUrl: PICA_URL };
 
 export function reply(texts: string[], quick: string[] = []): SkillResponse {
     return {
@@ -226,19 +230,25 @@ export const MSG = {
         "방금 보낸 내용은 저장하지 않았어요.\n\n행사를 알리려면 «행사 제보하기»를 누른 뒤 사진·글을 보내 주세요. 운영자에게 남길 말이 있으면 «문의하기»를 눌러 주세요.",
     ),
     /** 동의 안내: 한 줄 요지로 줄임(운영자 11/27 «동의 체크도 통합해서 줄여»). 버튼 «동의하고 보내기» 하나는 그대로 */
-    consent: () => reply([
-        "리플렛·포스터 사진이나 일정 글을 보내 주시면 운영자가 확인한 뒤에 피카에 올려요.\n\n«동의하고 보내기»를 누르면 보낸 정보가 사실이고, 이미지 권리를 확인했다는 뜻이에요. (사진 1년 보관 · 이름·전화번호는 받지 않음 · picka.news/privacy)",
-    ], [AGREE_TEXT]),
+    consent: (): SkillResponse => ({
+        version: "2.0",
+        template: {
+            outputs: [card("", `리플렛·포스터 사진이나 일정 글을 보내 주시면 운영자가 확인한 뒤에 피카에 올려요.\n${CHECK_FIRST}\n\n«동의하고 보내기»를 누르면 보낸 정보가 사실이고, 이미지 권리를 확인했다는 뜻이에요. (사진 1년 보관 · 이름·전화번호는 받지 않음 · picka.news/privacy)`, [SEARCH_BTN])],
+            quickReplies: [qr(AGREE_TEXT)],
+        },
+    }),
     /** 채널을 추가하지 않은 사람: 제보를 받지 않고 채널 추가를 권한다(운영자 11/27 «카톡은 채널구독») */
     needFriend: () => one(card(
         "채널을 추가해 주세요",
         "피카 채널을 추가하면 행사 제보를 받을 수 있어요. 추가한 뒤 «행사 제보하기»를 다시 눌러 주세요.\n방금 보낸 내용은 저장하지 않았어요.",
         [{ label: "채널 추가하기", action: "webLink", webLinkUrl: CHANNEL_ADD_URL }, PICA_BTN],
     )),
-    ready: () => withEnd(reply([
-        `지금부터 ${TIP_MINUTES}분 동안 보내는 사진·글을 행사 제보로 받아요.\n리플렛·포스터 사진을 이 채팅창에 그냥 보내 주세요(여러 장도 돼요). 단체 이름·행사 이름·날짜는 글로 보내 주셔도 돼요. 사진 바로 뒤에 보낸 글은 같은 제보로 묶어요. 다 보냈으면 «제보 끝내기»를 눌러 주세요.`,
-    ])),
-    agreed: () => withEnd(reply([`동의해 주셔서 고맙습니다. 지금부터 ${TIP_MINUTES}분 동안 보내는 리플렛·포스터 사진이나 일정 글을 행사 제보로 받아요. 이 채팅창에 보내 주세요. 다 보냈으면 «제보 끝내기»를 눌러 주세요.`])),
+    ready: () => withEnd(one(card("",
+        `지금부터 ${TIP_MINUTES}분 동안 보내는 사진·글을 행사 제보로 받아요.\n${CHECK_FIRST}\n\n리플렛·포스터 사진을 이 채팅창에 그냥 보내 주세요(여러 장도 돼요). 단체 이름·행사 이름·날짜는 글로 보내 주셔도 돼요. 다 보냈으면 «제보 끝내기»를 눌러 주세요.`,
+        [SEARCH_BTN]))),
+    agreed: () => withEnd(one(card("",
+        `동의해 주셔서 고맙습니다. 지금부터 ${TIP_MINUTES}분 동안 보내는 리플렛·포스터 사진이나 일정 글을 행사 제보로 받아요.\n${CHECK_FIRST}\n\n다 보냈으면 «제보 끝내기»를 눌러 주세요.`,
+        [SEARCH_BTN]))),
     /** 제보 시간 밖에 먼저 온 사진: 10분 맡아 두고 묻는다 */
     askHeld: (n: number) => reply([
         `사진 ${n}장을 받았어요. 이 사진을 행사 제보로 보낼까요?\n«제보로 보내기»를 누르면 운영자가 확인한 뒤 피카에 올려요. 10분 안에 누르지 않으면 저장하지 않아요.`,
