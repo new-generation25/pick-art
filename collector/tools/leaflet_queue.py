@@ -45,7 +45,10 @@ MAX_LEN = 300
 READ_BY = "claude-scheduled"
 
 TEXT_FIELDS = ("title", "date_text", "time_text", "venue", "region_hint", "price_text",
-               "booking_text", "booking_url", "organizer", "contact")
+               "booking_text", "booking_url", "organizer", "contact",
+               # 인쇄된 장르·형식 낱말(«연극», «창작연극», «뮤지컬», «개인전» …) — 운영자 11/28 «내용에 연극이라 써있는데».
+               # 없던 칸이라 예전 결과 JSON 에 없어도 된다(빈칸으로 본다)
+               "genre_text")
 BOOL_FIELDS = ("multiple_events", "personal_info_visible")  # personal_info_visible: 이미지에 개인 휴대전화·계좌번호·개인 메일이 보임 → 포스터로 공개하지 않음(FR-042)
 ALLOWED_KEYS = set(TEXT_FIELDS) | set(BOOL_FIELDS)
 CONFIDENCE = {"high", "low", "none"}
@@ -389,11 +392,46 @@ def match_venue(text, venues):
     return {"venue_id": v.get("id"), "name": v.get("name"), "region": v.get("region")}
 
 
-def build_result(data):
+def guess_genre(fields, note=None):
+    """읽은 글자로 분야·세부 갈래를 규칙으로 정한다(AI 아님, genre_rules.json). 운영자 11/28 «장르 연극인건 못읽었어?».
+    분야: category_words 와 각 분야의 세부 갈래 낱말 중 한 분야만 걸리면 그 분야. 둘 이상·없음 → 비움(운영자가 고름).
+    세부 갈래: genre.classify(제목 먼저, 그다음 장르 낱말·주최·덧붙인 글). → {category, subcategory, evidence} 또는 None"""
+    import genre as G
+    R = G.rules()
+    def txt(*names):
+        return " ".join(str(fields[n].get("raw") or fields[n].get("value") or "") for n in names if isinstance(fields.get(n), dict))
+    title = txt("title")
+    body = " ".join(x for x in (txt("genre_text", "organizer", "time_text", "price_text"), note or "") if x)
+    text = f"{title} {body}".lower()
+    def find(words_of):
+        out = {}
+        for cat, spec in R["categories"].items():
+            h = [w for w in words_of(cat, spec) if w and w.lower() in text]
+            if h:
+                out[cat] = h
+        return out
+    # «공연»·«전시»처럼 분야를 바로 말하는 낱말을 먼저 본다(«환경교육 아동극 … 무료 공연»의 «교육»에 끌려가지 않게)
+    hits = find(lambda cat, spec: R.get("category_words", {}).get(cat, []))
+    if len(hits) != 1:
+        hits = find(lambda cat, spec: list(R.get("category_words", {}).get(cat, [])) + [w for ws in spec["subs"].values() for w in ws])
+    if len(hits) != 1:
+        return {"category": None, "subcategory": None,
+                "evidence": ("분야 단서 여럿: " + "; ".join(f"{c}({', '.join(h[:2])})" for c, h in hits.items())) if hits else "분야 단서 없음"}
+    cat = next(iter(hits))
+    _, sub, by, ev, pending = G.classify({"category": cat, "title": title, "description": body})
+    return {"category": cat, "subcategory": None if pending else sub,
+            "evidence": f"분야 {cat}: {', '.join(hits[cat][:3])}" + (f" · {ev}" if ev else "")}
+
+
+def build_result(data, note=None):
     fields, dropped = validate(data)
     start, end = parse_dates(fields["date_text"]["raw"], fields["multiple_events"])
     fields.update({"date_start": start, "date_end": end, "date_parser": "rule_extractor.parse_period",
                    "read_by": READ_BY, "privacy_dropped": dropped})
+    try:
+        fields["genre"] = guess_genre(fields, note)
+    except Exception as e:  # 규칙 파일 문제로 읽은 결과를 잃지 않는다
+        fields["genre"] = {"category": None, "subcategory": None, "evidence": f"판정 실패: {str(e)[:100]}"}
     return fields
 
 

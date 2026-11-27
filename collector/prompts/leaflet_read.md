@@ -33,7 +33,7 @@
 
 ## 칸
 
-JSON 맨 위 키는 아래 12개만 쓴다. 다른 키가 있으면 저장이 거절된다.
+JSON 맨 위 키는 아래 13개만 쓴다. 다른 키가 있으면 저장이 거절된다.
 
 | 키 | 옮길 글자 |
 |---|---|
@@ -47,10 +47,11 @@ JSON 맨 위 키는 아래 12개만 쓴다. 다른 키가 있으면 저장이 �
 | `booking_url` | 인쇄된 예매·안내 주소 |
 | `organizer` | 주최·주관 단체 이름 |
 | `contact` | 문의 연락처 |
+| `genre_text` | 행사의 장르·형식을 말하는 **인쇄된 낱말**을 그대로 모아 옮긴다(예: `연극`, `창작연극`, `아동극`, `뮤지컬`, `정기연주회`, `오페라`, `무용`, `개인전`, `사진전`, `축제`, `워크숍`). 제목 위아래 작은 줄·소개 글·단체 소개에 있어도 옮긴다. 인쇄되지 않은 장르는 쓰지 않는다 — `--save` 가 이 낱말로 분야·세부 갈래를 규칙으로 정해 관리자 초안에 미리 고른다 |
 | `multiple_events` | 한 장에 서로 다른 행사가 2개 이상이면 `true`, 아니면 `false` (true/false 만) |
 | `personal_info_visible` | 이미지 어딘가에 **개인 휴대전화 번호(010 등)·계좌번호·개인 이메일**이 인쇄돼 보이면 `true`, 아니면 `false`. 번호 자체는 어느 칸에도 옮기지 않는다 — 이 표시가 있으면 운영자가 그 이미지를 포스터로 공개하지 않는다 |
 
-`multiple_events`·`personal_info_visible` 을 뺀 10칸은 모두 이 모양이다:
+`multiple_events`·`personal_info_visible` 을 뺀 11칸은 모두 이 모양이다:
 
 ```json
 {"raw": "인쇄된 글자 그대로", "value": "같은 글자를 정리한 것", "confidence": "high"}
@@ -103,6 +104,7 @@ JSON 맨 위 키는 아래 12개만 쓴다. 다른 키가 있으면 저장이 �
   "booking_url": {"raw": null, "value": null, "confidence": "none"},
   "organizer": {"raw": "주최: 극단 예시", "value": "극단 예시", "confidence": "high"},
   "contact": {"raw": "문의 055-330-1234", "value": "055-330-1234", "confidence": "high"},
+  "genre_text": {"raw": "정기공연", "value": "정기공연", "confidence": "high"},
   "multiple_events": false,
   "personal_info_visible": false
 }
@@ -126,6 +128,7 @@ JSON 맨 위 키는 아래 12개만 쓴다. 다른 키가 있으면 저장이 �
   "booking_url": {"raw": null, "value": null, "confidence": "none"},
   "organizer": {"raw": null, "value": null, "confidence": "none"},
   "contact": {"raw": null, "value": null, "confidence": "none"},
+  "genre_text": {"raw": "음악회", "value": "음악회", "confidence": "high"},
   "multiple_events": false,
   "personal_info_visible": true
 }

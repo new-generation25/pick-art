@@ -573,3 +573,31 @@ def test_cleanup_removes_avatar_files_without_a_profile():
     assert (dry["avatar_orphans"], dry["avatar_removed"]) == (2, 0) and len(store.avatars) == 3
     out = lq.cleanup(store, True, now=now)
     assert (out["avatar_orphans"], out["avatar_removed"]) == (2, 2) and store.avatars == ["u1/a.jpg"] and not out["errors"]
+
+
+def _fields(**kw):
+    f = lambda v: {"raw": v, "value": v, "confidence": "high" if v else "none"}
+    d = {k: f(None) for k in lq.TEXT_FIELDS}
+    d.update({k: f(v) for k, v in kw.items()})
+    d.update(multiple_events=False, personal_info_visible=False)
+    return d
+
+
+@pytest.mark.parametrize("kw,cat,sub", [
+    # 운영자 11/28 «내용에 연극이라 써있는데» — 리플렛에 인쇄된 장르 낱말로 분야·갈래를 규칙으로 정한다
+    (dict(title="이웃집 쌀통", genre_text="극단해연 제2회 정기공연 창작연극", organizer="주관 극단해연"), "공연", "연극"),
+    (dict(title="아기토끼 꼬네의 메아리", genre_text="기후위기 대응 환경교육 아동극", price_text="무료 공연"), "공연", "연극"),
+    (dict(title="뮤지컬 <빨래>", genre_text="뮤지컬"), "공연", "뮤지컬"),
+    (dict(title="김미성 개인전 <마음의 중심>", genre_text="개인전"), "전시", None),
+    (dict(title="도자기 만들기 원데이 클래스", genre_text="체험 워크숍"), "체험", "체험·워크숍"),
+    (dict(title="봄날"), None, None),
+])
+def test_guess_genre(kw, cat, sub):
+    g = lq.build_result(_fields(**kw))["genre"]
+    assert (g["category"], g["subcategory"]) == (cat, sub)
+
+
+def test_old_result_without_genre_text_still_saves():
+    d = _fields(title="봄날")
+    del d["genre_text"]
+    assert lq.build_result(d)["genre_text"]["confidence"] == "none"

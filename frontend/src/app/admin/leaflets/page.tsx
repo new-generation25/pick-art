@@ -18,13 +18,15 @@ import { shrink } from "@/app/tip/leaflet/LeafletForm";
 type Field = { raw?: string | null; value?: string | null; confidence?: "high" | "low" | "none" };
 type Sub = {
     id: string; user_id: string; image_path: string | null; image_kind: "file" | "photo"; official_url: string | null; group_name: string | null;
-    given: Record<string, string>; note: string | null; rights_version: string; ai_result: (Record<string, Field> & { date_start?: string | null; date_end?: string | null; error?: string; personal_info_visible?: boolean; venue_match?: VenueMatch | null }) | null;
+    given: Record<string, string>; note: string | null; rights_version: string; ai_result: (Record<string, Field> & { date_start?: string | null; date_end?: string | null; error?: string; personal_info_visible?: boolean; venue_match?: VenueMatch | null; genre?: GenreGuess | null }) | null;
     status: "uploaded" | "read" | "published" | "rejected"; admin_note: string | null; event_id: string | null; created_at: string;
     channel: "web" | "kakao_bot" | "kakao_chat";
 };
 /** 읽은 장소 글자를 확인된 장소 목록(venues)과 맞춘 결과(collector leaflet_queue.match_venue, 11/27 검증에서 더함) */
 type VenueMatch = { venue_id: string; name: string; region: string };
 type Draft = EventDraft & { group_name: string; use_poster: boolean };
+/** 읽은 장르 낱말로 규칙이 정한 분야·세부 갈래(collector leaflet_queue.guess_genre, 운영자 11/28 «장르 연극인건 못읽었어?»). 애매하면 비어 있다 */
+type GenreGuess = { category: string | null; subcategory: string | null; evidence?: string };
 
 const CHANNEL = { web: "사이트", kakao_bot: "카카오 챗봇", kakao_chat: "카카오 채팅(운영자가 옮김)" } as const;
 const STATUS = { uploaded: { label: "읽기 전", color: "gray" }, read: { label: "읽음", color: "blue" }, published: { label: "등록함", color: "teal" }, rejected: { label: "반영 안 함", color: "red" } } as const;
@@ -36,8 +38,9 @@ function draftOf(s: Sub): Draft {
     return {
         group_name: s.group_name || v(a.organizer as Field),
         title: s.given.title || v(a.title as Field),
-        category: "",
-        subcategory: "",
+        // 분야·세부 갈래: 규칙이 정했으면 미리 고른다(운영자가 바꿀 수 있다)
+        category: a.genre?.category ?? "",
+        subcategory: (a.genre?.category && a.genre?.subcategory) || "",
         // 지역: 포스터에 인쇄된 시·군을 먼저, 없으면 장소 목록에서 찾은 장소의 지역(포스터에 지역 이름이 없는 일이 많다 — 11/27 검증 12건 중 3건)
         region: regionFromText(regionHint) ?? (GN_REGIONS.find(r => r === a.venue_match?.region) ?? ""),
         venue: s.given.venue || v(a.venue as Field),
@@ -197,11 +200,14 @@ export default function AdminLeafletsPage() {
                                         {a.error && <Text size="sm" c="red" mt={6}>읽지 못함: {String(a.error)}</Text>}
                                         {s.ai_result && !a.error && (
                                             <Text size="xs" c="dimmed" mt={6}>
-                                                읽은 원문 — {["title", "date_text", "time_text", "venue", "price_text", "booking_text", "organizer"].map(k => {
+                                                읽은 원문 — {["title", "genre_text", "date_text", "time_text", "venue", "price_text", "booking_text", "organizer"].map(k => {
                                                     const f = a[k] as Field | undefined;
                                                     return f?.raw ? `${k}: «${f.raw}»${f.confidence === "low" ? "(확신 낮음)" : ""}` : null;
                                                 }).filter(Boolean).join(" · ") || "없음"}
                                             </Text>
+                                        )}
+                                        {s.ai_result?.genre?.category && (
+                                            <Text size="xs" c="dimmed" mt={4}>분야·갈래를 미리 골랐습니다: {s.ai_result.genre.category}{s.ai_result.genre.subcategory ? ` · ${s.ai_result.genre.subcategory}` : ""} ({s.ai_result.genre.evidence})</Text>
                                         )}
                                         {s.ai_result?.venue_match && (
                                             <Text size="xs" c="dimmed" mt={4}>장소 목록에서 찾음: {s.ai_result.venue_match.name} ({s.ai_result.venue_match.region}) — 포스터에 지역이 없으면 이 지역을 미리 채웁니다</Text>
