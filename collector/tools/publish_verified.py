@@ -39,6 +39,7 @@ from genre import is_theater_film, normalize_category  # noqa: E402
 from dedupe import loose, norm, similar  # noqa: E402,F401
 from title_rules import clean_title, clean_venue as venue_rule  # noqa: E402
 from blocked_sites import host_of, paused_hosts  # noqa: E402
+from privacy import mask_event  # noqa: E402
 
 ISO = re.compile(r"^20\d\d-\d\d-\d\d$")
 OUT_DIR = os.path.join("..", "docs")  # 결과 목록 JSON 자리(테스트는 임시 폴더로 바꾼다)
@@ -276,6 +277,7 @@ async def main(date_from, date_to, dry, ids=None):
                 "published_at": datetime.now(timezone.utc).isoformat(),
                 "raw_post_id": chosen["id"],
             }
+            event = mask_event(event)  # 휴대전화 번호 가리기(운영자 11/27, 일반전화는 그대로)
             if not dry:
                 res = db.supabase.table("events").insert(event).execute()
                 if not res.data:

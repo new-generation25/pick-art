@@ -32,6 +32,7 @@ from database import Database  # noqa: E402
 from utils import check_link, process_and_upload_image  # noqa: E402
 from naver_blog_scraper import _norm  # noqa: E402
 import publish_verified as pv  # noqa: E402
+from privacy import mask_event  # noqa: E402
 
 ISO = re.compile(r"^20\d\d-\d\d-\d\d$")
 EDITABLE = ("title", "category", "region", "venue", "start", "end", "time", "price")
@@ -172,6 +173,7 @@ async def publish_only(ids):
                 "source": r["source"], "original_url": r["source_url"], "status": "PUBLISHED",
                 "published_at": datetime.now(timezone.utc).isoformat(), "raw_post_id": rid,
             }
+            event = mask_event(event)  # 휴대전화 번호 가리기(운영자 11/27, 일반전화는 그대로)
             res = db.supabase.table("events").insert(event).execute()
             if not res.data:
                 fail += 1
