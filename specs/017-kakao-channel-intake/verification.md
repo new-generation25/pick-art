@@ -199,3 +199,7 @@ anon list kakao folder: []
 | 채널 미추가 + 엉뚱한 말 | 세 갈래 카드 |
 
 - 남음: 실제 휴대폰 요청에 `isFriend` 가 오는지. 스킬 서버가 «kakao skill <종류> isFriend <참/거짓>» 로그를 남김 → 운영자 휴대폰 제보 1건 뒤 Vercel 로그로 확인(이 PC의 Vercel 연결 도구는 pick-art 프로젝트를 못 보고, 토큰 호출은 권한 거절 → MAX 크롬 Vercel 화면으로 볼 것).
+- 11/28 0시 18~20분 운영자 휴대폰 제보(행사 제보하기 → 사진 1장 → 글 «마이스토리»). Vercel 로그(MAX 크롬 Vercel › pick-art › Logs, 검색 «kakao»): `kakao skill tip/image/text isFriend true` → **실제 요청에 isFriend 가 온다. 채널 추가 확인 동작함.**
+  - **사진이 버려짐**: 로그 «kakao image store failed … fetch 200 image/jpg». 카카오가 휴대폰 사진을 표준이 아닌 `image/jpg` 로 보내는데 `jpeg|png|webp` 만 받아서. → `jpe?g|pjpeg|png|webp` 로 고침(2c46154). 사진이 실패해 뒤 글도 따로 한 건이 됨.
+  - 운영자 지적 «메시지를 2개씩 보내? 1개로 응답만 해도» → 받았다는 말과 피카 안내를 카드 하나로(2c46154).
+  - 시험 제보 2건 지움.
