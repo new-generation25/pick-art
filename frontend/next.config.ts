@@ -18,6 +18,7 @@ const nextConfig: NextConfig = {
       { source: "/admin/subscribers", destination: "/admin", permanent: false },
       { source: "/admin/configs", destination: "/admin", permanent: false },
       { source: "/admin/ai-prompt", destination: "/admin", permanent: false },
+      { source: "/admin/manual", destination: "/admin/events/new", permanent: false },
     ];
   },
   // 서비스 워커(public/sw.js)는 브라우저가 늘 새 판을 확인하도록 캐시하지 않는다

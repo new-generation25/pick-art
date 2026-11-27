@@ -25,11 +25,16 @@ export const ADMIN_SECTIONS: Section[] = [
             { href: "/admin/reports", label: "신고·제보" },
             { href: "/admin/partners", label: "협약 신청" },
             { href: "/admin/refine", label: "세부 갈래·안내 그림" },
-            { href: "/admin/venues", label: "장소 확인" },
         ],
     },
-    { key: "events", label: "행사", short: "행사", icon: CalendarDays, pages: [{ href: "/admin/manual", label: "새 행사" }] },
-    { key: "sources", label: "출처·단체", short: "출처", icon: Building2, pages: [{ href: "/admin/sources", label: "출처" }] },
+    { key: "events", label: "행사", short: "행사", icon: CalendarDays, pages: [{ href: "/admin/events", label: "찾기·고치기" }, { href: "/admin/events/new", label: "새 행사" }] },
+    {
+        key: "sources", label: "출처·단체", short: "출처", icon: Building2, pages: [
+            { href: "/admin/sources", label: "출처" },
+            { href: "/admin/orgs", label: "단체" },
+            { href: "/admin/venues", label: "공간·장소 확인" },
+        ],
+    },
     {
         key: "status", label: "현황", short: "현황", icon: Activity, pages: [
             { href: "/admin/status", label: "운영 현황" },
@@ -86,7 +91,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     const current = sectionOf(pathname);
     const badges = menuBadges(counts);
     const badgeOf = (key: string) => key === "queue" ? badges.queue : key === "status" ? badges.status : 0;
-    const isPage = (href: string) => href === "/admin" ? pathname === "/admin" : !!pathname && (pathname === href || pathname.startsWith(href + "/"));
+    // 둘째 줄 칩은 주소가 가장 길게 맞는 하나만 켠다(/admin/events/new 에서 «찾기·고치기»까지 켜지지 않게)
+    const matches = (href: string) => href === "/admin" ? pathname === "/admin" : !!pathname && (pathname === href || pathname.startsWith(href + "/"));
+    const best = current.pages.filter(pg => matches(pg.href)).sort((a, b) => b.href.length - a.href.length)[0]?.href;
+    const isPage = (href: string) => href === best;
 
     return (
         <AdminContext.Provider value={{ counts, reload, email }}>

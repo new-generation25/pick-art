@@ -2,10 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Container, Title, Text, Paper, Group, Badge, Button, SegmentedControl, Stack, TextInput, Textarea, Select, Checkbox, Loader, Anchor, SimpleGrid } from "@mantine/core";
+import { Container, Title, Text, Paper, Group, Badge, Button, SegmentedControl, Stack, TextInput, Textarea, Checkbox, Loader, Anchor, SimpleGrid } from "@mantine/core";
 import { supabase } from "@/lib/supabase";
 import { GN_REGIONS, regionFromText } from "@/lib/regions";
-import { CATEGORIES } from "@/lib/categories";
+import { EventFields, checkEvent, eventColumns, type EventDraft } from "@/components/admin/EventFields";
 import { leafletSource, RIGHTS_CHECKS, RIGHTS_VERSION } from "@/lib/leaflets";
 import { shrink } from "@/app/tip/leaflet/LeafletForm";
 
@@ -23,7 +23,7 @@ type Sub = {
 };
 /** 읽은 장소 글자를 확인된 장소 목록(venues)과 맞춘 결과(collector leaflet_queue.match_venue, 11/27 검증에서 더함) */
 type VenueMatch = { venue_id: string; name: string; region: string };
-type Draft = { group_name: string; title: string; category: string; region: string; venue: string; date_start: string; date_end: string; price_info: string; is_free: boolean; original_url: string; description: string; use_poster: boolean };
+type Draft = EventDraft & { group_name: string; use_poster: boolean };
 
 const CHANNEL = { web: "사이트", kakao_bot: "카카오 챗봇", kakao_chat: "카카오 채팅(운영자가 옮김)" } as const;
 const STATUS = { uploaded: { label: "읽기 전", color: "gray" }, read: { label: "읽음", color: "blue" }, published: { label: "등록함", color: "teal" }, rejected: { label: "반영 안 함", color: "red" } } as const;
@@ -36,6 +36,7 @@ function draftOf(s: Sub): Draft {
         group_name: s.group_name || v(a.organizer as Field),
         title: s.given.title || v(a.title as Field),
         category: "",
+        subcategory: "",
         // 지역: 포스터에 인쇄된 시·군을 먼저, 없으면 장소 목록에서 찾은 장소의 지역(포스터에 지역 이름이 없는 일이 많다 — 11/27 검증 12건 중 3건)
         region: regionFromText(regionHint) ?? (GN_REGIONS.find(r => r === a.venue_match?.region) ?? ""),
         venue: s.given.venue || v(a.venue as Field),
@@ -126,9 +127,8 @@ export default function AdminLeafletsPage() {
 
     const publish = async (s: Sub) => {
         const d = drafts[s.id];
-        const missing = [!d.group_name.trim() && "단체 이름", !d.title.trim() && "제목", !d.category && "분야", !d.region && "지역", !d.date_start && "시작일"].filter(Boolean);
-        if (missing.length) { setMsg(m => ({ ...m, [s.id]: `${missing.join("·")}을(를) 채워 주세요` })); return; }
-        if (d.original_url && !/^https?:\/\//.test(d.original_url)) { setMsg(m => ({ ...m, [s.id]: "원본 주소는 http로 시작해야 합니다" })); return; }
+        const missing = [...(d.group_name.trim() ? [] : ["단체 이름"]), ...checkEvent(d)];
+        if (missing.length) { setMsg(m => ({ ...m, [s.id]: `${missing.join(" · ")}을(를) 확인해 주세요` })); return; }
         setMsg(m => ({ ...m, [s.id]: "등록 중…" }));
         let poster = "";
         if (d.use_poster && s.image_kind === "file" && !s.ai_result?.personal_info_visible && s.image_path) {
@@ -141,10 +141,9 @@ export default function AdminLeafletsPage() {
             if (!poster) { setMsg(m => ({ ...m, [s.id]: "포스터를 옮기지 못했습니다(포스터 없이 하려면 체크를 끄세요)" })); return; }
         }
         const { data: ev, error } = await supabase.from("events").insert({
-            title: d.title.trim(), category: d.category, region: d.region, venue: d.venue.trim() || null,
-            event_date_start: d.date_start, event_date_end: d.date_end || d.date_start,
-            price_info: d.price_info.trim() || null, is_free: d.is_free, description: d.description.trim() || null,
-            poster_image_url: poster || null, source: leafletSource(d.group_name), original_url: d.original_url.trim() || null,
+            ...eventColumns(d),
+            ...(d.subcategory ? { subcategory_by: "admin", subcategory_pending: false, subcategory_evidence: "운영자 확정" } : {}),
+            poster_image_url: poster || null, source: leafletSource(d.group_name),
             status: "PUBLISHED", published_at: new Date().toISOString(),
         }).select("id").single();
         if (error || !ev) { setMsg(m => ({ ...m, [s.id]: `등록하지 못했습니다: ${error?.message ?? ""}` })); return; }
@@ -206,22 +205,9 @@ export default function AdminLeafletsPage() {
                                     {d && s.status !== "published" && s.status !== "rejected" ? (
                                         <Stack gap={6}>
                                             <TextInput label="단체 이름(출처 «단체 제공 · 이름»)" value={d.group_name} onChange={e => setD(s.id, "group_name", e.currentTarget.value)} />
-                                            <TextInput label="제목" value={d.title} onChange={e => setD(s.id, "title", e.currentTarget.value)} />
-                                            <Group grow>
-                                                <Select label="분야" data={CATEGORIES} value={d.category || null} onChange={x => setD(s.id, "category", x ?? "")} />
-                                                <Select label="지역" data={GN_REGIONS} value={d.region || null} onChange={x => setD(s.id, "region", x ?? "")} searchable />
-                                            </Group>
-                                            <TextInput label="장소" value={d.venue} onChange={e => setD(s.id, "venue", e.currentTarget.value)} />
-                                            <Group grow>
-                                                <TextInput label="시작일" type="date" value={d.date_start} onChange={e => setD(s.id, "date_start", e.currentTarget.value)} />
-                                                <TextInput label="끝나는 날" type="date" value={d.date_end} onChange={e => setD(s.id, "date_end", e.currentTarget.value)} />
-                                            </Group>
-                                            <TextInput label="관람료" value={d.price_info} onChange={e => setD(s.id, "price_info", e.currentTarget.value)} />
-                                            <Checkbox label="무료" checked={d.is_free} onChange={e => setD(s.id, "is_free", e.currentTarget.checked)} />
-                                            <TextInput label="원본 안내 주소(있으면)" value={d.original_url} onChange={e => setD(s.id, "original_url", e.currentTarget.value)} placeholder="없으면 «단체 제공»으로만 표시"
-                                                description={!s.official_url && d.original_url ? "단체가 적은 주소가 아니라 리플렛에 인쇄된 예매 주소로 채웠습니다. 열리는지 눌러 확인한 뒤 등록하세요(헌장 I)." : undefined}
-                                                rightSection={/^https?:\/\//.test(d.original_url) ? <Anchor href={d.original_url} target="_blank" rel="noopener noreferrer" size="xs">열기</Anchor> : null} rightSectionWidth={44} />
-                                            <Textarea label="상세 안내(이미지에 적힌 글·단체가 준 글만)" value={d.description} autosize minRows={2} onChange={e => setD(s.id, "description", e.currentTarget.value)} />
+                                            <EventFields value={d} onChange={next => setDrafts(x => ({ ...x, [s.id]: { ...x[s.id], ...next } }))}
+                                                urlNote={!s.official_url && d.original_url ? "단체가 적은 주소가 아니라 리플렛에 인쇄된 예매 주소로 채웠습니다. 열리는지 눌러 확인해 주세요." : "없으면 비워 둡니다(출처는 «단체 제공»으로 표시)."}
+                                                descriptionLabel="상세 안내(이미지에 적힌 글·단체가 준 글만)" />
                                             <Checkbox label={a.personal_info_visible ? "이 이미지를 포스터로 쓰기 — 개인 연락처가 보여 쓸 수 없음(단체에 번호 없는 판을 요청)" : "이 이미지를 포스터로 쓰기"}
                                                 disabled={s.image_kind !== "file" || !!a.personal_info_visible}
                                                 checked={d.use_poster && s.image_kind === "file" && !a.personal_info_visible}

@@ -22,6 +22,19 @@ function when(iso: string) {
 }
 const safeUrl = (u?: string) => (u && /^https?:\/\//.test(u) ? u : null);
 
+/** 제보에 적힌 내용을 «새 행사» 양식에 채워 여는 주소. 저장하면 이 제보가 «반영함»으로 닫힌다 */
+function tipHref(r: { id: string; tip: { title?: string; date_start?: string; date_end?: string; venue?: string; region?: string; url?: string } | null }): string {
+    const t = r.tip || {};
+    const q = new URLSearchParams({ report: r.id });
+    if (t.title) q.set("title", t.title);
+    if (t.date_start) q.set("start", t.date_start);
+    if (t.date_end) q.set("end", t.date_end);
+    if (t.venue) q.set("venue", t.venue);
+    if (t.region) q.set("region", t.region);
+    if (t.url) q.set("url", t.url);
+    return `/admin/events/new?${q.toString()}`;
+}
+
 export default function AdminReportsPage() {
     const [filter, setFilter] = useState<"new" | "all">("new");
     const [rows, setRows] = useState<Report[] | null>(null);
@@ -90,7 +103,7 @@ export default function AdminReportsPage() {
                                 {r.status !== "done" && <Button size="xs" color="teal" onClick={() => handle(r, "done")}>반영함</Button>}
                                 {r.status !== "rejected" && <Button size="xs" variant="default" onClick={() => handle(r, "rejected")}>반영 안 함</Button>}
                                 {r.status !== "new" && <Button size="xs" variant="subtle" onClick={() => handle(r, "new")}>다시 열기</Button>}
-                                {r.kind === "tip" && <Button size="xs" variant="subtle" component={Link} href="/admin/manual">직접 등록으로</Button>}
+                                {r.kind === "tip" && <Button size="xs" variant="light" component={Link} href={tipHref(r)}>행사로 등록</Button>}
                             </Group>
                         </Paper>
                     ))}

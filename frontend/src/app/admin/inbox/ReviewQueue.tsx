@@ -23,6 +23,7 @@ export interface ReviewContent {
     review_reason?: string;
     review_note?: string;
     publish_approved_at?: string;
+    publish_approved_by?: string;
     publish_failed_at?: string;
     ai_suggestion?: {
         date_start?: string; date_end?: string; region?: string; venue?: string;
@@ -132,9 +133,16 @@ interface Props {
     posts: ReviewPost[];
     loading: boolean;
     onChanged: (changes: ReviewChange[]) => void;
+    /** 묶음 안에 넣을 때: 제목 줄·설명을 그리지 않는다(동의 필요의 계정별 묶음) */
+    compact?: boolean;
+    /** 승인·옮기기를 누른 관리자(메일). raw_posts 는 관리자만 읽는 표다 */
+    actor?: string;
 }
 
-export function ReviewQueue({ bucket, posts, loading, onChanged }: Props) {
+const PAGE = 20;   // 한 번에 그리는 카드 수(동의 필요는 수백 건이다)
+
+export function ReviewQueue({ bucket, posts, loading, onChanged, compact = false, actor = "" }: Props) {
+    const [shown, setShown] = useState(PAGE);
     const [selected, setSelected] = useState<string[]>([]);
     const [busy, setBusy] = useState(false);
 
@@ -153,7 +161,7 @@ export function ReviewQueue({ bucket, posts, loading, onChanged }: Props) {
             for (const id of picked) {
                 const c = fresh[id];
                 if (!c) { failed.push(`${id}: 이미 처리됨`); continue; }
-                const next = { ...c, publish_approved_at: now };
+                const next = { ...c, publish_approved_at: now, publish_approved_by: actor || undefined };
                 try {
                     await writeContent(id, next);
                     changes.push({ id, status: "REVIEW", content: next });
@@ -212,6 +220,7 @@ export function ReviewQueue({ bucket, posts, loading, onChanged }: Props) {
                 review_bucket: "candidate",
                 review_bucket_at: new Date().toISOString(),
                 review_reason: `admin_moved_from_${bucket}`,
+                review_moved_by: actor || undefined,
             };
             await writeContent(post.id, next);
             onChanged([{ id: post.id, status: "REVIEW", content: next }]);
@@ -225,8 +234,8 @@ export function ReviewQueue({ bucket, posts, loading, onChanged }: Props) {
         setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
 
     return (
-        <Box mb={60}>
-            <Group justify="space-between" mb="xs" wrap="wrap">
+        <Box mb={compact ? 8 : 40}>
+            {!compact && <Group justify="space-between" mb="xs" wrap="wrap">
                 <Group>
                     <Box w={4} h={24} bg={bucket === "candidate" ? "teal" : bucket === "consent" ? "orange" : "gray"} style={{ borderRadius: 999 }} />
                     <Title order={2} size="h3" fw={900}>{BUCKET_LABEL[bucket]} ({posts.length})</Title>
@@ -251,8 +260,8 @@ export function ReviewQueue({ bucket, posts, loading, onChanged }: Props) {
                         </Button>
                     </Group>
                 )}
-            </Group>
-            <Text size="sm" c="dimmed" mb="lg">{BUCKET_NOTE[bucket]}</Text>
+            </Group>}
+            {!compact && <Text size="sm" c="dimmed" mb="lg">{BUCKET_NOTE[bucket]}</Text>}
 
             {loading ? (
                 <Text ta="center" c="dimmed" py={60} fw={700}>데이터를 불러오는 중...</Text>
@@ -262,8 +271,9 @@ export function ReviewQueue({ bucket, posts, loading, onChanged }: Props) {
                 </Paper>
             ) : (
                 <Stack gap="md">
-                    {posts.map((post) => {
+                    {posts.slice(0, shown).map((post) => {
                         const c = post.content || {};
+                        const body = String(c.description || c.text || c.caption || "").trim();
                         const a = c.ai_suggestion || {};
                         const state = approvalState(c);
                         const thumb = post.image_urls?.[0] || a.poster_url || "";
@@ -331,6 +341,12 @@ export function ReviewQueue({ bucket, posts, loading, onChanged }: Props) {
                                                 승인됨, 검증 실패({fmtTime(c.publish_failed_at)}) — 다음 정기 실행에서 다시 확인
                                             </Badge>
                                         )}
+                                        {body && (
+                                            <details>
+                                                <summary style={{ cursor: "pointer", fontSize: 12.5, color: "var(--mantine-color-dimmed)" }}>원문 보기</summary>
+                                                <Text size="xs" c="dimmed" mt={4} style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{body.slice(0, 1200)}{body.length > 1200 ? " …" : ""}</Text>
+                                            </details>
+                                        )}
                                         <Group pt="xs" gap="xs" style={{ borderTop: "1px solid var(--mantine-color-gray-1)" }}>
                                             <Button
                                                 component="a"
@@ -359,6 +375,11 @@ export function ReviewQueue({ bucket, posts, loading, onChanged }: Props) {
                             </Paper>
                         );
                     })}
+                    {posts.length > shown && (
+                        <Button variant="default" radius="xl" onClick={() => setShown(n => n + PAGE)}>
+                            더 보기 ({shown}/{posts.length})
+                        </Button>
+                    )}
                 </Stack>
             )}
         </Box>

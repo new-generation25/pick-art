@@ -7,6 +7,7 @@ import {
 } from "@mantine/core";
 import { RefreshCw, ExternalLink } from "lucide-react";
 import { SiteVisitsPanel, type SiteVisits } from "@/components/admin/SiteVisitsPanel";
+import { PushMemberStats, RoutineSteps } from "@/components/admin/OpsExtras";
 import { supabase } from "@/lib/supabase";
 import { GN_REGIONS } from "@/lib/regions";
 import {
@@ -403,6 +404,10 @@ export default function AdminDashboard() {
                         </Text>
                     </Paper>
                 </SimpleGrid>
+
+                {/* 회차 요약·알림·회원 (specs/019 A6) */}
+                <RoutineSteps />
+                <PushMemberStats />
 
                 <SiteVisitsPanel data={ops.snapshots["site_visits"]?.data as unknown as SiteVisits | undefined} updatedAt={ops.snapshots["site_visits"]?.updated_at} />
 

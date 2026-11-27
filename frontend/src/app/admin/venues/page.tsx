@@ -24,10 +24,40 @@ type Venue = {
     candidates: Candidate[] | null;
     checked_by: string | null;
     checked_at: string | null;
+    closed_days: string | null;
+    capacity: number | null;
+    district: string | null;
 };
 
 const STATUS_KO = { pending: "확인 대기", confirmed: "확정", failed: "찾을 수 없음" } as const;
 const ORDER = { pending: 0, failed: 1, confirmed: 2 } as const;
+
+/** 공간 정보(휴관일·객석·구·군). 공개 화면의 «공간 정보»에 나온다. 공식 안내에서 확인한 것만 적는다 */
+function VenueInfo({ v, onSaved }: { v: Venue; onSaved: (patch: Partial<Venue>) => void }) {
+    const [closed, setClosed] = useState(v.closed_days || "");
+    const [cap, setCap] = useState(v.capacity != null ? String(v.capacity) : "");
+    const [district, setDistrict] = useState(v.district || "");
+    const [msg, setMsg] = useState("");
+    const dirty = closed !== (v.closed_days || "") || cap !== (v.capacity != null ? String(v.capacity) : "") || district !== (v.district || "");
+    const save = async () => {
+        const n = cap.trim() ? Number(cap) : null;
+        if (n !== null && (!Number.isInteger(n) || n <= 0 || n > 100000)) { setMsg("객석 수는 숫자로 넣어 주세요."); return; }
+        const patch = { closed_days: closed.trim() || null, capacity: n, district: district.trim() || null };
+        const { data, error } = await supabase.from("venues").update(patch).eq("id", v.id).select("id");
+        if (error || !data?.length) { setMsg(`저장하지 못했습니다: ${error?.message || "권한 확인"}`); return; }
+        setMsg("저장했습니다."); onSaved(patch);
+    };
+    const input = "h-9 rounded-lg bg-neutral-50 px-2 text-sm ring-1 ring-neutral-200";
+    return (
+        <div className="mt-2 flex flex-wrap items-end gap-2">
+            <label className="text-xs text-neutral-500">휴관일<br /><input className={`${input} w-40 max-w-full`} value={closed} onChange={e => setClosed(e.target.value)} placeholder="예: 매주 월요일" maxLength={60} /></label>
+            <label className="text-xs text-neutral-500">객석<br /><input className={`${input} w-20`} value={cap} onChange={e => setCap(e.target.value)} inputMode="numeric" placeholder="석" /></label>
+            <label className="text-xs text-neutral-500">구·군<br /><input className={`${input} w-28`} value={district} onChange={e => setDistrict(e.target.value)} placeholder="예: 해운대구" maxLength={20} /></label>
+            {dirty && <button type="button" className="h-9 rounded-lg bg-neutral-900 px-3 text-xs font-bold text-white" onClick={save}>공간 정보 저장</button>}
+            {msg && <span className="pb-2 text-xs text-neutral-500" role="status">{msg}</span>}
+        </div>
+    );
+}
 
 function naverSearch(v: Venue) {
     return `https://map.naver.com/p/search/${encodeURIComponent(`${v.name} ${v.region || ""}`.trim())}`;
@@ -54,9 +84,13 @@ export default function AdminVenuesPage() {
             setLoading(false);
             return;
         }
-        const { data: ev } = await supabase.from("events").select("venue_id").eq("status", "PUBLISHED").not("venue_id", "is", null).limit(5000);
+        // 행사 수: 1,000건씩 끝까지 읽는다(공개 행사가 1,000건을 넘어 수가 모자라게 세어졌다, specs/019 FR-009)
         const c: Record<string, number> = {};
-        for (const e of ev || []) c[e.venue_id] = (c[e.venue_id] || 0) + 1;
+        for (let from = 0; ; from += 1000) {
+            const { data: ev } = await supabase.from("events").select("venue_id").eq("status", "PUBLISHED").not("venue_id", "is", null).order("id").range(from, from + 999);
+            for (const e of ev || []) c[e.venue_id] = (c[e.venue_id] || 0) + 1;
+            if (!ev || ev.length < 1000) break;
+        }
         setCounts(c);
         setVenues(((data || []) as Venue[]).sort((a, b) => ORDER[a.geo_status] - ORDER[b.geo_status] || (c[b.id] || 0) - (c[a.id] || 0)));
         setLoading(false);
@@ -140,6 +174,7 @@ export default function AdminVenuesPage() {
                                     <p className="mt-1 text-sm text-neutral-700">{v.address || "-"} ({v.lat?.toFixed(5)}, {v.lng?.toFixed(5)})</p>
                                 )}
                                 {v.checked_by && <p className="mt-1 text-xs text-neutral-400">확인: {v.checked_by} · {v.checked_at?.slice(0, 16).replace("T", " ")}</p>}
+                                {v.geo_status === "confirmed" && <VenueInfo v={v} onSaved={(patch) => setVenues(list => list.map(x => x.id === v.id ? { ...x, ...patch } : x))} />}
 
                                 {v.candidates && v.candidates.length > 0 && (
                                     <div className="mt-3 flex flex-col gap-1">

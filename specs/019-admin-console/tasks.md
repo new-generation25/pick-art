@@ -14,9 +14,9 @@
 - [X] T007 맨 위 줄을 두 번 그리던 화면 4곳(인박스·직접등록·저장공간·장소 좌표)에서 화면 쪽 `AdminHeader` 삭제, 위 여백 맞춤
 - [X] T008 리플렛 «반영 안 함» 메모 칸(메모가 늘 빈 값으로 저장되던 것): `frontend/src/app/admin/leaflets/page.tsx`
 - [X] T009 단체 협약 메모를 관리자만 읽는 표로: `supabase/migrations/20261127100000_org_admin_notes.sql`(운영 DB 적용 11/27, 익명 읽기·쓰기 401 확인), `frontend/src/lib/orgNotes.ts`, 협약 화면·협약 표시 버튼이 새 표에 씀. 협약을 풀 때 «맺은 날~푼 날»을 남김
-- [ ] T010 배포 뒤 `supabase/migrations/20261127110000_orgs_drop_partner_note.sql` 적용(옛 칸 지우기) → 익명 키로 `orgs.partner_note` 읽기가 거절되는지 확인 (SC-008)
+- [X] T010 배포 뒤 옛 칸 지우기 적용(11/27) → 익명 키로 `orgs.partner_note` 읽기 400 «column does not exist», 공개 단체 화면 200 (SC-008)
 - [X] T011 로컬 빌드 확인(11/27): 삭제한 주소 3개가 `/admin`으로 감, 남은 관리자 화면 13곳이 모두 그려짐, 없앤 버튼 6개가 화면에 없음. 남은 버튼을 하나씩 눌러 보는 확인은 하지 않았다(운영자 화면 검토 때 함께)
-- [ ] T012 운영자 «배포해» 뒤 운영 주소 확인 (A0·A1·A2 함께)
+- [X] T012 운영 배포(main 1f94621, 11/27): `/admin`·`/admin/status`·`/admin/refine` 200, 없앤 화면 3곳 307 → `/admin`, 없앤 API 404, 로그인 화면 종이 테마, 홈 칩 줄 구조 반영
 
 남긴 것(쓰지 않지만 지우지 않음): DB 표 `subscribers`·`keywords`·`configs`·`crawler_configs`·`blacklist`·`crawl_logs`와 함수 `subscribe_newsletter`·`add_keyword_alerts`, `frontend/src/lib/localOnly.ts`(헌장 III이 가리킴), 수집기의 수동 요청 처리(`collector/main.py check_manual_requests`).
 
@@ -35,6 +35,37 @@
 - [X] T031 예전 대시보드는 `frontend/src/app/admin/status/page.tsx`(현황)로 옮김. 세부 갈래·안내 그림은 `frontend/src/app/admin/refine/page.tsx`(대기함)로
 - [X] T032 대조(11/27 13:19): 공개 후보 74·사람 판단 187·동의 필요 359(합 620 = 08:20 회차 «남은 REVIEW 620»), 자동 공개 대기 77(DB COLLECTED 77), 장소 확인 2(DB pending 2), 리플렛·신고·협약 0(DB 0), 세부 갈래 101(진행 중 행사만, 세부 판정 화면과 같은 조건)
 
-## A3~A6
+## A3 대기함 (US4 · FR-013~017)
 
-단계 시작 때 채운다(plan.md의 단계 표).
+- [X] T040 `frontend/src/app/admin/inbox/page.tsx` 다시 쓰기: 갈래 6개(공개 후보·사람 판단·동의 필요·자동 공개 대기·최근 결과·반영 안 한 것). «발행하기»(검증 없이 바로 공개)·«현재 노출 삭제»·«휴지통 비우기»를 없앰 — 승인·고친 것은 다음 정기 실행이 검증한 뒤 공개하고, 반영 안 한 것은 지우지 않아 다시 수집되지 않는다
+- [X] T041 `inbox/CollectedQueue.tsx`: 자동 공개에서 빠진 것을 이유별로(날짜 없음 · 검증에서 멈춤 · 60일 뒤는 접어 둠). 날짜를 적어 저장하면 다음 실행이 검증
+- [X] T042 `inbox/ConsentGroups.tsx`: 동의 필요를 계정별 묶음으로(359건 → 계정 128곳), 계정의 동의 단계(없음·임시·상시·철회)와 근거를 그 자리에서 저장
+- [X] T043 `inbox/ReviewQueue.tsx`: 원문 보기(근거), 승인·옮긴 사람 기록, 20건씩 더 보기
+- [X] T044 «최근 결과»: 승인한 것이 공개됐는지·검증에 걸렸는지(이유)·대기 중인지
+- [X] T045 제보 → «행사로 등록»: 제보에 적힌 제목·날짜·장소·주소를 채운 새 행사 양식으로 열고, 저장하면 제보를 «반영함»으로 닫음 (`admin/reports/page.tsx`)
+- [X] T046 로컬 확인(11/27): 갈래별 건수 74·187·359·77·272, «반영 안 함» → «반영 안 한 것»에 보임 → «되돌리기»로 원래 자리(77 → 76 → 77). 승인 → 다음 회차 결과 확인은 운영자가 실제 후보를 승인해야 볼 수 있다(specs/003 R2 ④)
+
+## A4 행사 (US5 · FR-018~021)
+
+- [X] T050 공통 행사 칸 `frontend/src/components/admin/EventFields.tsx`(제목·분야·세부·지역·장소·시작일·끝나는 날·관람료·무료·원본 주소·상세). 새 행사·고치기·리플렛 등록이 같이 씀 → 행사 넣는 양식 3개 → 1개 (SC-006)
+- [X] T051 `frontend/src/app/admin/events/page.tsx`: 공개·숨김, 제목·장소·출처 찾기, 지역·분야·기간 거르기, 50건씩(1,000건 한계 없음), 고치기 창, 숨김(이유)·되돌리기
+- [X] T052 `frontend/src/app/admin/events/new/page.tsx`: 새 행사(원본 안내 주소 필수). 옛 `/admin/manual`은 이 주소로 보냄
+- [X] T053 DB `events.hidden_reason·hidden_by·hidden_at·keep_visible·edited_at`(운영 적용). 숨김 76건 모두에 이유를 백업 파일 7개에서 찾아 적음 (SC-007)
+- [X] T054 수집기: `dedupe_published.py`가 숨길 때 이유를 남기고 `keep_visible` 행은 다시 숨기지 않음, `hide_events.py`도 이유를 남김
+- [X] T055 로컬 확인(11/27): 진행 중·예정 698건/끝난 것 424건 조회, 끝난 행사 1건(엘콰이어 정기연주회)을 고치기 저장 → 숨김(424 → 423) → 숨김 목록에 이유 «같은 행사가 따로 있음(중복) · 운영자» → 되돌리기(77 → 76). 그 행사는 `keep_visible=true`로 남았다
+
+## A5 출처·단체 (US6 · FR-022~025)
+
+- [X] T060 DB `whitelist.consent·consent_at·consent_evidence·paused_reason`(운영 적용), 글자 표시 19곳을 칸으로 옮겨 적음(임시 18 · 상시 1 — 옮기기 전 표와 같음). `role·score·score_detail`은 마이그레이션 기록을 맞춤
+- [X] T061 `frontend/src/app/admin/sources/page.tsx`: «살펴볼 것»(실패·정의 만료 의심·0건 2회 연속·켜진 경고), 동의 단계 표시·고치기, 쉬게 함(이유)
+- [X] T062 수집기: `triage_review.py`가 동의 칸을 읽음(칸이 «없음»이면 예전 글자 표시), `main.py`가 쉬게 한 웹·블로그 출처를 건너뛰고 «⏸️ 일시 중지: 이유»로 보고
+- [X] T063 `frontend/src/app/admin/orgs/page.tsx`: 단체 338곳 찾기, 종류·인스타 계정·협약 맺은 날 고치기, 관리자 메모
+- [X] T064 `frontend/src/app/admin/venues/page.tsx`: 확정 장소의 휴관일·객석·구·군 고치기, 행사 수를 끝까지 읽기
+- [ ] T065 다음 정기 실행에서 확인: 쉬게 한 출처가 건너뛰어지는지(지금 화면에서 쉬게 한 출처 없음), 동의 단계를 바꾼 계정의 글이 정리에서 옮겨지는지(운영자가 실제로 바꿨을 때)
+
+## A6 현황 (US7 · FR-026~028)
+
+- [X] T070 수집기 `ops_log.record_steps` + `main.py`: 회차마다 단계별 한 줄을 `ops_snapshots.routine_steps`에(최근 14회). 11/27 08:20 회차는 로그에서 옮겨 넣음
+- [X] T071 `frontend/src/components/admin/OpsExtras.tsx`: 회차 요약, 휴대폰 알림(기기 1 · 주말 요약 1통), 회원(2명 · 찜 2 · 장소 찜 0) — 관리자만 부르는 집계 함수 `admin_push_stats`·`admin_member_stats`(익명 401)
+- [ ] T072 11/27 15:00 회차가 스스로 남긴 회차 요약이 로그와 같은지 확인 (SC-009)
+
