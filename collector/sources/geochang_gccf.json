@@ -19,7 +19,9 @@
     },
     {
       "url": "https://www.gccf.or.kr/front/M0000019/exhibit/list.do",
-      "category": "전시"
+      "category": "전시",
+      "min_rows": 0,
+      "_min_rows_note": "2026-11-27 기획전시 게시판이 비어 있음(목록 0건, 페이지 정상). 전시가 없는 달이 잦아 0건을 만료로 보지 않는다"
     }
   ],
   "list": {

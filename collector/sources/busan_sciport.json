@@ -1,0 +1,16 @@
+{
+  "slug": "busan_sciport",
+  "name": "국립부산과학관",
+  "_comment": "행사 게시판 정의가 아니라 일시 중지 표시용. paused 를 지우려면 boards·list 를 채운다",
+  "verified_at": "2026-11-27",
+  "paused": "2026-11-27 첫 화면 주소로 등록돼 행사 게시판을 읽지 못했다(매 회차 '선택자 불일치'). 행사 소식은 공식 인스타 @sciport_busan(누리집에 걸린 링크)으로 수집한다",
+  "match": [
+    "sciport.or.kr"
+  ],
+  "region": "부산",
+  "venue": "국립부산과학관",
+  "boards": [],
+  "expect": {
+    "min_rows": 0
+  }
+}

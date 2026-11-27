@@ -1,0 +1,16 @@
+{
+  "slug": "uiryeong_tour",
+  "name": "의병박물관",
+  "_comment": "행사 게시판 정의가 아니라 일시 중지 표시용. paused 를 지우려면 boards·list 를 채운다",
+  "verified_at": "2026-11-27",
+  "paused": "2026-11-27 의령 관광 누리집 첫 화면 주소라 행사 게시판이 없다(매 회차 '선택자 불일치'). 의령 행사는 의령군민문화회관 정의(culture.uiryeong.go.kr)와 의령군 인스타(@uiryeong_official, @here_ur_tour)로 수집한다",
+  "match": [
+    "uiryeong.go.kr/tour"
+  ],
+  "region": "경남",
+  "venue": "의병박물관",
+  "boards": [],
+  "expect": {
+    "min_rows": 0
+  }
+}

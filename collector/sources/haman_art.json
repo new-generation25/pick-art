@@ -15,7 +15,9 @@
     },
     {
       "url": "https://www.haman.go.kr/02574/02589.web",
-      "category": "전시"
+      "category": "전시",
+      "min_rows": 0,
+      "_min_rows_note": "2026-11-27 전시안내 게시판 「총 0건」(최종수정 2024-09-09). 0건을 만료로 보지 않는다"
     }
   ],
   "list": {

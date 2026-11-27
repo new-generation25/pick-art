@@ -1,0 +1,16 @@
+{
+  "slug": "tongyeong_ttaf",
+  "name": "통영연극예술축제",
+  "_comment": "행사 게시판 정의가 아니라 일시 중지 표시용. paused 를 지우려면 boards·list 를 채운다",
+  "verified_at": "2026-11-27",
+  "paused": "2026-11-27 연 1회 축제 누리집(ttaf.kr). 첫 화면에 행사 목록 게시판이 없어 정의로 읽을 수 없다(매 회차 '선택자 불일치'). 축제 공지가 올라오는 시기(봄)에 게시판을 다시 확인해 정의를 만든다",
+  "match": [
+    "ttaf.kr"
+  ],
+  "region": "경남",
+  "venue": "통영연극예술축제",
+  "boards": [],
+  "expect": {
+    "min_rows": 0
+  }
+}

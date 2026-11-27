@@ -1,0 +1,16 @@
+{
+  "slug": "busan_gamcheon",
+  "name": "감천문화마을 골목축제",
+  "_comment": "행사 게시판 정의가 아니라 일시 중지 표시용. paused 를 지우려면 boards·list 를 채운다",
+  "verified_at": "2026-11-27",
+  "paused": "2026-11-27 마을 소개 누리집(gamcheon.or.kr) 첫 화면이라 행사 목록 게시판이 없다(매 회차 '선택자 불일치'). 골목축제는 연 1회라 축제 공지 시기에 게시판을 다시 확인한다",
+  "match": [
+    "gamcheon.or.kr"
+  ],
+  "region": "부산",
+  "venue": "감천문화마을",
+  "boards": [],
+  "expect": {
+    "min_rows": 0
+  }
+}

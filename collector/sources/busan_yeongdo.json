@@ -1,0 +1,40 @@
+{
+  "slug": "busan_yeongdo",
+  "name": "영도문화예술회관",
+  "_comment": "영도구 영도문화예술회관. 을숙도문화회관(busan_eulsukdo)과 같은 문화인 예매 시스템(yeongdo.moonhwain.net:451)의 '진행중인 공연/전시' 목록을 읽는다. 목록 구조·선택자가 을숙도와 같다(2026-11-27 8건 확인). 일시가 '11/28 (토)'처럼 연도 없이 나와 올해 연도로 읽으므로 연말에 이듬해 1월 공연은 연도가 한 해 앞서 잡힐 수 있다(을숙도와 같은 한계). 예매 사이트에 올라온 공연만 잡히고 대관공연은 빠진다",
+  "verified_at": "2026-11-27",
+  "match": [
+    "yeongdo.moonhwain.net"
+  ],
+  "region": "부산",
+  "venue": "영도문화예술회관",
+  "boards": [
+    {
+      "url": "https://yeongdo.moonhwain.net:451/rsvc/rsv_pm_list.html?b_id=yeongdo&pfmIng=1",
+      "category": "공연"
+    }
+  ],
+  "list": {
+    "rows": "ul.list li.i",
+    "title": "dt",
+    "period": "dd:nth-of-type(3)",
+    "link": ".plist_img a@href",
+    "id_regex": "p_idx=([0-9]+)",
+    "image": ".plist_img img@src",
+    "category": "dd:nth-of-type(2)",
+    "category_map": {
+      "전시": "전시"
+    }
+  },
+  "detail": {
+    "body": ".main_box4_con"
+  },
+  "expect": {
+    "min_rows": 1,
+    "required": [
+      "title",
+      "link",
+      "period"
+    ]
+  }
+}

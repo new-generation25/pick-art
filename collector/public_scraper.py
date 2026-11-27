@@ -94,7 +94,8 @@ class PublicScraper:
                 await asyncio.sleep(d["board_delay"])
             items = await self._list_items(session, d, board)
             print(f"[Scraper] 📊 {board['category']} {board.get('api') and 'API' or board['url']} → {len(items)} items", flush=True)
-            if len(items) < d["expect"]["min_rows"]:
+            # 게시판마다 min_rows 를 따로 둘 수 있다(예: 전시가 없는 달이 잦은 전시 게시판은 0). 없으면 정의 전체 값
+            if len(items) < board.get("min_rows", d["expect"]["min_rows"]):
                 expired.append(board["url"])
                 continue
             found += len(items)

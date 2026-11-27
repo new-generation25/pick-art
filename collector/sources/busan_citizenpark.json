@@ -1,0 +1,16 @@
+{
+  "slug": "busan_citizenpark",
+  "name": "부산시민공원 역사관",
+  "_comment": "행사 게시판 정의가 아니라 일시 중지 표시용. paused 를 지우려면 boards·list 를 채운다",
+  "verified_at": "2026-11-27",
+  "paused": "2026-11-27 부산시민공원 첫 화면 주소로 등록돼 전시 게시판이 없다(매 회차 '선택자 불일치'). 역사관 전시는 부산시 행사 출처로 들어온다. 전시 게시판 주소를 찾으면 정의를 만든다",
+  "match": [
+    "busan.go.kr/citizenpark"
+  ],
+  "region": "부산",
+  "venue": "부산시민공원 역사관",
+  "boards": [],
+  "expect": {
+    "min_rows": 0
+  }
+}
