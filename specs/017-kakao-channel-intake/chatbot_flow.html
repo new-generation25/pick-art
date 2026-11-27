@@ -87,21 +87,22 @@ a { color: var(--green); }
 <div class="wrap">
   <header>
     <h1>피카 카카오톡 챗봇 흐름</h1>
-    <p class="sub">카카오톡 채널 «피카»(@pickanews)에 들어온 사람이 무엇을 누르고 무엇을 받는지 정리했습니다. 2026-11-27 밤, 운영자 결정(«행사 제보하기»로 이름 변경, 제보 시간 10분, 문의는 메시지로 남기기, 피카 이용자 늘리기)을 반영한 기준입니다. 채널은 주로 행사 제보를 받는 곳이고, 마지막 목표는 피카(picka.news) 이용자를 늘리는 것입니다.</p>
-    <div class="chips"><span class="chip live">적용됨: 아래 메뉴·오픈빌더 v1.2</span><span class="chip wait">배포 대기: 카드 문구·버튼, 제보 10분, 제보 뒤 안내</span></div>
+    <p class="sub">카카오톡 채널 «피카»(@pickanews)에 들어온 사람이 무엇을 누르고 무엇을 받는지, 2026-11-28 운영 기준(main d71f971)으로 정리했습니다. 채널은 주로 행사 제보를 받는 곳이고, 마지막 목표는 피카(picka.news) 이용자를 늘리는 것입니다.</p>
+    <div class="chips"><span class="chip live">모두 운영 중</span><span class="chip live">휴대폰 시험 통과: 사진·제보 끝내기·사진 먼저</span><span class="chip wait">남음: 비즈니스 채널 심사</span></div>
   </header>
 
   <section>
     <h2>들어오는 길</h2>
     <div class="doors">
-      <div class="door"><b>채팅방 처음 열기</b><span>인사 카드가 옵니다</span></div>
-      <div class="door"><b>아래 메뉴 «행사 제보하기»</b><span>제보를 시작합니다</span></div>
-      <div class="door"><b>아래 메뉴 «피카 보기»</b><span>picka.news 가 열립니다</span></div>
-      <div class="door"><b>아래 메뉴 «내 주변 행사»</b><span>picka.news/nearby 가 열립니다</span></div>
-      <div class="door"><b>카드 버튼 «문의하기»</b><span>메시지를 남기면 늦더라도 답한다는 안내 → «메시지 남기기»</span></div>
-      <div class="door"><b>아무 말·사진 보내기</b><span>제보 시간 10분 안이면 제보, 밖이면 세 갈래 카드</span></div>
+      <div class="door"><b>채팅방 처음 열기</b><span>인사 카드</span></div>
+      <div class="door"><b>아래 메뉴 «행사 제보하기»</b><span>제보 시작</span></div>
+      <div class="door"><b>아래 메뉴 «피카 보기»</b><span>picka.news</span></div>
+      <div class="door"><b>아래 메뉴 «내 주변 행사»</b><span>picka.news/nearby</span></div>
+      <div class="door"><b>카드 버튼 «문의하기»</b><span>«메시지 남기기» → 파트너센터 «내 채팅»</span></div>
+      <div class="door"><b>사진부터 보내기</b><span>«이 사진을 행사 제보로 보낼까요?»</span></div>
+      <div class="door"><b>아무 말 보내기</b><span>제보 중이면 제보, 아니면 세 갈래 카드</span></div>
     </div>
-    <p class="note" style="margin-top:10px">아래 메뉴는 «행사 제보하기 · 피카 보기 · 내 주변 행사» 순서이고, 채팅방에 들어오면 펼쳐진 채로 보입니다(«항상 열림»). 3칸 중 2칸이 사이트로 갑니다.</p>
+    <p class="note" style="margin-top:10px">아래 메뉴는 «행사 제보하기 · 피카 보기 · 내 주변 행사», 채팅방에 들어오면 펼쳐진 채로(«항상 열림»). 3칸 중 2칸이 사이트로 갑니다. 제보는 채널을 추가한 사람만 받습니다(추가하지 않았으면 «채널을 추가해 주세요»).</p>
   </section>
 
   <section>
@@ -114,75 +115,88 @@ a { color: var(--green); }
       </div></div>
 
       <div class="step"><div class="rail"><span class="dot">2</span></div><div class="body">
-        <h3>«행사 제보하기» → 권리 확인 동의 (처음 한 번)</h3><p class="who">동의한 적이 없는 사람</p>
+        <h3>«행사 제보하기» → 동의 (처음 한 번)</h3><p class="who">동의한 적이 없는 사람</p>
         <div class="chat"><div class="me">행사 제보하기</div>
-          <div class="bot"><span>리플렛·포스터 사진이나 일정 글을 보내 주시면 운영자가 확인한 뒤에 피카에 올립니다. 자동으로 올라가지 않아요.</span><span>보내기 전에 두 가지에 동의해 주세요. ① 올릴 권한이 있음 ② 행사 정보를 피카 사이트·SNS에 알리는 데 씀. 사진은 1년 보관, 카카오 이름·전화번호는 받지 않아요.</span></div>
+          <div class="bot"><span>리플렛·포스터 사진이나 일정 글을 보내 주시면 운영자가 확인한 뒤에 피카에 올려요.</span><span>«동의하고 보내기»를 누르면 보낸 정보가 사실이고, 이미지 권리를 확인했다는 뜻이에요. (사진 1년 보관 · 이름·전화번호는 받지 않음)</span></div>
           <span class="qr">동의하고 보내기</span></div>
       </div></div>
 
       <div class="step"><div class="rail"><span class="dot">3</span></div><div class="body">
-        <h3>제보 시간 10분 열림</h3><p class="who">동의를 누르면, 또는 이미 동의한 사람이 «행사 제보하기»를 누르면</p>
-        <div class="chat"><div class="me">동의하고 보내기</div><div class="bot"><span>동의해 주셔서 고맙습니다. 지금부터 10분 동안 보내는 리플렛·포스터 사진이나 일정 글을 행사 제보로 받아요.</span></div></div>
+        <h3>제보 시간 10분</h3><p class="who">동의하면, 또는 이미 동의한 사람이 «행사 제보하기»를 누르면</p>
+        <div class="chat"><div class="me">동의하고 보내기</div><div class="bot"><span>동의해 주셔서 고맙습니다. 지금부터 10분 동안 보내는 리플렛·포스터 사진이나 일정 글을 행사 제보로 받아요. 다 보냈으면 «제보 끝내기»를 눌러 주세요.</span></div><span class="qr">제보 끝내기</span></div>
       </div></div>
 
       <div class="step"><div class="rail"><span class="dot">4</span></div><div class="body">
-        <h3>사진·글 보내기 → 피카로 안내</h3><p class="who">채팅창에 그냥 보냅니다. 여러 장도 됩니다</p>
-        <div class="chat"><div class="me">📷 포스터 사진</div><div class="bot"><span>사진 1장 받았어요. 운영자가 확인한 뒤에 피카에 올립니다. 단체 이름이 사진에 없으면 지금 글로 보내 주세요.</span></div>
-          <div class="bot"><span>피카에서 이번 주 공연·전시도 둘러보세요. 피카 회원이면 «내 정보»에서 «카카오톡 제보 연결»을 해 두면 보낸 제보가 내 기록에 남아요.</span><div class="btns"><span class="btn">피카 보기</span></div></div>
-          <div class="me">극단 ○○, 12월 20일 창원 공연이에요</div><div class="bot"><span>방금 보낸 사진과 함께 받았어요.</span></div></div>
-        <p class="note">사진 바로 뒤에 보낸 글은 같은 제보로 묶습니다. 보낼 때마다 제보 시간이 10분 늘어납니다. 새 제보를 받을 때마다 피카로 오라는 카드가 붙습니다.</p>
+        <h3>사진·글 보내기 — 답은 말풍선 하나</h3><p class="who">채팅창에 그냥 보냅니다. 여러 장도 됩니다</p>
+        <div class="chat"><div class="me">📷 포스터 사진</div>
+          <div class="bot"><span>사진 1장 받았어요. 운영자가 확인한 뒤에 피카에 올려요. 단체 이름이 사진에 없으면 지금 글로 보내 주세요.</span><span>피카 회원이면 «내 정보»에서 «카카오톡 제보 연결»을 해 두세요. 보낸 제보가 내 기록에 남아요.</span><div class="btns"><span class="btn">피카 보기</span></div></div>
+          <span class="qr">제보 끝내기</span>
+          <div class="me">이웃집 쌀통</div><div class="bot"><span>앞서 보낸 제보에 덧붙여 받았어요. 다 보냈으면 «제보 끝내기»를 눌러 주세요.</span></div></div>
+        <p class="note">보낼 때마다 제보 시간이 10분 늘어납니다. 휴대폰 사진(카카오가 «image/jpg»로 주는 것)도 저장됩니다.</p>
       </div></div>
 
       <div class="step"><div class="rail"><span class="dot">5</span></div><div class="body">
-        <h3>운영자 확인 → 피카에 실림</h3><p class="who">운영자</p>
-        <p>예약 작업이 사진의 글자를 읽어 초안을 만들고, 운영자가 관리자 화면 «리플렛 제보»에서 확인해 «등록»해야 picka.news 에 공개됩니다.</p>
+        <h3>«제보 끝내기»</h3><p class="who">다 보냈을 때 («끝», «그만», «제보 종료»도 같음)</p>
+        <div class="chat"><div class="me">제보 끝내기</div><div class="bot"><span class="t">제보를 끝냈어요</span><span>보내 주셔서 고맙습니다. 이제 보내는 말은 제보로 저장하지 않아요.</span><div class="btns"><span class="btn">피카 보기</span><span class="btn">행사 제보하기</span><span class="btn">문의하기</span></div></div></div>
+      </div></div>
+
+      <div class="step"><div class="rail"><span class="dot">6</span></div><div class="body">
+        <h3>자동 읽기 → 운영자 확인 → 피카에 실림</h3><p class="who">예약 작업 · 운영자</p>
+        <p>이 PC의 Claude 앱 예약 작업 «피카 리플렛 글자 읽기»가 <b>매일 10·12·14·16·18·20시</b>에 사진의 인쇄된 글자를 읽어 초안을 채웁니다: 제목·날짜·시각·장소·지역·요금·예매·주최·문의, 그리고 <b>분야·장르</b>(인쇄된 «연극»·«뮤지컬»·«개인전» 같은 낱말로 규칙이 정함). 운영자는 관리자 «리플렛 제출»에서 맞춰 보고 «등록»만 누릅니다.</p>
+        <p class="note">PC·Claude 앱이 켜져 있고 F: 외장 SSD가 연결돼 있어야 읽기가 돕니다. 계좌·개인 휴대전화가 인쇄된 이미지는 «개인정보 보임»으로 표시돼 포스터로 쓰지 않습니다.</p>
       </div></div>
     </div>
   </section>
 
   <section>
-    <h2>제보가 아닐 때</h2>
+    <h2>그 밖의 갈래</h2>
     <div class="forks">
-      <div class="fork"><h3>제보 시간 밖에 보낸 말·사진</h3>
+      <div class="fork"><h3>사진부터 보냄</h3>
+        <div class="chat"><div class="me">📷 사진</div><div class="bot"><span>사진 1장을 받았어요. 이 사진을 행사 제보로 보낼까요? 10분 안에 누르지 않으면 저장하지 않아요.</span></div><span class="qr">제보로 보내기</span><span class="qr">보내지 않기</span></div>
+        <p class="note">«제보로 보내기» → 동의한 사람은 바로 저장, 처음이면 동의 뒤 저장. 맡아 두는 것은 카카오 임시 사진 주소뿐(10분).</p></div>
+      <div class="fork"><h3>제보 중이 아닐 때 보낸 말</h3>
         <div class="chat"><div class="me">주차 되나요?</div><div class="bot"><span class="t">무엇을 도와드릴까요?</span><span>방금 보낸 내용은 저장하지 않았어요. 행사를 알리려면 «행사 제보하기»를, 운영자에게 남길 말이 있으면 «문의하기»를 눌러 주세요.</span><div class="btns"><span class="btn">피카 보기</span><span class="btn">행사 제보하기</span><span class="btn">문의하기</span></div></div></div></div>
       <div class="fork"><h3>«문의하기»</h3>
-        <div class="chat"><div class="me">문의하기</div><div class="bot"><span class="t">문의하기</span><span>메시지를 남겨 놓으시면 운영자가 확인하고 답을 드려요. 답이 조금 늦을 수 있어요. 아래 «메시지 남기기»를 누른 뒤 보내 주세요.</span><div class="btns"><span class="btn">메시지 남기기 <small>→ 1:1 채팅</small></span><span class="btn">피카 보기</span></div></div></div>
-        <p class="note">«메시지 남기기»를 누르면 1:1 채팅으로 바뀌고, 남긴 말은 파트너센터 «내 채팅»으로 들어옵니다. 운영자가 시간 날 때 답합니다.</p></div>
+        <div class="chat"><div class="me">문의하기</div><div class="bot"><span class="t">문의하기</span><span>메시지를 남겨 놓으시면 운영자가 확인하고 답을 드려요. 답이 조금 늦을 수 있어요.</span><div class="btns"><span class="btn">메시지 남기기 <small>→ 1:1 채팅</small></span><span class="btn">피카 보기</span></div></div></div>
+        <p class="note">남긴 말은 파트너센터 «내 채팅»으로 들어옵니다.</p></div>
+      <div class="fork"><h3>채널을 추가하지 않은 사람</h3>
+        <div class="chat"><div class="me">행사 제보하기</div><div class="bot"><span class="t">채널을 추가해 주세요</span><span>피카 채널을 추가하면 행사 제보를 받을 수 있어요.</span><div class="btns"><span class="btn">채널 추가하기</span><span class="btn">피카 보기</span></div></div></div></div>
     </div>
   </section>
 
   <section>
-    <h2>피카 회원과 잇기 (포인트의 조건)</h2>
+    <h2>피카 회원과 잇기</h2>
     <div class="steps">
-      <div class="step"><div class="rail"><span class="dot">1</span></div><div class="body"><h3>picka.news «내 정보» → «연결 코드 받기»</h3><p class="who">로그인한 회원(구글·카카오 모두)</p><p>6자리 코드가 10분 동안 보입니다.</p></div></div>
-      <div class="step"><div class="rail"><span class="dot">2</span></div><div class="body"><h3>채팅방에 «연결 123456»</h3>
-        <div class="chat"><div class="me">연결 482915</div><div class="bot"><span>피카 회원과 연결했어요. 이 채팅방에서 보내는 행사 제보는 회원님이 보낸 것으로 기록돼요.</span></div></div>
-        <p class="note">카톡 제보가 누구 것인지 아는 길은 이 연결뿐입니다. 연결하지 않은 제보는 회원과 이어지지 않아 포인트가 쌓이지 않습니다. 비즈니스 채널로 바뀌고 앱이 연결되면 번호 없이 잇는 방법을 다시 볼 수 있습니다.</p></div></div>
+      <div class="step"><div class="rail"><span class="dot">1</span></div><div class="body"><h3>picka.news «내 정보» → «연결 코드 받기»</h3><p class="who">로그인한 회원(구글·카카오)</p><p>6자리 코드가 10분 동안 보입니다.</p></div></div>
+      <div class="step"><div class="rail"><span class="dot">2</span></div><div class="body"><h3>채팅방에 «연결 123456» 또는 숫자 6자리만</h3>
+        <div class="chat"><div class="me">482915</div><div class="bot"><span>피카 회원과 연결했어요. 이 채팅방에서 보내는 행사 제보는 회원님이 보낸 것으로 기록돼요.</span></div></div>
+        <p class="note">연결 전에 같은 카톡으로 보낸 제보도 이 회원에게 붙습니다. 숫자가 코드가 아니면 평소 글로 받습니다. 틀린 코드는 하루 5번까지. 카톡 제보가 누구 것인지 아는 길은 이 연결뿐이라, 포인트도 연결한 사람에게만 쌓입니다.</p></div></div>
     </div>
   </section>
 
   <section>
     <h2>정해 둔 규칙</h2>
     <ul class="rules">
-      <li>제보 시간은 «행사 제보하기»를 누른 뒤 <span class="num">10</span>분. 보낼 때마다 다시 10분.</li>
-      <li>한 사람 하루 <span class="num">5</span>건, 채널 전체 하루 <span class="num">60</span>건까지 받습니다.</li>
-      <li>보낸 사람은 카카오가 주는 비식별 값을 한 번 더 바꾼 구분값으로만 압니다. 이름·전화번호는 받지 않습니다.</li>
-      <li>사진과 구분값·동의 기록은 1년 뒤 지웁니다. 회원 연결은 «연결 끊기»나 탈퇴 때까지.</li>
-      <li>무엇이든 자동으로 실리지 않습니다. 운영자가 확인해야 공개됩니다.</li>
+      <li>제보 시간은 «행사 제보하기»(또는 «제보로 보내기») 뒤 <span class="num">10</span>분, 보낼 때마다 다시 10분. «제보 끝내기»로 바로 닫힘.</li>
+      <li>한 사람 하루 <span class="num">5</span>건, 채널 전체 하루 <span class="num">60</span>건.</li>
+      <li>보낸 사람은 카카오 비식별 값을 한 번 더 바꾼 구분값으로만 압니다. 이름·전화번호는 받지 않습니다.</li>
+      <li>사진·구분값·동의 기록은 1년 뒤 지웁니다. 회원 연결은 «연결 끊기»나 탈퇴 때까지.</li>
+      <li>무엇이든 자동으로 실리지 않습니다. 운영자가 확인해 «등록»해야 공개됩니다.</li>
     </ul>
   </section>
 
   <section>
-    <h2>적용된 것과 배포 대기</h2>
+    <h2>지금까지 바뀐 것 (11/27~28)</h2>
     <div class="tbl"><table>
-      <thead><tr><th>항목</th><th>지금 운영</th><th>배포하면</th></tr></thead>
+      <thead><tr><th>무엇</th><th>운영자 말</th><th>지금</th></tr></thead>
       <tbody>
-        <tr><td>아래 메뉴</td><td colspan="2">행사 제보하기 · 피카 보기 · 내 주변 행사, 항상 열림 (관리자센터, 적용됨)</td></tr>
-        <tr><td>«행사 제보하기» 말 알아듣기</td><td colspan="2">오픈빌더 v1.2 로 적용됨</td></tr>
-        <tr><td>카드 버튼</td><td>인스타그램으로 문의 · 행사 알리기</td><td>피카 보기 · 행사 제보하기 · 문의하기</td></tr>
-        <tr><td>«문의하기»</td><td>메일·인스타 안내</td><td>메시지 남기기(1:1 채팅 → 내 채팅)</td></tr>
-        <tr><td>제보 시간</td><td>30분</td><td>10분 (DB 변경도 배포와 함께)</td></tr>
-        <tr><td>제보 뒤 피카 안내 카드</td><td>없음</td><td>새 제보마다 «피카 보기»와 회원 연결 권유</td></tr>
+        <tr><td>이름</td><td>«행사 알리기 말고 행사 제보하기로»</td><td>행사 제보하기</td></tr>
+        <tr><td>제보 시간</td><td>«30분 너무 길어 10분으로»</td><td>10분 + 제보 끝내기</td></tr>
+        <tr><td>문의</td><td>«메시지를 남겨 놓으시면 추후 응답 > 내채팅 연결»</td><td>문의하기 → 메시지 남기기</td></tr>
+        <tr><td>답 개수</td><td>«메시지를 2개씩 보내? 1개로»</td><td>말풍선 하나</td></tr>
+        <tr><td>사진 먼저</td><td>«그냥 사진을 먼저 보내면 … 무시됨»</td><td>«제보로 보낼까요?»</td></tr>
+        <tr><td>채널 추가</td><td>«카톡은 채널구독, 피카에서는 로그인»</td><td>채널 추가한 사람만 제보</td></tr>
+        <tr><td>읽기</td><td>«바로 등록할 수 있을 정도로 해석», «장르 연극인건 못읽었어?»</td><td>2시간마다 읽기 + 분야·장르 미리 선택</td></tr>
       </tbody>
     </table></div>
   </section>
@@ -190,8 +204,7 @@ a { color: var(--green); }
   <section class="todo">
     <h2>직접 해 주실 것</h2>
     <ol>
-      <li><b>배포</b>: «피카 앱 개선» 세션에 «017 가져와서 배포해»라고 보내 주세요(커밋 2789cc6 까지). 배포가 끝나면 제보 시간 10분 DB 변경을 바로 적용하고 운영에서 확인합니다.</li>
-      <li><b>비즈니스 채널 전환</b>: 파트너센터 «채널 › 비즈니스 심사 › 채널 심사 신청하기»에서 사업자등록번호(릴로컬)를 넣고 사업자등록증과 카카오톡 전자증명서용 휴대폰으로 신청해 주세요. 사업자 번호는 제가 넣지 않습니다.</li>
+      <li><b>비즈니스 채널 전환</b>: 파트너센터 «채널 › 비즈니스 심사 › 채널 심사 신청하기»에서 릴로컬 사업자등록번호와 사업자등록증으로 신청해 주세요(사업자 번호는 제가 넣지 않습니다). 통과되면 카카오 로그인 회원은 번호 없이 잇는 방법을 다시 볼 수 있습니다.</li>
     </ol>
   </section>
 </div>
