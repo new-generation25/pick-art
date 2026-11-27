@@ -21,6 +21,9 @@ export function ShareButton({ title, eventId }: { title: string; eventId?: strin
                 });
                 return;
             } catch (err) {
+                // 공유 창을 열었다가 닫은 것(취소)이면 여기서 끝낸다. 링크를 복사하지도, 안내를 띄우지도 않는다
+                // (운영자 2026-11-28: 공유하지 않았는데 «복사되었습니다»가 떴음). 그 밖의 오류일 때만 복사로 넘어간다
+                if ((err as { name?: string } | null)?.name === "AbortError") return;
                 console.log("Share failed", err);
             }
         }
@@ -29,8 +32,7 @@ export function ShareButton({ title, eventId }: { title: string; eventId?: strin
         try {
             await navigator.clipboard.writeText(url);
             setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-            alert("링크가 클립보드에 복사되었습니다. 지인에게 공유해 보세요!");
+            setTimeout(() => setCopied(false), 2500);
         } catch (err) {
             console.error("Clipboard API failed, using fallback", err);
 
@@ -46,8 +48,7 @@ export function ShareButton({ title, eventId }: { title: string; eventId?: strin
                 document.body.removeChild(textarea);
 
                 setCopied(true);
-                setTimeout(() => setCopied(false), 2000);
-                alert("링크가 복사되었습니다. 지인에게 공유해 보세요!");
+                setTimeout(() => setCopied(false), 2500);
             } catch (legacyErr) {
                 console.error("Legacy copy also failed", legacyErr);
                 // Final fallback: show URL in alert
@@ -64,8 +65,8 @@ export function ShareButton({ title, eventId }: { title: string; eventId?: strin
         >
             {copied ? <Check className="w-5 h-5 text-accent" /> : <Share2 className="w-5 h-5" />}
             {copied && (
-                <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-neutral-900 text-white text-[10px] font-bold rounded shadow-xl whitespace-nowrap">
-                    복사완료!
+                <span role="status" className="absolute -top-11 left-0 whitespace-nowrap rounded-full bg-ink px-3 py-1.5 text-[12.5px] font-bold text-white shadow-[0_4px_12px_rgba(20,23,28,.25)]">
+                    링크를 복사했어요
                 </span>
             )}
         </button>
