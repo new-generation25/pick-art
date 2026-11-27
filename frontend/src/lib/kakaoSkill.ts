@@ -54,6 +54,9 @@ const LINK_RE = /^(?:피카\s*)?(?:회원\s*)?연결(?:\s*코드)?\s*[:：]?\s*(
 const LINK_HELP_WORDS = new Set(["연결", "회원 연결", "피카 연결", "연결 코드", "회원연결"]);
 /** 제보 끝내기(운영자 11/28 «그냥 대화를 한건데 제보로 이어짐. 사용자가 제보종료를 할수 있도록 해»): 제보 중 답마다 바로가기로 보인다 */
 export const END_TEXT = "제보 끝내기";
+/** 먼저 보낸 사진(운영자 11/28 «그냥 사진을 먼저 보내면 … 무시됨», 보완 방법 1): «제보로 보낼까요?» 바로가기 */
+export const SEND_HELD_TEXT = "제보로 보내기";
+export const DROP_HELD_TEXT = "보내지 않기";
 const END_WORDS = new Set([END_TEXT, "제보 종료", "제보 끝", "제보 그만", "끝내기", "종료", "끝", "그만"]);
 
 export type SkillAction =
@@ -63,6 +66,8 @@ export type SkillAction =
     | { kind: "linkHelp" }
     | { kind: "agree" }
     | { kind: "endTip" }
+    | { kind: "sendHeld" }
+    | { kind: "dropHeld" }
     | { kind: "tip" }
     | { kind: "ask" }
     /** plugin: 보안 이미지 플러그인(«사진 보내기» 블록)으로 온 사진 — 그 블록을 부른 것 자체가 제보 뜻이다 */
@@ -150,6 +155,8 @@ function parseAction(body: unknown): { userKey: string; action: SkillAction } | 
     }
     if (utterance === AGREE_TEXT) return { userKey, action: { kind: "agree" } };
     if (END_WORDS.has(utterance)) return { userKey, action: { kind: "endTip" } };
+    if (utterance === SEND_HELD_TEXT) return { userKey, action: { kind: "sendHeld" } };
+    if (utterance === DROP_HELD_TEXT) return { userKey, action: { kind: "dropHeld" } };
     const link = LINK_RE.exec(utterance.replace(/\s+/g, " "));
     if (link) return { userKey, action: { kind: "link", code: link[1] } };
     if (/^\d{6}$/.test(utterance)) return { userKey, action: { kind: "link", code: utterance, bare: true } };
@@ -232,6 +239,14 @@ export const MSG = {
         `지금부터 ${TIP_MINUTES}분 동안 보내는 사진·글을 행사 제보로 받아요.\n리플렛·포스터 사진을 이 채팅창에 그냥 보내 주세요(여러 장도 돼요). 단체 이름·행사 이름·날짜는 글로 보내 주셔도 돼요. 사진 바로 뒤에 보낸 글은 같은 제보로 묶어요. 다 보냈으면 «제보 끝내기»를 눌러 주세요.`,
     ])),
     agreed: () => withEnd(reply([`동의해 주셔서 고맙습니다. 지금부터 ${TIP_MINUTES}분 동안 보내는 리플렛·포스터 사진이나 일정 글을 행사 제보로 받아요. 이 채팅창에 보내 주세요. 다 보냈으면 «제보 끝내기»를 눌러 주세요.`])),
+    /** 제보 시간 밖에 먼저 온 사진: 10분 맡아 두고 묻는다 */
+    askHeld: (n: number) => reply([
+        `사진 ${n}장을 받았어요. 이 사진을 행사 제보로 보낼까요?\n«제보로 보내기»를 누르면 운영자가 확인한 뒤 피카에 올려요. 10분 안에 누르지 않으면 저장하지 않아요.`,
+    ], [SEND_HELD_TEXT, DROP_HELD_TEXT]),
+    /** «제보로 보내기»를 눌렀는데 맡아 둔 사진이 없거나 10분이 지남 */
+    heldGone: () => reply([`보낼 사진이 없거나 10분이 지났어요. «행사 제보하기»를 누른 뒤 사진을 다시 보내 주세요.`], [TIP_TEXT]),
+    /** «보내지 않기» */
+    heldDropped: () => menu("저장하지 않았어요", "방금 보낸 사진은 저장하지 않았어요. 행사를 알리려면 «행사 제보하기»를 눌러 주세요."),
     /** 제보 끝내기: 그 뒤 보내는 말은 저장하지 않는다 */
     ended: () => menu("제보를 끝냈어요", "보내 주셔서 고맙습니다. 운영자가 확인한 뒤에 피카에 올려요.\n이제 보내는 말은 제보로 저장하지 않아요. 또 알릴 행사가 있으면 «행사 제보하기»를 눌러 주세요."),
     gotImages: (n: number, refused: number) => gotCard(

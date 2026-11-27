@@ -71,7 +71,7 @@ export async function POST(request: Request) {
 
     // 제보는 채널을 추가한 사람만 받는다(운영자 11/27 «카톡은 채널구독, 피카에서는 로그인»).
     // 추가하지 않은 사람이 제보를 시작·동의·사진을 보내면 저장하지 않고 채널 추가를 권한다. 다른 말은 평소처럼 답한다
-    if (!isFriend && (action.kind === "tip" || action.kind === "agree" || action.kind === "image")) return json(MSG.needFriend());
+    if (!isFriend && (action.kind === "tip" || action.kind === "agree" || action.kind === "image" || action.kind === "sendHeld")) return json(MSG.needFriend());
     if (!isFriend && action.kind === "text") return json(MSG.notTip());
 
     // 채널로 오는 말은 제보만이 아니다: 웰컴·제보 시간 밖의 말에는 «피카 보기»·«행사 제보하기»·«문의하기» 세 갈래를 보인다.
@@ -114,7 +114,23 @@ export async function POST(request: Request) {
     if (action.kind === "agree") {
         const r = await intake(secret, userKey, "agree");
         if (r.error === "auth") return NextResponse.json({ error: "forbidden" }, { status: 403 });
-        return json(r.ok ? MSG.agreed() : MSG.error());
+        if (!r.ok) return json(MSG.error());
+        // 동의 전에 먼저 보내 맡아 둔 사진이 있으면 동의하자마자 제보로 저장한다
+        const held = await takeHeld(secret, userKey);
+        return held.length ? saveImages(secret, userKey, held) : json(MSG.agreed());
+    }
+    if (action.kind === "sendHeld") {
+        // «제보로 보내기»: 동의 확인 → 제보 시간을 열고 맡아 둔 사진을 저장(처음이면 동의 뒤 agree 에서 저장)
+        const s = await intake(secret, userKey, "start");
+        if (s.error === "auth") return NextResponse.json({ error: "forbidden" }, { status: 403 });
+        if (!s.ok) return json(MSG.error());
+        if (!s.agreed) return json(MSG.consent());
+        const held = await takeHeld(secret, userKey);
+        return held.length ? saveImages(secret, userKey, held) : json(MSG.heldGone());
+    }
+    if (action.kind === "dropHeld") {
+        await takeHeld(secret, userKey);
+        return json(MSG.heldDropped());
     }
     if (action.kind === "text") {
         const r = await intake(secret, userKey, "text", action.text);
@@ -130,14 +146,29 @@ export async function POST(request: Request) {
         if (s.error === "auth") return NextResponse.json({ error: "forbidden" }, { status: 403 });
         if (s.ok && !s.agreed) return json(MSG.consent());
     }
-    if (action.urls.length === 0) return json(MSG.noImage());
+    const urls = action.urls.filter(isKakaoImageUrl);
+    if (urls.length === 0) return json(MSG.noImage());
+    return saveImages(secret, userKey, urls);
+}
+
+/** 맡아 둔(먼저 보낸) 사진 주소를 꺼내고 지운다 */
+async function takeHeld(secret: string, userKey: string): Promise<string[]> {
+    const r = (await intake(secret, userKey, "take")) as Intake & { urls?: unknown };
+    return Array.isArray(r.urls) ? r.urls.filter((u): u is string => typeof u === "string" && isKakaoImageUrl(u)) : [];
+}
+
+/** 사진을 제보로 저장한다. 제보 시간 밖이면(«행사 제보하기» 전에 먼저 보냄) 주소를 10분 맡아 두고 «제보로 보낼까요?»를 묻는다
+ *  (운영자 11/28 «그냥 사진을 먼저 보내면 제보로 인식하지 않아서 그냥 무시됨», 보완 방법 1) */
+async function saveImages(secret: string, userKey: string, urls: string[]): Promise<NextResponse> {
     const made: { id: string; path: string; url: string }[] = [];
     let refused = 0;
-    for (const url of action.urls) {
-        if (!isKakaoImageUrl(url)) continue;
+    for (const url of urls) {
         const r = await intake(secret, userKey, "image");
         if (r.error === "auth") return NextResponse.json({ error: "forbidden" }, { status: 403 });
-        if (r.error === "not_agreed" || r.error === "not_tip") return json(MSG.notTip());
+        if ((r.error === "not_agreed" || r.error === "not_tip") && made.length === 0) {
+            const h = await intake(secret, userKey, "hold", urls.join("\n"));
+            return json(h.ok ? MSG.askHeld(urls.length) : MSG.notTip());
+        }
         if (r.ok && r.id && r.image_path) made.push({ id: r.id, path: r.image_path, url });
         else refused++;
     }
