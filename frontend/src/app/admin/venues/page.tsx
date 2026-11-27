@@ -104,7 +104,7 @@ export default function AdminVenuesPage() {
     const n = (s: Venue["geo_status"]) => venues.filter(v => v.geo_status === s).length;
 
     return (
-        <main className="min-h-screen bg-neutral-50 pb-20">
+        <div className="pb-10">
             <div className="container mx-auto px-4 pt-8">
                 <h1 className="text-3xl font-black text-neutral-900 flex items-center gap-3">
                     <MapPin className="w-8 h-8 text-indigo-600" /> 장소 좌표 확인
@@ -173,7 +173,7 @@ export default function AdminVenuesPage() {
                                         <button type="button" className="px-3 h-9 rounded-lg bg-amber-100 text-amber-800 text-xs font-bold" onClick={() => update(v.id, { geo_status: "pending" })}>다시 확인</button>
                                     )}
                                     <select
-                                        className="h-9 px-2 rounded-lg bg-neutral-50 ring-1 ring-neutral-200 text-sm"
+                                        className="h-9 max-w-full px-2 rounded-lg bg-neutral-50 ring-1 ring-neutral-200 text-sm"
                                         value={mergeTo[v.id] || ""}
                                         onChange={e => setMergeTo({ ...mergeTo, [v.id]: e.target.value })}
                                         aria-label="합칠 장소"
@@ -192,6 +192,6 @@ export default function AdminVenuesPage() {
                     </ul>
                 )}
             </div>
-        </main>
+        </div>
     );
 }

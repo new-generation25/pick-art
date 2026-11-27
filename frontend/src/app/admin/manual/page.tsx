@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { PlusCircle, Image as ImageIcon, Save, ArrowLeft, Upload, X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { GN_REGIONS } from "@/lib/regions";
+import { CATEGORIES } from "@/lib/categories";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -133,7 +135,7 @@ export default function AdminManualAddPage() {
     };
 
     return (
-        <Box bg="gray.0" mih="100vh" pb={80}>
+        <Box pb={40}>
             <Container size="lg" pt={32}>
                 <Group justify="space-between" align="end" mb={40}>
                     <Group gap="sm">
@@ -141,7 +143,7 @@ export default function AdminManualAddPage() {
                             <PlusCircle size={24} />
                         </ThemeIcon>
                         <Box>
-                            <Title order={1} size={rem(32)} fw={900}>수동 행사 등록</Title>
+                            <Title order={1} size={rem(28)} fw={900}>새 행사</Title>
                             <Text c="dimmed" fw={500}>크롤링되지 않은 새로운 행사를 직접 등록합니다.</Text>
                         </Box>
                     </Group>
@@ -178,7 +180,7 @@ export default function AdminManualAddPage() {
                             <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
                                 <Select
                                     label="카테고리"
-                                    data={['공연', '전시', '축제', '강연', '체험']}
+                                    data={CATEGORIES}
                                     value={formData.category}
                                     onChange={val => setFormData({ ...formData, category: val || '공연' })}
                                     size="md"
@@ -186,7 +188,7 @@ export default function AdminManualAddPage() {
                                 />
                                 <Select
                                     label="지역"
-                                    data={['창원', '김해', '진주', '통영', '거제', '양산', '밀양']}
+                                    data={[...GN_REGIONS]}
                                     value={formData.region}
                                     onChange={val => setFormData({ ...formData, region: val || '창원' })}
                                     size="md"

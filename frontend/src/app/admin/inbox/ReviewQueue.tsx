@@ -292,7 +292,7 @@ export function ReviewQueue({ bucket, posts, loading, onChanged }: Props) {
                                     <Stack flex={1} gap={6} style={{ minWidth: 0 }}>
                                         <Group gap="xs" wrap="wrap">
                                             <Badge color="pink" variant="light" radius="md">{post.source}</Badge>
-                                            {account && <Text size="sm" fw={700}>{account}</Text>}
+                                            {account && <Text size="sm" fw={700} style={{ wordBreak: "break-all" }}>{account}</Text>}
                                             {a.author && a.author !== a.account && <Text size="sm" c="dimmed">{a.author}</Text>}
                                             {a.role && <Badge variant="default" size="sm">{a.role}</Badge>}
                                             {c.review_reason === "standing_consent" && (

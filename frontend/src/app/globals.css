@@ -407,3 +407,27 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .pica-sheet-up, .pica-fade-in, .pica-pop-in { animation: none; }
 }
+
+/* 관리자 화면 (specs/019 A1). 종이 테마 색을 쓰고, Mantine 단추·표시의 남색(indigo)·파랑(blue)을 짙은 초록으로 맞춘다.
+   화면마다 색 이름을 고치지 않고 여기 한 곳에서 바꾼다. 창(Modal)·메뉴는 몸통 밖(Portal)에 그려지므로 :root 에 건다 */
+:root:has(.pica-admin) {
+  --mantine-color-indigo-0: #eef5f1; --mantine-color-indigo-1: #dce9e2; --mantine-color-indigo-2: #b9d3c5; --mantine-color-indigo-3: #93bca7; --mantine-color-indigo-4: #73a88d;
+  --mantine-color-indigo-5: #4f8f6f; --mantine-color-indigo-6: #2e6b4e; --mantine-color-indigo-7: #285f45; --mantine-color-indigo-8: #21503a; --mantine-color-indigo-9: #193e2d;
+  --mantine-color-indigo-filled: #2e6b4e; --mantine-color-indigo-filled-hover: #285f45;
+  --mantine-color-indigo-light: rgba(46, 107, 78, 0.1); --mantine-color-indigo-light-hover: rgba(46, 107, 78, 0.16); --mantine-color-indigo-light-color: #2e6b4e;
+  --mantine-color-indigo-outline: #2e6b4e; --mantine-color-indigo-outline-hover: rgba(46, 107, 78, 0.06); --mantine-color-indigo-text: #2e6b4e;
+  --mantine-color-blue-0: #eef5f1; --mantine-color-blue-1: #dce9e2; --mantine-color-blue-2: #b9d3c5; --mantine-color-blue-3: #93bca7; --mantine-color-blue-4: #73a88d;
+  --mantine-color-blue-5: #4f8f6f; --mantine-color-blue-6: #2e6b4e; --mantine-color-blue-7: #285f45; --mantine-color-blue-8: #21503a; --mantine-color-blue-9: #193e2d;
+  --mantine-color-blue-filled: #2e6b4e; --mantine-color-blue-filled-hover: #285f45;
+  --mantine-color-blue-light: rgba(46, 107, 78, 0.1); --mantine-color-blue-light-hover: rgba(46, 107, 78, 0.16); --mantine-color-blue-light-color: #2e6b4e;
+  --mantine-color-blue-outline: #2e6b4e; --mantine-color-blue-outline-hover: rgba(46, 107, 78, 0.06); --mantine-color-blue-text: #2e6b4e;
+  --mantine-primary-color-filled: #2e6b4e; --mantine-primary-color-filled-hover: #285f45;
+  --mantine-primary-color-light: rgba(46, 107, 78, 0.1); --mantine-primary-color-light-hover: rgba(46, 107, 78, 0.16); --mantine-primary-color-light-color: #2e6b4e;
+  --mantine-color-anchor: #2e6b4e;
+}
+/* 관리자 화면의 Mantine 카드(Paper)는 종이 위 흰 카드로 */
+.pica-admin { --mantine-color-gray-0: #faf7f1; }
+.pica-admin a { text-underline-offset: 3px; }
+/* 표가 든 카드는 휴대폰 폭에서 카드 안에서만 좌우로 넘긴다(쪽 전체가 옆으로 밀리지 않게, FR-006) */
+.pica-admin .mantine-Paper-root:has(.mantine-Table-table) { overflow-x: auto; }
+

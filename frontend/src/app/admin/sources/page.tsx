@@ -119,7 +119,7 @@ export default function SourcesPage() {
     }, [items, typeFilter, searchTerm]);
 
     return (
-        <Box mih="100vh" py={32}>
+        <Box py={24}>
             <Container size="lg">
                 <Group justify="space-between" mb="lg" wrap="wrap">
                     <Stack gap={0}>

@@ -107,7 +107,7 @@ export default function AdminStoragePage() {
     ];
 
     return (
-        <Box bg="gray.0" mih="100vh" pb={80}>
+        <Box pb={40}>
             <Container size="lg" pt={32}>
                 <Group justify="space-between" align="end" mb={40}>
                     <Group gap="sm">

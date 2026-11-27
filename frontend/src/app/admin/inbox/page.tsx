@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
 import {
     Inbox, CheckCircle, XCircle, ExternalLink,
@@ -9,6 +10,8 @@ import {
     BookOpen, Search, Trash2, RefreshCcw, Maximize2
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { GN_REGIONS } from "@/lib/regions";
+import { CATEGORIES, normalizeCategory } from "@/lib/categories";
 import { EventList } from "@/components/ui/EventList";
 import {
     Box, Container, Title, Text, Button, Group, Stack, Badge,
@@ -32,8 +35,16 @@ interface RawPost {
 type TabType = "pending" | ReviewBucket | "published";
 const REVIEW_BUCKETS: ReviewBucket[] = ["candidate", "consent", "human"];
 
+const TABS: TabType[] = ["pending", "candidate", "consent", "human", "published"];
+
+// 주소의 ?tab= 을 읽으려면(«오늘 할 일»에서 넘어올 때) Suspense 안에 있어야 한다
 export default function AdminInboxPage() {
-    const [activeTab, setActiveTab] = useState<TabType>("pending");
+    return <Suspense fallback={null}><AdminInbox /></Suspense>;
+}
+
+function AdminInbox() {
+    const wanted = useSearchParams().get("tab") as TabType | null;
+    const [activeTab, setActiveTab] = useState<TabType>(wanted && TABS.includes(wanted) ? wanted : "pending");
     const [posts, setPosts] = useState<RawPost[]>([]);
     const [publishedEvents, setPublishedEvents] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -136,7 +147,7 @@ export default function AdminInboxPage() {
         setEditForm({
             title: cleanTitle(rawTitle),
             description: post.content.description || post.content.text || "",
-            category: isWGCC ? "공연" : (post.content.ai_suggestion?.category || "행사"),
+            category: isWGCC ? "공연" : normalizeCategory(post.content.ai_suggestion?.category || "행사"),
             region: isWGCC ? "김해" : (post.content.ai_suggestion?.region || "경남"),
             venue: isWGCC ? "김해서부문화센터" : (post.content.ai_suggestion?.venue || ""),
             event_date_start: post.content.ai_suggestion?.date_start || "",
@@ -344,7 +355,7 @@ export default function AdminInboxPage() {
     };
 
     return (
-        <Box bg="gray.0" mih="100vh" pb={80}>
+        <Box pb={40}>
             <Container size="lg" pt={32}>
 
                 {/* Header Section */}
@@ -354,7 +365,7 @@ export default function AdminInboxPage() {
                             <Inbox size={24} />
                         </ThemeIcon>
                         <Box>
-                            <Title order={1} size={rem(32)} fw={900}>수집 인박스</Title>
+                            <Title order={1} size={rem(28)} fw={900}>공개 판단</Title>
                             <Text c="dimmed" fw={500}>자동 공개에서 빠진 수집분과 인스타 후보를 검토합니다.</Text>
                         </Box>
                     </Group>
@@ -616,7 +627,7 @@ export default function AdminInboxPage() {
                                                 </Box>
                                             )}
                                         </Box>
-                                        <Box>
+                                        <Box style={{ minWidth: 0, flex: 1 }}>
                                             <Text size="sm" fw={700} lineClamp={1}>{post.content.title || '제목 없음'}</Text>
                                             <Text size="xs" c="dimmed" lineClamp={2}>{post.content.description}</Text>
                                         </Box>
@@ -668,7 +679,7 @@ export default function AdminInboxPage() {
                                         <Select
                                             label="지역"
                                             leftSection={<MapPin size={16} />}
-                                            data={['창원', '김해', '진주', '통영', '거제', '양산', '밀양', '함안', '기타']}
+                                            data={[...GN_REGIONS]}
                                             value={editForm.region}
                                             onChange={(val) => setEditForm({ ...editForm, region: val || '창원' })}
                                             size="md"
@@ -677,7 +688,7 @@ export default function AdminInboxPage() {
                                         <Select
                                             label="카테고리"
                                             leftSection={<Tag size={16} />}
-                                            data={['공연', '전시', '행사', '축제', '강연', '체험']}
+                                            data={CATEGORIES}
                                             value={editForm.category}
                                             onChange={(val) => setEditForm({ ...editForm, category: val || '공연' })}
                                             size="md"
