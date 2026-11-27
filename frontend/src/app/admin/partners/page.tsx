@@ -7,9 +7,23 @@ import { supabase } from "@/lib/supabase";
 import { appendOrgNote } from "@/lib/orgNotes";
 import { todayKST } from "@/lib/utils";
 import { STATUS_LABEL, orgNormName } from "@/lib/partnerAgreement";
+import { agreementHandle, setSourceConsent } from "@/lib/siteConsent";
 
 // 정식 협약 신청 검토 (specs/016). 관리자 RLS 로 읽고 고친다.
 // «협약 확인»을 눌러야만 단체(orgs)에 partner_since 가 생긴다 — 신청만으로는 협약 표시를 하지 않는다(헌장 I).
+// 운영자 2026-11-28 «협약신청 확인되면 상시동의로 전환»: 확인하면 그 인스타 계정의 출처 동의 단계를 상시로, 철회 처리하면 철회로 바꾼다.
+
+/** 출처 동의 단계를 바꾼 결과를 운영자에게 보일 한 줄 */
+async function switchConsent(a: { id: string; insta_handle: string | null; official_url: string; terms_version: string }, tier: "standing" | "withdrawn"): Promise<string> {
+    const handle = agreementHandle(a);
+    if (!handle) return "인스타그램 계정이 적혀 있지 않아 출처의 동의 단계는 바꾸지 않았습니다.";
+    const evidence = tier === "standing" ? `사이트 협약 신청 ${a.id.slice(0, 8)} 확인(${a.terms_version})` : `사이트 협약 철회(신청 ${a.id.slice(0, 8)})`;
+    const r = await setSourceConsent(handle, tier, evidence, todayKST());
+    const word = tier === "standing" ? "상시 동의" : "철회";
+    if (r.error) return `출처 @${handle} 의 동의 단계를 바꾸지 못했습니다: ${r.error}`;
+    if (!r.changed) return `출처에 @${handle} 계정이 없어 동의 단계를 바꾸지 못했습니다. «출처»에 이 계정을 추가한 뒤 동의 단계를 «${word}»로 골라 주세요.`;
+    return `출처 @${handle} 의 동의 단계를 «${word}»로 바꿨습니다.`;
+}
 type Agreement = {
     id: string; org_name: string; representative: string | null; reg_no: string | null; official_url: string;
     insta_handle: string | null; region: string | null; contact_private: string; contact_public: string | null;
@@ -30,7 +44,7 @@ function when(iso: string) {
 const safeUrl = (u?: string | null) => (u && /^https?:\/\//.test(u) ? u : null);
 
 /** 단체 찾기 + 고르기 + 협약 확인 */
-function ConfirmBox({ a, note, onDone, onError }: { a: Agreement; note: string; onDone: () => void; onError: (m: string) => void }) {
+function ConfirmBox({ a, note, onDone, onError }: { a: Agreement; note: string; onDone: (notice: string) => void; onError: (m: string) => void }) {
     const [q, setQ] = useState(a.org_name);
     const [found, setFound] = useState<Org[] | null>(null);
     const [pick, setPick] = useState<string>("");
@@ -80,7 +94,7 @@ function ConfirmBox({ a, note, onDone, onError }: { a: Agreement; note: string; 
                 .update({ status: "confirmed", org_id: orgId, handled_at: new Date().toISOString(), admin_note: note || a.admin_note })
                 .eq("id", a.id).select("id");
             if (r.error || !r.data?.length) throw new Error(`신청 상태 저장 실패: ${r.error?.message || "권한"}`);
-            onDone();
+            onDone(`«${a.org_name}» 협약을 확인했습니다. ${await switchConsent(a, "standing")}`);
         } catch (e) {
             onError((e as Error).message);
         } finally {
@@ -107,7 +121,7 @@ function ConfirmBox({ a, note, onDone, onError }: { a: Agreement; note: string; 
                     </Stack>
                 </Radio.Group>
             )}
-            <Button size="xs" color="teal" mt="sm" loading={busy} disabled={!pick} onClick={confirm}>협약 확인 (단체에 오늘부터 협약 표시)</Button>
+            <Button size="xs" color="teal" mt="sm" loading={busy} disabled={!pick} onClick={confirm}>협약 확인 (단체에 오늘부터 협약 표시 · 출처는 상시 동의로)</Button>
         </Paper>
     );
 }
@@ -118,6 +132,7 @@ export default function AdminPartnersPage() {
     const [error, setError] = useState<string | null>(null);
     const [notes, setNotes] = useState<Record<string, string>>({});
     const [open, setOpen] = useState<string | null>(null);
+    const [notice, setNotice] = useState<string | null>(null);   // 방금 한 처리의 결과(출처 동의 단계 포함)
 
     const load = useCallback(async () => {
         let q = supabase.from("partner_agreements").select("*, orgs(name)").order("created_at", { ascending: false }).limit(200);
@@ -151,6 +166,7 @@ export default function AdminPartnersPage() {
             .update({ status: "withdrawn", handled_at: new Date().toISOString(), admin_note: notes[a.id] ?? a.admin_note })
             .eq("id", a.id).select("id");
         if (error || !data?.length) { setError(error?.message || "저장하지 못했습니다(권한 확인)"); return; }
+        setNotice(`«${a.org_name}» 협약을 철회 처리했습니다. ${await switchConsent(a, "withdrawn")}`);
         load();
     };
 
@@ -161,12 +177,14 @@ export default function AdminPartnersPage() {
                     <Title order={1} fw={900}>협약 신청</Title>
                     <Text c="dimmed" size="sm">
                         /partners 맨 아래 «동의하고 파트너십 맺기»에서 단체가 보낸 정보 제공 협약 신청. 공식 누리집·SNS로 단체를 확인한 뒤 단체(orgs)에 연결해 «협약 확인»합니다.
-                        철회 요청은 7일 안에 «철회 처리»하고 단체 행사 정보를 내립니다.
+                        확인하면 그 인스타 계정의 출처 동의 단계가 «상시 동의»로 바뀌어, 다음 정기 실행부터 그 계정 게시물이 동의 받은 것으로 처리됩니다.
+                        철회 요청은 7일 안에 «철회 처리»하고 단체 행사 정보를 내립니다(출처 동의 단계는 «철회»로 바뀝니다).
                     </Text>
                 </div>
                 <SegmentedControl value={filter} onChange={v => setFilter(v as "todo" | "all")} data={[{ label: "할 것", value: "todo" }, { label: "전체", value: "all" }]} />
             </Group>
             {error && <Text c="red" mb="md">{error}</Text>}
+            {notice && <Paper withBorder p="sm" radius="md" mb="md" role="status"><Text size="sm" style={{ overflowWrap: "anywhere" }}>{notice}</Text></Paper>}
             {rows === null ? <Loader size="sm" /> : rows.length === 0 ? (
                 <Text c="dimmed">{filter === "todo" ? "확인할 협약 신청이 없습니다." : "아직 협약 신청이 없습니다."}</Text>
             ) : (
@@ -208,7 +226,7 @@ export default function AdminPartnersPage() {
                                 )}
                             </Group>
                             {open === a.id && a.status === "new" && (
-                                <ConfirmBox a={a} note={notes[a.id] ?? ""} onError={setError} onDone={() => { setOpen(null); load(); }} />
+                                <ConfirmBox a={a} note={notes[a.id] ?? ""} onError={setError} onDone={(m) => { setOpen(null); setNotice(m); load(); }} />
                             )}
                         </Paper>
                     ))}
