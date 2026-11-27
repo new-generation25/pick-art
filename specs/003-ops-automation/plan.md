@@ -12,7 +12,7 @@
 
 **Language/Version**: Python 3.13(수집기), TypeScript 5 / Next.js 16.1 App Router(프론트)
 
-**Primary Dependencies**: supabase-py, aiohttp, python-telegram-bot(notifier) / @supabase/supabase-js, Mantine 8
+**Primary Dependencies**: supabase-py, aiohttp / @supabase/supabase-js, Mantine 8
 
 **Storage**: Supabase Postgres(서울). 이번에 쓰는 것: `ops_snapshots`(적용됨), `raw_posts`(status·content), `events`(읽기), `venues`·`profiles`(읽기). 로컬: `docs/insta/`(git 밖, G: 백업), `collector/logs/`
 
@@ -64,7 +64,7 @@ specs/003-ops-automation/
 
 ```text
 collector/
-├── main.py                      # 결과 숫자 모으기 → run_log 기록 → 경고 판정 → 텔레그램(상태 변화만)
+├── main.py                      # 결과 숫자 모으기 → run_log 기록 → 경고 판정
 ├── public_scraper.py            # 결과 dict 에 found/new/dup/fail/expired 숫자 칸 추가
 ├── kopis_scraper.py             # 〃
 ├── naver_blog_scraper.py        # (이미 found/new/dup 반환)
@@ -92,7 +92,7 @@ _attic/                          # R5: 루트 일회성 스크립트
 |---|---|---|---|
 | **R0 마무리** | 11/26 08:20 정기 실행 결과 확인 | 로그에 KOPIS 경남·부산 각 1건 이상, «인스타 기록 백업 ✅», «대시보드 스냅숏 ✅» 줄 | — |
 | **D-배포** | 대시보드 커밋을 main에 병합 → Vercel | https://pick-art.vercel.app/admin 을 관리자로 열어 활성 행사·REVIEW 수가 DB 조회와 같음 | **main 병합 승인** |
-| **R1 실행 기록·경고** | 결과 숫자 칸 → 네트워크 오류 출처 1회 재시도 → `ops_log.py` → `collector_runs`·`collector_alerts` → 텔레그램 상태 변화만 → 대시보드 «출처별 최근 실행»·«수집기 경고»·«실행 누락» | ① 정기 실행 1회 뒤 `collector_runs` 새 줄 수 = 처리 출처 수 ② 시험 모드(`OPS_TEST_FAIL=KOPIS`)로 기록 단계만 돌리면 2회째에 KOPIS 경고 생김, 해제 후 풀림 ③ 그 사이 텔레그램은 생김·풀림 2통 ④ pytest 통과 | — (코드만) |
+| **R1 실행 기록·경고** | 결과 숫자 칸 → 네트워크 오류 출처 1회 재시도 → `ops_log.py` → `collector_runs`·`collector_alerts` → 대시보드 «출처별 최근 실행»·«수집기 경고»·«실행 누락» | ① 정기 실행 1회 뒤 `collector_runs` 새 줄 수 = 처리 출처 수 ② 시험 모드(`OPS_TEST_FAIL=KOPIS`)로 기록 단계만 돌리면 2회째에 KOPIS 경고 생김, 해제 후 풀림 ③ pytest 통과 | — (코드만) |
 | **R2 REVIEW 정리·인박스** | `triage_review.py` dry-run → 승인 → apply, 정기 실행에 연결 → 인박스 탭 | ① dry-run 표(EXPIRED·DUPLICATE·consent·candidate·human 건수) ② 적용 후 무더기 없는 REVIEW 0 ③ 무작위 20건 눈 확인 잘못 0 ④ 공개 후보 1건 승인 → 다음 정기 실행에서 공개 피드 표시 | **dry-run 결과 승인**(상태 대량 변경) |
 | **R4 수집기 정리** | import 줄 정리 → `git mv` 37개 → 환경 파일 하나로 | 최상위 .py ≤ 15 · 이동 전후 정기 실행 출처별 발견 건수 같음 · pytest 통과 · 삭제 0 | **이동 목록 승인** |
 | **R5 저장소 정리** | 루트 34개 → `_attic/`, 쓰지 않는 화면·API·의존성, README | `npm run build` 통과 · 관리자 메뉴 전 페이지 열림 · 루트 일회성 0 | **접을 폴더·지울 화면 목록 승인** |
@@ -117,7 +117,7 @@ _attic/                          # R5: 루트 일회성 스크립트
 
 ## 진행 (2026-11-26)
 
-- **R1 완료** — 수집기 `ops_log.py`·`rules/alerts.json`·웹 출처 네트워크 재시도 1회(8056dbc), 대시보드 «수집기 경고»·«출처별 최근 실행»·«실행 누락»(4b8e7df, picka.news/admin 확인). 지난 로그 24회를 채움, 켜진 경고 5건. 시험 모드로 켜짐·풀림 확인. 텔레그램은 `.env.local` 값이 예시값이라 꺼져 있음(운영자가 토큰을 넣어야 감). 정기 실행 연결 뒤 첫 실제 확인은 11/26 08:20 회차.
+- **R1 완료** — 수집기 `ops_log.py`·`rules/alerts.json`·웹 출처 네트워크 재시도 1회(8056dbc), 대시보드 «수집기 경고»·«출처별 최근 실행»·«실행 누락»(4b8e7df, picka.news/admin 확인). 지난 로그 24회를 채움, 켜진 경고 5건. 시험 모드로 켜짐·풀림 확인. 정기 실행 연결 뒤 첫 실제 확인은 11/26 08:20 회차.
 - **R2 적용·연결 완료, 공개 1건 확인은 남음** — `tools/triage_review.py`(d4c1812). dry-run(11/26): REVIEW 813 → 만료 581 · 중복 0 · 동의 필요 25 · 공개 후보 46 · 사람 판단 161. 11/26 승인 뒤 적용: 581건 EXPIRED, REVIEW 232건에 무더기(되돌리기 목록 `collector/logs/triage/applied_2026-11-26_025302.json`, git 밖. 같은 폴더의 `triage_2026-11-26.json`은 적용 뒤 다시 돌린 dry-run으로 덮여 지금은 232건 모두 kept).
   - 정기 실행(`main.py`, f35ec2b): 인스타 수집 블록 다음에 매 회차 `triage_review.py --apply` → `publish_verified.publish_approved`(승인된 공개 후보만, 오늘~60일, 날짜·링크·중복 검증). 보고에 «REVIEW 정리»·«승인 후보 공개» 줄. `AUTO_PUBLISH=off`면 승인 후보 공개도 멈춘다.
   - `publish_verified --ids`(a2c3741): REVIEW는 `content.publish_approved_at`이 있을 때만 받는다(기본 실행은 예전대로 COLLECTED·PENDING만). 검증 실패(날짜 형식·공개 범위 밖·링크·저장 실패)는 REVIEW 유지 + `review_reason="publish_failed: …"`·`publish_failed_at`, 승인은 남아 다음 실행에서 다시 본다. 끝난 것 EXPIRED·이미 공개된 것 DUPLICATE는 다른 수집분과 같다. 인스타 포스터는 저장소에 올린 것만 쓴다. 중복 판정이 events를 1,000건까지만 읽던 것을 끝까지 읽게 고침(11/26 1,170건).

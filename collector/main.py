@@ -5,12 +5,9 @@ import atexit
 import asyncio
 from dotenv import load_dotenv
 from database import Database
-from insta_scraper import InstaScraper
 from public_scraper import PublicScraper
 from kopis_scraper import KopisScraper
 from naver_blog_scraper import scrape_blog
-from fb_scraper_service import FacebookScraper
-from notifier import TelegramNotifier
 from ai_extractor import AIExtractor
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from datetime import datetime, timezone, timedelta
@@ -25,7 +22,6 @@ else:
 
 # Load environment variables
 load_dotenv(".env.local")
-notifier = TelegramNotifier()
 
 RUNNING_TIMEOUT = timedelta(minutes=30)
 PID_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".running.pid")
@@ -281,8 +277,7 @@ async def run_crawlers(specific_target=None):
             lines.append(f"• AI 추출: {'켜짐' if AIExtractor().enabled else '꺼짐 (기본값 사용)'}")
 
             # 실행 기록·이상 판정(specs/003 R1): 출처별 숫자를 ops_snapshots 에 남기고 경고를 켜고 끈다.
-            # 텔레그램은 경고가 켜지거나 풀렸을 때와 그날 오후 첫 실행의 하루 요약만 보낸다.
-            # 판정이 실패하면 예전처럼 전체 보고를 그대로 보낸다
+            # 결과는 로그와 관리자 «현황»에서 본다(텔레그램 알림은 2026-11-27 없앰).
             try:
                 import ops_log
                 blog_names = {c['name'] for c in configs if c['target_type'] == 'naver_blog'}
@@ -295,19 +290,10 @@ async def run_crawlers(specific_target=None):
                     ops_log.record_steps(db, run_at, step_lines, head=lines[0])
                 except Exception as e:
                     lines.append(f"• 회차 요약 저장 실패: {e}")
-                outgoing = []
-                alert = ops_log.alert_message(res["opened"], res["resolved"])
-                if alert:
-                    outgoing.append(alert)
-                if ops_log.is_daily_summary_run(res["rows"], run_at):
-                    outgoing.append(ops_log.daily_message(rows, res["open"]))
             except Exception as e:
                 lines.append(f"• 실행 기록 실패: {e}")
-                outgoing = None
             message = "\n".join(lines)
             print(message, flush=True)
-            for text in (outgoing if outgoing is not None else [message]):
-                await notifier.send_message(text)
         
     except Exception as e:
         print(f"Crawler error: {e}")

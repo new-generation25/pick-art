@@ -37,7 +37,6 @@ description: 경남 아트 네비게이터 배포 및 운영 가이드
      - `SUPABASE_URL`, `SUPABASE_KEY`
      - `INSTAGRAM_USERNAME`, `INSTAGRAM_PASSWORD`
      - `GEMINI_API_KEY` (AI 자동 정제용)
-     - `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`
 
 ### 📊 관리자 대시보드 (Streamlit Admin)
 
@@ -53,7 +52,6 @@ description: 경남 아트 네비게이터 배포 및 운영 가이드
 ## 3. 주기적 운영 작업
 
 - **데이터 백업**: Supabase Dashboard에서 정기적 백업 설정 활성화
-- **모니터링**: 텔레그램 에러 알림 수신 시 `collector` 로그 확인
 - **콘텐츠 검수**: 매일 1~2회 `Admin` 인박스 확인 및 DM 발송/발행 진행
 
 ---

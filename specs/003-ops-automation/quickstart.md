@@ -34,7 +34,6 @@ Remove-Item Env:OPS_TEST_FAIL; python -c "import ops_log; ops_log.selftest(1)"
 기대:
 - 2회째에 `collector_alerts`에 `zero_found/KOPIS`가 켜진다(`resolved_at: null`).
 - 해제 1회 뒤 그 경고의 `resolved_at`이 채워진다.
-- 텔레그램은 켜짐 1통, 풀림 1통이다.
 - 이 시험은 수집·공개를 하지 않는다(`events`·`raw_posts` 건수 변화 0).
 
 정기 실행 1회 뒤 확인:

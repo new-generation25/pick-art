@@ -86,21 +86,6 @@ def test_merge_open_keep_resolve():
     assert alerts4 == []
 
 
-def test_messages():
-    assert ops_log.alert_message([], []) is None
-    many = [{"text": f"t{i}"} for i in range(7)]
-    msg = ops_log.alert_message(many, [])
-    assert msg.count("켜짐") == 5 and "외 2건" in msg
-
-
-def test_daily_summary_once_per_afternoon():
-    rows = [{"run_at": "2026-11-25T08:20:00+09:00"}, {"run_at": "2026-11-25T15:00:00+09:00"}]
-    assert ops_log.is_daily_summary_run(rows, "2026-11-25T15:00:00+09:00")
-    assert not ops_log.is_daily_summary_run(rows, "2026-11-25T08:20:00+09:00")
-    rows.append({"run_at": "2026-11-25T19:00:00+09:00"})
-    assert not ops_log.is_daily_summary_run(rows, "2026-11-25T19:00:00+09:00")
-
-
 def test_keep_recent():
     rows = [{"run_at": f"2026-11-{d:02d}T08:20:00+09:00", "source": "A"} for d in range(1, 31)]
     kept = ops_log.keep_recent(rows, keep=3)

@@ -41,11 +41,11 @@ RLS: 관리자(`is_admin()`)만 SELECT. 쓰기는 service 키(이 PC의 수집�
 | rule | 규칙 id (`zero_found`, `source_fail`, `def_expired`, `publish_zero`) |
 | target | 출처 이름(전체 규칙이면 `*`) |
 | level | `bad` · `warn` |
-| text | 대시보드·텔레그램에 그대로 쓰는 한 줄 |
+| text | 대시보드에 그대로 쓰는 한 줄 |
 | since | 처음 생긴 실행의 run_at |
 | resolved_at | 풀린 실행의 run_at, 켜져 있으면 null |
 
-상태 변화: (없음) → 켜짐(since) → 풀림(resolved_at). 풀린 경고는 7일 보존 뒤 버린다. 텔레그램은 켜짐·풀림 때만.
+상태 변화: (없음) → 켜짐(since) → 풀림(resolved_at). 풀린 경고는 7일 보존 뒤 버린다.
 
 «정기 실행 누락»은 저장하지 않는다. 대시보드가 `collector_runs`의 마지막 run_at으로 판정한다(실행이 없으면 쓸 주체가 없으므로).
 

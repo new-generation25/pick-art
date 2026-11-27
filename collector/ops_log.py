@@ -5,17 +5,15 @@
      (「발견 N건 (신규 a, 중복 b, 실패 c)」 — 스크래퍼가 이미 쓰는 문구, 로그와 같은 출처)
   2. ops_snapshots 의 collector_runs 에 붙이고 최근 60회만 남긴다
   3. rules/alerts.json 규칙으로 경고를 판정해 collector_alerts 를 고친다(켜짐·풀림)
-  4. 텔레그램에 보낼 글을 돌려준다: 경고가 켜지거나 풀렸을 때, 그리고 그날 오후 첫 실행의 하루 요약
 
 JSON 모양: specs/003-ops-automation/contracts/ops-snapshots.md, 규칙: contracts/alert-rules.md
 
 손으로 쓰기 (collector 폴더에서)
   python ops_log.py --backfill            지난 logs/scheduled_*.log 로 collector_runs 채우기(이미 있는 run_at 은 건너뜀)
   python ops_log.py --test-fail KOPIS     시험: 이름이 *_test 인 스냅숏에서 KOPIS 0건 2회 → 정상 1회를 흉내 내고
-                                          켜짐·풀림을 출력한다. --send 를 붙이면 텔레그램에 [시험] 머리로 보낸다
+                                          켜짐·풀림을 출력한다
 """
 import glob
-import html
 import json
 import os
 import re
@@ -24,7 +22,6 @@ from datetime import datetime, timedelta, timezone
 
 KST = timezone(timedelta(hours=9))
 KEEP_RUNS = 60
-DASHBOARD = "https://picka.news/admin"
 HERE = os.path.dirname(os.path.abspath(__file__))
 RULES_PATH = os.path.join(HERE, "rules", "alerts.json")
 PUBLISH_SOURCE = "자동 공개"
@@ -202,50 +199,7 @@ def merge_alerts(prev, active, now, keep_days=7):
     return out, opened, resolved
 
 
-# ---------- 3. 텔레그램 글 ----------
-
-def alert_message(opened, resolved, limit=5, prefix=""):
-    if not opened and not resolved:
-        return None
-    lines = [f"{prefix}⚠️ 피카 수집 경고"]
-    # 텔레그램은 HTML 모드로 보낸다(notifier.py): 사이트 오류 글의 < > & 를 그대로 두면 전송이 실패한다
-    items = [f"켜짐 · {html.escape(a['text'])}" for a in opened] + [f"풀림 · {html.escape(a['text'])}" for a in resolved]
-    lines += items[:limit]
-    if len(items) > limit:
-        lines.append(f"외 {len(items) - limit}건 — 대시보드 {DASHBOARD}")
-    else:
-        lines.append(DASHBOARD)
-    return "\n".join(lines)
-
-
-def is_daily_summary_run(rows, run_at):
-    """그날(KST) 12시 이후 첫 실행이면 True — 15:00 실행이 하루 요약을 보낸다(놓친 날은 그다음 오후 실행)"""
-    t = datetime.fromisoformat(run_at).astimezone(KST)
-    if t.hour < 12:
-        return False
-    for ra in {r["run_at"] for r in rows}:
-        if ra == run_at:
-            continue
-        o = datetime.fromisoformat(ra).astimezone(KST)
-        if o.date() == t.date() and o.hour >= 12 and o < t:
-            return False
-    return True
-
-
-def daily_message(run_rows, open_alerts):
-    sources = [r for r in run_rows if r["kind"] != "publish"]
-    failed = [r for r in sources if r["status"] == "FAIL"]
-    pub = next((r for r in run_rows if r["kind"] == "publish"), None)
-    published = pub.get("found") if pub else None
-    return "\n".join([
-        "📊 피카 수집 하루 요약",
-        f"출처 {len(sources)}곳 · 실패 {len(failed)}곳 · 새 공개 {published if published is not None else '-'}건",
-        f"켜진 경고 {len(open_alerts)}건",
-        DASHBOARD,
-    ])
-
-
-# ---------- 4. 저장 ----------
+# ---------- 3. 저장 ----------
 
 def _read(db, name):
     got = db.supabase.table("ops_snapshots").select("data").eq("name", name).execute().data or []
@@ -354,8 +308,7 @@ def backfill(db):
     return 0 if res["ok"] else 1
 
 
-def test_fail(db, source, send):
-    import asyncio
+def test_fail(db, source):
     src = _read(db, "collector_runs").get("rows", [])
     if not src:
         print("❌ collector_runs 가 비어 있습니다. 먼저 --backfill")
@@ -380,27 +333,11 @@ def test_fail(db, source, send):
     seed_now = datetime.now(timezone.utc).isoformat()
     _write(db, "collector_runs_test", {"rows": fake_run(0, False), "meta": []}, seed_now)
     _write(db, "collector_alerts_test", {"rows": [], "meta": []}, seed_now)
-    msgs = []
     for i, broken in enumerate((True, True, False), 1):
         rows = fake_run(i, broken)
         res = record(db, rows, suffix="_test", now=(datetime.now(timezone.utc) + timedelta(seconds=i)).isoformat())
         mine = lambda xs: [a["text"] for a in xs if a["target"] == source]
         print(f"{i}회째({'고장' if broken else '정상'}): 켜짐 {mine(res['opened'])} · 풀림 {mine(res['resolved'])}")
-        msg = alert_message([a for a in res["opened"] if a["target"] == source],
-                            [a for a in res["resolved"] if a["target"] == source], prefix="[시험] ")
-        if msg:
-            msgs.append(msg)
-    if send:
-        from notifier import TelegramNotifier
-        n = TelegramNotifier()
-
-        async def go():
-            for m in msgs:
-                await n.send_message(m)
-        asyncio.run(go())
-        print(f"텔레그램 {len(msgs)}통 보냄" if n.enabled else "텔레그램 설정 없음 — 보내지 않음")
-    else:
-        print(f"텔레그램으로 보낼 글 {len(msgs)}통 (--send 없음, 보내지 않음)")
     return 0
 
 
@@ -413,5 +350,5 @@ if __name__ == "__main__":
     if "--backfill" in sys.argv:
         sys.exit(backfill(Database()))
     if "--test-fail" in sys.argv:
-        sys.exit(test_fail(Database(), sys.argv[sys.argv.index("--test-fail") + 1], "--send" in sys.argv))
+        sys.exit(test_fail(Database(), sys.argv[sys.argv.index("--test-fail") + 1]))
     print(__doc__)
