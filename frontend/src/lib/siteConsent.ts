@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 // 사이트에서 받은 동의(specs/016 정식 협약): 단체·예술인이 /partners 에서 동의서를 보내면 partner_agreements 에 쌓이고,
 // 운영자가 «협약 확인»을 누르면 status 가 confirmed 가 된다. 관리자 화면은 이 표를 인스타 계정으로 찾아
 // «확정 동의»(확인됨)·«사이트 신청»(확인 전)으로 보여 준다. 댓글·DM으로 받은 임시·상시 동의(whitelist.consent)와는 다른 칸이다.
-// 운영자 2026-11-28 «협약신청 확인되면 상시동의로 전환»: «협약 확인»을 누르면 그 인스타 계정의 출처(whitelist) 동의 단계를
+// 운영자 2026-11-27 «협약신청 확인되면 상시동의로 전환»: «협약 확인»을 누르면 그 인스타 계정의 출처(whitelist) 동의 단계를
 // 상시(standing)로, «철회 처리»를 누르면 철회(withdrawn)로 바꾼다(setSourceConsent). 수집·공개 판정은 whitelist.consent 를 본다.
 
 export type SiteConsent = { status: "confirmed" | "new"; orgName: string; at: string | null };

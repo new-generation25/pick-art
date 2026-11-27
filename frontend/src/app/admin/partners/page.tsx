@@ -11,7 +11,7 @@ import { agreementHandle, setSourceConsent } from "@/lib/siteConsent";
 
 // 정식 협약 신청 검토 (specs/016). 관리자 RLS 로 읽고 고친다.
 // «협약 확인»을 눌러야만 단체(orgs)에 partner_since 가 생긴다 — 신청만으로는 협약 표시를 하지 않는다(헌장 I).
-// 운영자 2026-11-28 «협약신청 확인되면 상시동의로 전환»: 확인하면 그 인스타 계정의 출처 동의 단계를 상시로, 철회 처리하면 철회로 바꾼다.
+// 운영자 2026-11-27 «협약신청 확인되면 상시동의로 전환»: 확인하면 그 인스타 계정의 출처 동의 단계를 상시로, 철회 처리하면 철회로 바꾼다.
 
 /** 출처 동의 단계를 바꾼 결과를 운영자에게 보일 한 줄 */
 async function switchConsent(a: { id: string; insta_handle: string | null; official_url: string; terms_version: string }, tier: "standing" | "withdrawn"): Promise<string> {
