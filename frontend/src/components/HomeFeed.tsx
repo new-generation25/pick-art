@@ -181,9 +181,10 @@ export async function HomeFeed({ params: resolvedParams, region, district }: { p
             <b className="pica-num text-ink">{dbEvents.length}</b>건
           </p>
         )}
-      </div>
 
-      <div className="mx-auto max-w-6xl pb-6 pt-2 sm:px-2">
+      {/* 선반을 칩 줄과 같은 부모 안에 둔다: 칩 줄(sticky)은 부모 높이 안에서만 붙어 있으므로, 부모가 칩 줄 높이뿐이면
+          내리자마자 같이 올라간다(specs/014 FR-006 «칩 줄 고정», 11/27 converge 에서 찾음). 좌우 여백은 예전과 같게 -mx-4 */}
+      <div className="-mx-4 pb-6 pt-2">
         {one ? (
           <div className="px-4">
             <a href={moreBase} className="inline-flex items-center gap-1.5 py-2 text-[14px] font-semibold text-ink-soft hover:text-ink">
@@ -203,6 +204,7 @@ export async function HomeFeed({ params: resolvedParams, region, district }: { p
         ) : (
           <FeedSections sections={shown} moreBase={moreBase} folded={extraSections.map(s => s.key)} foldedMoreBase={extraMoreBase} />
         )}
+      </div>
       </div>
 
       {/* «지도» 버튼 (specs/014 US3): 누르면 지금 필터 결과의 장소를 지도 시트로 */}

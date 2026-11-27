@@ -88,7 +88,7 @@ description: "Task list for 내 주변 행사 (거리순 보기)"
 ## Phase 6: 관리자 장소 확인 (FR-011)
 
 - [x] T028 (코드·tsc·eslint 통과. 관리자 로그인으로 실제 저장은 T029에서 확인) `frontend/src/app/admin/venues/page.tsx`: `pending` 우선 목록(이름·별칭·시군·연결 행사 수·후보), 후보 고르기·좌표 붙여넣기·찾을 수 없음·두 장소 합치기, `checked_by`·`checked_at` 기록. 관리자 메뉴에 링크
-- [ ] T029 검증: `pending` 장소 1곳을 확정하면 `/nearby`에서 그 행사에 거리가 생김(plan 단계 F)
+- [X] T029 검증: `pending` 장소 1곳을 확정하면 `/nearby`에서 그 행사에 거리가 생김(plan 단계 F) — 11/27: «클레이아크김해미술관 시청각실»을 후보 1번(진례면 분청로 25)으로 확정 → 익명 `public_venues`에 좌표가 생기고, 로컬 빌드 `/nearby`의 «거리 확인 안 됨»이 10 → 9건. 되돌리기용 원래 값: `collector/logs/venue_confirm_2026-11-27.json`
 
 ---
 
@@ -124,7 +124,7 @@ description: "Task list for 내 주변 행사 (거리순 보기)"
 (2026-11-21 `/speckit-converge` — spec·plan·tasks·헌장과 현재 코드 대조. 열린 T029·T031은 그대로 두고 겹치는 작업은 만들지 않음)
 
 - [x] T033 (2026-11-21 사용자 「명세 고쳐」 → spec FR-013·contracts 2개·plan Summary·T020 문구를 현재 동작에 맞춤) FR-013의 「앱이 없으면 네이버지도 웹 길찾기로 연다」와 현재 구현(자동 전환 없음, 별도 「앱이 없으면 웹에서 보기」 링크 = 장소 이름 검색)이 다르다. 운영자 결정(2026-11-21 아이폰 Chrome 되돌아감)대로 spec FR-013·contracts/naver-map-link.md(1.5초 자동 전환)·contracts/nearby-ui.md(버튼 2개)·plan Summary·T020 문구를 고칠지 사용자에게 확인한 뒤 반영 per FR-013 (partial)
-- [ ] T034 표본 30곳의 표시 거리와 네이버지도 실측 직선거리 차이를 재서 `docs/REPORT_nearby_geocode.md`에 표로 기록(T011은 완료로 표시됐지만 이 파일이 없고, REPORT_nearby.md에 「30곳 실측은 하지 않음」으로 적혀 있음) per SC-002 (partial)
-- [ ] T035 여러 장소에서 열리는 행사(순회·여러 공간)를 가장 가까운 장소 거리로 보이고 「외 n곳」을 붙이기. 지금은 `events.venue_id` 하나만 있어 행사당 장소 1곳 per Edge Cases·Key Entities(Event) (missing)
-- [ ] T036 위치 정확도가 1km를 넘거나(「약」) 가장 가까운 행사가 50km를 넘을 때 지역 고르기도 함께 보이기. 지금은 위치 기준이면 지역 고르기가 숨겨짐(`NearbyClient.tsx` `!gpsOrigin` 조건) per Edge Cases(정확도 낮음·부산경남 밖) (partial)
-- [ ] T037 휴대폰에서 「내 위치로 찾기」 → 첫 목록까지 시간을 재서 3초 안인지 REPORT_nearby.md에 기록 per SC-003 (partial)
+- [X] T034 표본 30곳의 표시 거리와 네이버지도 실측 직선거리 차이를 재서 `docs/REPORT_nearby_geocode.md`에 표로 기록(T011은 완료로 표시됐지만 이 파일이 없고, REPORT_nearby.md에 「30곳 실측은 하지 않음」으로 적혀 있음) per SC-002 (partial) — 11/27: 30곳 모두 300m 안(최대 104m, 중앙값 16m). 네이버 지도는 세션 브라우저에서 열리지 않아 OpenStreetMap 좌표로 대조했다 → `docs/REPORT_nearby_geocode.md`
+- [ ] T035 여러 장소에서 열리는 행사(순회·여러 공간)를 가장 가까운 장소 거리로 보이고 「외 n곳」을 붙이기. 지금은 `events.venue_id` 하나만 있어 행사당 장소 1곳 per Edge Cases·Key Entities(Event) (missing) — 11/27 미룸: 지금 여러 장소 행사는 공개 1,122건 중 4건(장소 이름이 «A · B · C»로 들어와 좌표를 못 찾은 것)이고 모두 «거리 확인 안 됨»에 시군으로 보인다. 행사–장소를 여러 개로 잇는 표와 수집·좌표 단계 변경이 필요해, 건수가 늘면 다시 본다
+- [X] T036 위치 정확도가 1km를 넘거나(「약」) 가장 가까운 행사가 50km를 넘을 때 지역 고르기도 함께 보이기. 지금은 위치 기준이면 지역 고르기가 숨겨짐(`NearbyClient.tsx` `!gpsOrigin` 조건) per Edge Cases(정확도 낮음·부산경남 밖) (partial) — 11/27: 위치 기준이어도 오차 1km 초과(«약») 또는 가장 가까운 행사 50km 초과면 안내 한 줄과 지역 고르기를 함께 보임. 로컬 빌드에서 오차 2.5km·서울 좌표로 확인
+- [X] T037 휴대폰에서 「내 위치로 찾기」 → 첫 목록까지 시간을 재서 3초 안인지 REPORT_nearby.md에 기록 per SC-003 (partial) — 11/27: 운영 주소·휴대폰 크기(375×812)에서 쪽 열기 0.79초 + «내 위치로 찾기» 누른 뒤 첫 목록 0.37초(232건). 위치를 받는 시간은 가짜 위치로 대신해 빠져 있다(실기기 GPS 시간은 기기마다 다름) → REPORT_nearby.md

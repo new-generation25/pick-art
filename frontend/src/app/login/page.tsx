@@ -1,32 +1,25 @@
 "use client";
 
-import { Header } from "@/components/ui/Header";
-import { User } from "lucide-react";
 import { SocialLoginButtons } from "@/components/ui/SocialLoginButtons";
 import { LegalLinks } from "@/components/ui/LegalLinks";
 
 // 로그인과 가입은 소셜 로그인 하나로 한다. 처음 온 사람은 /auth/callback 에서 가입 3단계(/welcome)로 간다.
+// 맨 위 줄(Header)은 MainLayout 이 그린다. 색·글꼴은 공개 화면 종이 테마(specs/014 FR-001·002)
 export default function LoginPage() {
     return (
-        <main className="min-h-screen bg-neutral-50">
-            <Header />
-            <div className="container mx-auto px-4 flex items-center justify-center min-h-screen pt-20">
-                <div className="w-full max-w-md bg-white rounded-[2.5rem] p-10 shadow-xl shadow-indigo-100/50 ring-1 ring-neutral-200">
-                    <div className="text-center mb-10">
-                        <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-200">
-                            <User className="w-8 h-8 text-white" />
-                        </div>
-                        <h1 className="text-3xl font-black text-neutral-900 mb-2">로그인</h1>
-                        <p className="text-neutral-500 font-medium">가까운 곳의 공연·전시 소식을 만나보세요.</p>
-                    </div>
-
-                    <SocialLoginButtons />
-                    <div className="mt-4"><LegalLinks /></div>
-
-                    <p className="mt-8 text-center text-sm font-medium text-neutral-400">
-                        처음이면 그대로 계속하면 가입됩니다.
-                    </p>
+        <main className="flex min-h-[70vh] items-center justify-center px-4 py-10">
+            <div className="pica-box w-full max-w-md p-8">
+                <div className="mb-8 text-center">
+                    <h1 className="pica-display text-[30px] leading-tight text-ink">로그인</h1>
+                    <p className="mt-2 text-[15px] text-ink-soft">가까운 곳의 공연·전시 소식을 만나보세요.</p>
                 </div>
+
+                <SocialLoginButtons />
+                <div className="mt-4"><LegalLinks /></div>
+
+                <p className="mt-6 text-center text-[13px] text-ink-soft">
+                    처음이면 그대로 계속하면 가입됩니다.
+                </p>
             </div>
         </main>
     );

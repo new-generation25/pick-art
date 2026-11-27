@@ -213,6 +213,15 @@ export function NearbyClient({ rows, today, appname }: { rows: NearbyRow[]; toda
                             </button>
                         </div>
                     )}
+                    {/* 위치가 대략적이거나(오차 1km 넘음) 부산·경남 밖이면 지역 고르기도 함께 보인다(specs/002 T036) */}
+                    {gpsOrigin && (gpsOrigin.approx || tooFar) && (
+                        <div className="mt-4 flex flex-col gap-2">
+                            <p className="text-[14px] text-ink-soft">
+                                {tooFar ? "지금 위치가 부산·경남 밖이에요." : "위치가 대략적으로만 잡혔어요."} 지역을 고르면 그 중심에서 가까운 순으로 보여 드려요.
+                            </p>
+                            <AreaSelect value="" onChange={chooseArea} />
+                        </div>
+                    )}
                     <p className="mt-3 text-[15px] text-ink-soft">
                         <b className="text-ink">{origin.label}{origin.approx ? " · 약" : ""}</b> · 거리 표시 <b className="text-ink">{result.near.length}건</b>
                         {result.unknown.length > 0 && <> · 거리 확인 안 됨 {result.unknown.length}건</>}

@@ -66,7 +66,7 @@ export function Header() {
                                     <UserRound size={20} />
                                 </button>
                             </Menu.Target>
-                            <Menu.Dropdown>
+                            <Menu.Dropdown className="pica-portal">
                                 <Menu.Label>{nickname}님</Menu.Label>
                                 <Menu.Item leftSection={<UserRound size={14} />} component={Link} href="/me">내 정보</Menu.Item>
                                 <Menu.Item leftSection={<Heart size={14} />} component={Link} href="/me#saved">찜한 행사</Menu.Item>

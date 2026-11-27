@@ -42,8 +42,8 @@ export default function AuthCallbackPage() {
     }, [router]);
 
     return (
-        <main className="min-h-screen flex items-center justify-center bg-neutral-50">
-            <p className="font-bold text-neutral-600">{message}</p>
+        <main className="flex min-h-[60vh] items-center justify-center">
+            <p className="font-bold text-ink-soft">{message}</p>
         </main>
     );
 }

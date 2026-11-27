@@ -123,4 +123,12 @@ _attic/                          # R5: 루트 일회성 스크립트
   - `publish_verified --ids`(a2c3741): REVIEW는 `content.publish_approved_at`이 있을 때만 받는다(기본 실행은 예전대로 COLLECTED·PENDING만). 검증 실패(날짜 형식·공개 범위 밖·링크·저장 실패)는 REVIEW 유지 + `review_reason="publish_failed: …"`·`publish_failed_at`, 승인은 남아 다음 실행에서 다시 본다. 끝난 것 EXPIRED·이미 공개된 것 DUPLICATE는 다른 수집분과 같다. 인스타 포스터는 저장소에 올린 것만 쓴다. 중복 판정이 events를 1,000건까지만 읽던 것을 끝까지 읽게 고침(11/26 1,170건).
   - 인박스(cb6c4e6): 탭 «인박스(COLLECTED)·공개 후보·동의 필요·사람 판단·현재 노출». 공개 후보는 골라서 «선택한 것 공개 승인»(`publish_approved_at`), 세 탭 모두 «반영 안 함»(REJECTED), 동의 필요·사람 판단은 «공개 후보로 옮기기». 휴지통에서 되돌리면 무더기가 있는 줄은 REVIEW로 간다. «장소 확인» 탭(FR-008)은 아직 없음.
   - 남은 끝 조건: ③ 무작위 20건 눈 확인 ④ 공개 후보 1건 승인 → 다음 정기 실행에서 공개 피드 표시. 인박스 화면은 브라우저로 아직 열어 보지 않음.
+  - 11/27 ③ 끝: REVIEW 620건 중 무작위 20건(씨앗 1127)의 저장된 무더기를 규칙으로 다시 판정해 20건 모두 같음, 무더기 없는 줄 0. 눈으로 본 것: 정보 계정 3건 → 사람 판단, 기관+날짜+장소 4건 → 공개 후보, 단체·예술인 12건 → 동의 필요, 기관인데 날짜 없음 1건 → 사람 판단. 참고(분류는 규칙대로): 장소 칸에 문장이 들어간 것 2건, 서울 공연장(마포아트센터) 1건. ④는 운영자 승인이 있어야 한다(지금 «승인된 공개 후보 없음»).
 - **R4·R5 목록 완료, 이동은 승인 대기** — [docs/plan/cleanup_lists_2026-11-26.md](../../docs/plan/cleanup_lists_2026-11-26.md) 끝의 «승인에 필요한 선택» 9개.
+- **R4·R5 적용 (11/26 저녁, 운영자 «추천대로 해»)** — 옮기기만 하고 지운 것은 frontend 화면·API뿐(git 기록에 남음).
+  - R4(08b740c): 수집기 39개 → `collector/_attic/`(DB를 쓰거나 지우거나 RLS를 여는 9개는 `_attic/danger/`), `main.py`의 쓰지 않는 import 2줄 삭제, 안내서 명령 경로 수정. 최상위 `.py` 16개(목록 작성 뒤 `dedupe`·`genre`·`poster_finder`가 새로 생겨 15를 넘음). `pytest` 164 통과, `import main` 확인.
+  - 환경 파일: `collector/.env.local`로 통일. `.env`에만 있던 NAVER 키 2개를 옮기고 `.env`는 `.env.bak-20261126`으로 이름만 바꿈(둘 다 git 밖). 코드 수정 없음(`geocode_venues`는 `.env.local`을 먼저 읽는다).
+  - R5(ed17506): 루트 일회성 34개 → `_attic/`(삭제 쿼리 2개는 `_attic/danger/`), 옛 안내서 7개 → `_attic/docs/`, `admin/`(Streamlit)·`testsprite_tests/` 두 곳·frontend 로그 → `_attic/`. `QA_CASE_STUDIES.md`는 남긴 `.agent/`가 가리켜서 루트에 둠.
+  - R5 frontend(57ed660): `/admin/stats`·`/admin/blacklist`·`/admin/whitelist`, API `crawlLogs`·`updatePrompt`·`crawl/kopis` 삭제, 의존성 `pg`·`react-datepicker`·`@types/react-datepicker`(frontend)·`instaloader`(루트) 제거. 남김: `/admin/ai-prompt`·`getPrompt`(인박스 사용), `/signup`, `/api/newsletter`. `next build --webpack` 통과, 관리자 화면 14개 200·지운 경로 404.
+  - 남은 끝 조건: 11/27 08:20 정기 실행의 출처별 발견 건수를 11/26 15:00 회차와 비교. README 다시 쓰기는 안 함.
+  - 11/27 비교 끝: 출처 45곳 가운데 41곳은 발견 건수·상태가 같고, 4곳은 1~2건 차이(창원문화재단 182→180, 부산문화회관 82→81, 해운대문화회관 35→34, KOPIS 경남 96→94 — 끝난 행사가 빠진 범위). 정리 뒤 새로 실패하거나 0건이 된 출처 없음. 헌장 IV의 시각 문구는 2.0.1에서 08:20·15:00으로 고침.

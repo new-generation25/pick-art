@@ -2,7 +2,7 @@
 
 정기 실행(main.py)이 매 회차 부른다. 세 가지를 보낸다(회원이 내 정보에서 끌 수 있다):
   favorite_eve : 찜한 행사가 내일 시작하면 «내일 ○○» (행사마다 한 번)
-  weekend      : 금요일, 내 지역(설정)의 이번 주말 행사 수와 대표 몇 개 (주마다 한 번)
+  weekend      : 금요일 오후 회차(낮 12시 뒤), 내 지역(설정)의 이번 주말 행사 수와 대표 몇 개 (주마다 한 번)
   venue_new    : 찜한 장소에 새로 공개된 행사 (행사마다 한 번, 한 사람에게 한 회차에 한 통으로 묶음)
 같은 알림은 push_sent 에 남겨 두 번 보내지 않는다. 기기가 알림을 막아 404/410 이 오면 그 구독을 지운다.
 밤 9시~아침 8시(한국)에는 보내지 않는다.
@@ -63,8 +63,8 @@ def weekend_range(today):
     return sat, sat + timedelta(days=1)
 
 
-def plan(sb, today, force_weekend=False):
-    """→ [(user_id, kind, refs[], payload)]"""
+def plan(sb, today, force_weekend=False, afternoon=True):
+    """→ [(user_id, kind, refs[], payload)]. afternoon: 낮 12시 뒤 회차인지(주말 요약은 금요일 오후 회차에만, specs/018)"""
     profiles = {p["id"]: p for p in all_rows(sb.table("profiles").select("id,region,push_favorites,push_weekend,push_venues"))}
     subs_users = {s["user_id"] for s in all_rows(sb.table("push_subscriptions").select("user_id"))}
     sent = {(r["user_id"], r["kind"], r["ref"]) for r in all_rows(sb.table("push_sent").select("user_id,kind,ref"))}
@@ -89,8 +89,9 @@ def plan(sb, today, force_weekend=False):
             "url": f"/events/{e['id']}", "tag": f"fav-{e['id']}",
         }))
 
-    # 2) 금요일 주말 요약 (내 지역, 지역을 안 정했으면 보내지 않는다)
-    if today.weekday() == 4 or force_weekend:
+    # 2) 금요일 오후 회차의 주말 요약 (내 지역, 지역을 안 정했으면 보내지 않는다).
+    #    11/27 첫 금요일에 08:20 회차가 보내 명세(오후 3시 회차)와 달랐다 → 낮 12시 뒤 회차로 맞춤
+    if (today.weekday() == 4 and afternoon) or force_weekend:
         sat, sun = weekend_range(today)
         ref = today.isoformat()
         cache = {}
@@ -217,7 +218,7 @@ def main():
     if not a.dry_run and (now.hour >= 21 or now.hour < 8):
         print(f"휴대폰 알림: 밤 시간({now:%H:%M})이라 보내지 않음")
         return
-    items = plan(sb, now.date(), a.force_weekend)
+    items = plan(sb, now.date(), a.force_weekend, afternoon=now.hour >= 12)
     ok, fail, gone = send(sb, items, a.dry_run)
     kinds = defaultdict(int)
     for _, k, _, _ in items:
