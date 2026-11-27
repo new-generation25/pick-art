@@ -52,6 +52,9 @@ export const MAX_IMAGE_BYTES = 25 * 1024 * 1024;
 /** 피카 회원 잇기(운영자 11/27 «연결 코드 방식»): «내 정보»에서 받은 6자리 코드를 «연결 123456»처럼 보낸다 */
 const LINK_RE = /^(?:피카\s*)?(?:회원\s*)?연결(?:\s*코드)?\s*[:：]?\s*(\d{6})$/;
 const LINK_HELP_WORDS = new Set(["연결", "회원 연결", "피카 연결", "연결 코드", "회원연결"]);
+/** 제보 끝내기(운영자 11/28 «그냥 대화를 한건데 제보로 이어짐. 사용자가 제보종료를 할수 있도록 해»): 제보 중 답마다 바로가기로 보인다 */
+export const END_TEXT = "제보 끝내기";
+const END_WORDS = new Set([END_TEXT, "제보 종료", "제보 끝", "제보 그만", "끝내기", "종료", "끝", "그만"]);
 
 export type SkillAction =
     | { kind: "welcome" }
@@ -59,6 +62,7 @@ export type SkillAction =
     | { kind: "link"; code: string; bare?: boolean }
     | { kind: "linkHelp" }
     | { kind: "agree" }
+    | { kind: "endTip" }
     | { kind: "tip" }
     | { kind: "ask" }
     /** plugin: 보안 이미지 플러그인(«사진 보내기» 블록)으로 온 사진 — 그 블록을 부른 것 자체가 제보 뜻이다 */
@@ -145,6 +149,7 @@ function parseAction(body: unknown): { userKey: string; action: SkillAction } | 
         return { userKey, action: { kind: "image", urls: words } };
     }
     if (utterance === AGREE_TEXT) return { userKey, action: { kind: "agree" } };
+    if (END_WORDS.has(utterance)) return { userKey, action: { kind: "endTip" } };
     const link = LINK_RE.exec(utterance.replace(/\s+/g, " "));
     if (link) return { userKey, action: { kind: "link", code: link[1] } };
     if (/^\d{6}$/.test(utterance)) return { userKey, action: { kind: "link", code: utterance, bare: true } };
@@ -192,7 +197,9 @@ const menu = (title: string, description: string) => one(card(title, description
 
 /** 제보를 받은 답: 받았다는 말과 피카 안내를 말풍선 하나로(운영자 11/28 «메시지를 2개씩 보내? 1개로 응답만 해도») */
 const AFTER_TIP = "\n\n피카 회원이면 «내 정보»에서 «카카오톡 제보 연결»을 해 두세요. 보낸 제보가 내 기록에 남아요.";
-const gotCard = (text: string): SkillResponse => one(card("", text + AFTER_TIP, [PICA_BTN]));
+/** 제보 중 답에 붙이는 바로가기 «제보 끝내기» */
+const withEnd = (r: SkillResponse): SkillResponse => ({ ...r, template: { ...r.template, quickReplies: [qr(END_TEXT)] } });
+const gotCard = (text: string): SkillResponse => withEnd(one(card("", text + AFTER_TIP, [PICA_BTN])));
 
 export const MSG = {
     /** 웰컴: 채널 소개 + 세 갈래 */
@@ -221,17 +228,19 @@ export const MSG = {
         "피카 채널을 추가하면 행사 제보를 받을 수 있어요. 추가한 뒤 «행사 제보하기»를 다시 눌러 주세요.\n방금 보낸 내용은 저장하지 않았어요.",
         [{ label: "채널 추가하기", action: "webLink", webLinkUrl: CHANNEL_ADD_URL }, PICA_BTN],
     )),
-    ready: () => reply([
-        `지금부터 ${TIP_MINUTES}분 동안 보내는 사진·글을 행사 제보로 받아요.\n리플렛·포스터 사진을 이 채팅창에 그냥 보내 주세요(여러 장도 돼요). 단체 이름·행사 이름·날짜는 글로 보내 주셔도 돼요. 사진 바로 뒤에 보낸 글은 같은 제보로 묶어요.`,
-    ]),
-    agreed: () => reply([`동의해 주셔서 고맙습니다. 지금부터 ${TIP_MINUTES}분 동안 보내는 리플렛·포스터 사진이나 일정 글을 행사 제보로 받아요. 이 채팅창에 보내 주세요.`]),
+    ready: () => withEnd(reply([
+        `지금부터 ${TIP_MINUTES}분 동안 보내는 사진·글을 행사 제보로 받아요.\n리플렛·포스터 사진을 이 채팅창에 그냥 보내 주세요(여러 장도 돼요). 단체 이름·행사 이름·날짜는 글로 보내 주셔도 돼요. 사진 바로 뒤에 보낸 글은 같은 제보로 묶어요. 다 보냈으면 «제보 끝내기»를 눌러 주세요.`,
+    ])),
+    agreed: () => withEnd(reply([`동의해 주셔서 고맙습니다. 지금부터 ${TIP_MINUTES}분 동안 보내는 리플렛·포스터 사진이나 일정 글을 행사 제보로 받아요. 이 채팅창에 보내 주세요. 다 보냈으면 «제보 끝내기»를 눌러 주세요.`])),
+    /** 제보 끝내기: 그 뒤 보내는 말은 저장하지 않는다 */
+    ended: () => menu("제보를 끝냈어요", "보내 주셔서 고맙습니다. 운영자가 확인한 뒤에 피카에 올려요.\n이제 보내는 말은 제보로 저장하지 않아요. 또 알릴 행사가 있으면 «행사 제보하기»를 눌러 주세요."),
     gotImages: (n: number, refused: number) => gotCard(
         `사진 ${n}장 받았어요. 운영자가 확인한 뒤에 피카에 올려요.` +
         (refused ? `\n하루 5장까지 받아서 ${refused}장은 받지 못했어요. 내일 다시 보내 주세요.` : "") +
         "\n단체 이름이 사진에 없으면 지금 글로 보내 주세요.",
     ),
     gotText: (attached: boolean) => attached
-        ? reply(["방금 보낸 사진과 함께 받았어요. 운영자가 확인한 뒤에 피카에 올려요."])
+        ? withEnd(reply(["방금 보낸 사진과 함께 받았어요. 운영자가 확인한 뒤에 피카에 올려요."]))
         : gotCard("글로 받았어요. 운영자가 확인한 뒤에 피카에 올려요. 리플렛·포스터 사진이 있으면 이 채팅창에 함께 보내 주세요."),
     linked: () => reply(["피카 회원과 연결했어요. 이 채팅방에서 보내는 행사 제보는 회원님이 보낸 것으로 기록돼요.\n연결을 끊으려면 피카 «내 정보»(picka.news/me)에서 «연결 끊기»를 눌러 주세요."]),
     badCode: () => reply(["연결 코드가 맞지 않거나 10분이 지났어요. 피카 «내 정보»(picka.news/me)에서 새 코드를 받아 «연결 123456»처럼 보내 주세요."]),

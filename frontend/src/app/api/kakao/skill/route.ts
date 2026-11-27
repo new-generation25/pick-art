@@ -83,6 +83,12 @@ export async function POST(request: Request) {
     }
     if (action.kind === "ask") return json(MSG.ask());
     if (action.kind === "linkHelp") return json(MSG.linkHelp());
+    if (action.kind === "endTip") {
+        // 제보 끝내기: 제보 시간을 바로 닫는다(운영자 11/28). 제보 중이 아니었어도 같은 답
+        const r = await intake(secret, userKey, "end");
+        if (r.error === "auth") return NextResponse.json({ error: "forbidden" }, { status: 403 });
+        return json(MSG.ended());
+    }
     if (action.kind === "link") {
         // 피카 회원 잇기: «내 정보»에서 받은 6자리 코드(10분, 틀린 시도 하루 5번까지)
         const r = await intake(secret, userKey, "link", action.code);
