@@ -13,6 +13,7 @@ import aiohttp
 from dotenv import load_dotenv
 
 from database import Database
+from title_rules import clean_venue as venue_rule
 from utils import check_link
 
 load_dotenv(".env.local")
@@ -67,7 +68,7 @@ def org_fields(d) -> dict:
 
 def clean_venue(name):
     """KOPIS 공연장명이 '시설 (홀)' 꼴인데 홀 자리에 시설명이 또 들어간 경우를 줄인다: 'A (A )' -> 'A'"""
-    name = (name or "").strip()
+    name = venue_rule(name)   # [지역] 꼬리표 빼기(운영자 11/27, title_rules.clean_venue)
     if name.endswith(")"):
         for i in [k for k in range(len(name)) if name.startswith(" (", k)]:
             head, inner = name[:i].strip(), name[i + 2:-1].strip()

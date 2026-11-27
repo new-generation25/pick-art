@@ -58,3 +58,23 @@ def test_removes(raw, expect):
 ])
 def test_keeps(raw):
     assert clean_title(raw) == (raw.strip(), [])
+
+
+from title_rules import clean_venue  # noqa: E402
+
+
+@pytest.mark.parametrize("raw,expect", [
+    ("KBS홀 [부산]", "KBS홀"),
+    ("KBS홀 [창원] (KBS홀 [창원] )", "KBS홀"),
+    ("킨키[부산] (킨키 [부산])", "킨키"),
+    ("KT&G 상상마당 라이브홀 [부산] (라이브홀)", "KT&G 상상마당 라이브홀 (라이브홀)"),
+    ("로드아트센터 [부산] (로드아트센터(2F))", "로드아트센터 (로드아트센터(2F))"),
+    ("필슈파스 [부산진구] (필슈파스 (4F) )", "필슈파스 (필슈파스 (4F))"),
+    ("문기타, 문씨어터 [진주] (문씨어터)", "문기타, 문씨어터 (문씨어터)"),
+    ("신세계 문화홀 [센텀시티]", "신세계 문화홀"),   # 운영자 11/27: 공연명이 아닌 것은 모두 삭제
+    ("공간소극장 [대연역]", "공간소극장"),
+    ("영화의전당 하늘연극장", "영화의전당 하늘연극장"),
+    ("[부산]", "[부산]"),
+])
+def test_clean_venue(raw, expect):
+    assert clean_venue(raw) == expect

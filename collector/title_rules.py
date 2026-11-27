@@ -29,6 +29,22 @@ _NOTICE = re.compile(r"(?:\s+|(?<=[」』〉>》）)\]'\"’”]))(?:"
 _TIME_TAIL = re.compile(r"\s*[(（]\s*(?:(?:(?:오전|오후|낮|저녁|밤)\s*)?\d{1,2}\s*시(?:\s*\d{1,2}\s*분|\s*반)?|(?:(?:오전|오후)\s*)?\d{1,2}\s*:\s*\d{2})\s*[)）]\s*$")
 
 
+_ANY_TAG = re.compile(r"\s*\[([^\[\]]{1,30})\]")
+
+
+def clean_venue(name):
+    """장소 칸의 [ ] 꼬리표를 모두 뺀다. KOPIS 공연장명 «KBS홀 [부산]», «킨키[부산] (킨키 [부산])», «신세계 문화홀 [센텀시티]», «공간소극장 [대연역]».
+    운영자 11/27 «장소 이름의 [부산]도 삭제해», «센텀시티 대연역. 공연명(부제, 원제)이 아닌 것들은 모두 삭제야».
+    (제목 칸은 다르다: 제목의 [ ] 는 원제일 수 있어 지역 이름뿐일 때만 뺀다 — clean_title)
+    빼고 나서 «A (A)» 꼴이 되면 «A» 하나로(kopis_scraper.clean_venue 와 같은 정리)."""
+    orig = (name or "").strip()
+    out = re.sub(r"\s{2,}", " ", _ANY_TAG.sub("", orig)).replace("( ", "(").replace(" )", ")").strip()
+    m = re.fullmatch(r"(.+?)\s*\(\s*(.+?)\s*\)", out)
+    if m and m.group(1).strip() == m.group(2).strip():
+        out = m.group(1).strip()
+    return out or orig
+
+
 def clean_title(title):
     """제목 → (노출 제목, 걷어낸 조각 목록). 걷어낼 것이 없으면 제목을 그대로 돌려준다"""
     orig = (title or "").strip()
