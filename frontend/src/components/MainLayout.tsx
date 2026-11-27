@@ -6,6 +6,7 @@ import { Header } from "./ui/Header";
 import { SiteFooter } from "./ui/SiteFooter";
 import { TipBand, showTipBand } from "./ui/TipBand";
 import { usePathname } from "next/navigation";
+import "@/lib/install";   // 설치 신호(beforeinstallprompt)는 화면이 뜨자마자 오므로 여기서 받아 둔다
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
     const [opened, { toggle }] = useDisclosure();

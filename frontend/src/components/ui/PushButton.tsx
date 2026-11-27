@@ -54,8 +54,10 @@ export function PushButton({ compact = false }: { compact?: boolean }) {
         return compact ? null : <p className="py-2 text-[13px] text-ink-soft">이 브라우저는 알림을 받을 수 없어요. 크롬·사파리 최신판에서 열어 주세요.</p>;
     }
     if (state === "ios-install") {
-        return <p className={compact ? "basis-full text-[12.5px] text-ink-soft" : "py-2 text-[13px] leading-[1.5] text-ink-soft"}>
-            아이폰은 사파리 아래 <b className="text-ink">공유 버튼 → 홈 화면에 추가</b>로 피카를 설치한 뒤, 그 앱에서 알림을 켤 수 있어요.
+        // 설치 방법은 «앱으로 설치» 안내(InstallApp)가 보여 준다: 홈에서는 그 한 줄로 충분하고, 내 정보에서는 바로 위에 있다
+        if (compact) return null;
+        return <p className="py-2 text-[13px] leading-[1.5] text-ink-soft">
+            홈 화면에 추가한 피카 앱에서 알림을 켤 수 있어요. 위 <b className="text-ink">앱으로 설치</b>를 먼저 해 주세요.
         </p>;
     }
     if (!loggedIn) {

@@ -10,6 +10,7 @@ import { Box } from "@mantine/core";
 import { ArrowLeft, CalendarPlus, MessageCircle } from "lucide-react";
 import { INSTAGRAM_URL, InstagramIcon } from "@/components/ui/InstagramLink";
 import { PushButton } from "@/components/ui/PushButton";
+import { InstallHint } from "@/components/ui/InstallApp";
 
 /** 카카오톡 채널 «피카» 홈 (specs/017) */
 const KAKAO_CHANNEL = "https://pf.kakao.com/_xoxdxkvX";
@@ -238,6 +239,8 @@ export async function HomeFeed({ params: resolvedParams, region, district }: { p
             <a href={KAKAO_CHANNEL} target="_blank" rel="noopener noreferrer" className="pica-chip"><MessageCircle size={15} aria-hidden />카카오톡 채널 «피카»</a>
             <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="pica-chip"><InstagramIcon size={15} />인스타그램 @picka.news</a>
           </div>
+          {/* 앱으로 설치 안내 (specs/018 덧붙임). 이미 설치한 앱에서는 보이지 않는다 */}
+          <InstallHint />
         </div>
       </section>
     </Box>

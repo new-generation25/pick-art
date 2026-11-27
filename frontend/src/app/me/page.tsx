@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Bell, Building2, CalendarPlus, ChevronRight, Heart, Info, MapPin, Sparkles, Sun, UserRound } from "lucide-react";
+import { ArrowLeft, Bell, Building2, CalendarPlus, ChevronRight, Heart, Info, MapPin, Sparkles, Sun, UserRound, Smartphone } from "lucide-react";
 import { PushButton } from "@/components/ui/PushButton";
+import { InstallGuide, useInstallKind } from "@/components/ui/InstallApp";
 import { supabase } from "@/lib/supabase";
 import { logoutAndReload } from "@/lib/logout";
 import { GN_REGIONS } from "@/lib/regions";
@@ -40,6 +41,7 @@ export default function MePage() {
     const [photoBusy, setPhotoBusy] = useState(false);
     const [points, setPoints] = useState<MyPoints | null>(null);
     const [ledger, setLedger] = useState<LedgerRow[]>([]);
+    const installKind = useInstallKind();   // 앱으로 설치 안내 (specs/018 덧붙임): 이미 설치한 앱에서는 숨긴다
     const [tipCount, setTipCount] = useState(0);   // 내가 보낸 제보 수 (specs/023: 포인트 카드를 보일지)
     const [msg, setMsg] = useState("");
 
@@ -291,6 +293,15 @@ export default function MePage() {
 
                 {/* 휴대폰 알림 (specs/018): 예전 «새 행사·이메일 알림» 토글은 실제로 보내는 곳이 없어 이것으로 바꿨다 */}
                 <div className={card}>
+                    {installKind && installKind !== "standalone" && (
+                        <div id="install" className="scroll-mt-20 border-b border-line py-2">
+                            <div className="flex min-h-11 items-center gap-3 text-[15px]">
+                                <Smartphone className="h-5 w-5 flex-none text-ink-soft" aria-hidden />
+                                <span className="min-w-0 flex-1"><b className="block font-bold">앱으로 설치</b><small className="block text-[12.5px] leading-[1.4] text-ink-soft">홈 화면에 피카를 두고 바로 열어요</small></span>
+                            </div>
+                            <div className="pb-1 pt-1"><InstallGuide kind={installKind} /></div>
+                        </div>
+                    )}
                     <Line icon={Bell} title="휴대폰 알림" sub="이 기기로 받아요. 기기마다 따로 켜요" />
                     <div className="pb-2"><PushButton /></div>
                     <Line icon={Heart} title="찜한 행사 전날" sub="찜한 행사가 시작하기 하루 전 아침" right={<Toggle on={p!.push_favorites} onChange={v => save({ push_favorites: v })} label="찜한 행사 전날 알림" />} />
