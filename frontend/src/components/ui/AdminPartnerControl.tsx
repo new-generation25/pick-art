@@ -57,12 +57,12 @@ export function AdminPartnerControl({ table, id, since }: { table: "venues" | "o
             {since ? (
                 <>
                     <span>{since}부터 협약</span>
-                    <button type="button" onClick={() => save(false)} disabled={state === "saving"} className="rounded-lg border border-ink px-2.5 py-1 font-bold text-ink disabled:opacity-50">협약 풀기</button>
+                    <button type="button" onClick={() => save(false)} disabled={state === "saving"} className="rounded-full border border-ink px-3 py-1 font-bold text-ink disabled:opacity-50">협약 풀기</button>
                 </>
             ) : (
                 <>
                     <input type="date" value={date} max={todayKST()} onChange={e => setDate(e.currentTarget.value)} className="rounded-lg border border-line bg-paper px-2 py-1 text-ink" aria-label="협약 맺은 날" />
-                    <button type="button" onClick={() => save(true)} disabled={state === "saving" || !date} className="rounded-lg bg-ink px-2.5 py-1 font-bold text-white disabled:opacity-50">협약 맺음</button>
+                    <button type="button" onClick={() => save(true)} disabled={state === "saving" || !date} className="rounded-full bg-ink px-3 py-1 font-bold text-white disabled:opacity-50">협약 맺음</button>
                 </>
             )}
             <span aria-live="polite">{state === "saving" ? "저장 중…" : state === "error" ? "저장하지 못했습니다" : ""}</span>

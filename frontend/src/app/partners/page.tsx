@@ -39,7 +39,7 @@ function CtaLink({ href, label, invert }: { href: string; label: string; invert?
         ? "border-[1.5px] border-[var(--pk-ink)] bg-[var(--pk-card)] text-ink"
         : "bg-[var(--pk-accent)] text-[var(--pk-on-accent)]";
     return (
-        <Link href={href} className={`mt-3 inline-flex min-h-12 items-center px-4 text-[15px] font-bold no-underline ${color}`}>
+        <Link href={href} className={`mt-3 inline-flex min-h-12 items-center rounded-full px-5 text-[15px] font-bold no-underline ${color}`}>
             {label} →
         </Link>
     );

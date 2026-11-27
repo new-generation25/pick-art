@@ -32,7 +32,7 @@ export function RouteButtons({ e, appname, block = false }: { e: Place; appname:
     if (block) {
         return (
             <button type="button" onClick={open}
-                className="flex h-[46px] flex-1 items-center justify-center gap-1.5 rounded-xl bg-accent-soft text-[15px] font-bold text-accent">
+                className="flex h-[46px] flex-1 items-center justify-center gap-1.5 rounded-full bg-accent-soft text-[15px] font-bold text-accent">
                 <Navigation size={18} aria-hidden /> 길찾기
             </button>
         );

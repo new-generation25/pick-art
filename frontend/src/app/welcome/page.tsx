@@ -130,7 +130,7 @@ export default function WelcomePage() {
                     type="button"
                     disabled={!canNext || saving}
                     onClick={() => (step < STEPS.length - 1 ? setStep(step + 1) : save())}
-                    className="flex-1 bg-ink px-5 py-3 text-[16px] font-bold text-paper disabled:opacity-40"
+                    className="flex-1 rounded-full bg-ink px-5 py-3 text-[16px] font-bold text-paper disabled:opacity-40"
                 >
                     {step < STEPS.length - 1 ? "다음" : saving ? "저장 중..." : "시작하기"}
                 </button>

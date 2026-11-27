@@ -59,6 +59,8 @@ export const viewport: Viewport = {
 const theme = createTheme({
   primaryColor: 'indigo',
   fontFamily: inter.style.fontFamily,
+  // 버튼은 어디서나 알약 모양 (운영자 2026-11-28 «전체적인 버튼을 반원 둥근형으로 통일해»). 관리자 화면의 Mantine 버튼도 같게
+  components: { Button: { defaultProps: { radius: 'xl' } } },
 });
 
 import { MainLayout } from "@/components/MainLayout";

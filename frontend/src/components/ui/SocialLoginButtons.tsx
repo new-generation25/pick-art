@@ -41,7 +41,7 @@ export function SocialLoginButtons() {
                 type="button"
                 onClick={() => signIn("google")}
                 disabled={pending !== null}
-                className="w-full h-14 rounded-2xl bg-white border border-neutral-200 font-bold text-neutral-800 hover:bg-neutral-50 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                className="w-full h-14 rounded-full bg-white border border-neutral-200 font-bold text-neutral-800 hover:bg-neutral-50 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
             >
                 <svg className="w-5 h-5" viewBox="0 0 48 48" aria-hidden="true">
                     <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z" />
@@ -55,7 +55,7 @@ export function SocialLoginButtons() {
                 type="button"
                 onClick={() => signIn("kakao")}
                 disabled={pending !== null}
-                className="w-full h-14 rounded-2xl bg-[#FEE500] font-bold text-[#191919] hover:brightness-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                className="w-full h-14 rounded-full bg-[#FEE500] font-bold text-[#191919] hover:brightness-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
             >
                 <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
                     <path fill="#191919" d="M12 3C6.5 3 2 6.5 2 10.8c0 2.8 1.9 5.2 4.7 6.6l-1 3.6c-.1.3.3.6.6.4l4.2-2.8c.5.1 1 .1 1.5.1 5.5 0 10-3.5 10-7.8S17.5 3 12 3z" />

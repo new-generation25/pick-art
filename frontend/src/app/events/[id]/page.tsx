@@ -187,7 +187,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                             e={{ venue: venueInfo?.name || event.venue, title: event.title, region: event.region, coords: venueInfo?.lat && venueInfo?.lng ? { lat: venueInfo.lat, lng: venueInfo.lng } : null }} />
                     )}
                     {hasVenuePage && (
-                        <Link href={`/venues/${event.venue_id}`} className="flex h-[46px] flex-1 items-center justify-center gap-1.5 rounded-xl bg-card text-[15px] font-bold text-ink shadow-[0_0_0_1px_var(--pk-line)]">
+                        <Link href={`/venues/${event.venue_id}`} className="flex h-[46px] flex-1 items-center justify-center gap-1.5 rounded-full bg-card text-[15px] font-bold text-ink shadow-[0_0_0_1px_var(--pk-line)]">
                             <Building2 className="h-[18px] w-[18px]" aria-hidden /> 공간 정보
                         </Link>
                     )}

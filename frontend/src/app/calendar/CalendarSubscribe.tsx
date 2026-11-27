@@ -21,7 +21,7 @@ export function CalendarSubscribe({ siteUrl }: { siteUrl: string }) {
     };
 
     const field = "w-full border-[1.5px] border-line bg-paper px-3 py-2.5 text-[15px] text-ink";
-    const btn = "inline-flex h-12 items-center justify-center border-[1.5px] border-ink px-5 text-[15px] font-bold";
+    const btn = "inline-flex h-12 items-center justify-center rounded-full border-[1.5px] border-ink px-5 text-[15px] font-bold";
     return (
         <div className="flex flex-col gap-5">
             <div className="grid grid-cols-2 gap-3">
@@ -48,7 +48,7 @@ export function CalendarSubscribe({ siteUrl }: { siteUrl: string }) {
                 <label htmlFor="cal-url" className="mb-1.5 block text-[14px] font-semibold text-ink">구독 주소 (다른 캘린더 앱에 «URL로 추가»)</label>
                 <div className="flex gap-2">
                     <input id="cal-url" readOnly value={https} className={`${field} min-w-0 flex-1 text-[13px]`} onFocus={e => e.currentTarget.select()} />
-                    <button type="button" onClick={copy} className={`${btn} h-auto shrink-0 bg-paper px-3 text-ink`}>{copied ? "복사함" : "복사"}</button>
+                    <button type="button" onClick={copy} className={`${btn} h-auto shrink-0 bg-paper px-4 text-ink`}>{copied ? "복사함" : "복사"}</button>
                 </div>
             </div>
         </div>

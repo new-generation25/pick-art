@@ -136,7 +136,7 @@ export default function MePage() {
             <main className="mx-auto min-h-screen max-w-xl px-4 pt-6">
                 <h1 className="pica-display text-[24px] text-ink">내 정보</h1>
                 <p className="mt-3 text-[15px] text-ink-soft">로그인하면 찜한 행사, 내 지역, 관심 분야, 알림을 한곳에서 관리할 수 있어요.</p>
-                <Link href={loginHref("/me")} className="mt-4 inline-flex h-12 items-center rounded-xl bg-accent px-6 text-[15px] font-bold text-on-accent">로그인</Link>
+                <Link href={loginHref("/me")} className="mt-4 inline-flex h-12 items-center rounded-full bg-accent px-6 text-[15px] font-bold text-on-accent">로그인</Link>
                 <p className="mt-6 text-[14px]"><Link href="/calendar" className="underline">로그인 없이 캘린더로 받기</Link></p>
             </main>
         );
@@ -283,8 +283,8 @@ export default function MePage() {
                 <div className={card}>
                     <Line icon={CalendarPlus} title="캘린더로 받기" sub={`${p!.region || "전체 지역"} · ${p!.interests.length === 1 ? p!.interests[0] : "전체 분야"} 행사가 내 캘린더에 저절로 들어와요`} />
                     <div className="flex gap-2 pb-3">
-                        <a href={`https://calendar.google.com/calendar/r?cid=${encodeURIComponent(webcal)}`} target="_blank" rel="noopener noreferrer" className="flex h-[42px] flex-1 items-center justify-center rounded-[10px] bg-accent-soft text-[14px] font-bold text-accent">구글 캘린더</a>
-                        <a href={webcal} className="flex h-[42px] flex-1 items-center justify-center rounded-[10px] bg-accent-soft text-[14px] font-bold text-accent">애플·기타</a>
+                        <a href={`https://calendar.google.com/calendar/r?cid=${encodeURIComponent(webcal)}`} target="_blank" rel="noopener noreferrer" className="flex h-[42px] flex-1 items-center justify-center rounded-full bg-accent-soft text-[14px] font-bold text-accent">구글 캘린더</a>
+                        <a href={webcal} className="flex h-[42px] flex-1 items-center justify-center rounded-full bg-accent-soft text-[14px] font-bold text-accent">애플·기타</a>
                     </div>
                     <p className="pb-3 text-[12px] text-ink-soft"><Link href="/calendar" className="underline">지역·분야를 따로 골라 구독하기</Link></p>
                 </div>

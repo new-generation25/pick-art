@@ -60,8 +60,8 @@ export function KakaoLinkCard({ className }: { className: string }) {
                     <p className="pica-num text-[26px] font-bold tracking-[0.2em] text-ink">{code.code}</p>
                     <p className="mt-1 text-ink-soft">{code.until}까지 피카 카카오톡 채널 채팅방에 <b className="text-ink">연결 {code.code}</b> 을 보내 주세요.</p>
                     <div className="mt-2 flex gap-2">
-                        <a href={KAKAO_CHAT} target="_blank" rel="noopener noreferrer" className="flex h-[38px] flex-1 items-center justify-center rounded-[10px] bg-accent text-[14px] font-bold text-on-accent">카카오톡 채널 열기</a>
-                        <button type="button" onClick={refresh} className="h-[38px] flex-1 rounded-[10px] bg-card text-[14px] font-bold shadow-[inset_0_0_0_1.5px_var(--pk-line)]">보냈어요</button>
+                        <a href={KAKAO_CHAT} target="_blank" rel="noopener noreferrer" className="flex h-[38px] flex-1 items-center justify-center rounded-full bg-accent text-[14px] font-bold text-on-accent">카카오톡 채널 열기</a>
+                        <button type="button" onClick={refresh} className="h-[38px] flex-1 rounded-full bg-card text-[14px] font-bold shadow-[inset_0_0_0_1.5px_var(--pk-line)]">보냈어요</button>
                     </div>
                 </div>
             )}

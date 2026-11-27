@@ -45,7 +45,7 @@ export function FavoriteButton({ eventId }: { eventId: string }) {
             aria-pressed={saved}
             aria-label={saved ? "찜 풀기" : "찜하기"}
             title={saved ? "찜 풀기" : "찜하기"}
-            className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-line bg-card text-ink transition-colors hover:bg-soft disabled:opacity-50"
+            className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-line bg-card text-ink transition-colors hover:bg-soft disabled:opacity-50"
         >
             <Heart className="h-5 w-5" fill={saved ? "currentColor" : "none"} aria-hidden />
         </button>

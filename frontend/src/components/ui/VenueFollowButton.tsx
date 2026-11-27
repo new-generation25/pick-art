@@ -42,8 +42,8 @@ export function VenueFollowButton({ venueId, icon = false }: { venueId: string; 
     return (
         <button type="button" onClick={toggle} disabled={busy || userId === undefined} aria-pressed={on} aria-label={label} title={label}
             className={icon
-                ? `inline-flex h-[46px] w-[46px] shrink-0 items-center justify-center rounded-xl text-ink shadow-[0_0_0_1px_var(--pk-line)] transition-colors disabled:opacity-50 ${on ? "bg-accent-soft text-accent" : "bg-card hover:bg-soft"}`
-                : `flex h-[46px] flex-1 items-center justify-center gap-1.5 rounded-xl text-[15px] font-bold shadow-[0_0_0_1px_var(--pk-line)] transition-colors disabled:opacity-50 ${on ? "bg-accent-soft text-accent" : "bg-card text-ink hover:bg-soft"}`}>
+                ? `inline-flex h-[46px] w-[46px] shrink-0 items-center justify-center rounded-full text-ink shadow-[0_0_0_1px_var(--pk-line)] transition-colors disabled:opacity-50 ${on ? "bg-accent-soft text-accent" : "bg-card hover:bg-soft"}`
+                : `flex h-[46px] flex-1 items-center justify-center gap-1.5 rounded-full text-[15px] font-bold shadow-[0_0_0_1px_var(--pk-line)] transition-colors disabled:opacity-50 ${on ? "bg-accent-soft text-accent" : "bg-card text-ink hover:bg-soft"}`}>
             <Heart className="h-[18px] w-[18px]" fill={on ? "currentColor" : "none"} aria-hidden />
             {!icon && (on ? "찜한 장소" : "장소 찜")}
         </button>

@@ -47,7 +47,7 @@ export function PushButton({ compact = false }: { compact?: boolean }) {
 
     const chip = "pica-chip";
     if (state === "checking" || loggedIn === null) {
-        return compact ? null : <button type="button" disabled className="flex h-[42px] w-full items-center justify-center gap-1.5 rounded-[10px] bg-soft text-[14px] font-bold text-ink-soft"><BellRing size={15} aria-hidden />알림 상태 확인 중…</button>;
+        return compact ? null : <button type="button" disabled className="flex h-[42px] w-full items-center justify-center gap-1.5 rounded-full bg-soft text-[14px] font-bold text-ink-soft"><BellRing size={15} aria-hidden />알림 상태 확인 중…</button>;
     }
 
     if (state === "unsupported") {
@@ -59,7 +59,7 @@ export function PushButton({ compact = false }: { compact?: boolean }) {
         </p>;
     }
     if (!loggedIn) {
-        return <Link href="/login" className={compact ? chip : "flex h-[42px] items-center justify-center rounded-[10px] bg-accent-soft text-[14px] font-bold text-accent"}>
+        return <Link href="/login" className={compact ? chip : "flex h-[42px] items-center justify-center rounded-full bg-accent-soft text-[14px] font-bold text-accent"}>
             <BellRing size={15} aria-hidden />로그인하고 알림 받기
         </Link>;
     }
@@ -69,7 +69,7 @@ export function PushButton({ compact = false }: { compact?: boolean }) {
     return (
         <>
             <button type="button" onClick={click} disabled={busy} aria-pressed={state === "on"}
-                className={compact ? chip : `flex h-[42px] w-full items-center justify-center gap-1.5 rounded-[10px] text-[14px] font-bold ${state === "on" ? "bg-soft text-ink" : "bg-accent text-on-accent"}`}>
+                className={compact ? chip : `flex h-[42px] w-full items-center justify-center gap-1.5 rounded-full text-[14px] font-bold ${state === "on" ? "bg-soft text-ink" : "bg-accent text-on-accent"}`}>
                 {state === "on" ? <BellOff size={15} aria-hidden /> : <BellRing size={15} aria-hidden />}
                 {busy ? "잠시만요…" : state === "on" ? (compact ? "알림 켜짐" : "이 기기 알림 끄기") : "휴대폰 알림 켜기"}
             </button>

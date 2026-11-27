@@ -244,7 +244,7 @@ export function AgreementForm() {
                         {errors.map(e => <li key={e}>{e}</li>)}
                     </ul>
                 )}
-                <button type="submit" disabled={state === "sending" || loggedIn === undefined} className="h-14 w-full bg-[var(--pk-accent)] px-5 text-[17px] font-bold text-[var(--pk-on-accent)] disabled:opacity-50">
+                <button type="submit" disabled={state === "sending" || loggedIn === undefined} className="h-14 w-full rounded-full bg-[var(--pk-accent)] px-5 text-[17px] font-bold text-[var(--pk-on-accent)] disabled:opacity-50">
                     {state === "sending" ? "보내는 중…" : loggedIn ? "동의하고 보내기" : "로그인하고 보내기"}
                 </button>
                 <p className="text-[14px] leading-relaxed text-ink-soft">

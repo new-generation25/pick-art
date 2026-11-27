@@ -177,7 +177,7 @@ export function TipForm() {
                 </div>
                 <div>
                     <input id="tip-photo" type="file" accept="image/jpeg,image/png,image/webp,image/*" onChange={pick} className="peer sr-only" />
-                    <label htmlFor="tip-photo" className="flex min-h-12 cursor-pointer items-center justify-center rounded-[10px] border border-dashed border-ink-soft bg-card px-3 text-[15px] font-semibold text-ink peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-[var(--pk-accent)]">
+                    <label htmlFor="tip-photo" className="flex min-h-12 cursor-pointer items-center justify-center rounded-full border border-dashed border-ink-soft bg-card px-4 text-[15px] font-semibold text-ink peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-[var(--pk-accent)]">
                         {file ? "다른 사진으로 바꾸기" : "포스터·현수막 사진 한 장 올리기"}
                     </label>
                     {preview && <img src={preview} alt="올릴 사진 미리보기" className="mt-2 max-h-64 w-auto rounded-[8px] border border-line" />}

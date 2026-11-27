@@ -98,7 +98,7 @@ export function LeafletForm() {
         return (
             <div className="pica-box p-5 text-[15px]">
                 <p className="text-ink">리플렛은 로그인한 뒤 올릴 수 있어요. 누가 보냈는지 알아야 확인할 때 다시 여쭐 수 있습니다.</p>
-                <Link href={loginHref("/tip/leaflet")} className="mt-4 inline-flex h-12 items-center border-[1.5px] border-ink bg-accent px-5 font-bold text-on-accent">로그인하고 올리기</Link>
+                <Link href={loginHref("/tip/leaflet")} className="mt-4 inline-flex h-12 items-center rounded-full border-[1.5px] border-ink bg-accent px-6 font-bold text-on-accent">로그인하고 올리기</Link>
             </div>
         );
     }
@@ -110,7 +110,7 @@ export function LeafletForm() {
                 <div className="pica-box p-5 text-[15px]">
                     <p className="font-bold text-ink">고맙습니다. 리플렛을 받았어요.</p>
                     <p className="mt-2 text-ink-soft">글자를 읽어 행사 칸을 채운 뒤 운영자가 확인하고 올립니다. 진행 상황은 아래 «내가 보낸 리플렛»에서 볼 수 있어요.</p>
-                    <button type="button" onClick={() => setState("idle")} className="mt-4 border-[1.5px] border-ink px-4 py-2 font-bold">하나 더 올리기</button>
+                    <button type="button" onClick={() => setState("idle")} className="mt-4 rounded-full border-[1.5px] border-ink px-5 py-2 font-bold">하나 더 올리기</button>
                 </div>
             ) : (
                 <form onSubmit={send} className="flex flex-col gap-5" noValidate>
@@ -167,7 +167,7 @@ export function LeafletForm() {
                     {errors.length > 0 && (
                         <ul className="text-[14px] font-semibold text-accent" role="alert">{errors.map(e => <li key={e}>{e}</li>)}</ul>
                     )}
-                    <button type="submit" disabled={state === "sending"} className="inline-flex h-12 items-center justify-center self-start border-[1.5px] border-ink bg-accent px-6 font-bold text-on-accent disabled:opacity-50">
+                    <button type="submit" disabled={state === "sending"} className="inline-flex h-12 items-center justify-center self-start rounded-full border-[1.5px] border-ink bg-accent px-6 font-bold text-on-accent disabled:opacity-50">
                         {state === "sending" ? "올리는 중…" : "리플렛 올리기"}
                     </button>
                 </form>

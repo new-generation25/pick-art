@@ -15,7 +15,7 @@ export default function NotFound() {
                 주소가 바뀌었거나, 행사 정보가 내려갔을 수 있어요. 지금 열리는 행사에서 다시 찾아보세요.
             </p>
             <div className="mt-8 flex flex-wrap gap-2">
-                <Link href="/" className="bg-ink px-5 py-3 text-[15px] font-bold text-paper">홈으로</Link>
+                <Link href="/" className="rounded-full bg-ink px-5 py-3 text-[15px] font-bold text-paper">홈으로</Link>
                 <Link href="/?date=week" className="pica-chip">이번 주 행사</Link>
             </div>
         </main>

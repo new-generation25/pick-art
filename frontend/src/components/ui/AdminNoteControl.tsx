@@ -46,7 +46,7 @@ export function AdminNoteControl({ eventId, note }: { eventId: string; note: str
                 className="w-full border-[1.5px] border-line bg-paper p-2 text-[14px] text-ink"
             />
             <div className="flex items-center gap-3">
-                <button type="button" onClick={save} disabled={state === "saving"} className="border-[1.5px] border-ink bg-ink px-3 py-1 font-bold text-paper disabled:opacity-50">저장</button>
+                <button type="button" onClick={save} disabled={state === "saving"} className="rounded-full border-[1.5px] border-ink bg-ink px-3.5 py-1 font-bold text-paper disabled:opacity-50">저장</button>
                 <span aria-live="polite">{state === "saving" ? "저장 중…" : state === "saved" ? "저장했습니다" : state === "error" ? "저장하지 못했습니다" : `${value.length}/120`}</span>
             </div>
         </div>

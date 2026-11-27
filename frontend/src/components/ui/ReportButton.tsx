@@ -72,7 +72,7 @@ export function ReportButton({ eventId }: { eventId: string }) {
                         className="w-full border-[1.5px] border-line bg-paper p-2.5 text-ink"
                     />
                     <div className="flex items-center gap-3">
-                        <button type="submit" disabled={state === "sending"} className="h-10 border-[1.5px] border-ink bg-ink px-4 font-bold text-paper disabled:opacity-50">
+                        <button type="submit" disabled={state === "sending"} className="h-10 rounded-full border-[1.5px] border-ink bg-ink px-5 font-bold text-paper disabled:opacity-50">
                             {state === "sending" ? "보내는 중…" : "알리기"}
                         </button>
                         <button type="button" onClick={() => setOpen(false)} className="text-ink-soft underline underline-offset-4">닫기</button>

@@ -74,7 +74,7 @@ export function PlacePage({ eyebrow, kindIcon = "venue", name, partnerSince, fac
                         {actions}
                         {ics && (
                             <a href={`https://calendar.google.com/calendar/r?cid=${encodeURIComponent(webcal!)}`} target="_blank" rel="noopener noreferrer"
-                                className="flex h-[46px] flex-1 items-center justify-center gap-1.5 rounded-xl bg-card text-[15px] font-bold text-ink shadow-[0_0_0_1px_var(--pk-line)]">
+                                className="flex h-[46px] flex-1 items-center justify-center gap-1.5 rounded-full bg-card text-[15px] font-bold text-ink shadow-[0_0_0_1px_var(--pk-line)]">
                                 <CalendarPlus className="h-[18px] w-[18px]" aria-hidden /> 일정 캘린더로 받기
                             </a>
                         )}

@@ -63,7 +63,7 @@ export function AdminPosterControl({ sha256, placeholder }: { sha256: string | n
                     )}
                     <div className="flex items-center gap-3">
                         <button type="button" onClick={toggle} disabled={state === "saving"}
-                            className="rounded-lg bg-ink px-3 py-1.5 font-bold text-white disabled:opacity-50">
+                            className="rounded-full bg-ink px-3.5 py-1.5 font-bold text-white disabled:opacity-50">
                             {placeholder ? "안내 그림 표시 풀기" : "안내 그림으로 표시"}
                         </button>
                         <span aria-live="polite">{state === "saving" ? "저장 중…" : state === "error" ? "저장하지 못했습니다" : ""}</span>

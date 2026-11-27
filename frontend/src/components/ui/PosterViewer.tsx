@@ -65,7 +65,7 @@ export function PosterViewer({ src, alt, ended = false, event }: { src?: string 
                     <button
                         type="button"
                         onClick={() => setOpened(false)}
-                        className="absolute right-3 top-3 inline-flex h-11 w-11 items-center justify-center border-[1.5px] border-white bg-black/60 text-white"
+                        className="absolute right-3 top-3 inline-flex h-11 w-11 items-center justify-center rounded-full border-[1.5px] border-white bg-black/60 text-white"
                         aria-label="닫기"
                     >
                         <X size={22} aria-hidden />

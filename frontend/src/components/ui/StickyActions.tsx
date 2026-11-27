@@ -24,12 +24,12 @@ export function StickyActions({ eventId, title, originalUrl, groupProvided }: {
                     href={originalUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex h-12 flex-1 items-center justify-center gap-1.5 rounded-xl bg-accent px-4 text-[16px] font-bold text-on-accent no-underline"
+                    className="flex h-12 flex-1 items-center justify-center gap-1.5 rounded-full bg-accent px-4 text-[16px] font-bold text-on-accent no-underline"
                 >
                     <ExternalLink size={18} aria-hidden /> 원본 안내 페이지 열기
                 </CountedLink>
             ) : (
-                <span className="flex h-12 flex-1 items-center justify-center rounded-xl border border-dashed border-ink-soft px-3 text-center text-[14px] font-bold text-ink">
+                <span className="flex h-12 flex-1 items-center justify-center rounded-full border border-dashed border-ink-soft px-3 text-center text-[14px] font-bold text-ink">
                     {groupProvided ? "단체 제공 — 원본 안내 없음" : "원본 안내 없음"}
                 </span>
             )}
