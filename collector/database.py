@@ -161,7 +161,7 @@ class Database:
 
     def get_raw_post(self, source: str, source_id: str):
         try:
-            res = self.supabase.table("raw_posts").select("id, content, status").eq("source", source).eq("source_id", source_id).limit(1).execute()
+            res = self.supabase.table("raw_posts").select("id, content, status, image_urls, source_url, source_id").eq("source", source).eq("source_id", source_id).limit(1).execute()
             return res.data[0] if res.data else None
         except Exception:
             return None

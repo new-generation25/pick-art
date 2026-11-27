@@ -30,6 +30,7 @@ def make(scraper_errors):
 def run(s):
     public_scraper.find_for_url = lambda url: {"slug": "x"}
     public_scraper.RETRY_WAIT = 0
+    public_scraper.record_block = lambda *a, **k: ""  # 시험이 .cache/blocked_sites.json 에 적지 않게
     return asyncio.run(s.scrape([{"name": "시험", "value": "https://example.invalid/"}]))[0]
 
 

@@ -14,6 +14,7 @@ from source_loader import find_for_url
 from rule_extractor import parse_period
 from utils import check_link, process_and_upload_image
 from blocked_sites import SiteBlocked, check_response, record as record_block
+from poster_lookup import KopisPosterLookup
 from poster_finder import has_poster_rule, load_placeholders, poster_candidates
 
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
@@ -37,6 +38,8 @@ class PublicScraper:
     def __init__(self, db: Database):
         self.db = db
         self._placeholders = None  # 안내 그림 지문(placeholder_images). 첫 쓰임에 한 번 읽는다
+        self._hidden = None  # 포스터 없음으로 숨긴 행사 {raw_post_id: event_id}. 첫 쓰임에 한 번 읽는다
+        self._kopis = KopisPosterLookup()  # 포스터가 없을 때만 KOPIS 같은 날 공연에서 찾는다(실행 안에서 목록 재사용)
 
     async def scrape(self, dynamic_targets):
         """대상별 결과 [{name, status, summary}]를 돌려준다."""
@@ -94,7 +97,7 @@ class PublicScraper:
 
     async def _scrape_definition(self, session, d, target_name):
         """collector/sources/<slug>.json 정의를 그대로 실행한다. 사이트별 분기 없음."""
-        new = dup = fail = updated = 0
+        new = dup = fail = updated = refilled = 0
         found = 0
         expired = []
         print(f"[Scraper] 📐 Definition: {d['slug']} (verified_at {d.get('verified_at')})", flush=True)
@@ -136,6 +139,9 @@ class PublicScraper:
                 existing = self.db.get_raw_post(target_name, source_id)
                 if existing:
                     dup += 1
+                    # 포스터 없이 남은 항목(공개 대기 중 그림 없음, 또는 포스터 없음으로 숨긴 행사)만 이번에 다시 찾아본다
+                    if await self._refill_existing(session, d, board, it, existing, title, period, suggestion):
+                        refilled += 1
                     # 예전 수집분에 날짜가 비어 있으면 규칙 추출값으로 채운다
                     old = (existing.get("content") or {}).get("ai_suggestion") or {}
                     if period["parsed"] and not old.get("date_start"):
@@ -161,13 +167,8 @@ class PublicScraper:
                             title = re.sub(r"\s+", " ", full).strip()
                     except Exception:
                         pass
-                image = it["image"]
-                p_url = sha = None
-                if image:
-                    _, p_url, sha = await process_and_upload_image(self.db.supabase, image, f"{d['slug']}_{source_id}")
-                # 목록 그림이 없거나 안내 그림이면 상세 페이지의 포스터 자리(정의 detail.poster·body)에서 다시 찾는다
-                if (not p_url or sha in self._placeholder_set()) and has_poster_rule(d.get("detail")):
-                    p_url = await self._detail_poster(session, d, board, link, detail, f"{d['slug']}_{source_id}") or p_url
+                p_url, _ = await self._find_poster(session, d, board, link, detail, it, title, period["start"],
+                                                   suggestion["category"], f"{d['slug']}_{source_id}")
                 post = {
                     "source": target_name,
                     "source_id": source_id,
@@ -189,10 +190,66 @@ class PublicScraper:
         # 목록이 비어도 정의가 허용(min_rows 0)했으면 실패가 아니다 (예: 아직 이달 일정이 안 올라온 달력)
         status = "SUCCESS" if new or dup or (found == 0 and not expired) else "FAIL"
         mark = "❌" if status == "FAIL" else ("⚠️" if fail or expired else "✅")
-        extra = f", 날짜보완 {updated}" if updated else ""
+        extra = (f", 날짜보완 {updated}" if updated else "") + (f", 포스터 새로 찾음 {refilled}" if refilled else "")
         warn = f" / 정의 만료 의심 게시판 {len(expired)}" if expired else ""
         return {"name": target_name, "status": status,
                 "summary": f"{mark} 수집 완료: 발견 {found}건 (신규 {new}, 중복 {dup}, 실패 {fail}{extra}){warn}"}
+
+    async def _find_poster(self, session, d, board, link, detail, it, title, date_start, category, key):
+        """포스터 찾기 순서: 목록 그림 → (없거나 안내 그림이면) 상세 페이지 포스터 자리 → (공연이고 그래도 없으면) KOPIS 같은 날·
+        같은 시도 공연(운영자 11/27 「포스터가 없을시 크롤링 단계에서」). (저장소 주소, 지문) 또는 (None, None)"""
+        p_url = sha = None
+        if it.get("image"):
+            _, p_url, sha = await process_and_upload_image(self.db.supabase, it["image"], key)
+            if sha in self._placeholder_set():
+                p_url = sha = None
+        if not p_url and has_poster_rule(d.get("detail")):
+            p_url = await self._detail_poster(session, d, board, link, detail, key)
+            sha = None
+        if not p_url and category == "공연" and date_start:
+            poster, name = await self._kopis.find(session, title, date_start, d.get("region") or "")
+            if poster:
+                _, p_url, sha = await process_and_upload_image(self.db.supabase, poster, key)
+                if p_url and sha not in self._placeholder_set():
+                    print(f"  🎫 KOPIS 포스터: {name}", flush=True)
+                else:
+                    p_url = sha = None
+        return p_url, sha
+
+    def _hidden_for_poster(self):
+        """포스터 없음으로 숨긴 행사 {raw_post_id: event_id} — 실행마다 한 번 읽는다"""
+        if self._hidden is None:
+            self._hidden = {}
+            try:
+                rows = (self.db.supabase.table("events").select("id,raw_post_id").eq("status", "HIDDEN")
+                        .ilike("hidden_reason", "%포스터 없음%").execute().data or [])
+                self._hidden = {r["raw_post_id"]: r["id"] for r in rows if r.get("raw_post_id")}
+            except Exception as e:
+                print(f"[Scraper] ⚠️ 숨긴 행사 읽기 실패: {e}", flush=True)
+        return self._hidden
+
+    async def _refill_existing(self, session, d, board, it, existing, title, period, suggestion) -> bool:
+        """이미 수집한 항목 중 포스터가 없는 것만 다시 찾는다. 찾으면 수집분 그림을 채우고, 포스터 없음으로 숨긴 행사는
+        포스터를 넣어 다시 공개한다(공개 대기 중이던 수집분은 다음 공개 단계가 받는다). 포스터가 있는 항목은 건드리지 않는다"""
+        hidden_event = self._hidden_for_poster().get(existing["id"])
+        if existing.get("image_urls") and not hidden_event:
+            return False
+        if existing.get("status") not in ("COLLECTED", "PENDING") and not hidden_event:
+            return False
+        if not period.get("end") or period["end"] < datetime.now(timezone(timedelta(hours=9))).date().isoformat():
+            return False
+        p_url, sha = await self._find_poster(session, d, board, existing["source_url"], None, it, title,
+                                             period.get("start"), suggestion["category"], f"{d['slug']}_{existing['source_id']}")
+        if not p_url:
+            return False
+        self.db.supabase.table("raw_posts").update({"image_urls": [p_url]}).eq("id", existing["id"]).execute()
+        if hidden_event:
+            patch = {"poster_image_url": p_url, "status": "PUBLISHED", "hidden_reason": None, "hidden_by": None, "hidden_at": None}
+            if sha:
+                patch["poster_sha256"] = sha
+            self.db.supabase.table("events").update(patch).eq("id", hidden_event).execute()
+            print(f"  🖼️ 포스터 찾아 다시 공개: {title[:40]}", flush=True)
+        return True
 
     def _placeholder_set(self):
         if self._placeholders is None:
