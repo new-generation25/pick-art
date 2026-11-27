@@ -46,6 +46,24 @@ export async function avatarUrl(path: string | null | undefined): Promise<string
     return data.signedUrl;
 }
 
+/**
+ * 구글·카카오가 로그인 때 넘겨준 프로필 사진 주소(운영자 11/28 «구글로그인은 프로필 이미지 보이게», «카톡도»).
+ * 올린 사진이 없을 때만 쓴다. 저장하지 않고 그 주소를 그대로 불러온다. 구글·카카오 사진 서버 주소만 받는다.
+ * 구글은 avatar_url·picture 칸(운영 회원 3명으로 확인). 카카오는 같은 칸으로 온다고 보고 넣었다(카카오 가입 회원이 아직 없어 실제 값은 못 봄).
+ */
+const PROVIDER_PHOTO_HOSTS = /(^|\.)(googleusercontent\.com|kakaocdn\.net)$/;
+export function providerPhoto(user: { user_metadata?: Record<string, unknown> | null } | null | undefined): string | null {
+    const md = user?.user_metadata || {};
+    const raw = [md.avatar_url, md.picture].find(v => typeof v === "string" && v) as string | undefined;
+    if (!raw) return null;
+    try {
+        const u = new URL(raw.replace(/^http:/, "https:"));
+        if (u.protocol !== "https:" || !PROVIDER_PHOTO_HOSTS.test(u.hostname)) return null;
+        if (/default_profile/i.test(u.pathname)) return null;   // 카카오의 «사진 없음» 기본 그림은 쓰지 않는다
+        return u.toString();
+    } catch { return null; }
+}
+
 function announce(path: string | null) {
     window.dispatchEvent(new CustomEvent(AVATAR_EVENT, { detail: path }));
 }

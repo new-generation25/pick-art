@@ -25,6 +25,11 @@
 
 - [X] T031 [US3] 운영자 11/28 «관리자는 늘 까치로 고정»: `Avatar` 는 관리자면 사진을 받지 않고 까치만, `/me` «고치기»의 사진 버튼 자리는 관리자에게 «까치 그림으로 고정돼요» 한 줄
 
+## 4-1. US4 — 구글·카카오 프로필 사진 (P2, 운영자 11/28)
+
+- [X] T035 [US4] `lib/avatar.ts` `providerPhoto(user)`(user_metadata 의 avatar_url·picture, 구글·카카오 사진 서버 주소만, 카카오 기본 그림 제외), `Avatar` 의 `fallbackUrl`, 머리 줄·`/me` 에 연결, `/me` 안내 글
+- [X] T036 [US4] `privacy/page.tsx`: «구글이 넘겨주는 이름·프로필 사진은 쓰지 않는다» 문장을 고치고 변경 고지에 한 줄. 운영 회원 3명(모두 구글)의 로그인 정보에 `avatar_url`·`picture`(lh3.googleusercontent.com)가 있는 것 확인. 카카오는 가입 회원이 없어 실제 칸을 보지 못함
+
 ## 5. 확인·마무리
 
 - [X] T040 `npx tsc --noEmit` + `next build --webpack` + `pytest collector/tests`(264 통과)

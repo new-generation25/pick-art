@@ -9,7 +9,7 @@ import { Menu } from "@mantine/core";
 import { INSTAGRAM_URL, InstagramIcon } from "./InstagramLink";
 import { HeaderSearch } from "./HeaderSearch";
 import { Avatar } from "./Avatar";
-import { AVATAR_EVENT } from "@/lib/avatar";
+import { AVATAR_EVENT, providerPhoto } from "@/lib/avatar";
 
 /**
  * 맨 위 한 줄 (specs/014 시안 f01 → 운영자 11/27 머리 줄 시안 h01-B): 왼쪽 까치 그림 + 글자 로고 pica(끝 점만 초록), 오른쪽 찾기 · 내 정보(흰 원).
@@ -79,7 +79,7 @@ export function Header() {
                         <Menu shadow="md" width={210} position="bottom-end" transitionProps={{ transition: "pop-top-right", duration: 220, timingFunction: "cubic-bezier(.2,.8,.2,1)" }}>
                             <Menu.Target>
                                 <button type="button" className="grid h-11 w-11 place-items-center rounded-full" aria-label="내 정보">
-                                    <Avatar path={avatarPath} admin={adminRole} size={44} />
+                                    <Avatar path={avatarPath} fallbackUrl={providerPhoto(user)} admin={adminRole} size={44} />
                                 </button>
                             </Menu.Target>
                             <Menu.Dropdown className="pica-portal">

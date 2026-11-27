@@ -15,7 +15,7 @@ import { fetchMyLedger, fetchMyPoints, POINT_REASON, type LedgerRow, type MyPoin
 import { ShelfTile, type ShelfCard } from "@/components/ui/Shelf";
 import { KakaoLinkCard } from "@/components/me/KakaoLinkCard";
 import { Avatar } from "@/components/ui/Avatar";
-import { removeAvatar, uploadAvatar } from "@/lib/avatar";
+import { providerPhoto, removeAvatar, uploadAvatar } from "@/lib/avatar";
 
 type Profile = {
     nickname: string; phone: string; region: string; interests: string[];
@@ -164,7 +164,7 @@ export default function MePage() {
                     <Link href="/" className="inline-flex h-11 items-center gap-1 rounded-full px-2 text-[14px] font-semibold text-ink-soft hover:text-ink"><ArrowLeft className="h-5 w-5" aria-hidden /> 행사 목록</Link>
                 </div>
                 <div className="flex items-center gap-3.5">
-                    <Avatar path={avatarPath} admin={isAdmin} size={60} />
+                    <Avatar path={avatarPath} fallbackUrl={providerPhoto(user)} admin={isAdmin} size={60} />
                     <div className="min-w-0">
                         <h1 className="pica-display text-[24px] leading-[1.2] text-ink">{p!.nickname}</h1>
                         <p className="mt-[3px] truncate text-[13px] text-ink-soft">{user?.email || (user?.app_metadata?.provider === "kakao" ? "카카오 계정으로 로그인" : "")}</p>
@@ -187,7 +187,7 @@ export default function MePage() {
                                     <button type="button" onClick={dropPhoto} disabled={photoBusy} className="h-[38px] rounded-full bg-card px-3.5 text-[13.5px] font-bold text-ink shadow-[inset_0_0_0_1.5px_var(--pk-line)] disabled:opacity-50">사진 지우기</button>
                                 )}
                             </div>
-                            <p className="mt-1 text-[12.5px] leading-[1.4] text-ink-soft">가운데를 정사각으로 잘라 작게 줄여 저장해요. 지금은 내 화면에만 보여요.</p>
+                            <p className="mt-1 text-[12.5px] leading-[1.4] text-ink-soft">가운데를 정사각으로 잘라 작게 줄여 저장해요. 지금은 내 화면에만 보여요. 올리지 않으면 구글·카카오 프로필 사진이 보여요.</p>
                         </div>
                         )}
                         <label className="text-[13px] font-semibold text-ink-soft">닉네임
