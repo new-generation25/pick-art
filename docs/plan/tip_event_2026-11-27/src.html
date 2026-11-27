@@ -56,14 +56,14 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: .92em; backgro
     <p class="kicker">피카 · specs/020-tip-event · 2026-11-27</p>
     <h1>숨은 행사 제보 — 만들었고, 운영에는 아직 올리지 않았습니다</h1>
     <p class="lead">로그인 없이 «행사 이름 + 링크나 사진 하나»로 제보하는 화면, 공개 화면 아래의 제보 띠, 커피 쿠폰 연락처(선택·동의) 처리까지 구현하고 로컬에서 확인했습니다.</p>
-    <p class="meta">요청: 「SNS콘텐츠 제작」 세션(운영자 결정 11/27, PLAN_community 12-1절) · 커밋 <code>6f00a75</code> (revive/2026-10)</p>
+    <p class="meta">요청: 「SNS콘텐츠 제작」 세션(운영자 결정 11/27, PLAN_community 12-1절) · 커밋 <code>6f00a75</code>·<code>6c6c995</code> (revive/2026-10)</p>
   </header>
 
   <section>
     <h2>지금 상태</h2>
     <div class="status">
       <div class="tile"><b>구현</b><span>끝</span><small>타입 검사·빌드 통과, 수집기 테스트 203개 통과</small></div>
-      <div class="tile"><b>DB 변경</b><span>운영에 적용 안 함</span><small>운영 DB에서 «적용 → 시험 → 전부 되돌림»으로 21개 항목 통과. 남은 변경 없음을 다시 확인</small></div>
+      <div class="tile"><b>DB 변경</b><span>운영에 적용 안 함</span><small>운영 DB에서 «적용 → 시험 → 전부 되돌림»으로 28개 항목 통과. 남은 변경 없음을 다시 확인</small></div>
       <div class="tile"><b>운영 주소</b><span>예전 그대로</span><small><code>picka.news/tip</code>은 아직 로그인이 필요합니다</small></div>
     </div>
   </section>
@@ -79,6 +79,7 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: .92em; backgro
           <tr><td>커피 쿠폰</td><td>없음</td><td>연락처(전화번호나 이메일)를 선택으로 받고 동의를 받음. 운영자만 봄. 쿠폰을 보낸 뒤 지우고, 보내지 않은 것도 90일 뒤 지움</td></tr>
           <tr><td>「제보: ○○」</td><td>없음</td><td>제보한 분이 이름을 적었고 운영자가 «행사로 등록»할 때 켜 둔 경우에만 행사 화면에 «제보» 줄로 보임</td></tr>
           <tr><td>관리자 › 신고·제보</td><td>회원 제보만, 글만</td><td>로그인 없는 제보, 사진 보기, 표시 이름, 쿠폰 연락처와 «쿠폰 보냄 · 연락처 지우기», 갈래 «쿠폰 대상», 이번 주 한 줄 요약</td></tr>
+          <tr><td>주간 집계</td><td>제보와 등록한 행사가 메모 글자로만 이어짐</td><td>제보에 등록한 행사 id가 칸으로 남고, 사이트 제보와 카카오톡 채널 제보를 한 곳에서 세는 보기(<code>tip_entries</code>)가 생김. 수집 쪽이 «그 주에 실린 제보»를 한 번에 뽑음 (「문화정보 수집」 세션 요청)</td></tr>
           <tr><td>스팸 막기</td><td>로그인이 막아 줌</td><td>로그인 없는 제보는 사이트 전체 하루 40건, 같은 이름·같은 링크는 하루 한 번, 사람 눈에 안 보이는 칸 검사. 접속 주소(IP)는 저장하지 않음</td></tr>
           <tr><td>개인정보처리방침</td><td>제보 = 회원 계정</td><td>로그인 없는 제보·사진(1년)·쿠폰 연락처(보낸 뒤 삭제, 최대 90일)·표시 이름을 적고 변경 고지에 한 줄 추가</td></tr>
         </tbody>
@@ -136,7 +137,7 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: .92em; backgro
     <div class="mine">
       <h3>🟩 직접 해 주실 것</h3>
       <ol>
-        <li><b>배포하려면 이 세션(피카 앱 개선)에 «배포해»라고 적어 주세요.</b> main 배포와 운영 DB 변경은 운영자 본인의 말이 있어야 해서 제가 먼저 하지 않았습니다. 받으면 DB 적용 → 배포 → 운영 주소 시험까지 이어서 합니다.</li>
+        <li><b>배포하려면 이 세션(피카 앱 개선)에 «배포해»라고 적어 주세요.</b> main 배포와 운영 DB 변경은 운영자 본인의 말이 있어야 해서 제가 먼저 하지 않았습니다. 받으면 DB 적용 → 배포 → 운영 주소 시험까지 이어서 합니다. 017 세션의 제목 노출 규칙 커밋(수집기 코드, <code>f1920b5</code>)도 이때 main에 함께 올라갑니다.</li>
         <li>MAX 크롬에 Supabase SQL 편집기 탭이 하나 열려 있습니다. 탭을 닫을 때 «사이트에서 나가시겠습니까?»가 뜨면 «나가기»를 눌러 주세요. 페이지가 확인 창을 띄워서 제가 닫지 못했습니다(안의 시험 SQL은 지워 두었습니다).</li>
         <li>배포 뒤 매주: <a href="https://picka.news/admin/reports">관리자 › 신고·제보</a> → «쿠폰 대상»에서 그 주에 반영한 제보의 연락처 확인 → 5명에게 쿠폰 발송 → 줄마다 «쿠폰 보냄 · 연락처 지우기». 쿠폰 구매·발송은 돈이 나가는 일이라 운영자 몫입니다.</li>
       </ol>
@@ -148,6 +149,7 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: .92em; backgro
         <li>동의 문구: «커피 쿠폰을 보내는 데만 쓰고, 보낸 뒤 지워요. 쿠폰을 받지 못한 연락처도 90일 뒤 지웁니다. 이 내용으로 연락처를 받는 데 동의해요.»</li>
         <li>띠 문구: «피카에 없는 행사, 알려 주세요 — 매주 5명께 커피 쿠폰을 드려요. 행사 이름과 링크(또는 사진) 하나면 돼요.»</li>
         <li>「같은 사람 한 주 1장」은 자동으로 묶지 않습니다. 연락처를 보고 운영자가 가립니다.</li>
+        <li>카카오톡 채널로 온 제보는 연락처를 받지 않습니다. 그 제보자에게 쿠폰을 주려면 채널 1:1 채팅으로 건네야 합니다.</li>
       </ol>
     </div>
   </section>
