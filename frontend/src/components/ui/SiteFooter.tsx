@@ -21,11 +21,11 @@ export function SiteFooter() {
                         <Link href="/partners" className={linkClass}>단체·공간 안내</Link>
                         <Link href="/terms" className={linkClass}>이용약관</Link>
                         <Link href="/privacy" className={linkClass}>개인정보처리방침</Link>
-                        <Text fz="xs" c="var(--pk-ink-soft)">&copy; 2024 pickart (pica). All rights reserved.</Text>
+                        {/* 저작권·운영 주체 한 줄(운영자 11/28 «피카 최하단에 릴로컬 넣으면 되잖아», «왜 2024로 돼있어?» → «그렇게 고쳐»).
+                            카카오 비즈니스 채널 심사에서 채널 «피카»와 사업자 «릴로컬»을 잇는 근거 */}
+                        <Text fz="xs" c="var(--pk-ink-soft)">&copy; 2026 피카 · 운영 릴로컬</Text>
                     </Group>
                 </Group>
-                {/* 운영 주체 표시(운영자 11/28 «피카 최하단에 릴로컬 넣으면 되잖아» — 카카오 비즈니스 채널 심사에서 채널 «피카»와 사업자 «릴로컬»을 잇는 근거) */}
-                <Text fz="xs" c="var(--pk-ink-soft)" mt="xs">운영 릴로컬</Text>
             </Container>
         </Box>
     );
