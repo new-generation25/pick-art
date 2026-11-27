@@ -1,0 +1,16 @@
+{
+  "slug": "miryang_arirang",
+  "name": "밀양아리랑대축제",
+  "_comment": "행사 게시판 정의가 아니라 일시 중지 표시용. paused 를 지우려면 boards·list 를 채운다",
+  "verified_at": "2026-11-27",
+  "paused": "2026-11-27 연 1회 축제(5월) 누리집 첫 화면 주소라 행사 목록 게시판이 없다. 11/26·27 수집기(aiohttp)가 인증서 검증에 실패했으나 인증서는 2027-01-28까지 유효(requests 접속 200) — 이 PC 인증서 목록이 새 Let's Encrypt 루트(Root YE)를 모르는 문제로 보인다. 축제 공지 시기(봄)에 게시판을 찾아 정의를 만든다. 밀양 행사는 밀양문화관광재단 블로그·KOPIS로 들어온다",
+  "match": [
+    "arirang.or.kr"
+  ],
+  "region": "경남",
+  "venue": "밀양",
+  "boards": [],
+  "expect": {
+    "min_rows": 0
+  }
+}
