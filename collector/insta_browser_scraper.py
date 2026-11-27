@@ -217,6 +217,7 @@ async def collect_account(page, db, account, published, seen, max_age_days=21, d
     """한 계정의 새 게시물을 읽어 행사 후보를 REVIEW 로 쌓는다. 반환: (새 게시물 수, 후보 수, 후보 목록)"""
     handle, role, region = account["handle"], account.get("role") or "", account.get("region") or ""
     done = set(seen.get(handle, []))
+    known = account.setdefault("known", set())   # 이 계정이 이미 올린 행사 (정리한 제목, 시작일). 같은 행사 글은 다시 쌓지 않는다
     posts = await list_posts(page, handle)
     found, n_new = [], 0
     stale = (date.today().toordinal() - 31)  # 끝난 지 한 달 넘은 행사는 후보로 쌓지 않는다
@@ -251,6 +252,10 @@ async def collect_account(page, db, account, published, seen, max_age_days=21, d
             n = _norm(e["title"])
             if e["start"] and any(n in p or p in n for p in published.get(e["start"], []) if p):
                 continue
+            if e["start"] and (n, e["start"]) in known:
+                continue   # 같은 계정이 같은 행사를 이미 올렸다(대기함·반영 안 함 어디에 있든). 2026-11-27 겹치는 글 59건 정리 뒤 추가
+            if e["start"]:
+                known.add((n, e["start"]))
             e.update({"code": code, "account": handle, "author": author, "role": role, "posted": posted.isoformat() if posted else "",
                       "caption": cap[:1500]})
             found.append(e)

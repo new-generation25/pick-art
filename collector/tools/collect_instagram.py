@@ -67,6 +67,21 @@ async def main(dry):
     published = {}
     for ev in db.supabase.table("events").select("title,event_date_start").execute().data:
         published.setdefault(ev["event_date_start"], []).append(_norm(ev["title"]))
+    # 계정마다 이미 쌓인 행사 (정리한 제목, 시작일): 같은 계정이 같은 행사를 다시 올린 글은 새로 쌓지 않는다
+    known, start = {}, 0
+    while True:
+        page_rows = (db.supabase.table("raw_posts").select("content").eq("source", "인스타그램")
+                     .order("id").range(start, start + 999).execute().data or [])
+        for r in page_rows:
+            c = r.get("content") or {}
+            s = c.get("ai_suggestion") or {}
+            if s.get("account") and s.get("date_start"):
+                known.setdefault(s["account"].lower(), set()).add((_norm(c.get("title") or ""), s["date_start"]))
+        if len(page_rows) < 1000:
+            break
+        start += 1000
+    for a in accounts:
+        a["known"] = known.get(a["handle"].lower(), set())
     seen = load_seen()
     total_new = total_found = 0
     # 가장 오래 안 본 계정부터(처음 보는 계정이 맨 앞). 시간 상한에 걸려도 다음 회차가 이어서 본다
