@@ -87,9 +87,13 @@ def raw(rid, title, status="REVIEW", start=D1, end=D2, approved=True, url=None, 
             "status": status, "image_urls": [], "content": c}
 
 
-def run(monkeypatch, tmp_path, rows, events=(), ids=None, bad_links=()):
+def run(monkeypatch, tmp_path, rows, events=(), ids=None, bad_links=(), no_poster_ids=()):
     db = FakeDB(rows, list(events))
+    db.tables["placeholder_images"] = []
     uploads = []
+
+    async def fake_no_poster(_session, row, _shas):  # 포스터를 실제로 받지 않는다: no_poster_ids 에 든 수집분만 «포스터 없음»
+        return row["id"] in no_poster_ids
 
     async def fake_link(_session, url):
         return (url not in bad_links), (404 if url in bad_links else 200), url
@@ -101,9 +105,48 @@ def run(monkeypatch, tmp_path, rows, events=(), ids=None, bad_links=()):
     monkeypatch.setattr(pv, "Database", lambda: db)
     monkeypatch.setattr(pv, "check_link", fake_link)
     monkeypatch.setattr(pv, "process_and_upload_image", fake_upload)
+    monkeypatch.setattr(pv, "no_poster", fake_no_poster)
     monkeypatch.setattr(pv, "OUT_DIR", str(tmp_path))
     summary = asyncio.run(pv.main(RANGE[0], RANGE[1], False, ids=ids))
     return db, summary, uploads
+
+
+def test_no_poster_is_not_published_and_stays_collected(monkeypatch, tmp_path):
+    """포스터 없는 행사는 공개하지 않는다(운영자 2026-11-27). 수집분은 그대로 두어 다음 실행에서 다시 본다"""
+    db, summary, _ = run(monkeypatch, tmp_path, [raw("np", "포스터 없는 대관 공연", status="COLLECTED", approved=False)],
+                         ids=["np"], no_poster_ids={"np"})
+    assert db.tables["events"] == [] and by_id(db, "np")["status"] == "COLLECTED"
+    assert "포스터없음': 1" in summary
+
+
+def test_no_poster_falls_back_to_other_source_with_poster(monkeypatch, tmp_path):
+    """같은 행사(제목·시작일)의 다른 출처에 포스터가 있으면 그쪽을 공개하고, 포스터 없는 쪽은 중복으로 닫는다"""
+    rows = [raw("p1", "같은 공연", status="COLLECTED", approved=False, url="https://a.example/1"),
+            raw("p2", "같은 공연", status="COLLECTED", approved=False, url="https://b.example/2")]
+    db, _, _ = run(monkeypatch, tmp_path, rows, ids=["p1", "p2"], no_poster_ids={"p1"})
+    ev = db.tables["events"]
+    assert len(ev) == 1 and ev[0]["raw_post_id"] == "p2"
+    assert by_id(db, "p1")["status"] == "DUPLICATE"
+
+
+def test_no_poster_detects_placeholder_by_fingerprint():
+    """안내 그림(지문이 placeholder_images 에 있음)은 포스터 없음, 다른 그림은 포스터 있음, 주소 없음은 포스터 없음"""
+    import hashlib
+
+    class Resp:
+        def __init__(self, body): self.body, self.status = body, 200
+        async def __aenter__(self): return self
+        async def __aexit__(self, *a): return False
+        async def read(self): return self.body
+
+    class Sess:
+        def get(self, url, timeout=None): return Resp(url.encode())
+
+    ph = {hashlib.sha256(b"https://x/placeholder.jpg").hexdigest()}
+    row = lambda u: {"image_urls": [u] if u else [], "content": {"ai_suggestion": {}}}  # noqa: E731
+    assert asyncio.run(pv.no_poster(Sess(), row("https://x/placeholder.jpg"), ph)) is True
+    assert asyncio.run(pv.no_poster(Sess(), row("https://x/real.jpg"), ph)) is False
+    assert asyncio.run(pv.no_poster(Sess(), row(None), ph)) is True
 
 
 def by_id(db, rid):

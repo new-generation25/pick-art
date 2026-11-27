@@ -13,6 +13,7 @@ from datetime import datetime, timezone, timedelta
 from source_loader import find_for_url
 from rule_extractor import parse_period
 from utils import check_link, process_and_upload_image
+from blocked_sites import SiteBlocked, check_response, record as record_block
 from poster_finder import has_poster_rule, load_placeholders, poster_candidates
 
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
@@ -55,6 +56,7 @@ class PublicScraper:
                 print(f"{'='*60}", flush=True)
 
                 # 네트워크 오류(접속 끊김·시간 초과)는 30초 쉬고 한 번 더 해 본다 (specs/003 R1). 그 밖의 오류는 바로 실패
+                blocked_reason = None  # 이번 실행에서 막혔는지(차단 응답·접속 실패). 3회 연속이면 위험 사이트(blocked_sites.py)
                 for attempt in (1, 2):
                     try:
                         definition = find_for_url(target_url)
@@ -71,9 +73,19 @@ class PublicScraper:
                             await asyncio.sleep(RETRY_WAIT)
                             continue
                         result = {"name": target_name, "status": "FAIL", "summary": f"❌ 사이트 오류(재시도 1회): {str(e)}"}
+                        blocked_reason = f"접속 실패 {type(e).__name__}"
+                    except SiteBlocked as e:
+                        result = {"name": target_name, "status": "FAIL", "summary": f"⛔ 접근 차단: {e}"}
+                        blocked_reason = str(e)
+                        break
                     except Exception as e:
                         result = {"name": target_name, "status": "FAIL", "summary": f"❌ 사이트 오류: {str(e)}"}
                         break
+                if not result["summary"].startswith("⏸️"):  # 일시 중지(정의의 paused)는 접속하지 않았으므로 세지 않는다
+                    try:
+                        result["summary"] += record_block(self.db, target_url, bool(blocked_reason), blocked_reason or "")
+                    except Exception as e:
+                        print(f"[Scraper] ⚠️ 차단 기록 실패: {e}", flush=True)
 
                 print(f"\n{'='*60}\n[Scraper] {result['summary']}\n{'='*60}\n", flush=True)
                 self._update_log(log_id, result["summary"], result["status"])
@@ -209,7 +221,10 @@ class PublicScraper:
         async with session.get(url, headers=headers or {}, timeout=aiohttp.ClientTimeout(total=30)) as r:
             raw = await r.read()
             enc = board.get("encoding") or d.get("encoding") or r.charset or "utf-8"
-        return raw.decode(enc, errors="replace")
+            status = r.status
+        text = raw.decode(enc, errors="replace")
+        check_response(status, text)  # 차단 응답이면 SiteBlocked (운영자 11/27: 3회 막히면 위험 사이트)
+        return text
 
     async def _list_items(self, session, d, board):
         """게시판 하나의 항목을 [{id, title, period, link, image, venue}]로 만든다.

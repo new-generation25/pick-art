@@ -14,6 +14,9 @@
   4. 이미 공개된 행사(events, 숨긴 행 포함): 위 제목+시작일이 같거나, 2026-11-26 보강 — 느슨한 제목
      (대괄호 [지역]·연극/뮤지컬 접두·〈〉<> 기호·공백·연도 제거, ×→x)이 같거나 서로 포함 관계이고 시작일·지역이 같으면 중복으로 본다
      (예: KOPIS 「더 드레서 [진주]」 ↔ 기관 「연극 <더 드레서>」). 순회공연은 날짜·지역이 달라 걸리지 않는다.
+  5. 포스터(2026-11-27 운영자 「포스터가 없는건 기본적으로 올리지 않는걸로」): 포스터가 없거나 받을 수 없거나 안내 그림
+     (placeholder_images 지문)이면 공개하지 않는다. 같은 행사의 다른 출처에 포스터가 있으면 그쪽을 쓴다.
+     수집분은 그대로 두어 원문에 포스터가 올라오면 다음 실행에서 다시 본다(결과 JSON 「no_poster」)
 발행한 raw_posts 는 status='PUBLISHED' 로 바꾼다. 결과 목록을 JSON으로 남긴다.
 """
 import asyncio
@@ -35,6 +38,7 @@ from utils import check_link, process_and_upload_image  # noqa: E402
 from genre import is_theater_film, normalize_category  # noqa: E402
 from dedupe import loose, norm, similar  # noqa: E402,F401
 from title_rules import clean_title, clean_venue as venue_rule  # noqa: E402
+from blocked_sites import host_of, paused_hosts  # noqa: E402
 
 ISO = re.compile(r"^20\d\d-\d\d-\d\d$")
 OUT_DIR = os.path.join("..", "docs")  # 결과 목록 JSON 자리(테스트는 임시 폴더로 바꾼다)
@@ -84,6 +88,24 @@ def mark_review_failed(db, row, reason, now):
     db.supabase.table("raw_posts").update({"content": c}).eq("id", row["id"]).eq("status", "REVIEW").execute()
 
 
+async def no_poster(session, row, placeholder_shas) -> bool:
+    """포스터가 없거나, 받을 수 없거나, 안내 그림(«공연 이미지 준비 중» 같은 그림, placeholder_images)이면 True.
+    포스터 없는 행사는 공개하지 않는다(운영자 2026-11-27 「포스터가 없는건 기본적으로 올리지 않는걸로」,
+    예: 통영 「그리매 정기전」·「어린이집 학부모 참여 영유아예술제」). 인스타 승인 후보는 포스터 주소가 poster_url 에 있다"""
+    a = (row.get("content") or {}).get("ai_suggestion") or {}
+    poster = (row.get("image_urls") or [None])[0] or a.get("poster_url")
+    if not poster or not str(poster).startswith("http"):
+        return True
+    try:
+        async with session.get(poster, timeout=aiohttp.ClientTimeout(total=30)) as resp:
+            if resp.status >= 400:
+                return True
+            body = await resp.read()
+    except Exception:
+        return True
+    return hashlib.sha256(body).hexdigest() in placeholder_shas
+
+
 async def main(date_from, date_to, dry, ids=None):
     """ids 를 주면(정기 실행의 승인 후보 공개) 그 id 만 보고 승인된 REVIEW 도 받는다. 결과 파일 이름 끝에 _approved"""
     db = Database()
@@ -98,7 +120,14 @@ async def main(date_from, date_to, dry, ids=None):
         rows = db.supabase.table("raw_posts").select("*").in_("status", ["COLLECTED", "PENDING"]).execute().data
     if ONLY_URLS:  # --curated <json>: 그 큐레이션 파일로 넣은 수집분만 발행한다
         rows = [r for r in rows if r["source_url"] in ONLY_URLS]
-    cands, skipped = [], {"날짜없음/형식오류": 0, "기간밖": 0, "기간지남": 0, "극장영화": 0}
+    cands, skipped = [], {"날짜없음/형식오류": 0, "기간밖": 0, "기간지남": 0, "극장영화": 0, "포스터없음": 0}
+    # 안내 그림(«공연 이미지 준비 중» 같은 그림)의 지문 — 포스터 없음 판정에 쓴다(운영자 11/27)
+    placeholder_shas = {p["sha256"] for p in (db.supabase.table("placeholder_images").select("sha256").execute().data or [])}
+    # 쉬게 한 출처(위험 사이트 포함, blocked_sites.py)의 누리집에는 링크 확인도 하지 않는다(운영자 11/27). 수집분은 그대로 둔다
+    try:
+        risky = paused_hosts(db)
+    except Exception:
+        risky = set()
     # 오늘(한국 시간) 이전에 끝난 수집분은 '기간 지남'(EXPIRED)으로 돌려 인박스 검토 대기에서 뺀다.
     # 지우지 않으므로 같은 글을 다시 수집하지 않고 중복 판정에도 쓰인다. date_from 이 아니라 오늘 기준이다.
     today = datetime.now(timezone(timedelta(hours=9))).date().isoformat()
@@ -127,6 +156,9 @@ async def main(date_from, date_to, dry, ids=None):
             skipped["극장영화"] += 1
             if r["status"] == "REVIEW":
                 fail_review(r, "극장 영화(멀티플렉스·일반 개봉 상영)는 넣지 않음")
+            continue
+        if host_of(r.get("source_url")) in risky:
+            skipped["쉬는출처"] = skipped.get("쉬는출처", 0) + 1
             continue
         if s > date_to or e < date_from:
             skipped["기간밖"] += 1
@@ -186,6 +218,23 @@ async def main(date_from, date_to, dry, ids=None):
                     if r["status"] == "REVIEW":
                         fail_review(r, f"원본 링크 열리지 않음({status})")
                 continue
+            # 포스터 없는 행사는 공개하지 않는다(운영자 2026-11-27). 같은 행사의 다른 출처에 포스터가 있으면 그것을 쓴다.
+            # 수집분은 그대로 두므로 원문에 포스터가 올라오면 다음 실행에서 다시 본다
+            if await no_poster(session, chosen, placeholder_shas):
+                alt = None
+                for r in grp:
+                    if r is not chosen and not await no_poster(session, r, placeholder_shas):
+                        ok, _, _ = await check_link(session, r["source_url"])
+                        if ok:
+                            alt = r; break
+                if not alt:
+                    skipped["포스터없음"] += 1
+                    report.setdefault("no_poster", []).append({"title": chosen["content"]["title"], "source": chosen["source"],
+                                                               "url": chosen["source_url"]})
+                    if chosen["status"] == "REVIEW":
+                        fail_review(chosen, "포스터 없음(없음·받을 수 없음·안내 그림)")
+                    continue
+                chosen = alt
             for r in grp:
                 if r is not chosen:
                     report["duplicates"].append({"title": r["content"]["title"], "source": r["source"], "kept": chosen["source"]})
