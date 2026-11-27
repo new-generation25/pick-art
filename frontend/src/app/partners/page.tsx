@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AgreementForm } from "@/components/partners/AgreementForm";
+import { PartnerCount } from "@/components/partners/PartnerCount";
 
 // 예술가·작은 단체 안내 + 정보 제공 동의(정식 협약) 받기 (specs/016).
 // 운영자 11/26 «/partners를 예술가·작은 단체용으로 다듬고 끝에 동의 칸». 기관용 설명(KOPIS·공연법·통계)은 지우지 않고 맨 아래 접는 칸으로 옮겼다.
@@ -176,6 +177,7 @@ export default function PartnersPage() {
 
                 <section id="join" className="scroll-mt-20">
                     <h2 className="pica-display text-[26px] leading-tight text-ink">동의하고 파트너십 맺기</h2>
+                    <PartnerCount className="mt-2" />
                     <p className="mt-2 text-[15px] leading-relaxed text-ink">
                         한 번 동의해 주시면 그다음 공지부터는 묻지 않고 바로 실어요. 무료이고, 언제든 그만둘 수 있어요.
                     </p>
