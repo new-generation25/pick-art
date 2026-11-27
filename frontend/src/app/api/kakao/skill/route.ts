@@ -66,13 +66,22 @@ export async function POST(request: Request) {
     if (!req) return NextResponse.json({ error: "bad request" }, { status: 400 });
     const { userKey, action } = req;
 
-    // 채널로 오는 말은 제보만이 아니다: 웰컴·제보 시간 밖의 말에는 «운영자에게 문의»(상담 연결)·«행사 알리기» 두 갈래를 보인다
+    // 채널로 오는 말은 제보만이 아니다: 웰컴·제보 시간 밖의 말에는 문의 길(메일·인스타그램 메시지)·«행사 알리기» 두 갈래를 보인다(상담원 연결은 운영자 11/27 요청으로 뺌)
     if (action.kind === "welcome") {
         const r = await intake(secret, userKey, "status");
         if (r.error === "auth") return NextResponse.json({ error: "forbidden" }, { status: 403 });
         return json(MSG.welcome());
     }
     if (action.kind === "ask") return json(MSG.ask());
+    if (action.kind === "linkHelp") return json(MSG.linkHelp());
+    if (action.kind === "link") {
+        // 피카 회원 잇기: «내 정보»에서 받은 6자리 코드(10분, 틀린 시도 하루 5번까지)
+        const r = await intake(secret, userKey, "link", action.code);
+        if (r.error === "auth") return NextResponse.json({ error: "forbidden" }, { status: 403 });
+        if (r.error === "bad_code") return json(MSG.badCode());
+        if (r.error === "link_limit") return json(MSG.linkLimit());
+        return json(r.ok ? MSG.linked() : MSG.error());
+    }
     if (action.kind === "tip") {
         const r = await intake(secret, userKey, "start");
         if (r.error === "auth") return NextResponse.json({ error: "forbidden" }, { status: 403 });

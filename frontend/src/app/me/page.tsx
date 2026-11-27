@@ -13,6 +13,7 @@ import { todayKST } from "@/lib/utils";
 import { loginHref, POINTS_NOTE, TIP_EVENT_NAME, TIP_POINTS } from "@/lib/reports";
 import { fetchMyLedger, fetchMyPoints, POINT_REASON, type LedgerRow, type MyPoints } from "@/lib/points";
 import { ShelfTile, type ShelfCard } from "@/components/ui/Shelf";
+import { KakaoLinkCard } from "@/components/me/KakaoLinkCard";
 
 type Profile = {
     nickname: string; phone: string; region: string; interests: string[];
@@ -246,6 +247,8 @@ export default function MePage() {
                 </div>
             </div>
             <p className="mx-4 mt-2 h-5 text-[12.5px] text-accent" aria-live="polite">{msg}</p>
+
+            <KakaoLinkCard className={card} />
 
             <div className={card}>
                 <Link href="/partners" className="no-underline text-ink"><Line icon={Info} title="단체·공간 안내" sub="공연·전시 정보를 보내는 방법" right={<ChevronRight className="h-5 w-5 text-ink-soft" />} /></Link>

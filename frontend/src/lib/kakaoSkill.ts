@@ -14,7 +14,8 @@
  *
  * 채널로 오는 말은 제보만이 아니다(운영자 11/26 «일반 사용자들도 있잖아», «제보는 메뉴형태로»).
  * «행사 알리기»를 누른 뒤 30분 동안 보낸 사진·글만 제보로 받는다(DB kakao_senders.tip_until).
- * 그 밖의 말은 저장하지 않고 «운영자에게 문의»(버튼 action "operator" = 상담 연결, 채널 1:1 채팅으로 넘김)·«행사 알리기»를 보인다.
+ * 그 밖의 말은 저장하지 않고 문의 길(메일·인스타그램 메시지)과 «행사 알리기»를 보인다.
+ * 상담원 연결(버튼 action "operator", 채널 1:1 채팅으로 넘김)은 운영자 11/27 «상담원 연결 기능은 없애»로 뺐다.
  */
 import { RIGHTS_CHECKS, RIGHTS_VERSION, PRIVACY_NOTE } from "./leaflets";
 
@@ -28,18 +29,27 @@ export const TIP_TEXT = "행사 알리기";
 const TIP_WORDS = new Set([TIP_TEXT, "제보", "제보하기", "행사 제보", PHOTO_TEXT, "리플렛 보내기", "포스터 보내기"]);
 /** 오픈빌더 «행사 알리기» 블록 이름. 이 블록에서 온 요청은 발화와 상관없이 제보 시작으로 읽는다 */
 export const TIP_BLOCK = "행사 알리기";
-/** 상담 연결 버튼 이름(스킬 응답 버튼 action "operator") */
+/** 예전 상담 연결 버튼 이름. 옛 카드의 버튼을 누르면 이 말이 올 수 있어 문의 안내로 받는다 */
 export const OPERATOR_LABEL = "운영자에게 문의";
-/** 채팅방 메뉴 «운영자 문의»가 부르는 오픈빌더 블록 이름. 채팅방 메뉴는 상담 연결을 직접 못 걸어서(연결 종류: URL·챗봇·소식·쿠폰·채널 프로필·QR)
- *  이 블록이 상담 연결 버튼 카드로 답한다 */
+/** 채팅방 메뉴 «운영자 문의»가 부르는 오픈빌더 블록 이름. 이 블록은 문의 길(메일·인스타그램 메시지)을 알려 준다 */
 export const ASK_BLOCK = "운영자 문의";
+/** 문의 길: 사이트 소개·약관과 같은 메일, 인스타그램 메시지 */
+export const CONTACT_MAIL = "pick.art.pica@gmail.com";
+/** 프로필 주소(«메시지 보내기» 버튼이 있다). ig.me/m/… 은 PC 에서 instagram.com/m/… 으로 넘어가 확실하지 않아 쓰지 않는다 */
+export const INSTA_DM_URL = "https://www.instagram.com/picka.news/";
 const ASK_WORDS = new Set([OPERATOR_LABEL, ASK_BLOCK, "문의", "문의하기", "상담", "상담원 연결", "운영자 연결"]);
 export const MAX_IMAGES = 10;
 /** 카카오에서 내려받을 때 상한(PC에서 보낸 원본 PNG 7.5MB 확인). 저장 전에 긴 변 2048px JPEG 로 줄인다 */
 export const MAX_IMAGE_BYTES = 25 * 1024 * 1024;
 
+/** 피카 회원 잇기(운영자 11/27 «연결 코드 방식»): «내 정보»에서 받은 6자리 코드를 «연결 123456»처럼 보낸다 */
+const LINK_RE = /^(?:피카\s*)?(?:회원\s*)?연결(?:\s*코드)?\s*[:：]?\s*(\d{6})$/;
+const LINK_HELP_WORDS = new Set(["연결", "회원 연결", "피카 연결", "연결 코드", "회원연결"]);
+
 export type SkillAction =
     | { kind: "welcome" }
+    | { kind: "link"; code: string }
+    | { kind: "linkHelp" }
     | { kind: "agree" }
     | { kind: "tip" }
     | { kind: "ask" }
@@ -116,6 +126,9 @@ export function parseSkillRequest(body: unknown): SkillRequest | null {
         return { userKey, action: { kind: "image", urls: words } };
     }
     if (utterance === AGREE_TEXT) return { userKey, action: { kind: "agree" } };
+    const link = LINK_RE.exec(utterance.replace(/\s+/g, " "));
+    if (link) return { userKey, action: { kind: "link", code: link[1] } };
+    if (LINK_HELP_WORDS.has(utterance)) return { userKey, action: { kind: "linkHelp" } };
     if (TIP_WORDS.has(utterance) || blockName === TIP_BLOCK) return { userKey, action: { kind: "tip" } };
     if (ASK_WORDS.has(utterance) || blockName === ASK_BLOCK) return { userKey, action: { kind: "ask" } };
     if (/웰컴|welcome/i.test(blockName) || !utterance) return { userKey, action: { kind: "welcome" } };
@@ -125,7 +138,7 @@ export function parseSkillRequest(body: unknown): SkillRequest | null {
 // ---------- 답 ----------
 
 type QuickReply = { label: string; action: "message"; messageText: string };
-type Button = { label: string; action: "message"; messageText: string } | { label: string; action: "operator" };
+type Button = { label: string; action: "message"; messageText: string } | { label: string; action: "webLink"; webLinkUrl: string };
 type Output = { simpleText: { text: string } } | { textCard: { title: string; description: string; buttons: Button[]; buttonLayout: "vertical" } };
 export type SkillResponse = { version: "2.0"; template: { outputs: Output[]; quickReplies?: QuickReply[] } };
 
@@ -141,7 +154,7 @@ export function reply(texts: string[], quick: string[] = []): SkillResponse {
     };
 }
 
-/** 두 갈래 카드: 운영자 상담 연결 · 행사 알리기 (textCard 단일형은 제목+설명 400자까지) */
+/** 두 갈래 카드: 인스타그램으로 문의 · 행사 알리기 (textCard 단일형은 제목+설명 400자까지) */
 function menu(title: string, description: string): SkillResponse {
     return {
         version: "2.0",
@@ -151,7 +164,7 @@ function menu(title: string, description: string): SkillResponse {
                     title: title.slice(0, 50),
                     description: description.slice(0, 400 - title.length),
                     buttons: [
-                        { label: OPERATOR_LABEL, action: "operator" },
+                        { label: "인스타그램으로 문의", action: "webLink", webLinkUrl: INSTA_DM_URL },
                         { label: TIP_TEXT, action: "message", messageText: TIP_TEXT },
                     ],
                     buttonLayout: "vertical",
@@ -165,17 +178,17 @@ export const MSG = {
     /** 웰컴: 채널 소개 + 두 갈래 */
     welcome: () => menu(
         "피카 카카오톡 채널이에요",
-        "가까운 공연·전시·축제를 날짜순으로 알려 드려요(picka.news).\n\n궁금한 것은 «운영자에게 문의»를 눌러 주세요. 운영자가 채팅으로 답해요.\n공연·전시를 알리고 싶은 단체·예술가는 «행사 알리기»를 눌러 주세요.",
+        `가까운 공연·전시·축제를 날짜순으로 알려 드려요(picka.news).\n\n궁금한 것은 메일 ${CONTACT_MAIL}이나 인스타그램 @picka.news 메시지로 보내 주세요.\n공연·전시를 알리고 싶은 단체·예술가는 «행사 알리기»를 눌러 주세요.`,
     ),
-    /** 채팅방 메뉴 «운영자 문의»: 상담 연결 버튼 (운영자 채팅 시간은 채널 관리자센터 채팅 설정과 같게: 매일 오전 9시~오후 6시) */
+    /** 채팅방 메뉴 «운영자 문의»: 문의 길 안내 (이 채팅창은 챗봇이라 사람이 답하지 않는다) */
     ask: () => menu(
         "운영자에게 문의하기",
-        "아래 «운영자에게 문의»를 누르면 운영자와 1:1 채팅으로 이어져요. 매일 오전 9시~오후 6시에 답하고, 그 밖 시간에 남기면 다음 채팅 시간에 답해요.\n\n공연·전시를 알리려면 «행사 알리기»를 눌러 주세요.",
+        `이 채팅창은 자동 응답이라 문의에 답하지 못해요.\n궁금한 것은 메일 ${CONTACT_MAIL}이나 인스타그램 @picka.news 메시지로 보내 주세요. 운영자가 확인하고 답해요.\n\n공연·전시를 알리려면 «행사 알리기»를 눌러 주세요.`,
     ),
     /** 제보 시간이 아닐 때 온 말·사진: 저장하지 않았음을 밝히고 두 갈래 */
     notTip: () => menu(
         "무엇을 도와드릴까요?",
-        "방금 보낸 내용은 저장하거나 운영자에게 넘기지 않았어요.\n\n문의는 «운영자에게 문의»를 누른 뒤 다시 보내 주세요.\n행사를 알리려면 «행사 알리기»를 누른 뒤 사진·글을 보내 주세요.",
+        `방금 보낸 내용은 저장하거나 운영자에게 넘기지 않았어요.\n\n문의는 메일 ${CONTACT_MAIL}이나 인스타그램 @picka.news 메시지로 보내 주세요.\n행사를 알리려면 «행사 알리기»를 누른 뒤 사진·글을 보내 주세요.`,
     ),
     consent: () => reply([
         "피카(picka.news)는 경남·부산의 공연·전시·축제를 날짜순으로 알려 드려요.\n리플렛·포스터 사진이나 일정 글을 보내 주시면 운영자가 확인한 뒤에 피카에 올립니다. 자동으로 올라가지 않아요.",
@@ -193,6 +206,10 @@ export const MSG = {
     gotText: (attached: boolean) => reply([
         attached ? "방금 보낸 사진과 함께 받았어요. 운영자가 확인한 뒤에 피카에 올립니다." : "글로 받았어요. 운영자가 확인한 뒤에 피카에 올립니다. 리플렛·포스터 사진이 있으면 이 채팅창에 함께 보내 주세요.",
     ]),
+    linked: () => reply(["피카 회원과 연결했어요. 이 채팅방에서 보내는 행사 제보는 회원님이 보낸 것으로 기록돼요.\n연결을 끊으려면 피카 «내 정보»(picka.news/me)에서 «연결 끊기»를 눌러 주세요."]),
+    badCode: () => reply(["연결 코드가 맞지 않거나 10분이 지났어요. 피카 «내 정보»(picka.news/me)에서 새 코드를 받아 «연결 123456»처럼 보내 주세요."]),
+    linkLimit: () => reply(["오늘은 연결을 더 시도할 수 없어요. 내일 다시 해 주세요."]),
+    linkHelp: () => reply(["피카 회원과 연결하려면 피카 «내 정보»(picka.news/me)에서 «연결 코드 받기»를 누르고, 받은 6자리를 «연결 123456»처럼 이 채팅창에 보내 주세요."]),
     noImage: () => reply(["사진을 받지 못했어요. 이 채팅창에 사진을 다시 보내 주세요."]),
     limit: () => reply(["오늘은 더 받을 수 없어요(하루 5건까지). 내일 다시 보내 주세요."]),
     error: () => reply(["지금은 받지 못했어요. 잠시 뒤에 다시 보내 주세요."]),
