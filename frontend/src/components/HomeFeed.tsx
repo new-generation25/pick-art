@@ -223,13 +223,14 @@ export async function HomeFeed({ params: resolvedParams, region, district }: { p
       {!one && (
         <MapButton
           showTip
+          hideFromId="home-news"
           summary={[DATE_LABEL[filters.date || ""] || "", place || "", cats.length ? (sub ? `${cats[0]} · ${sub}` : cats.join("·")) : "", kids.on ? "아이와" : ""].filter(Boolean).join(" · ")}
           events={dbEvents.map((e: any) => ({ ...toShelf(e), venueId: e.venue_id ?? null, today: (e.event_date_start || e.event_date_end || today) <= today }))}
         />
       )}
 
       {/* 소식 받기 (11/27): 메일을 보내는 기능이 없어 이메일 구독·키워드 알림 칸을 뺐다. 실제로 받아 볼 수 있는 길만 둔다 */}
-      <section className="mt-6 bg-[var(--pk-soft)]">
+      <section id="home-news" className="mt-6 bg-[var(--pk-soft)]">
         <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
           <h2 className="pica-display text-[22px] text-ink sm:text-[26px]">새 소식 받아 보기</h2>
           <p className="mt-1 text-[14px] text-ink-soft">찜한 행사 전날과 주말 행사를 휴대폰 알림으로, 또는 쓰시는 곳에서 받아 보세요.</p>
