@@ -352,9 +352,56 @@ def _strip(s: str) -> str:
     return re.sub(r"<[^>]+>", "", re.sub(r"<br\s*/?>", " ", s))
 
 
+# 새 화면 테마 (2026-11-27 운영자 제안 「기존 레이아웃은 유지하고 버튼·폰트·컬러만」 — 시안 단계, 기본값은 riso 그대로)
+# 사이트 화면 팔레트·글꼴(BRAND_GUIDE 2·3절 2026-11-26): 종이·흰 면·짙은 초록, 제목 Gowun Batang, 숫자 Space Grotesk
+SCREEN = {"paper": "#F4EFE6", "card": "#FFFFFF", "ink": "#1E1A15", "ink_soft": "#6B6257", "blue": "#2E6B4E", "pink": "#E6EFE9"}
+SCREEN_CSS = """
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=Space+Grotesk:wght@600;700&display=block');
+.slide::before { display: none; }
+.disp { font-family: 'Gowun Batang', serif; font-weight: 700; letter-spacing: -0.03em; }
+.print { text-shadow: none; }
+.brand { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 34px; letter-spacing: -0.5px; }
+.brand b { color: #2E6B4E; }
+.brand span { font-weight: 600; font-size: 26px; color: #6B6257; margin-left: 10px; }
+.chip { border: none; border-radius: 999px; background: #fff; box-shadow: 0 2px 8px rgba(30,26,21,.14); padding: 10px 26px; }
+.chip.pink { background: #2E6B4E; color: #fff; }
+.band { background: #2E6B4E; }
+.cover .poster { border: none; border-radius: 12px; box-shadow: 0 8px 26px rgba(30,26,21,.24); }
+.cover .sticker { border: none; border-radius: 999px; background: #E6EFE9; color: #2E6B4E; }
+.cover .swipe { border-radius: 999px; padding: 12px 26px; }
+.ticket { border: none; border-radius: 22px; background: #fff; box-shadow: 0 3px 14px rgba(30,26,21,.12); overflow: hidden; }
+.ticket .row { border-top: 2px solid #E3DBCD; }
+.ticket .k { background: transparent; color: #6B6257; font-weight: 700; }
+.notice { border: none; border-left: 8px solid #2E6B4E; border-radius: 14px; background: #E6EFE9; }
+.what .poster2 { border: none; border-radius: 12px; box-shadow: 0 6px 20px rgba(30,26,21,.2); }
+.what li, .what li:first-child { border-color: #E3DBCD; }
+.how li::before { font-family: 'Space Grotesk', sans-serif; font-weight: 700; border-radius: 50%; box-shadow: none; }
+.cover .hook { font-size: 62px; line-height: 1.18; width: 400px; }
+.story .hook { font-size: 78px; }
+.cta .big { text-shadow: none; }
+.cta .brand b { color: #E6EFE9; }
+.cta .brand span { color: rgba(255,255,255,.8); }
+.cta .act { border: none; border-radius: 22px; background: rgba(255,255,255,.14); }
+.story .poster { border: none; border-radius: 12px; box-shadow: 0 8px 26px rgba(30,26,21,.24); }
+"""
+THEME = "riso"
+
+
+def _screen_page(html: str) -> str:
+    """riso 표기(픽아트 pica · @계정)를 사이트 글자 로고(pica. + @계정)로 바꾼다."""
+    html = re.sub(r'픽아트 <b(?: style="[^"]*")?>pica</b>(?: · ([^<]+))?',
+                  lambda m: 'pica<b>.</b>' + (f'<span>{m.group(1)}</span>' if m.group(1) else ''), html)
+    return html.replace('<b style="color:#ff4fa3">', '<b>')
+
+
 def render(pages: list, out_dir: str, slug: str, height: int = H, names: list = None) -> list:
     from playwright.sync_api import sync_playwright
-    css = CSS % {"W": W, "H": H, **RISO}
+    if THEME == "screen":
+        imp, rest = SCREEN_CSS.strip().split("\n", 1)  # @import 는 맨 앞에 있어야 먹는다
+        css = imp + "\n" + CSS % {"W": W, "H": H, **SCREEN} + rest
+        pages = [_screen_page(pg) for pg in pages]
+    else:
+        css = CSS % {"W": W, "H": H, **RISO}
     doc = f"<!doctype html><html><head><meta charset='utf-8'><style>{css}</style></head><body>" + \
           "".join(pages) + "</body></html>"
     html_path = os.path.join(out_dir, f"{slug}_slides.html")
@@ -366,7 +413,8 @@ def render(pages: list, out_dir: str, slug: str, height: int = H, names: list = 
         pg = b.new_page(viewport={"width": W, "height": height}, device_scale_factor=1)
         pg.goto("file:///" + os.path.abspath(html_path).replace("\\", "/"), wait_until="networkidle")
         pg.evaluate("document.fonts.ready")
-        pg.wait_for_function("document.fonts.check(\"40px 'Black Han Sans'\") && document.fonts.check(\"40px 'Pretendard Variable'\")", timeout=20000)
+        title_font = "Gowun Batang" if THEME == "screen" else "Black Han Sans"
+        pg.wait_for_function(f"document.fonts.check(\"40px '{title_font}'\") && document.fonts.check(\"40px 'Pretendard Variable'\")", timeout=20000)
         for i, el in enumerate(pg.query_selector_all(".slide"), 1):
             png = os.path.join(out_dir, f"{slug}_{names[i - 1]}.png" if names else f"{slug}_{i:02d}.png")
             el.screenshot(path=png)
@@ -400,7 +448,10 @@ def main():
     ap.add_argument("--handle", default="")
     ap.add_argument("--today")
     ap.add_argument("--story", action="store_true", help="스토리 1장(1080x1920)만 만든다")
+    ap.add_argument("--theme", choices=["riso", "screen"], default="riso", help="screen = 사이트 새 화면 색·글꼴(시안)")
     a = ap.parse_args()
+    global THEME
+    THEME = a.theme
     db = Database()
     if a.today:
         return list_today(db, a.today)
