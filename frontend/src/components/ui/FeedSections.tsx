@@ -61,11 +61,6 @@ export function FeedSections({ sections, moreBase, folded = [], foldedMoreBase }
 
     return (
         <>
-            {interests.length > 0 && (
-                <p className="mb-2 px-4 text-[12.5px] text-ink-soft">
-                    관심 분야(<b className="text-ink">{interests.join("·")}</b>)를 묶음마다 먼저 보여 줍니다.
-                </p>
-            )}
             {ordered.map(s => isFolded(s.key) ? (
                 <details key={s.key} className="group mx-4 mt-4 border-t border-line">
                     <summary className="flex h-[54px] cursor-pointer list-none items-center justify-between border-b border-line [&::-webkit-details-marker]:hidden">

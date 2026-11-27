@@ -234,12 +234,6 @@ export function FilterBar({ subs = [], total }: { subs?: { name: string; n: numb
             )}
             </div>
 
-            {myRegion && currentRegion === myRegion && (
-                <p className="mt-1 text-[12.5px] text-ink-soft">
-                    내 지역(<b className="text-ink">{myRegion}</b>)을 먼저 보여 줍니다. 지역 칩에서 바꿀 수 있어요.
-                </p>
-            )}
-
             {/* «필터»: 모든 조건 (언제·지역·구·군·분야·아이 나이·끝난 행사) */}
             <Drawer opened={opened} onClose={applyAndClose} position="bottom" size={340} title={<>필터 <span className="ml-1 text-[12px] font-medium text-ink-soft">지역·분야는 여러 개 고를 수 있어요</span></>} radius="lg" classNames={{ content: "pica-portal pica-filter-drawer" }}
                 styles={{ header: { paddingTop: 10, paddingBottom: 6, minHeight: 0 }, title: { fontWeight: 700, fontSize: 16 }, body: { paddingBottom: 14 } }}>

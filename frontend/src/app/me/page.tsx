@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Bell, Building2, CalendarPlus, ChevronRight, Heart, Info, MapPin, Sparkles, Sun, UserRound, Smartphone } from "lucide-react";
+import { ArrowLeft, Bell, Building2, CalendarPlus, ChevronRight, Heart, Info, MapPin, Sparkles, Sun, UserRound, Smartphone, LayoutDashboard } from "lucide-react";
 import { PushButton } from "@/components/ui/PushButton";
 import { InstallGuide, useInstallKind } from "@/components/ui/InstallApp";
 import { supabase } from "@/lib/supabase";
@@ -201,6 +201,13 @@ export default function MePage() {
                     </div>
                 )}
             </div>
+
+            {/* 관리자 페이지로 가는 길 (운영자 2026-11-28: 머리 줄 메뉴를 없애 이 줄이 유일한 입구다). 관리자에게만 보인다 */}
+            {isAdmin && (
+                <div className={card}>
+                    <Link href="/admin" className="no-underline text-ink"><Line icon={LayoutDashboard} title="관리자 페이지" sub="대기함·행사·출처 관리" right={<ChevronRight className="h-5 w-5 text-ink-soft" />} /></Link>
+                </div>
+            )}
 
             {/* 활동 포인트 (specs/021): 제보가 피카에 실리면 100P. 쓰임은 운영자가 정한 문구 그대로.
                 포인트 기록이나 보낸 제보가 있는 회원에게만 보인다 (specs/023) */}

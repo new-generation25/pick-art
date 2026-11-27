@@ -1,24 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { LogOut, LayoutDashboard, Settings, Search, Heart, UserRound, CalendarPlus } from "lucide-react";
+import { Search } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Menu } from "@mantine/core";
-import { INSTAGRAM_URL, InstagramIcon } from "./InstagramLink";
 import { HeaderSearch } from "./HeaderSearch";
 import { Avatar } from "./Avatar";
 import { AVATAR_EVENT, providerPhoto } from "@/lib/avatar";
-import { logoutAndReload } from "@/lib/logout";
 
 /**
  * 맨 위 한 줄 (specs/014 시안 f01 → 운영자 11/27 머리 줄 시안 h01-B): 왼쪽 까치 그림 + 글자 로고 pica(끝 점만 초록), 오른쪽 찾기 · 내 정보(흰 원).
- * 내 정보 메뉴 안에 찜·설정·캘린더·인스타그램·관리자·로그아웃을 둔다. 로그인 전이면 인물 원 대신 «로그인» 글자 버튼.
+ * 내 정보 원은 메뉴 없이 바로 /me 로 간다(운영자 2026-11-28 «이렇게 메뉴가 많을 필요가 있어? 내정보로 들어가면 다 있잖아»).
+ * 찜·설정·캘린더·관리자 페이지·로그아웃은 /me 안에 있다. 로그인 전이면 인물 원 대신 «로그인» 글자 버튼.
  */
 export function Header() {
     const [user, setUser] = useState<any>(null);
-    const [nickname, setNickname] = useState("");
-    const [isAdmin, setIsAdmin] = useState(false);
     // 프로필 원 (specs/022): 올린 사진 → 관리자(profiles.role)면 까치 → 사람 그림
     const [avatarPath, setAvatarPath] = useState<string | null>(null);
     const [adminRole, setAdminRole] = useState(false);
@@ -34,12 +30,8 @@ export function Header() {
                     .select('*')
                     .eq('id', session.user.id)
                     .single();
-                setNickname(profile?.nickname || session.user.email?.split('@')[0] || '사용자');
                 setAvatarPath(profile?.avatar_path || null);
                 setAdminRole(profile?.role === 'admin');
-                if (profile?.role === 'admin' || session.user.email?.toLowerCase().includes('max')) {
-                    setIsAdmin(true);
-                }
             }
         };
         checkUser();
@@ -48,7 +40,7 @@ export function Header() {
         window.addEventListener(AVATAR_EVENT, onAvatar);
         // 다른 탭에서 로그아웃했거나 로그인 기한이 끝나면 이 줄도 «로그인» 버튼으로 바꾼다
         const { data: auth } = supabase.auth.onAuthStateChange((event) => {
-            if (event === "SIGNED_OUT") { setUser(null); setIsAdmin(false); setAdminRole(false); setAvatarPath(null); }
+            if (event === "SIGNED_OUT") { setUser(null); setAdminRole(false); setAvatarPath(null); }
         });
         return () => { window.removeEventListener(AVATAR_EVENT, onAvatar); auth.subscription.unsubscribe(); };
     }, []);
@@ -75,26 +67,9 @@ export function Header() {
                         <HeaderSearch open={searching} setOpen={setSearching} />
                     </Suspense>
                     {user ? (
-                        <Menu shadow="md" width={210} position="bottom-end" transitionProps={{ transition: "pop-top-right", duration: 220, timingFunction: "cubic-bezier(.2,.8,.2,1)" }}>
-                            <Menu.Target>
-                                <button type="button" className="grid h-11 w-11 place-items-center rounded-full" aria-label="내 정보">
-                                    <Avatar path={avatarPath} fallbackUrl={providerPhoto(user)} admin={adminRole} size={44} />
-                                </button>
-                            </Menu.Target>
-                            <Menu.Dropdown className="pica-portal">
-                                <Menu.Label>{nickname}님</Menu.Label>
-                                <Menu.Item leftSection={<UserRound size={14} />} component={Link} href="/me">내 정보</Menu.Item>
-                                <Menu.Item leftSection={<Heart size={14} />} component={Link} href="/me#saved">찜한 행사</Menu.Item>
-                                <Menu.Item leftSection={<Settings size={14} />} component={Link} href="/me#settings">내 지역·관심 분야·알림</Menu.Item>
-                                <Menu.Item leftSection={<CalendarPlus size={14} />} component={Link} href="/calendar">캘린더로 받기</Menu.Item>
-                                <Menu.Item leftSection={<InstagramIcon size={14} />} component="a" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">인스타그램 @picka.news</Menu.Item>
-                                {isAdmin && (
-                                    <Menu.Item leftSection={<LayoutDashboard size={14} />} component={Link} href="/admin">관리자 페이지</Menu.Item>
-                                )}
-                                <Menu.Divider />
-                                <Menu.Item leftSection={<LogOut size={14} />} onClick={logoutAndReload}>로그아웃</Menu.Item>
-                            </Menu.Dropdown>
-                        </Menu>
+                        <Link href="/me" aria-label="내 정보" className="grid h-11 w-11 place-items-center rounded-full">
+                            <Avatar path={avatarPath} fallbackUrl={providerPhoto(user)} admin={adminRole} size={44} />
+                        </Link>
                     ) : (
                         <Link href="/login" className="ml-1 flex h-[38px] shrink-0 items-center rounded-full bg-white px-[13px] text-[14px] font-bold text-ink no-underline shadow-[inset_0_0_0_1.5px_#CFC5B4]">
                             로그인

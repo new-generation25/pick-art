@@ -169,7 +169,7 @@ export function TipForm() {
                 <input id="tip-title" value={form.title} onChange={set("title")} maxLength={120} className={field} placeholder="예) 골목 버스킹 〈겨울밤 어쿠스틱〉" />
             </div>
 
-            <fieldset className="flex flex-col gap-4">
+            <fieldset className="flex flex-col gap-2.5">
                 <legend className={label}>원문 링크나 사진 <span className="font-normal text-ink-soft">(둘 중 하나는 꼭)</span></legend>
                 {/* 이름표가 안 보이면 빈 상자가 링크 칸인지 알 수 없다 — «링크 입력란이 없는데 링크가 없다고 한다»(운영자 2026-11-28) */}
                 <div>
@@ -177,18 +177,17 @@ export function TipForm() {
                     <input id="tip-url" type="text" inputMode="url" autoCapitalize="none" autoCorrect="off" value={form.url} onChange={set("url")} maxLength={500} className={field} placeholder="https://… 인스타그램 게시물·예매 페이지 주소" />
                 </div>
                 <div>
-                    <p className="mb-1 text-[13px] font-semibold text-ink-soft">또는 사진 올리기</p>
                     <input id="tip-photo" type="file" accept="image/jpeg,image/png,image/webp,image/*" onChange={pick} className="peer sr-only" />
                     <label htmlFor="tip-photo" className="flex min-h-12 cursor-pointer items-center justify-center rounded-full border border-dashed border-ink-soft bg-card px-4 text-[15px] font-semibold text-ink peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-[var(--pk-accent)]">
-                        {file ? "다른 사진으로 바꾸기" : "포스터·현수막 사진 한 장 올리기"}
+                        {file ? "다른 사진으로 바꾸기" : "또는 포스터·현수막 사진 올리기"}
                     </label>
                     {preview && <img src={preview} alt="올릴 사진 미리보기" className="mt-2 max-h-64 w-auto rounded-[8px] border border-line" />}
-                    <p className={hint}>사진은 운영자만 봐요. 날짜와 장소를 확인하는 데 써요.</p>
+                    <p className={hint}>사진은 운영자만 봐요.</p>
                 </div>
             </fieldset>
 
             <details className={fold}>
-                <summary className={foldTitle}>더 알려 주기 <span className="font-normal text-ink-soft">(선택 — 날짜·장소)</span></summary>
+                <summary className={foldTitle}>더 알려 주기 <span className="font-normal text-ink-soft">(선택 — 날짜·장소{coupon ? "·쿠폰 연락처" : ""}·이름)</span></summary>
                 <div className="mt-3 flex flex-col gap-3">
                     {/* 날짜 칸은 휴대폰에서 한 줄에 하나씩: 두 칸을 나란히 두면 폭 150px 에 날짜 글자와 달력 그림이 겹친다(운영자 2026-11-28).
                         아이폰은 빈 날짜 칸이 납작해지거나 칸 밖으로 넘치므로 block·최소 높이·max-w-full 을 준다 */}
@@ -220,12 +219,8 @@ export function TipForm() {
                         <textarea id="tip-body" value={form.body} onChange={set("body")} maxLength={2000} rows={3} className={field} placeholder="시간, 관람료, 아이와 갈 만한지 등" />
                     </div>
                 </div>
-            </details>
-
-            {/* 선택 항목 하나로 (specs/023): 쿠폰 연락처(12월까지) + 이름 남기기 */}
-            <details className={fold}>
-                <summary className={foldTitle}>선택 항목 <span className="font-normal text-ink-soft">({coupon ? "커피 쿠폰 연락처 · 이름 남기기" : "이름 남기기"})</span></summary>
-                <div className="mt-3 flex flex-col gap-4">
+                {/* 쿠폰 연락처·이름 남기기도 같은 칸 안에 둔다 (접힌 칸을 하나로 — 운영자 2026-11-28 «너무 화면이 긴것 아니야») */}
+                <div className="mt-4 flex flex-col gap-4 border-t border-line pt-4">
                     {coupon && (
                         <div className="flex flex-col gap-3">
                             <div>
@@ -262,11 +257,9 @@ export function TipForm() {
             <button type="submit" disabled={sending} className="h-14 rounded-full bg-accent px-6 text-[17px] font-bold text-on-accent disabled:opacity-50">
                 {sending ? "보내는 중…" : "제보 보내기"}
             </button>
-            <p className="text-center text-[14px] leading-relaxed text-ink-soft">
-                카카오톡이 편하면 채널 «피카»의 「행사 제보하기」로 사진·글을 보내도 돼요.{" "}
-                <a href={KAKAO_CHAT} target="_blank" rel="noopener noreferrer" className="font-bold text-ink underline underline-offset-4">카카오톡으로 보내기</a>
+            <p className="text-center text-[13px] leading-relaxed text-ink-soft">
+                <a href={KAKAO_CHAT} target="_blank" rel="noopener noreferrer" className="font-bold text-ink underline underline-offset-4">카카오톡 채널 «피카»</a>의 「행사 제보하기」로 보내도 돼요.<br />{POINTS_NOTE}
             </p>
-            <p className="text-center text-[13px] leading-relaxed text-ink-soft">{POINTS_NOTE}</p>
         </form>
         {mineList}
         </>

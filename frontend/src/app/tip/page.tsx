@@ -16,16 +16,13 @@ export const revalidate = 3600;
 export default function TipPage() {
     return (
         <main className="min-h-screen pb-20">
-            <div className="mx-auto max-w-xl px-4 pt-20 sm:px-6 sm:pt-24">
+            <div className="mx-auto max-w-xl px-4 pt-8 sm:px-6 sm:pt-12">
                 <p className="text-[13px] font-bold text-accent">행사 제보하기</p>
                 <h1 className="pica-display mt-1 text-[32px] leading-[1.2] text-ink sm:text-[40px]">{TIP_EVENT_NAME}</h1>
-                <p className="mt-3 text-[16px] leading-relaxed text-ink">
-                    작은 공연, 동네 전시, 버스킹, 팝업 — 피카에 아직 없는 행사를 알려 주세요. 행사 이름과 링크(또는 사진) 하나면 돼요.
+                <p className="mt-2 text-[15px] leading-relaxed text-ink">
+                    피카에 아직 없는 행사를 알려 주세요. <b>실리면 {TIP_POINTS}포인트</b>가 쌓여요.{couponOpen(todayKST()) && ` ${COUPON_NOTE}`}
                 </p>
-                <p className="mt-4 rounded-[12px] bg-[var(--pk-accent-soft)] px-4 py-3 text-[15px] leading-relaxed text-ink">
-                    <b>피카에 실리면 {TIP_POINTS}포인트가 쌓여요.</b>{couponOpen(todayKST()) && ` ${COUPON_NOTE}`}
-                </p>
-                <div className="mt-7">
+                <div className="mt-5">
                     <TipForm />
                 </div>
                 <p className="mt-8 text-[13px] leading-relaxed text-ink-soft">
