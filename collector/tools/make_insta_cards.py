@@ -347,12 +347,12 @@ def slides_html(f: dict, poster: str, handle: str) -> list:
 <div class="slide event">{top(6)}
   <div class="pad" style="top:160px"><span class="chip pink">숨은 행사 제보 이벤트</span></div>
   <div class="pad disp h2 print" style="top:250px">우리 동네 행사,<br>알려 주세요</div>
-  <div class="pad ev-big" style="top:480px"><span class="n">5</span><span>명에게 매주<br>커피 쿠폰</span></div>
+  <div class="pad ev-big" style="top:480px"><span class="n">5</span><span>명께 매주<br>커피 쿠폰</span></div>
   <div class="pad ways" style="top:760px">
     <div><b>피카 사이트</b> 「행사 제보하기」</div>
     <div><b>카카오톡 채널 «피카»</b> 「행사 알리기」</div>
   </div>
-  <div class="pad small" style="bottom:110px">그 주에 확인돼 실린 제보를 보낸 분 중에서 뽑아요 · 당첨은 스토리로 알려요<br>이 이벤트는 인스타그램이 후원·보증·관리하지 않으며, 인스타그램과 관련이 없습니다.</div>
+  <div class="pad small" style="bottom:110px">그 주에 확인해서 피카에 실린 제보 가운데 골라요 · 당첨은 스토리로 알려요<br>이 이벤트는 인스타그램이 후원·보증·관리하지 않으며, 인스타그램과 관련이 없습니다.</div>
 </div>""")
 
     # 7. 단체·예술가 안내(2026-11-27 운영자 결정, 같은 문서 12-3)
