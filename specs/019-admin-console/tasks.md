@@ -70,3 +70,17 @@
 - [x] T072 11/27 15:00 회차가 스스로 남긴 회차 요약이 로그와 같은지 확인 (SC-009) — routine_steps 맨 위 회차 15:00, 단계 14줄 모두 `collector/logs/scheduled_20261127_1500.log` 요약 줄에 있음. 같은 회차의 공개 후 중복 숨김 1건에 이유·처리자 기록됨, 이유 없는 숨김 0건
 - [x] T073 A3~A6 운영 배포(main 0a274ec, 11/27 17시, 운영자 «배포해») — Vercel pick-art 성공, 운영 주소 관리자 10곳 200, `/admin/manual` 307 → `/admin/events/new`
 
+## A7 대기함 자세히 보기·코멘트·판단 기준 (FR-029~031, 2026-11-27 운영자 추가)
+
+- [X] T080 `frontend/src/app/admin/inbox/PostDetail.tsx`: 글 자세히 보기 창(포스터·수집한 글·원문 열기·대기 이유), `waitingReason`이 상태·갈래·분류 이유를 운영자 말로 풂
+- [X] T081 `frontend/src/app/admin/inbox/notes.ts` + 창의 코멘트 칸: `raw_posts.content.admin_notes`(최근 20개, 500자)에 쓰고 지움. 쓰기 직전에 최신 content 를 다시 읽고 상태가 같을 때만 저장
+- [X] T082 `ReviewQueue.tsx`·`ConsentGroups.tsx`·`CollectedQueue.tsx`·`page.tsx`: 여섯 탭의 줄 어디를 눌러도 창이 열림(링크·버튼·입력칸 제외), 코멘트 수 표시. 카드의 «원문 보기»(펼침)는 창으로 옮기고 링크 이름은 «원문 열기»로
+- [X] T083 `frontend/src/app/admin/inbox/Criteria.tsx`: «판단 기준 한눈에 보기» 창
+- [X] T084 `collector/tools/review_notes.py` + 시험: 코멘트 모아 읽기(읽기 전용)
+- [X] T085 로컬 확인(11/27, 운영 빌드 + MAX Chrome): 사람 판단 글에서 창 열림·대기 이유 «날짜를 읽지 못했습니다» 표시, 코멘트 쓰기 → 카드에 «운영자 코멘트 1개» → 지우기, 판단 기준 창, 375px 틀에서 자동 공개 대기·반영 안 한 것·동의 필요 줄을 눌러 창 열림(창 폭 338px, 가로 넘침 0). 캡처 `docs/plan/admin_inbox_detail_2026-11-27.jpg`
+- [ ] T086 운영 배포(운영자 «배포해» 뒤) → 운영 주소 확인
+
+## 11/27 원문 확인에서 나온 것
+
+- [X] T090 공개 후보 74건의 인스타그램 원문을 브라우저에서 읽음: 72건 열림, 2건 «Post을(를) 이용할 수 없습니다» → 2건을 «반영 안 함»(이유 기록, 되돌릴 수 있음)으로 옮김. 공개 후보 72건
+- [ ] T091 정기 실행의 링크 확인(`collector/utils.py check_link`)은 인스타그램 글이 지워졌는지 가려내지 못한다(지워진 글도 HTTP 200). 가려낼 방법은 인스타 수집과 같은 브라우저 세션으로 글을 여는 것 — 「인스타 수집」 세션 몫

@@ -11,7 +11,8 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
 import { Box, Button, Group, Stack, Text, Title, Paper, Badge, Checkbox } from "@mantine/core";
-import { ExternalLink, CheckCircle, XCircle, ArrowRight, Clock, AlertTriangle, MapPin, Calendar } from "lucide-react";
+import { ExternalLink, CheckCircle, XCircle, ArrowRight, Clock, AlertTriangle, MapPin, Calendar, MessageSquare } from "lucide-react";
+import { notesOf, opensDetail } from "./notes";
 
 export type ReviewBucket = "candidate" | "consent" | "human";
 
@@ -79,7 +80,7 @@ function errMsg(e: unknown): string {
     return String(e);
 }
 
-function reasonText(reason?: string): string {
+export function reasonText(reason?: string): string {
     if (!reason) return "";
     if (reason.startsWith("publish_failed: ")) return `공개 검증 실패 — ${reason.slice("publish_failed: ".length)}`;
     if (reason.startsWith("admin_moved")) return "관리자가 공개 후보로 옮김";
@@ -137,11 +138,13 @@ interface Props {
     compact?: boolean;
     /** 승인·옮기기를 누른 관리자(메일). raw_posts 는 관리자만 읽는 표다 */
     actor?: string;
+    /** 줄을 누르면 자세히 보기 창을 연다(대기 이유·수집한 글·운영자 코멘트) */
+    onOpen?: (post: ReviewPost) => void;
 }
 
 const PAGE = 20;   // 한 번에 그리는 카드 수(동의 필요는 수백 건이다)
 
-export function ReviewQueue({ bucket, posts, loading, onChanged, compact = false, actor = "" }: Props) {
+export function ReviewQueue({ bucket, posts, loading, onChanged, compact = false, actor = "", onOpen }: Props) {
     const [shown, setShown] = useState(PAGE);
     const [selected, setSelected] = useState<string[]>([]);
     const [busy, setBusy] = useState(false);
@@ -279,8 +282,11 @@ export function ReviewQueue({ bucket, posts, loading, onChanged, compact = false
                         const thumb = post.image_urls?.[0] || a.poster_url || "";
                         const account = a.account ? `@${a.account}` : "";
                         const datesOk = ISO.test(a.date_start || "") && ISO.test(a.date_end || "");
+                        const noteCount = notesOf(c).length;
                         return (
-                            <Paper key={post.id} p="md" radius="lg" withBorder shadow="sm">
+                            <Paper key={post.id} p="md" radius="lg" withBorder shadow="sm"
+                                style={onOpen ? { cursor: "pointer" } : undefined}
+                                onClick={onOpen ? (e) => { if (opensDetail(e)) onOpen(post); } : undefined}>
                                 <Group align="flex-start" wrap="nowrap">
                                     {bucket === "candidate" && (
                                         <Checkbox
@@ -309,7 +315,11 @@ export function ReviewQueue({ bucket, posts, loading, onChanged, compact = false
                                                 <Badge color="teal" variant="light" size="sm" style={{ textTransform: "none" }}>{c.review_note || "상시 동의"}</Badge>
                                             )}
                                         </Group>
-                                        <Title order={4} size="h5" lineClamp={2}>{c.title || "제목 없음"}</Title>
+                                        <Title order={4} size="h5" lineClamp={2}>
+                                            {onOpen
+                                                ? <button type="button" onClick={() => onOpen(post)} style={{ all: "unset", cursor: "pointer" }} aria-label={`${c.title || "제목 없음"} 자세히 보기`}>{c.title || "제목 없음"}</button>
+                                                : (c.title || "제목 없음")}
+                                        </Title>
                                         <Group gap="md" wrap="wrap">
                                             <Group gap={4}>
                                                 <Calendar size={14} />
@@ -341,11 +351,12 @@ export function ReviewQueue({ bucket, posts, loading, onChanged, compact = false
                                                 승인됨, 검증 실패({fmtTime(c.publish_failed_at)}) — 다음 정기 실행에서 다시 확인
                                             </Badge>
                                         )}
-                                        {body && (
-                                            <details>
-                                                <summary style={{ cursor: "pointer", fontSize: 12.5, color: "var(--mantine-color-dimmed)" }}>원문 보기</summary>
-                                                <Text size="xs" c="dimmed" mt={4} style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{body.slice(0, 1200)}{body.length > 1200 ? " …" : ""}</Text>
-                                            </details>
+                                        {body && <Text size="xs" c="dimmed" lineClamp={2} style={{ wordBreak: "break-word" }}>{body}</Text>}
+                                        {noteCount > 0 && (
+                                            <Group gap={4}>
+                                                <MessageSquare size={13} color="var(--mantine-color-dimmed)" />
+                                                <Text size="xs" c="dimmed">운영자 코멘트 {noteCount}개</Text>
+                                            </Group>
                                         )}
                                         <Group pt="xs" gap="xs" style={{ borderTop: "1px solid var(--mantine-color-gray-1)" }}>
                                             <Button
@@ -358,8 +369,9 @@ export function ReviewQueue({ bucket, posts, loading, onChanged, compact = false
                                                 color="indigo"
                                                 rightSection={<ExternalLink size={12} />}
                                             >
-                                                원본 보기
+                                                원문 열기
                                             </Button>
+                                            {onOpen && <Button variant="subtle" size="xs" color="gray" onClick={() => onOpen(post)}>자세히 · 코멘트</Button>}
                                             <Box style={{ flex: 1 }} />
                                             <Button variant="default" size="xs" radius="xl" disabled={busy} onClick={() => reject(post)} leftSection={<XCircle size={14} />}>
                                                 반영 안 함

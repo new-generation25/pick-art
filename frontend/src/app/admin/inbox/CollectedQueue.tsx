@@ -11,6 +11,7 @@ import { useMemo, useState } from "react";
 import { ExternalLink } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { todayKST } from "@/lib/utils";
+import { notesOf, opensDetail } from "./notes";
 
 export interface CollectedPost {
     id: string;
@@ -43,7 +44,7 @@ export function reasonOf(p: CollectedPost, today: string): Reason {
 
 const md = (day: string) => `${Number(day.slice(5, 7))}.${Number(day.slice(8, 10))}`;
 
-function Card({ p, reason, today, onDone }: { p: CollectedPost; reason: Reason; today: string; onDone: (id: string, next: CollectedPost | null) => void }) {
+function Card({ p, reason, today, onDone, onOpen }: { p: CollectedPost; reason: Reason; today: string; onDone: (id: string, next: CollectedPost | null) => void; onOpen?: (p: CollectedPost) => void }) {
     const a = p.content?.ai_suggestion || {};
     const [start, setStart] = useState(ISO.test(a.date_start || "") ? a.date_start! : "");
     const [end, setEnd] = useState(ISO.test(a.date_end || "") ? a.date_end! : "");
@@ -77,9 +78,14 @@ function Card({ p, reason, today, onDone }: { p: CollectedPost; reason: Reason; 
 
     const input = "h-9 rounded-lg border border-line bg-paper px-2 text-[14px] text-ink";
     return (
-        <div className="rounded-[14px] bg-card p-4 shadow-[0_1px_4px_rgba(30,26,21,.08)]">
-            <p className="text-[12.5px] font-semibold text-ink-soft">{p.source}</p>
-            <p className="mt-0.5 text-[15.5px] font-semibold leading-snug text-ink">{p.content?.title || "제목 없음"}</p>
+        <div className={`rounded-[14px] bg-card p-4 shadow-[0_1px_4px_rgba(30,26,21,.08)] ${onOpen ? "cursor-pointer" : ""}`}
+            onClick={onOpen ? (e) => { if (opensDetail(e)) onOpen(p); } : undefined}>
+            <p className="text-[12.5px] font-semibold text-ink-soft">{p.source}{notesOf(p.content).length > 0 ? ` · 운영자 코멘트 ${notesOf(p.content).length}개` : ""}</p>
+            <p className="mt-0.5 text-[15.5px] font-semibold leading-snug text-ink">
+                {onOpen
+                    ? <button type="button" onClick={() => onOpen(p)} className="text-left font-semibold text-ink" aria-label={`${p.content?.title || "제목 없음"} 자세히 보기`}>{p.content?.title || "제목 없음"}</button>
+                    : (p.content?.title || "제목 없음")}
+            </p>
             <p className="mt-1 text-[13px] text-ink-soft">
                 {[a.region, a.venue].filter(Boolean).join(" · ") || "장소 없음"}
                 {reason !== "nodate" && <> · {a.date_start} ~ {a.date_end}</>}
@@ -89,7 +95,8 @@ function Card({ p, reason, today, onDone }: { p: CollectedPost; reason: Reason; 
                 <label className="text-[12px] text-ink-soft">끝나는 날<br /><input type="date" className={input} value={end} min={start || undefined} onChange={e => setEnd(e.currentTarget.value)} /></label>
                 <button type="button" disabled={busy} onClick={saveDates} className="h-9 rounded-full bg-accent px-3.5 text-[13.5px] font-bold text-on-accent disabled:opacity-50">날짜 저장</button>
                 <button type="button" disabled={busy} onClick={reject} className="h-9 rounded-full border border-line px-3.5 text-[13.5px] font-semibold text-ink disabled:opacity-50">반영 안 함</button>
-                <a href={p.source_url} target="_blank" rel="noopener noreferrer" className="flex h-9 items-center gap-1 px-1 text-[13px] font-semibold text-accent">원본 <ExternalLink size={13} aria-hidden /></a>
+                <a href={p.source_url} target="_blank" rel="noopener noreferrer" className="flex h-9 items-center gap-1 px-1 text-[13px] font-semibold text-accent">원문 열기 <ExternalLink size={13} aria-hidden /></a>
+                {onOpen && <button type="button" onClick={() => onOpen(p)} className="h-9 px-1 text-[13px] font-semibold text-ink-soft underline underline-offset-4">자세히 · 코멘트</button>}
             </div>
             <p className="mt-2 text-[12.5px] text-ink-soft" role="status">
                 {msg || (reason === "nodate" ? "원본에서 날짜를 확인해 적으면, 다음 정기 실행이 날짜·링크·중복을 확인한 뒤 공개합니다." : "날짜는 범위 안입니다. 원본 링크가 열리는지 확인해 주세요. 다음 정기 실행에서 다시 검증합니다.")}
@@ -98,7 +105,7 @@ function Card({ p, reason, today, onDone }: { p: CollectedPost; reason: Reason; 
     );
 }
 
-export function CollectedQueue({ posts, loading, onChanged }: { posts: CollectedPost[]; loading: boolean; onChanged: (id: string, next: CollectedPost | null) => void }) {
+export function CollectedQueue({ posts, loading, onChanged, onOpen }: { posts: CollectedPost[]; loading: boolean; onChanged: (id: string, next: CollectedPost | null) => void; onOpen?: (p: CollectedPost) => void }) {
     const today = todayKST();
     const groups = useMemo(() => {
         const g: Record<Reason, CollectedPost[]> = { nodate: [], stuck: [], later: [], ended: [] };
@@ -117,12 +124,12 @@ export function CollectedQueue({ posts, loading, onChanged }: { posts: Collected
 
             <h2 className={head}>날짜 없음 <span className="pica-num text-accent">{groups.nodate.length}</span></h2>
             {groups.nodate.length === 0 ? <p className="px-1 text-[13px] text-ink-soft">없음</p> : (
-                <div className="grid gap-3 md:grid-cols-2">{groups.nodate.map(p => <Card key={p.id} p={p} reason="nodate" today={today} onDone={onChanged} />)}</div>
+                <div className="grid gap-3 md:grid-cols-2">{groups.nodate.map(p => <Card key={p.id} p={p} reason="nodate" today={today} onDone={onChanged} onOpen={onOpen} />)}</div>
             )}
 
             <h2 className={head}>검증에서 멈춘 것 <span className="pica-num text-accent">{groups.stuck.length}</span></h2>
             {groups.stuck.length === 0 ? <p className="px-1 text-[13px] text-ink-soft">없음</p> : (
-                <div className="grid gap-3 md:grid-cols-2">{groups.stuck.map(p => <Card key={p.id} p={p} reason="stuck" today={today} onDone={onChanged} />)}</div>
+                <div className="grid gap-3 md:grid-cols-2">{groups.stuck.map(p => <Card key={p.id} p={p} reason="stuck" today={today} onDone={onChanged} onOpen={onOpen} />)}</div>
             )}
 
             <details className="mt-6 rounded-[14px] bg-card px-4 py-3 shadow-[0_1px_4px_rgba(30,26,21,.08)]">
@@ -136,7 +143,9 @@ export function CollectedQueue({ posts, loading, onChanged }: { posts: Collected
                         return (
                             <li key={p.id} className="flex items-baseline gap-2 text-[13.5px] text-ink">
                                 <span className="pica-num w-[52px] shrink-0 text-ink-soft">{md(s)}</span>
-                                <a href={p.source_url} target="_blank" rel="noopener noreferrer" className="min-w-0 flex-1 truncate text-ink no-underline hover:underline">{p.content.title || "제목 없음"}</a>
+                                {onOpen
+                                    ? <button type="button" onClick={() => onOpen(p)} className="min-w-0 flex-1 truncate text-left text-ink hover:underline">{p.content.title || "제목 없음"}</button>
+                                    : <a href={p.source_url} target="_blank" rel="noopener noreferrer" className="min-w-0 flex-1 truncate text-ink no-underline hover:underline">{p.content.title || "제목 없음"}</a>}
                                 <span className="shrink-0 text-[12px] text-ink-soft">{md(addDays(s, -WINDOW_DAYS))}부터 대상</span>
                             </li>
                         );

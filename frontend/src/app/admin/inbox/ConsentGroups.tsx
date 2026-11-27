@@ -59,7 +59,7 @@ function ConsentBox({ source, onSaved }: { source: Source; onSaved: (s: Source) 
     );
 }
 
-export function ConsentGroups({ posts, loading, onChanged, actor }: { posts: ReviewPost[]; loading: boolean; onChanged: (changes: ReviewChange[]) => void; actor: string }) {
+export function ConsentGroups({ posts, loading, onChanged, actor, onOpen }: { posts: ReviewPost[]; loading: boolean; onChanged: (changes: ReviewChange[]) => void; actor: string; onOpen?: (post: ReviewPost) => void }) {
     const [sources, setSources] = useState<Record<string, Source>>({});
     const [open, setOpen] = useState<string | null>(null);
 
@@ -113,7 +113,7 @@ export function ConsentGroups({ posts, loading, onChanged, actor }: { posts: Rev
                                     {src
                                         ? <ConsentBox source={src} onSaved={s => setSources(m => ({ ...m, [g.account]: s }))} />
                                         : <p className="mb-3 px-1 text-[12.5px] text-ink-soft">이 계정은 출처 목록에 없어 동의 단계를 적을 수 없습니다. 글마다 «공개 후보로 옮기기»로 처리해 주세요.</p>}
-                                    <ReviewQueue bucket="consent" posts={g.list} loading={false} onChanged={onChanged} compact actor={actor} />
+                                    <ReviewQueue bucket="consent" posts={g.list} loading={false} onChanged={onChanged} compact actor={actor} onOpen={onOpen} />
                                 </div>
                             )}
                         </div>
