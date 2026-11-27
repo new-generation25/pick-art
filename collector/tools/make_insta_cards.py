@@ -217,6 +217,28 @@ body { background: #888; }
 .story .titlebox .s { font-size: 32px; margin-top: 6px; opacity: .92; font-weight: 600; }
 .story .more { position: absolute; left: 72px; right: 72px; top: 1640px; font-size: 28px; font-weight: 700; color: %(ink_soft)s; }
 
+/* 4. 반으로 나눈 장 */
+.how .half { position: absolute; left: 72px; right: 72px; }
+.how .half.up { top: 150px; height: 520px; }
+.how .half.down { top: 700px; height: 520px; border-top: 4px solid %(ink)s; padding-top: 50px; }
+.how .h3 { font-size: 68px; line-height: 1.1; margin-bottom: 34px; }
+.how .half li { font-size: 38px; margin-bottom: 26px; }
+.how .half li::before { width: 72px; height: 72px; font-size: 44px; }
+.how .half li.ct::before { content: '☎'; font-size: 36px; }
+.how .where { font-size: 46px; font-weight: 800; line-height: 1.35; }
+.how .where .wa { font-size: 32px; font-weight: 600; color: %(ink_soft)s; margin-top: 8px; padding-left: 58px; }
+.how .where .wv { display: inline; }
+.how .hint { margin-top: 40px; display: inline-block; background: %(card)s; border: 3px solid %(ink)s; padding: 16px 26px; font-size: 32px; font-weight: 700; }
+.how .hint b { color: %(blue)s; }
+
+/* 6. 피카 소개 */
+.intro .story-txt p { font-size: 40px; font-weight: 600; line-height: 1.55; margin-bottom: 34px; }
+.intro .story-txt b { color: %(blue)s; }
+.intro .feats { display: flex; gap: 16px; }
+.intro .feats span { border: 3px solid %(ink)s; background: %(card)s; padding: 12px 22px; font-size: 30px; font-weight: 800; }
+.intro .gocta { background: %(blue)s; color: #fff; font-size: 40px; font-weight: 700; line-height: 1.4; padding: 30px 36px; border: 4px solid %(ink)s; }
+.intro .gocta b { font-weight: 900; }
+
 /* 5. CTA */
 .cta { background: %(blue)s; color: #fff; }
 .cta::before { background-image: radial-gradient(rgba(255,255,255,.10) 1.2px, transparent 1.3px); }
@@ -230,7 +252,7 @@ body { background: #888; }
 
 
 def slides_html(f: dict, poster: str, handle: str) -> list:
-    n_total = 5
+    n_total = 6  # 6장: 피카 소개 + 프로필 링크(2026-11-27 운영자 지시)
     brand = f'<div class="brand">픽아트 <b>pica</b>{(" · " + esc(handle)) if handle else ""}</div>'
 
     def top(i):
@@ -277,24 +299,29 @@ def slides_html(f: dict, poster: str, handle: str) -> list:
   {credit}
 </div>""")
 
-    # 4. 가는 법·예약
+    # 4. 가는 법·예약 + 어디서 — 한 장을 위아래 반으로 나눠 각각 한 메시지(2026-11-27 운영자 지시)
     how = f["how"] or [f"공식 안내: {esc(f['source_name'])}"]
-    contact = f'<div class="pad chip" style="bottom:120px;font-size:34px">문의 {esc(f["contact"])}</div>' if f["contact"] else ""
-    place = (f'<div class="pad notice" style="bottom:210px;background:{RISO["card"]}">📍 {esc(f["venue"])}'
-             f'{"<br><span style=font-weight:600>" + esc(f["address"]) + "</span>" if f["address"] else ""}</div>') if f["venue"] else ""
+    contact = f'<li class="ct"><span>문의 {esc(f["contact"])}</span></li>' if f["contact"] else ""
+    where = (f'<div class="wv">{esc(f["venue"])}</div>'
+             f'{"<div class=wa>" + esc(f["address"]) + "</div>" if f["address"] else ""}') if f["venue"] else '<div class="wv">장소는 공식 안내 확인</div>'
     out.append(f"""
 <div class="slide how">{top(4)}
-  <div class="pad disp h2 print" style="top:170px">이렇게 가요</div>
-  <ol class="pad" style="top:360px">{''.join(f'<li><span>{x}</span></li>' for x in how)}</ol>
-  {place}
-  {contact}
+  <div class="half up">
+    <div class="disp h3 print">이렇게 가요</div>
+    <ol>{''.join(f'<li><span>{x}</span></li>' for x in how)}{contact}</ol>
+  </div>
+  <div class="half down">
+    <div class="disp h3 print">어디서 해요?</div>
+    <div class="where">📍 {where}</div>
+    <div class="hint">지도·길찾기는 <b>프로필 링크 → 피카</b>에서</div>
+  </div>
   {credit}
 </div>""")
 
     # 5. 저장·공유 CTA + 출처
     out.append(f"""
 <div class="slide cta">
-  <div class="top"><div class="brand" style="color:#fff">픽아트 <b style="color:{RISO['pink']}">pica</b>{(" · " + esc(handle)) if handle else ""}</div><div class="page" style="color:#fff">5/5</div></div>
+  <div class="top"><div class="brand" style="color:#fff">픽아트 <b style="color:{RISO['pink']}">pica</b>{(" · " + esc(handle)) if handle else ""}</div><div class="page" style="color:#fff">5/{n_total}</div></div>
   <div class="pad disp big" style="top:220px">같이 갈<br>사람<br>태그!</div>
   <div class="pad acts" style="top:720px">
     <div class="act"><span class="i">🔖</span>저장해 두기</div>
@@ -303,6 +330,20 @@ def slides_html(f: dict, poster: str, handle: str) -> list:
   </div>
   <div class="pad src" style="top:1010px">출처 · {esc(source_label(f))}<br>방문 전 공식 안내에서 변경 사항을 꼭 확인하세요.</div>
   <div class="credit"><span>{esc(f['poster_credit'])}</span><span>문화예술 큐레이션</span></div>
+</div>""")
+
+    # 6. 피카 소개 — 왜 만들었는지 + 사이트로 오는 길(2026-11-27 운영자 지시)
+    # 주소는 카드에 쓰지 않는다(2026-11-21 링크 금지 규칙). 사이트는 「프로필 링크」로 보낸다.
+    out.append(f"""
+<div class="slide intro">{top(6)}
+  <div class="pad disp h2 print" style="top:170px">피카는<br>이래서 만들었어요</div>
+  <div class="pad story-txt" style="top:420px">
+    <p>동네 극단, 작은 합창단, 작가 모임이 몇 달 준비한 공연도 포스터 한 장 붙이고 끝나는 일이 많아요.</p>
+    <p>피카(픽아트)는 흩어진 공지를 매일 모아 <b>공식 출처로 확인한 것만</b> 날짜순으로 보여 드려요.</p>
+  </div>
+  <div class="pad feats" style="top:900px"><span>오늘·이번 주</span><span>지역·분야로 고르기</span><span>지도로 보기</span></div>
+  <div class="pad gocta" style="bottom:120px">가까운 공연·전시·축제 전체는<br><b>프로필 링크 → 피카</b>에서 볼 수 있어요</div>
+  {credit}
 </div>""")
     return out
 
@@ -383,6 +424,10 @@ SCREEN_CSS = """
 .cta .brand span { color: rgba(255,255,255,.8); }
 .cta .act { border: none; border-radius: 22px; background: rgba(255,255,255,.14); }
 .story .poster { border: none; border-radius: 12px; box-shadow: 0 8px 26px rgba(30,26,21,.24); }
+.intro .feats span { border: none; border-radius: 999px; background: #fff; box-shadow: 0 2px 8px rgba(30,26,21,.14); }
+.intro .gocta { border: none; border-radius: 22px; }
+.how .half.down { border-top: 2px solid #E3DBCD; }
+.how .hint { border: none; border-radius: 999px; background: #E6EFE9; }
 """
 THEME = "riso"
 
