@@ -26,6 +26,8 @@ export function SiteFooter() {
                         <Text fz="xs" c="var(--pk-ink-soft)">&copy; 2024 pickart (pica). All rights reserved.</Text>
                     </Group>
                 </Group>
+                {/* 운영 주체 표시(운영자 11/28 «피카 최하단에 릴로컬 넣으면 되잖아» — 카카오 비즈니스 채널 심사에서 채널 «피카»와 사업자 «릴로컬»을 잇는 근거) */}
+                <Text fz="xs" c="var(--pk-ink-soft)" mt="xs">운영 릴로컬</Text>
             </Container>
         </Box>
     );
