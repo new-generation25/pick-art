@@ -1,7 +1,7 @@
 "use client";
 
 // «동의 필요»를 계정별로 묶어 보여 준다 (specs/019 FR-016). 소규모 단체·예술인 게시물은 허락이 있어야 실린다.
-//   임시 동의(그 행사 한 건): 그 글에서 «공개 후보로 옮기기»
+//   임시 동의(그 행사 한 건): 그 글에서 «공개 승인»(2026-11-28부터 바로 승인)
 //   상시 동의(앞으로의 소식까지): 계정의 동의 단계를 «상시»로 → 다음 정기 실행의 정리가 날짜 있는 글을 공개 후보로 옮긴다
 // 동의 단계는 출처(whitelist)의 consent 칸에 남는다. 인스타 세션이 댓글·DM으로 받은 허락도 같은 칸에 적힌다.
 
@@ -117,7 +117,7 @@ export function ConsentGroups({ posts, loading, onChanged, actor, onOpen }: { po
     return (
         <div>
             <p className="px-1 text-[13px] text-ink-soft">
-                소규모 단체·예술인 계정의 글 {posts.length}건, 계정 {groups.length}곳입니다. 허락을 받은 글만 «공개 후보로 옮기기»를 누르고, 앞으로의 소식까지 허락한 계정은 동의 단계를 «상시 동의»로 바꿉니다.
+                소규모 단체·예술인 계정의 글 {posts.length}건, 계정 {groups.length}곳입니다. 허락을 받은 글만 «공개 승인»을 누르고, 앞으로의 소식까지 허락한 계정은 동의 단계를 «상시 동의»로 바꿉니다.
             </p>
             <p className="mt-1 px-1 text-[13px] text-ink">
                 <b>확정 동의 {tally.confirmed}곳</b> · 상시 {tally.standing}곳 · 임시 {tally.temporary}곳 · 사이트 신청(확인 전) {tally.applied}곳 · 없음 {tally.none}곳{tally.withdrawn ? ` · 철회 ${tally.withdrawn}곳` : ""}
@@ -163,7 +163,7 @@ export function ConsentGroups({ posts, loading, onChanged, actor, onOpen }: { po
                                     )}
                                     {src
                                         ? <ConsentBox source={src} onSaved={s => setSources(m => ({ ...m, [g.account]: s }))} />
-                                        : <p className="mb-3 px-1 text-[12.5px] text-ink-soft">이 계정은 출처 목록에 없어 동의 단계를 적을 수 없습니다. 글마다 «공개 후보로 옮기기»로 처리해 주세요.</p>}
+                                        : <p className="mb-3 px-1 text-[12.5px] text-ink-soft">이 계정은 출처 목록에 없어 동의 단계를 적을 수 없습니다. 허락을 받은 글마다 «공개 승인»을 눌러 주세요.</p>}
                                     <ReviewQueue bucket="consent" posts={g.list} loading={false} onChanged={onChanged} compact actor={actor} onOpen={onOpen} />
                                 </div>
                             )}

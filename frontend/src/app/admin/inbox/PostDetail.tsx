@@ -6,7 +6,7 @@
 //     코멘트마다 그때의 갈래·분류 이유를 함께 적어, 나중에 분류 규칙을 손볼 때 근거로 읽는다
 //     (모아 보기: collector/tools/review_notes.py).
 // content 는 jsonb 라 통째로 바뀐다 → 쓰기 직전에 최신 값을 다시 읽어 admin_notes 만 고친다.
-//   · 이 창 안에서도 처리한다(운영자 2026-11-28 «개별 카드에서도 반영, 반영안함 할수 있어야지»): 공개 승인 · 공개 후보로 옮기기 ·
+//   · 이 창 안에서도 처리한다(운영자 2026-11-28 «개별 카드에서도 반영, 반영안함 할수 있어야지»): 공개 승인 · 동의 필요로 옮기기 ·
 //     반영 안 함 · 되돌리기. 쓰는 방식은 목록(ReviewQueue·CollectedQueue)과 같고, 결과는 페이지의 목록에 바로 반영된다.
 //   · Mantine 창은 화면 맨 바깥에 그려져 종이 테마의 색 값(--pk-…)이 닿지 않는다. 그래서 버튼 바탕색이 빠져 글자만 보였다.
 //     창 내용에 pica-portal 을 붙여 색 값을 준다.
@@ -57,10 +57,10 @@ export function waitingReason(p: ReviewPost, today: string): { head: string; lin
             return { head: "승인됨 — 다음 정기 실행 대기", lines: [`${fmt(c.publish_approved_at)}에 승인했습니다. 다음 정기 실행(08:20·15:00)이 날짜·원문 링크·중복을 확인한 뒤 공개합니다.`] };
         }
         const b = c.review_bucket as ReviewBucket | undefined;
-        const detail = reason.startsWith("admin_moved") ? "운영자가 직접 공개 후보로 옮겼습니다." : REASON_DETAIL[reason] || (reason ? reasonText(reason) : "");
+        const detail = reason.startsWith("admin_moved") ? (b === "consent" ? "운영자가 사람 판단에서 동의 필요로 옮겼습니다." : "운영자가 직접 공개 후보로 옮겼습니다.") : REASON_DETAIL[reason] || (reason ? reasonText(reason) : "");
         if (b === "candidate") return { head: "공개 후보", lines: [detail, "운영자가 승인하면 다음 정기 실행이 날짜·원문 링크·중복을 확인한 뒤 공개합니다. 승인 전에는 공개되지 않습니다."].filter(Boolean) };
-        if (b === "consent") return { head: "동의 필요", lines: [detail, "게시 동의를 받으면 «공개 후보로 옮기기»를 누릅니다. 계정을 «상시 동의»로 바꿔 두면 날짜가 있는 글은 다음 정기 실행이 공개 후보로 옮깁니다."].filter(Boolean) };
-        if (b === "human") return { head: "사람 판단", lines: [detail, "원문을 열어 보고 공개할 만하면 «공개 승인», 아니면 «반영 안 함»을 누릅니다. 날짜가 없는 글은 시작일·끝나는 날을 넣어야 승인됩니다."].filter(Boolean) };
+        if (b === "consent") return { head: "동의 필요", lines: [detail, "소개 허락(댓글·DM)을 받았으면 «공개 승인»을 누릅니다. 계정을 «상시 동의»로 바꿔 두면 날짜가 있는 글은 다음 정기 실행이 공개 후보로 옮깁니다."].filter(Boolean) };
+        if (b === "human") return { head: "사람 판단", lines: [detail, "원문을 열어 보고 공개할 만하면 «공개 승인», 작가·단체 글이라 허락이 필요하면 «동의 필요로 옮기기», 아니면 «반영 안 함»을 누릅니다. 날짜가 없는 글은 시작일·끝나는 날을 넣어야 승인됩니다."].filter(Boolean) };
         return { head: "아직 나누기 전", lines: ["다음 정기 실행이 공개 후보·동의 필요·사람 판단 가운데 하나로 나눕니다."] };
     }
     if (p.status === "COLLECTED" || p.status === "PENDING") {
@@ -147,13 +147,13 @@ function Detail({ post, actor, onSaved, onReview, onCollected, onRestore }: { po
     const approved = !!c.publish_approved_at;
     // 사람 판단 글은 이 창에서 바로 공개 승인한다(운영자 2026-11-28). 날짜가 없으면 원문을 보고 넣어야 승인된다
     const DAY = /^20\d\d-\d\d-\d\d$/;
-    const needDates = bucket === "human" && !(DAY.test(a.date_start || "") && DAY.test(a.date_end || ""));
+    const needDates = (bucket === "human" || bucket === "consent") &&!(DAY.test(a.date_start || "") && DAY.test(a.date_end || ""));
     const [typed, setTyped] = useState({ start: "", end: "" });
     const typedOk = DAY.test(typed.start) && DAY.test(typed.end) && typed.start <= typed.end;
-    const reviewAct = async (kind: "approve" | "candidate" | "reject") => {
+    const reviewAct = async (kind: "approve" | "consent" | "reject") => {
         const title = c.title || "제목 없음";
-        const ask = kind === "approve" ? `«${title}»을(를) 공개 승인할까요?${needDates ? `\n\n넣은 날짜: ${typed.start} ~ ${typed.end}` : ""}\n\n다음 정기 실행이 날짜·원문 링크·중복을 확인한 뒤 공개합니다.`
-            : kind === "candidate" ? (bucket === "consent" ? "작가·단체 계정 글입니다. 게시 동의를 받았나요?\n\n«확인»을 누르면 «공개 후보»로 옮깁니다(아직 공개하지 않습니다)." : "«공개 후보»로 옮길까요? (아직 공개하지 않습니다)")
+        const ask = kind === "approve" ? `${bucket === "consent" ? "작가·단체 계정 글입니다. 이 글을 소개해도 된다는 허락(댓글·DM)을 받았나요?\n\n" : ""}«${title}»을(를) 공개 승인할까요?${needDates ? `\n\n넣은 날짜: ${typed.start} ~ ${typed.end}` : ""}\n\n다음 정기 실행이 날짜·원문 링크·중복을 확인한 뒤 공개합니다.`
+            : kind === "consent" ? `«${title}»을(를) «동의 필요»로 옮길까요?\n\n작가·단체 계정 글이라 소개 허락을 받은 뒤 공개할 글이면 옮깁니다(아직 공개하지 않습니다).`
                 : `«${title}»을(를) 반영하지 않을까요?\n\n«반영 안 한 것»으로 갑니다. 거기서 되돌릴 수 있습니다.`;
         if (!window.confirm(ask)) return;
         setBusy(true); setActMsg("");
@@ -169,9 +169,11 @@ function Detail({ post, actor, onSaved, onReview, onCollected, onRestore }: { po
                 next.ai_suggestion = { ...(next.ai_suggestion || {}), date_start: typed.start, date_end: typed.end };
                 next.dates_set_by_admin = { at: now, by: actor || undefined, start: typed.start, end: typed.end };
             }
+            // 동의 필요에서 바로 승인: 운영자가 이 글의 허락을 확인했다는 기록
+            if (bucket === "consent") next.consent_confirmed_by_admin = { at: now, by: actor || undefined };
         }
-        else if (kind === "candidate") {
-            next.review_bucket = "candidate"; next.review_bucket_at = now;
+        else if (kind === "consent") {
+            next.review_bucket = "consent"; next.review_bucket_at = now;
             next.review_reason = `admin_moved_from_${bucket || "human"}`; next.review_moved_by = actor || undefined;
         } else {
             // 승인 표시는 지운다: 되돌렸을 때 다시 승인하지 않은 채 공개되지 않게
@@ -182,7 +184,7 @@ function Detail({ post, actor, onSaved, onReview, onCollected, onRestore }: { po
         setBusy(false);
         if (error || !data?.length) { setActMsg(`처리하지 못했습니다: ${error?.message || "관리자 권한 또는 상태 변경을 확인해 주세요"}`); return; }
         onReview([{ id: post.id, status, content: next }]);
-        setActMsg(kind === "approve" ? "공개 승인했습니다. 다음 정기 실행이 확인한 뒤 공개합니다." : kind === "candidate" ? "공개 후보로 옮겼습니다." : "반영하지 않기로 했습니다.");
+        setActMsg(kind === "approve" ? "공개 승인했습니다. 다음 정기 실행이 확인한 뒤 공개합니다." : kind === "consent" ? "동의 필요로 옮겼습니다." : "반영하지 않기로 했습니다.");
     };
     const collectedReject = async () => {
         if (!window.confirm(`«${c.title || "제목 없음"}»을(를) 반영하지 않을까요?\n\n«반영 안 한 것»으로 갑니다. 거기서 되돌릴 수 있습니다.`)) return;
@@ -200,10 +202,10 @@ function Detail({ post, actor, onSaved, onReview, onCollected, onRestore }: { po
     const ghost = `${btn} bg-card text-ink shadow-[inset_0_0_0_1.5px_var(--pk-ink)]`;
     const actions = post.status === "REVIEW" ? (
         <>
-            {(bucket === "candidate" || bucket === "human") && !approved && <button type="button" disabled={busy || (needDates && !typedOk)}
+            {(bucket === "candidate" || bucket === "human" || bucket === "consent") && !approved && <button type="button" disabled={busy || (needDates && !typedOk)}
                 title={needDates && !typedOk ? "시작일·끝나는 날을 넣어야 승인할 수 있습니다" : undefined}
                 onClick={() => reviewAct("approve")} className={primary}><Check size={16} aria-hidden />공개 승인</button>}
-            {bucket === "consent" && <button type="button" disabled={busy} onClick={() => reviewAct("candidate")} className={primary}><Check size={16} aria-hidden />공개 후보로 옮기기</button>}
+            {bucket === "human" && !approved && <button type="button" disabled={busy} onClick={() => reviewAct("consent")} className={ghost}>동의 필요로 옮기기</button>}
             <button type="button" disabled={busy} onClick={() => reviewAct("reject")} className={ghost}><X size={16} aria-hidden />반영 안 함</button>
         </>
     ) : post.status === "COLLECTED" || post.status === "PENDING" ? (

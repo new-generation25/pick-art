@@ -5,7 +5,9 @@
 //              (검증에 걸리면 REVIEW 로 남고 review_reason 이 «publish_failed: …»로 바뀐다)
 //   사람 판단: 카드에서 바로 «공개 승인»(운영자 2026-11-28 «사람판단에서 바로 등록»). 날짜가 없는 글은 카드에 넣은
 //              시작일·끝나는 날을 ai_suggestion 에 함께 써서 승인한다(공개 검증은 두 날짜가 있어야 통과한다)
-//   동의 필요: 읽기 + «공개 후보로 옮기기»(review_bucket='candidate')
+//              작가·단체 글이면 «동의 필요로 옮기기»(review_bucket='consent', 운영자 2026-11-28)
+//   동의 필요: 허락을 받았으면 카드에서 바로 «공개 승인»(운영자 2026-11-28 «동의필요 > 공개 로 바로»). 날짜 넣기는 사람 판단과 같다.
+//              승인하면 content.consent_confirmed_by_admin 에 확인한 사람·시각을 남긴다
 //   모든 탭: «반영 안 함» → status 'REJECTED'(인박스·review_instagram 이 쓰는 거절 상태. 휴지통에서 되돌리면 REVIEW 로 돌아간다)
 // content 는 jsonb 라 통째로 바꾸므로, 쓰기 직전에 DB 에서 최신 content 를 다시 읽어 키를 더한다(정기 실행이 쓴 키를 지우지 않게).
 
@@ -61,8 +63,8 @@ export const BUCKET_LABEL: Record<ReviewBucket, string> = {
 
 const BUCKET_NOTE: Record<ReviewBucket, string> = {
     candidate: "기관 계정이고 날짜·장소가 있는 후보입니다. 골라서 승인하면 다음 정기 실행(08:20·15:00)에서 날짜·링크·중복을 확인한 뒤 공개합니다.",
-    consent: "작가·단체 계정 글입니다. 게시 동의를 받은 뒤 «공개 후보로 옮기기»를 누르세요.",
-    human: "제보 계정·날짜 없음·장소 없음 글입니다. 원본을 보고 공개할 만하면 바로 «공개 승인»을 누르세요. 날짜가 없는 글은 시작일·끝나는 날을 넣어야 승인됩니다.",
+    consent: "작가·단체 계정 글입니다. 소개 허락(댓글·DM)을 받았으면 바로 «공개 승인»을 누르세요.",
+    human: "제보 계정·날짜 없음·장소 없음 글입니다. 원본을 보고 공개할 만하면 바로 «공개 승인»을 누르세요. 날짜가 없는 글은 시작일·끝나는 날을 넣어야 승인됩니다. 작가·단체 글이라 허락이 필요하면 «동의 필요로 옮기기»를 누르세요.",
 };
 
 const REASON_LABEL: Record<string, string> = {
@@ -176,6 +178,8 @@ export function ReviewQueue({ bucket, posts, loading, onChanged, compact = false
                     next.ai_suggestion = { ...(c.ai_suggestion || {}), date_start: dates.start, date_end: dates.end };
                     next.dates_set_by_admin = { at: now, by: actor || undefined, start: dates.start, end: dates.end };
                 }
+                // 동의 필요에서 바로 승인: 운영자가 이 글의 허락을 확인했다는 기록(운영자 2026-11-28 «동의필요 > 공개 로 바로»)
+                if (bucket === "consent") next.consent_confirmed_by_admin = { at: now, by: actor || undefined };
                 try {
                     await writeContent(id, next);
                     changes.push({ id, status: "REVIEW", content: next });
@@ -194,7 +198,8 @@ export function ReviewQueue({ bucket, posts, loading, onChanged, compact = false
     const approveSelected = () => approveIds(picked, `선택한 ${picked.length}건을 공개 승인할까요?`);
     const approveOne = (post: ReviewPost, dates?: { start: string; end: string }) => approveIds(
         [post.id],
-        `«${post.content?.title || "제목 없음"}»을(를) 공개 승인할까요?` + (dates ? `\n\n넣은 날짜: ${dates.start} ~ ${dates.end}` : ""),
+        (bucket === "consent" ? "작가·단체 계정 글입니다. 이 글을 소개해도 된다는 허락(댓글·DM)을 받았나요?\n\n" : "")
+            + `«${post.content?.title || "제목 없음"}»을(를) 공개 승인할까요?` + (dates ? `\n\n넣은 날짜: ${dates.start} ~ ${dates.end}` : ""),
         dates,
     );
     // 사람 판단 카드에서 날짜가 없는 글에 운영자가 넣는 날짜(카드별)
@@ -230,11 +235,10 @@ export function ReviewQueue({ bucket, posts, loading, onChanged, compact = false
         setBusy(false);
     };
 
-    const moveToCandidate = async (post: ReviewPost) => {
-        const ask = bucket === "consent"
-            ? "작가·단체 계정 글입니다. 게시 동의를 받았나요?\n\n«확인»을 누르면 «공개 후보»로 옮깁니다(아직 공개하지 않습니다)."
-            : "«공개 후보»로 옮길까요? (아직 공개하지 않습니다)";
-        if (!confirm(ask)) return;
+    // 사람 판단 → 동의 필요 (운영자 2026-11-28 «사람 판단 항목에서 > 동의필요 항목으로 넘길수 있도록»):
+    // 작가·단체 계정 글이라 허락을 받아야 하는 글을 옮긴다. 정기 실행의 분류는 사람이 둔 무더기를 덮어쓰지 않는다
+    const moveToConsent = async (post: ReviewPost) => {
+        if (!confirm(`«${post.content?.title || "제목 없음"}»을(를) «동의 필요»로 옮길까요?\n\n작가·단체 계정 글이라 소개 허락을 받은 뒤 공개할 글이면 옮깁니다(아직 공개하지 않습니다).`)) return;
         setBusy(true);
         try {
             const fresh = await freshContents([post.id]);
@@ -242,7 +246,7 @@ export function ReviewQueue({ bucket, posts, loading, onChanged, compact = false
             if (!c) throw new Error("이미 처리됨");
             const next = {
                 ...c,
-                review_bucket: "candidate",
+                review_bucket: "consent",
                 review_bucket_at: new Date().toISOString(),
                 review_reason: `admin_moved_from_${bucket}`,
                 review_moved_by: actor || undefined,
@@ -358,7 +362,7 @@ export function ReviewQueue({ bucket, posts, loading, onChanged, compact = false
                                                 <Text size="xs" c="orange.7">시작일·끝나는 날이 모두 있어야 공개 검증을 통과합니다.</Text>
                                             </Group>
                                         )}
-                                        {bucket === "human" && !datesOk && state !== "waiting" && (
+                                        {(bucket === "human" || bucket === "consent") && !datesOk && state !== "waiting" && (
                                             <Group gap="xs" wrap="wrap" align="center">
                                                 <Text size="xs" c="orange.7">원문에서 날짜를 확인해 넣으면 승인할 수 있습니다:</Text>
                                                 <input type="date" className="pica-date" aria-label="시작일" value={typedFor(post.id).start}
@@ -409,7 +413,12 @@ export function ReviewQueue({ bucket, posts, loading, onChanged, compact = false
                                                     공개 승인
                                                 </Button>
                                             )}
-                                            {bucket === "human" && state !== "waiting" && (() => {
+                                            {bucket === "human" && state !== "waiting" && (
+                                                <Button color="teal" variant="light" size="xs" radius="xl" disabled={busy} onClick={() => moveToConsent(post)} rightSection={<ArrowRight size={14} />}>
+                                                    동의 필요로 옮기기
+                                                </Button>
+                                            )}
+                                            {(bucket === "human" || bucket === "consent") && state !== "waiting" && (() => {
                                                 const t = typedFor(post.id);
                                                 const typedOk = ISO.test(t.start) && ISO.test(t.end) && t.start <= t.end;
                                                 return (
@@ -420,11 +429,6 @@ export function ReviewQueue({ bucket, posts, loading, onChanged, compact = false
                                                     </Button>
                                                 );
                                             })()}
-                                            {bucket === "consent" && (
-                                                <Button color="teal" variant="light" size="xs" radius="xl" disabled={busy} onClick={() => moveToCandidate(post)} rightSection={<ArrowRight size={14} />}>
-                                                    공개 후보로 옮기기
-                                                </Button>
-                                            )}
                                         </Group>
                                     </Stack>
                                 </Group>
