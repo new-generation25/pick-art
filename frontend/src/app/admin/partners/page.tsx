@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Container, Title, Text, Paper, Group, Badge, Button, SegmentedControl, Stack, Textarea, TextInput, Radio, Anchor, Loader } from "@mantine/core";
+import { Container, Title, Text, Paper, Group, Badge, Button, SegmentedControl, Stack, Textarea, TextInput, Radio, Anchor, Loader, Modal } from "@mantine/core";
+import { opensDetail } from "@/app/admin/inbox/notes";
 import { supabase } from "@/lib/supabase";
 import { appendOrgNote } from "@/lib/orgNotes";
 import { todayKST } from "@/lib/utils";
@@ -83,8 +84,8 @@ function CommentConsents() {
                                             <a href={`https://www.instagram.com/${h}/`} target="_blank" rel="noopener noreferrer" className="pica-ig">@{h}</a>
                                             {r.name && <span className="block text-[12.5px] text-ink-soft">{r.name}{r.role === "artist" ? " · 작가" : r.role === "group" ? " · 단체" : ""}</span>}
                                         </td>
-                                        <td className="px-3 py-2.5 align-top whitespace-nowrap">
-                                            <Badge variant="light" color={r.consent === "standing" ? "teal" : "gray"}>{r.consent === "standing" ? "상시" : "임시 · 그 행사 한 건"}</Badge>
+                                        <td className="px-3 py-2.5 align-top whitespace-nowrap" style={{ minWidth: 150 }}>
+                                            <Badge variant="light" color={r.consent === "standing" ? "teal" : "gray"} style={{ maxWidth: "none", overflow: "visible" }}>{r.consent === "standing" ? "상시" : "임시 · 그 행사 한 건"}</Badge>
                                             {off && <span className="mt-1 block text-[12px] font-semibold text-[#9a4b12]">기준과 다름 — 댓글 허락은 임시, 상시는 협약만</span>}
                                         </td>
                                         <td className="px-3 py-2.5 align-top whitespace-nowrap pica-num">{r.consent_at || "—"}</td>
@@ -109,6 +110,20 @@ function when(iso: string) {
     return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 const safeUrl = (u?: string | null) => (u && /^https?:\/\//.test(u) ? u : null);
+
+/** 신청 상태·구분 배지 묶음 — 목록 카드와 자세히 보기 창이 같이 쓴다 */
+function StatusBadges({ a }: { a: Agreement }) {
+    return (
+        <Group gap="xs" wrap="wrap">
+            <Badge color={COLOR[a.status]} variant={a.status === "new" ? "filled" : "light"}>{STATUS_LABEL[a.status]}</Badge>
+            {a.withdraw_requested_at && a.status !== "withdrawn" && <Badge color="orange" variant="filled">철회 요청 {when(a.withdraw_requested_at)}</Badge>}
+            {a.applicant_type && <Badge variant="light" color={a.applicant_type === "person" ? "grape" : "blue"}>{APPLICANT_LABEL[a.applicant_type]}</Badge>}
+            <Badge variant="outline" color="gray">{a.image_use === "yes" ? "이미지 사용 동의" : "이미지 비동의(글만)"}</Badge>
+            <Badge variant="outline" color="gray" style={{ textTransform: "none" }}>{a.terms_version}</Badge>
+            <Badge variant="outline" color="gray">{a.user_id ? "회원" : "로그인 없이"}</Badge>
+        </Group>
+    );
+}
 
 /** 단체 찾기 + 고르기 + 협약 확인 */
 function ConfirmBox({ a, note, onDone, onError }: { a: Agreement; note: string; onDone: (notice: string) => void; onError: (m: string) => void }) {
@@ -200,6 +215,8 @@ export default function AdminPartnersPage() {
     const [notes, setNotes] = useState<Record<string, string>>({});
     const [open, setOpen] = useState<string | null>(null);
     const [notice, setNotice] = useState<string | null>(null);   // 방금 한 처리의 결과(출처 동의 단계 포함)
+    const [detailId, setDetailId] = useState<string | null>(null);   // 자세히 보기 창에 띄운 신청
+    const detail = rows?.find(r => r.id === detailId) || null;
 
     const load = useCallback(async () => {
         let q = supabase.from("partner_agreements").select("*, orgs(name)").order("created_at", { ascending: false }).limit(200);
@@ -260,50 +277,85 @@ export default function AdminPartnersPage() {
                 <Text c="dimmed">{filter === "todo" ? "확인할 협약 신청이 없습니다." : "아직 협약 신청이 없습니다."}</Text>
             ) : (
                 <Stack gap="md">
+                    {/* 목록은 요약 카드: 누르면 자세히 보기 창에서 신청 내용 전부를 보고 처리한다 (운영자 2026-11-28 «클릭하면 카드형태로 자세히 볼수 있어야 하는데. 클릭이 안됨») */}
                     {rows.map(a => (
-                        <Paper key={a.id} withBorder p="md" radius="md">
-                            <Group justify="space-between" mb={6}>
-                                <Group gap="xs">
-                                    <Badge color={COLOR[a.status]} variant={a.status === "new" ? "filled" : "light"}>{STATUS_LABEL[a.status]}</Badge>
-                                    {a.withdraw_requested_at && a.status !== "withdrawn" && <Badge color="orange" variant="filled">철회 요청 {when(a.withdraw_requested_at)}</Badge>}
-                                    {a.applicant_type && <Badge variant="light" color={a.applicant_type === "person" ? "grape" : "blue"}>{APPLICANT_LABEL[a.applicant_type]}</Badge>}
-                                    <Badge variant="outline" color="gray">{a.image_use === "yes" ? "이미지 사용 동의" : "이미지 비동의(글만)"}</Badge>
-                                    <Badge variant="outline" color="gray" style={{ textTransform: "none" }}>{a.terms_version}</Badge>
-                                    <Badge variant="outline" color="gray">{a.user_id ? "회원" : "로그인 없이"}</Badge>
-                                </Group>
+                        <Paper key={a.id} withBorder p="md" radius="md" style={{ cursor: "pointer" }}
+                            onClick={e => { if (opensDetail(e)) setDetailId(a.id); }}>
+                            <Group justify="space-between" mb={6} wrap="wrap">
+                                <StatusBadges a={a} />
                                 <Text size="xs" c="dimmed">{when(a.created_at)}{a.handled_at ? ` · 처리 ${when(a.handled_at)}` : ""}</Text>
                             </Group>
-                            <Text fw={800} size="lg">{a.org_name}{a.region ? <Text span size="sm" c="dimmed"> · {a.region}</Text> : null}</Text>
-                            <Stack gap={2} mt={4}>
-                                {(a.representative || a.reg_no) && <Text size="sm">{[a.representative && `대표자 ${a.representative}`, a.reg_no && `고유번호 ${a.reg_no}`].filter(Boolean).join(" · ")}</Text>}
-                                <Text size="sm">공식: {safeUrl(a.official_url) ? <Anchor href={safeUrl(a.official_url)!} target="_blank" size="sm">{a.official_url}</Anchor> : a.official_url}
-                                    {a.insta_handle && <> · <Anchor href={`https://www.instagram.com/${a.insta_handle}/`} target="_blank" size="sm">@{a.insta_handle}</Anchor></>}</Text>
-                                <Text size="sm">담당자 연락처(비공개): <b>{a.contact_private}</b>{a.contact_public ? ` · 공개 연락처: ${a.contact_public}` : ""}</Text>
-                                {(a.extras?.monthly_report || a.extras?.grant_alerts) && (
-                                    <Text size="sm" c="dimmed">선택: {[a.extras.monthly_report && "월간 정리 메일", a.extras.grant_alerts && `지원사업 알림${a.extras.grant_profile ? `(${a.extras.grant_profile})` : ""}`].filter(Boolean).join(" · ")}</Text>
-                                )}
-                                {a.org_id && <Text size="sm">연결한 단체: <Anchor component={Link} href={`/orgs/${a.org_id}`} target="_blank" size="sm">{a.orgs?.name || "단체 페이지"}</Anchor></Text>}
-                            </Stack>
-                            <Textarea
-                                mt="sm" size="xs" autosize minRows={1} placeholder="처리 메모(관리자만 봄): 확인한 근거, 연락한 날 등"
-                                value={notes[a.id] ?? a.admin_note ?? ""}
-                                onChange={e => { const v = e.currentTarget.value; setNotes(n => ({ ...n, [a.id]: v })); }}
-                            />
+                            <Text fw={800} size="lg">
+                                <button type="button" onClick={() => setDetailId(a.id)} style={{ all: "unset", cursor: "pointer" }} aria-label={`${a.org_name} 협약 신청 자세히 보기`}>{a.org_name}</button>
+                                {a.region ? <Text span size="sm" c="dimmed"> · {a.region}</Text> : null}
+                            </Text>
+                            <Text size="sm" mt={4} style={{ overflowWrap: "anywhere" }}>
+                                공식: {safeUrl(a.official_url) ? <Anchor href={safeUrl(a.official_url)!} target="_blank" size="sm">{a.official_url}</Anchor> : a.official_url}
+                                {a.insta_handle && <> · <Anchor href={`https://www.instagram.com/${a.insta_handle}/`} target="_blank" size="sm">@{a.insta_handle}</Anchor></>}
+                            </Text>
                             <Group gap="xs" mt="sm">
-                                {a.status === "new" && <Button size="xs" color="teal" variant={open === a.id ? "light" : "filled"} onClick={() => setOpen(open === a.id ? null : a.id)}>협약 확인…</Button>}
-                                {a.status === "new" && <Button size="xs" variant="default" onClick={() => setStatus(a, "rejected")}>반려</Button>}
-                                {a.status === "rejected" && <Button size="xs" variant="subtle" onClick={() => setStatus(a, "new")}>다시 열기</Button>}
-                                {(a.status === "confirmed" || (a.status === "new" && a.withdraw_requested_at)) && (
-                                    <Button size="xs" color="orange" variant={a.withdraw_requested_at ? "filled" : "subtle"} onClick={() => withdraw(a)}>철회 처리</Button>
-                                )}
+                                <Button size="xs" radius="xl" color="teal" variant={a.status === "new" || a.withdraw_requested_at ? "filled" : "light"} onClick={() => setDetailId(a.id)}>
+                                    {a.status === "new" ? "자세히 보고 처리하기" : "자세히 보기"}
+                                </Button>
+                                {a.admin_note && <Text size="xs" c="dimmed" lineClamp={1} style={{ flex: 1, minWidth: 0 }}>메모: {a.admin_note}</Text>}
                             </Group>
-                            {open === a.id && a.status === "new" && (
-                                <ConfirmBox a={a} note={notes[a.id] ?? ""} onError={setError} onDone={(m) => { setOpen(null); setNotice(m); refresh(); }} />
-                            )}
                         </Paper>
                     ))}
                 </Stack>
             )}
+            <Modal opened={!!detail} onClose={() => { setDetailId(null); setOpen(null); }} size="lg" centered
+                title={<span className="text-[13px] font-semibold text-ink-soft">협약 신청 자세히 보기</span>} classNames={{ content: "pica-portal" }}>
+                {detail && (() => {
+                    const a = detail;
+                    const rowsOf: [string, React.ReactNode][] = [
+                        ["신청한 쪽", `${a.applicant_type ? APPLICANT_LABEL[a.applicant_type] : "구분 없음(11/28 이전 신청)"} · ${a.user_id ? "회원으로 보냄" : "로그인 없이 보냄"}`],
+                        ["이름", a.org_name],
+                        ["지역", a.region || "—"],
+                        ["대표자", a.representative || "—"],
+                        ["고유번호", a.reg_no || "—"],
+                        ["공식 누리집·SNS", safeUrl(a.official_url) ? <Anchor href={safeUrl(a.official_url)!} target="_blank" size="sm" style={{ overflowWrap: "anywhere" }}>{a.official_url}</Anchor> : a.official_url],
+                        ["인스타그램", a.insta_handle ? <Anchor href={`https://www.instagram.com/${a.insta_handle}/`} target="_blank" size="sm">@{a.insta_handle}</Anchor> : "—"],
+                        ["담당자 연락처(비공개)", <b key="c">{a.contact_private}</b>],
+                        ["공개 연락처", a.contact_public || "—"],
+                        ["이미지 사용", a.image_use === "yes" ? "포스터·사진 사용 동의" : "이미지 비동의(글만)"],
+                        ["선택 항목", [a.extras?.monthly_report && "월간 정리 메일", a.extras?.grant_alerts && `지원사업 알림${a.extras.grant_profile ? `(${a.extras.grant_profile})` : ""}`].filter(Boolean).join(" · ") || "—"],
+                        ["약관", a.terms_version],
+                        ["신청", `${when(a.created_at)} · 번호 ${a.id.slice(0, 8)}`],
+                        ["처리", a.handled_at ? `${STATUS_LABEL[a.status]} ${when(a.handled_at)}` : "아직 처리 전"],
+                        ...(a.withdraw_requested_at ? [["철회 요청", when(a.withdraw_requested_at)] as [string, React.ReactNode]] : []),
+                        ["연결한 단체", a.org_id ? <Anchor key="o" component={Link} href={`/orgs/${a.org_id}`} target="_blank" size="sm">{a.orgs?.name || "단체 페이지"}</Anchor> : "—"],
+                    ];
+                    return (
+                        <Stack gap="sm">
+                            <StatusBadges a={a} />
+                            <dl className="m-0 grid grid-cols-[minmax(0,8.5rem)_minmax(0,1fr)] gap-x-3 gap-y-1.5 text-[14px]">
+                                {rowsOf.map(([k, v]) => (
+                                    <div key={k} className="contents">
+                                        <dt className="text-[12.5px] font-semibold text-ink-soft">{k}</dt>
+                                        <dd className="m-0 text-ink" style={{ overflowWrap: "anywhere" }}>{v}</dd>
+                                    </div>
+                                ))}
+                            </dl>
+                            <Textarea
+                                size="xs" autosize minRows={2} label="처리 메모(관리자만 봄)" placeholder="확인한 근거, 연락한 날 등"
+                                value={notes[a.id] ?? a.admin_note ?? ""}
+                                onChange={e => { const v = e.currentTarget.value; setNotes(n => ({ ...n, [a.id]: v })); }}
+                            />
+                            <Group gap="xs">
+                                {a.status === "new" && <Button size="xs" radius="xl" color="teal" variant={open === a.id ? "light" : "filled"} onClick={() => setOpen(open === a.id ? null : a.id)}>협약 확인…</Button>}
+                                {a.status === "new" && <Button size="xs" radius="xl" variant="default" onClick={() => setStatus(a, "rejected")}>반려</Button>}
+                                {a.status === "rejected" && <Button size="xs" radius="xl" variant="subtle" onClick={() => setStatus(a, "new")}>다시 열기</Button>}
+                                {(a.status === "confirmed" || (a.status === "new" && a.withdraw_requested_at)) && (
+                                    <Button size="xs" radius="xl" color="orange" variant={a.withdraw_requested_at ? "filled" : "subtle"} onClick={() => withdraw(a)}>철회 처리</Button>
+                                )}
+                            </Group>
+                            {open === a.id && a.status === "new" && (
+                                <ConfirmBox a={a} note={notes[a.id] ?? ""} onError={setError} onDone={(m) => { setOpen(null); setDetailId(null); setNotice(m); refresh(); }} />
+                            )}
+                        </Stack>
+                    );
+                })()}
+            </Modal>
             <CommentConsents />
         </Container>
     );
