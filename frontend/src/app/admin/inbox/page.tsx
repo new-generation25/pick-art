@@ -18,6 +18,7 @@ import { CollectedQueue, type CollectedPost } from "./CollectedQueue";
 import { PostDetailModal } from "./PostDetail";
 import { CriteriaModal } from "./Criteria";
 import { notesOf, opensDetail } from "./notes";
+import { IgHandle } from "./igLinks";
 
 type Tab = "candidate" | "human" | "consent" | "pending" | "results" | "rejected";
 const TABS: { key: Tab; label: string }[] = [
@@ -230,7 +231,7 @@ function AdminInbox() {
                                                 <span className="min-w-0 flex-1">
                                                     <button type="button" onClick={() => open(p)} className="block w-full truncate text-left text-[14px] font-semibold text-ink">{p.content?.title || "제목 없음"}</button>
                                                     <span className="block truncate text-[12.5px] text-ink-soft">
-                                                        {p.source}{p.content?.ai_suggestion?.account ? ` · @${p.content.ai_suggestion.account}` : ""}
+                                                        {p.source}{p.content?.ai_suggestion?.account ? <> · <IgHandle handle={p.content.ai_suggestion.account} /></> : ""}
                                                         {p.content?.rejected_reason ? ` · ${String(p.content.rejected_reason)}` : ""}{notesOf(p.content).length > 0 ? ` · 코멘트 ${notesOf(p.content).length}` : ""}
                                                     </span>
                                                 </span>

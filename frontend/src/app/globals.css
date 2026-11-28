@@ -508,4 +508,8 @@ body {
    오류: 옅은 빨강 면 + 진한 빨강 글자. 안내: 옅은 초록 면 + 초록 글자. 빈 상태: 점선 대신 옅은 면 */
 .pica-err { display: block; width: fit-content; max-width: 100%; border-radius: 10px; background: #fbeae7; padding: 8px 12px; color: #8f2218; font-size: 13.5px; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; }
 .pica-info { display: block; border-radius: 10px; background: #e6efe9; padding: 8px 12px; color: #2e6b4e; font-size: 13.5px; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; }
+.pica-ig { color: #2e6b4e; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 1px; word-break: break-all; }
+.pica-ig:hover { text-decoration-thickness: 2px; }
+.pica-date { flex: 0 0 auto; width: 150px !important; max-width: 100%; height: 32px; border-radius: 8px; border: 1px solid #cfc5b4; background: #fff; padding: 0 8px; color: #1e1a15; font-size: 13.5px; font-family: inherit; }
+.pica-date:focus { outline: 2px solid #2e6b4e; outline-offset: 1px; }
 .pica-empty { display: block; border-radius: 14px; background: #ebe4d7; padding: 20px 16px; text-align: center; color: #6b6257; font-size: 14px; font-weight: 600; }

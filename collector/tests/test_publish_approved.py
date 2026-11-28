@@ -165,6 +165,18 @@ def test_approved_candidate_is_published_with_uploaded_poster(monkeypatch, tmp_p
     assert (tmp_path / f"publish_{RANGE[0]}_{RANGE[1]}_approved.json").exists()
 
 
+def test_approved_human_bucket_is_published_like_candidate(monkeypatch, tmp_path):
+    """사람 판단에서 바로 승인한 글(운영자 2026-11-28): 무더기와 상관없이 같은 검증을 거쳐 공개한다.
+    장소가 없던 글, 날짜를 운영자가 넣은 글 모두"""
+    nv = raw("h1", "장소 없는 제보 공연", review_bucket="human", review_reason="no_venue")
+    nv["content"]["ai_suggestion"]["venue"] = ""
+    nd = raw("h2", "날짜 넣은 제보 공연", review_bucket="human", review_reason="no_date",
+             dates_set_by_admin={"at": "2026-11-28T10:00:00+09:00", "start": D1, "end": D2})
+    db, _, _ = run(monkeypatch, tmp_path, [nv, nd], ids=["h1", "h2"])
+    assert sorted(e["raw_post_id"] for e in db.tables["events"]) == ["h1", "h2"]
+    assert by_id(db, "h1")["status"] == "PUBLISHED" and by_id(db, "h2")["status"] == "PUBLISHED"
+
+
 def test_unapproved_review_is_skipped_even_with_ids(monkeypatch, tmp_path):
     db, summary, _ = run(monkeypatch, tmp_path, [raw("b", "승인 안 한 것", approved=False)], ids=["b"])
     assert db.tables["events"] == [] and by_id(db, "b")["status"] == "REVIEW"

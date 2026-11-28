@@ -20,6 +20,7 @@ import { InstagramIcon } from "@/components/ui/InstagramLink";
 import { BUCKET_LABEL, reasonText, type ReviewBucket, type ReviewChange, type ReviewContent, type ReviewPost } from "./ReviewQueue";
 import { reasonOf, type CollectedPost } from "./CollectedQueue";
 import { notesOf, type AdminNote } from "./notes";
+import { IgHandle, withIgLinks } from "./igLinks";
 
 const MAX_NOTES = 20;
 const MAX_LEN = 500;
@@ -59,7 +60,7 @@ export function waitingReason(p: ReviewPost, today: string): { head: string; lin
         const detail = reason.startsWith("admin_moved") ? "운영자가 직접 공개 후보로 옮겼습니다." : REASON_DETAIL[reason] || (reason ? reasonText(reason) : "");
         if (b === "candidate") return { head: "공개 후보", lines: [detail, "운영자가 승인하면 다음 정기 실행이 날짜·원문 링크·중복을 확인한 뒤 공개합니다. 승인 전에는 공개되지 않습니다."].filter(Boolean) };
         if (b === "consent") return { head: "동의 필요", lines: [detail, "게시 동의를 받으면 «공개 후보로 옮기기»를 누릅니다. 계정을 «상시 동의»로 바꿔 두면 날짜가 있는 글은 다음 정기 실행이 공개 후보로 옮깁니다."].filter(Boolean) };
-        if (b === "human") return { head: "사람 판단", lines: [detail, "원문을 열어 보고 공개할 만하면 «공개 후보로 옮기기», 아니면 «반영 안 함»을 누릅니다."].filter(Boolean) };
+        if (b === "human") return { head: "사람 판단", lines: [detail, "원문을 열어 보고 공개할 만하면 «공개 승인», 아니면 «반영 안 함»을 누릅니다. 날짜가 없는 글은 시작일·끝나는 날을 넣어야 승인됩니다."].filter(Boolean) };
         return { head: "아직 나누기 전", lines: ["다음 정기 실행이 공개 후보·동의 필요·사람 판단 가운데 하나로 나눕니다."] };
     }
     if (p.status === "COLLECTED" || p.status === "PENDING") {
@@ -144,9 +145,14 @@ function Detail({ post, actor, onSaved, onReview, onCollected, onRestore }: { po
     const [actMsg, setActMsg] = useState("");
     const bucket = c.review_bucket as ReviewBucket | undefined;
     const approved = !!c.publish_approved_at;
+    // 사람 판단 글은 이 창에서 바로 공개 승인한다(운영자 2026-11-28). 날짜가 없으면 원문을 보고 넣어야 승인된다
+    const DAY = /^20\d\d-\d\d-\d\d$/;
+    const needDates = bucket === "human" && !(DAY.test(a.date_start || "") && DAY.test(a.date_end || ""));
+    const [typed, setTyped] = useState({ start: "", end: "" });
+    const typedOk = DAY.test(typed.start) && DAY.test(typed.end) && typed.start <= typed.end;
     const reviewAct = async (kind: "approve" | "candidate" | "reject") => {
         const title = c.title || "제목 없음";
-        const ask = kind === "approve" ? `«${title}»을(를) 공개 승인할까요?\n\n다음 정기 실행이 날짜·원문 링크·중복을 확인한 뒤 공개합니다.`
+        const ask = kind === "approve" ? `«${title}»을(를) 공개 승인할까요?${needDates ? `\n\n넣은 날짜: ${typed.start} ~ ${typed.end}` : ""}\n\n다음 정기 실행이 날짜·원문 링크·중복을 확인한 뒤 공개합니다.`
             : kind === "candidate" ? (bucket === "consent" ? "작가·단체 계정 글입니다. 게시 동의를 받았나요?\n\n«확인»을 누르면 «공개 후보»로 옮깁니다(아직 공개하지 않습니다)." : "«공개 후보»로 옮길까요? (아직 공개하지 않습니다)")
                 : `«${title}»을(를) 반영하지 않을까요?\n\n«반영 안 한 것»으로 갑니다. 거기서 되돌릴 수 있습니다.`;
         if (!window.confirm(ask)) return;
@@ -156,7 +162,14 @@ function Detail({ post, actor, onSaved, onReview, onCollected, onRestore }: { po
         const now = new Date().toISOString();
         const next: ReviewContent = { ...((cur.content || {}) as ReviewContent) };
         let status = "REVIEW";
-        if (kind === "approve") { next.publish_approved_at = now; next.publish_approved_by = actor || undefined; }
+        if (kind === "approve") {
+            next.publish_approved_at = now; next.publish_approved_by = actor || undefined;
+            // 사람 판단에서 날짜를 넣어 승인한 경우: 공개 단계가 읽는 자리에 쓴다
+            if (needDates) {
+                next.ai_suggestion = { ...(next.ai_suggestion || {}), date_start: typed.start, date_end: typed.end };
+                next.dates_set_by_admin = { at: now, by: actor || undefined, start: typed.start, end: typed.end };
+            }
+        }
         else if (kind === "candidate") {
             next.review_bucket = "candidate"; next.review_bucket_at = now;
             next.review_reason = `admin_moved_from_${bucket || "human"}`; next.review_moved_by = actor || undefined;
@@ -187,8 +200,10 @@ function Detail({ post, actor, onSaved, onReview, onCollected, onRestore }: { po
     const ghost = `${btn} bg-card text-ink shadow-[inset_0_0_0_1.5px_var(--pk-ink)]`;
     const actions = post.status === "REVIEW" ? (
         <>
-            {bucket === "candidate" && !approved && <button type="button" disabled={busy} onClick={() => reviewAct("approve")} className={primary}><Check size={16} aria-hidden />공개 승인</button>}
-            {bucket !== "candidate" && <button type="button" disabled={busy} onClick={() => reviewAct("candidate")} className={primary}><Check size={16} aria-hidden />공개 후보로 옮기기</button>}
+            {(bucket === "candidate" || bucket === "human") && !approved && <button type="button" disabled={busy || (needDates && !typedOk)}
+                title={needDates && !typedOk ? "시작일·끝나는 날을 넣어야 승인할 수 있습니다" : undefined}
+                onClick={() => reviewAct("approve")} className={primary}><Check size={16} aria-hidden />공개 승인</button>}
+            {bucket === "consent" && <button type="button" disabled={busy} onClick={() => reviewAct("candidate")} className={primary}><Check size={16} aria-hidden />공개 후보로 옮기기</button>}
             <button type="button" disabled={busy} onClick={() => reviewAct("reject")} className={ghost}><X size={16} aria-hidden />반영 안 함</button>
         </>
     ) : post.status === "COLLECTED" || post.status === "PENDING" ? (
@@ -216,7 +231,7 @@ function Detail({ post, actor, onSaved, onReview, onCollected, onRestore }: { po
 
             <div className="min-w-0">
                 <p className="text-[12.5px] font-semibold text-ink-soft">
-                    {post.source}{a.account ? ` · @${a.account}` : ""}{a.author && a.author !== a.account ? ` · ${a.author}` : ""}{a.role ? ` · ${a.role}` : ""}
+                    {post.source}{a.account ? <> · <IgHandle handle={a.account} /></> : ""}{a.author && a.author !== a.account ? ` · ${a.author}` : ""}{a.role ? ` · ${a.role}` : ""}
                 </p>
                 <h2 className="mt-0.5 text-[19px] font-bold leading-snug text-ink" style={{ wordBreak: "break-word" }}>{c.title || "제목 없음"}</h2>
                 <p className="mt-1 text-[14px] text-ink">
@@ -233,6 +248,16 @@ function Detail({ post, actor, onSaved, onReview, onCollected, onRestore }: { po
 
                 {(actions || actMsg) && (
                     <div className="mt-3 flex flex-wrap items-center gap-2" aria-label="이 글 처리하기">
+                        {post.status === "REVIEW" && needDates && !approved && (
+                            <div className="flex basis-full flex-wrap items-center gap-2 text-[13px] text-ink-soft">
+                                <span className="font-semibold text-[#9a4b12]">날짜가 없습니다. 원문에서 확인해 넣으면 승인할 수 있습니다:</span>
+                                <input type="date" className="pica-date" aria-label="시작일" value={typed.start}
+                                    onChange={(e) => setTyped((t) => ({ ...t, start: e.target.value }))} />
+                                <span>~</span>
+                                <input type="date" className="pica-date" aria-label="끝나는 날" value={typed.end} min={typed.start || undefined}
+                                    onChange={(e) => setTyped((t) => ({ ...t, end: e.target.value }))} />
+                            </div>
+                        )}
                         {actions}
                         {actMsg && <span className="basis-full text-[13px] font-semibold text-ink" role="status">{actMsg}</span>}
                     </div>
@@ -265,7 +290,7 @@ function Detail({ post, actor, onSaved, onReview, onCollected, onRestore }: { po
                 <section className="mt-4" aria-label="수집한 글">
                     <p className={label}>수집한 글</p>
                     {body
-                        ? <p className="mt-1 max-h-[320px] overflow-y-auto rounded-[10px] bg-soft px-3 py-2 text-[13.5px] leading-relaxed text-ink" style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{body}</p>
+                        ? <p className="mt-1 max-h-[320px] overflow-y-auto rounded-[10px] bg-soft px-3 py-2 text-[13.5px] leading-relaxed text-ink" style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{withIgLinks(body)}</p>
                         : <p className="mt-1 text-[13px] text-ink-soft">수집한 본문이 없습니다. 원문을 열어 확인해 주세요.</p>}
                 </section>
             </div>
