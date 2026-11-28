@@ -32,15 +32,22 @@ export const ADMIN_SECTIONS: Section[] = [
             { href: "/admin/leaflets", label: "리플렛", count: "leaflets" },
             { href: "/admin/reports", label: "신고·제보", count: "reports" },
             { href: "/admin/partners", label: "협약 신청", count: "partners" },
-            { href: "/admin/refine", label: "세부 갈래·안내 그림" },
         ],
     },
-    { key: "events", label: "행사", short: "행사", icon: CalendarDays, pages: [{ href: "/admin/events", label: "찾기·고치기" }, { href: "/admin/events/new", label: "새 행사" }] },
+    // A안(운영자 2026-11-28 «a안으로 진행»): «할 일»에는 공개 전에 들어온 것(공개 판단·받은 것)만, 이미 공개된 행사의 정보를 다듬는 일
+    // (세부 갈래·안내 그림·장소 확인)은 «행사»로 모은다. 화면 주소와 화면 안 코드는 그대로 — 메뉴 자리만 옮겼다
+    {
+        key: "events", label: "행사", short: "행사", icon: CalendarDays, pages: [
+            { href: "/admin/events", label: "찾기·고치기" },
+            { href: "/admin/events/new", label: "새 행사" },
+            { href: "/admin/refine", label: "세부 갈래·안내 그림" },
+            { href: "/admin/venues", label: "공간·장소 확인" },
+        ],
+    },
     {
         key: "sources", label: "출처·단체", short: "출처", icon: Building2, pages: [
             { href: "/admin/sources", label: "출처" },
             { href: "/admin/orgs", label: "단체" },
-            { href: "/admin/venues", label: "공간·장소 확인" },
         ],
     },
     {
