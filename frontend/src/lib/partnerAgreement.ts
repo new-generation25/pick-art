@@ -114,7 +114,7 @@ export const PRIVACY_NOTICE =
 export const ACTIVITY_FIELDS: { group: string; items: string[] }[] = [
     { group: "공연", items: ["연극", "뮤지컬", "클래식·오페라", "국악·전통연희", "대중음악", "무용", "서커스·마술"] },
     { group: "전시", items: ["회화·드로잉", "사진", "조각·설치", "미디어", "공예", "디자인·건축", "서예"] },
-    { group: "그 밖", items: ["축제", "강연·북토크", "상영회", "마켓", "체험·워크숍", "교육·강좌", "기타"] },
+    { group: "그 밖", items: ["축제", "강연·북토크", "상영회", "마켓", "체험·워크숍", "교육·강좌", "기획", "기타"] },   // «기획» 운영자 2026-11-28
 ];
 export const ACTIVITY_FIELD_VALUES = ACTIVITY_FIELDS.flatMap(g => g.items);
 

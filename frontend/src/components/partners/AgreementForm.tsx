@@ -17,7 +17,7 @@ import { loginHref } from "@/lib/reports";
 // 앱 안 브라우저 안내는 로그인 화면(/login)에서만 보인다.
 // 보내기는 DB 함수 submit_partner_agreement() 로만(회원 하루 3건·같은 연락처 하루 1번). 운영자가 확인해야 협약으로 표시된다.
 // 필수 동의 체크는 «전체 동의» 하나다(네 항목은 그 아래 목록, 개인정보는 따로 구분).
-// 순서(운영자 2026-11-28 «동의 체크는 맨 아래로»): ① 누구인가요 → ② 활동 분야(선택) → ③ 동의 → 보내기.
+// 순서(운영자 2026-11-28 «동의 체크는 맨 아래로»): ① 누구인가요 → ② 활동 분야(선택, 풀다운 하나) → ③ 동의 → 보내기.
 const DRAFT_KEY = "pica-agreement-draft";
 type Mine = { id: string; org_name: string; status: string; created_at: string; withdraw_requested_at: string | null };
 
@@ -141,9 +141,6 @@ export function AgreementForm() {
         );
     }
 
-    const toggleField = (v: string) =>
-        setForm(f => ({ ...f, fields: f.fields.includes(v) ? f.fields.filter(x => x !== v) : [...f.fields, v] }));
-
     const allAgreed = CONSENT_KEYS.every(k => form[k]);
     const setAll = (e: React.ChangeEvent<HTMLInputElement>) => {
         const v = e.currentTarget.checked;
@@ -224,26 +221,18 @@ export function AgreementForm() {
 
                 {/* 활동 분야 (선택, 여러 개) — 운영자 2026-11-28 «장르 물어보는 (선택) 항목도 넣어». 사이트의 분야·세부 갈래와 같은 말 */}
                 <fieldset>
-                    <legend className="mb-1 text-[18px] font-bold text-ink">② 활동 분야 <span className="text-[15px] font-normal text-ink-soft">(선택 · 여러 개)</span></legend>
-                    <p className="mb-3 text-[14px] leading-relaxed text-ink-soft">고르지 않아도 보낼 수 있어요. 골라 주시면 행사를 알맞은 분야에 싣는 데 참고해요.</p>
-                    <div className="flex flex-col gap-3">
+                    {/* 칩 21개 → 풀다운 한 칸, 하나만 (운영자 2026-11-28 «협약신청은 풀다운으로 선택» → «아니 장르선택»). 저장 칸은 배열 그대로([고른 값] 또는 []) */}
+                    <legend className="mb-1 text-[18px] font-bold text-ink">② 활동 분야 <span className="text-[15px] font-normal text-ink-soft">(선택)</span></legend>
+                    <label htmlFor="pa-field" className="mb-2 block text-[14px] leading-relaxed text-ink-soft">고르지 않아도 보낼 수 있어요. 골라 주시면 행사를 알맞은 분야에 싣는 데 참고해요.</label>
+                    <select id="pa-field" value={form.fields[0] || ""} onChange={e => { const v = e.currentTarget.value; setForm(f => ({ ...f, fields: v ? [v] : [] })); }}
+                        className="h-11 w-full min-w-0 rounded-[10px] border border-line bg-[var(--pk-card)] px-3 text-[16px] text-ink">
+                        <option value="">고르지 않음</option>
                         {ACTIVITY_FIELDS.map(g => (
-                            <div key={g.group}>
-                                <p className="mb-1.5 text-[13px] font-bold text-ink-soft">{g.group}</p>
-                                <div className="flex flex-wrap gap-2">
-                                    {g.items.map(v => {
-                                        const on = form.fields.includes(v);
-                                        return (
-                                            <button key={v} type="button" aria-pressed={on} onClick={() => toggleField(v)}
-                                                className={`min-h-10 rounded-full border-[1.5px] px-3.5 text-[14.5px] font-semibold ${on ? "border-[var(--pk-accent)] bg-[var(--pk-accent)] text-[var(--pk-on-accent)]" : "border-line bg-[var(--pk-card)] text-ink"}`}>
-                                                {v}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
+                            <optgroup key={g.group} label={g.group}>
+                                {g.items.map(v => <option key={v} value={v}>{v}</option>)}
+                            </optgroup>
                         ))}
-                    </div>
+                    </select>
                 </fieldset>
 
                 <fieldset>
