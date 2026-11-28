@@ -182,18 +182,11 @@ export function ReviewQueue({ bucket, posts, loading, onChanged, compact = false
                 go = confirm(`${ask}\n\n${AFTER_APPROVE}`);
             } else {
                 const lines = [...dups].slice(0, 5).map(([id, evs]) => `«${fresh[id]?.title || "제목 없음"}»\n${evs.slice(0, 3).map(dupLine).join("\n")}`).join("\n\n");
-                const asDup = confirm(`이미 공개된 행사와 같아 보이는 글이 ${dups.size}건 있습니다.\n\n${lines}\n\n«확인»: ${dups.size === 1 ? "이 글은" : "이 글들은"} 중복으로 처리하고 목록에서 뺍니다(공개하지 않음).\n«취소»: 다른 행사라면 다음 물음에서 그대로 승인할 수 있습니다.`);
-                if (asDup) {
-                    for (const [id, evs] of dups) {
-                        const c = fresh[id];
-                        const next: ReviewContent = { ...c, duplicate_of: { event_id: evs[0].id, title: evs[0].title, by: actor || undefined, at: now }, rejected_reason: `이미 공개된 행사와 같음: ${evs[0].title}` };
-                        delete next.publish_approved_at; delete next.publish_failed_at;
-                        const { data, error } = await supabase.from("raw_posts").update({ status: "DUPLICATE", content: next }).eq("id", id).eq("status", "REVIEW").select("id");
-                        if (error || !data?.length) failed.push(`${c.title || id}: ${error?.message || "이미 처리됨"}`);
-                        else changes.push({ id, status: "DUPLICATE", content: next });
-                    }
+                // 운영자 2026-11-28 «중복 판정 됐는데, 그러면 보류할까요? 라고 물어보게 바꿔»: 보류 = 승인하지 않고 목록에 그대로 둔다(아무것도 쓰지 않음)
+                const hold = confirm(`이미 공개된 행사와 같아 보이는 글이 ${dups.size}건 있습니다.\n\n${lines}\n\n보류할까요?\n«확인»: 보류 — 승인하지 않고 이 목록에 그대로 둡니다.\n«취소»: 다른 행사라면 다음 물음에서 공개 승인할 수 있습니다.`);
+                if (hold) {
                     approveList = ids.filter(id => !dups.has(id));
-                    go = approveList.length > 0 && confirm(`남은 ${approveList.length}건을 공개 승인할까요?\n\n${AFTER_APPROVE}`);
+                    go = approveList.length > 0 && confirm(`보류한 ${dups.size}건을 빼고 남은 ${approveList.length}건을 공개 승인할까요?\n\n${AFTER_APPROVE}`);
                 } else {
                     go = confirm(`${ask}\n\n— 이미 공개된 것과 다른 행사로 보고 승인합니다${dups.size === ids.length ? "" : "(나머지와 함께)"}. 공개 단계도 제목·시작일·지역으로 한 번 더 확인합니다.\n\n${AFTER_APPROVE}`);
                 }
@@ -224,10 +217,7 @@ export function ReviewQueue({ bucket, posts, loading, onChanged, compact = false
         onChanged(changes);
         setSelected((s) => s.filter((x) => !ids.includes(x)));
         setBusy(false);
-        if (failed.length) {
-            const dupN = changes.filter(c => c.status === "DUPLICATE").length;
-            alert(`승인 ${changes.length - dupN}건${dupN ? `, 중복 처리 ${dupN}건` : ""}, 실패 ${failed.length}건\n\n${failed.slice(0, 10).join("\n")}`);
-        }
+        if (failed.length) alert(`승인 ${changes.length}건, 실패 ${failed.length}건\n\n${failed.slice(0, 10).join("\n")}`);
     };
     const approveSelected = () => approveIds(picked, `선택한 ${picked.length}건을 공개 승인할까요?`);
     const approveOne = (post: ReviewPost, dates?: { start: string; end: string }) => approveIds(
