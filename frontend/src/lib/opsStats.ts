@@ -117,7 +117,8 @@ export function daysBetween(a: string, b: string): number {
     return Math.round((Date.parse(b + "T00:00:00Z") - Date.parse(a + "T00:00:00Z")) / 86400000);
 }
 
-export type Alert = { level: "bad" | "warn" | "info"; text: string; href?: string };
+/** ackKey: 운영자가 «확인»으로 끌 수 있는 경고(수집기 경고·실행 누락)의 열쇠 — lib/alertAcks */
+export type Alert = { level: "bad" | "warn" | "info"; text: string; href?: string; ackKey?: string };
 
 /** 자동으로 「이상」을 판정하는 규칙. 기준을 바꾸려면 여기만 고친다 */
 export const ALERT_RULES = {

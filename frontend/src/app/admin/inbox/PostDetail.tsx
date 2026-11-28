@@ -280,8 +280,15 @@ function Detail({ post, actor, onSaved, onReview, onCollected, onRestore }: { po
                             </li>
                         ))}
                     </ul>
-                    <textarea value={draft} onChange={e => setDraft(e.currentTarget.value)} maxLength={MAX_LEN} rows={3} aria-label="코멘트 쓰기"
-                        placeholder="예: 기관 계정인데 날짜를 못 읽음 — 포스터 그림에만 날짜가 있음 / 이 계정은 공연 후기만 올림"
+                    {/* Enter = 저장, Shift+Enter = 줄바꿈 (운영자 2026-11-28 «코맨트박스에서 엔터를 누르면 저장되도록»).
+                        한글 입력 중(글자 조합 중) Enter 는 조합을 끝내는 키라 저장하지 않는다 */}
+                    <textarea value={draft} onChange={e => setDraft(e.currentTarget.value)} maxLength={MAX_LEN} rows={3} aria-label="코멘트 쓰기 (Enter 저장, Shift+Enter 줄바꿈)"
+                        onKeyDown={e => {
+                            if (e.key !== "Enter" || e.shiftKey || e.nativeEvent.isComposing || e.keyCode === 229) return;
+                            e.preventDefault();
+                            if (!busy && draft.trim()) add();
+                        }}
+                        placeholder="예: 기관 계정인데 날짜를 못 읽음 — 포스터 그림에만 날짜가 있음 / 이 계정은 공연 후기만 올림 (Enter 저장 · Shift+Enter 줄바꿈)"
                         className="mt-2 w-full rounded-[10px] border border-line bg-paper px-3 py-2 text-[14px] text-ink" />
                     <div className="mt-1.5 flex flex-wrap items-center gap-2">
                         <button type="button" disabled={busy || !draft.trim()} onClick={add} className="inline-flex h-10 items-center gap-1.5 rounded-full bg-card px-4 text-[14px] font-bold text-ink shadow-[inset_0_0_0_1.5px_var(--pk-ink)] disabled:opacity-50"><MessageSquarePlus size={15} aria-hidden />코멘트 남기기</button>

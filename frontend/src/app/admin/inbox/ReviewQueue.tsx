@@ -13,11 +13,9 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
-import { Box, Button, Group, Stack, Text, Title, Paper, Badge, Checkbox } from "@mantine/core";
-import { ExternalLink, CheckCircle, XCircle, ArrowRight, Clock, AlertTriangle, MapPin, Calendar, MessageSquare } from "lucide-react";
-import { notesOf, opensDetail } from "./notes";
-import { IgHandle, withIgLinks } from "./igLinks";
+import { Box, Button, Group, Stack, Text, Title, Badge, Checkbox } from "@mantine/core";
+import { CheckCircle, XCircle, ArrowRight, Clock, AlertTriangle } from "lucide-react";
+import { DateFields, JudgeCard } from "./JudgeCard";
 
 export type ReviewBucket = "candidate" | "consent" | "human";
 
@@ -297,142 +295,59 @@ export function ReviewQueue({ bucket, posts, loading, onChanged, compact = false
                 <Stack gap="md">
                     {posts.slice(0, shown).map((post) => {
                         const c = post.content || {};
-                        const body = String(c.description || c.text || c.caption || "").trim();
                         const a = c.ai_suggestion || {};
                         const state = approvalState(c);
-                        const thumb = post.image_urls?.[0] || a.poster_url || "";
-                        const account = a.account ? `@${a.account}` : "";
                         const datesOk = ISO.test(a.date_start || "") && ISO.test(a.date_end || "");
-                        const noteCount = notesOf(c).length;
+                        const t = typedFor(post.id);
+                        const typedOk = ISO.test(t.start) && ISO.test(t.end) && t.start <= t.end;
+                        const askDates = (bucket === "human" || bucket === "consent") && !datesOk && state !== "waiting";
                         return (
-                            <Paper key={post.id} p="md" radius="lg" withBorder shadow="sm"
-                                style={onOpen ? { cursor: "pointer" } : undefined}
-                                onClick={onOpen ? (e) => { if (opensDetail(e)) onOpen(post); } : undefined}>
-                                <Group align="flex-start" wrap="nowrap">
-                                    {bucket === "candidate" && (
-                                        <Checkbox
-                                            mt={4}
-                                            aria-label="공개 승인할 후보로 고르기"
-                                            checked={selected.includes(post.id)}
-                                            disabled={state === "waiting"}
-                                            onChange={() => toggle(post.id)}
-                                        />
+                            <JudgeCard key={post.id} post={post} onOpen={onOpen ? () => onOpen(post) : undefined}
+                                leading={bucket === "candidate" ? (
+                                    <Checkbox mt={4} aria-label="공개 승인할 후보로 고르기" checked={selected.includes(post.id)}
+                                        disabled={state === "waiting"} onChange={() => toggle(post.id)} />
+                                ) : undefined}
+                                reason={c.review_reason ? { text: reasonText(c.review_reason), tone: String(c.review_reason).startsWith("publish_failed") ? "red" : "dimmed" } : undefined}
+                                status={<>
+                                    {bucket === "candidate" && !datesOk && (
+                                        <Group gap={4}>
+                                            <AlertTriangle size={14} color="var(--mantine-color-orange-6)" />
+                                            <Text size="xs" c="orange.7">시작일·끝나는 날이 모두 있어야 공개 검증을 통과합니다.</Text>
+                                        </Group>
                                     )}
-                                    <Box
-                                        w={96}
-                                        h={120}
-                                        bg="gray.1"
-                                        style={{ position: "relative", borderRadius: "var(--mantine-radius-md)", overflow: "hidden", flexShrink: 0 }}
-                                    >
-                                        <ImageWithFallback src={thumb} alt="" fill className="object-cover" sizes="96px" referrerPolicy="no-referrer" fallbackText="포스터 없음" />
-                                    </Box>
-                                    <Stack flex={1} gap={6} style={{ minWidth: 0 }}>
-                                        <Group gap="xs" wrap="wrap">
-                                            <Badge color="pink" variant="light" radius="md">{post.source}</Badge>
-                                            {account && <Text size="sm" fw={700} style={{ wordBreak: "break-all" }}><IgHandle handle={account} /></Text>}
-                                            {a.author && a.author !== a.account && <Text size="sm" c="dimmed">{a.author}</Text>}
-                                            {a.role && <Badge variant="default" size="sm">{a.role}</Badge>}
-                                            {c.review_reason === "standing_consent" && (
-                                                <Badge color="teal" variant="light" size="sm" style={{ textTransform: "none" }}>{c.review_note || "상시 동의"}</Badge>
-                                            )}
-                                        </Group>
-                                        <Title order={4} size="h5" lineClamp={2}>
-                                            {onOpen
-                                                ? <button type="button" onClick={() => onOpen(post)} style={{ all: "unset", cursor: "pointer" }} aria-label={`${c.title || "제목 없음"} 자세히 보기`}>{c.title || "제목 없음"}</button>
-                                                : (c.title || "제목 없음")}
-                                        </Title>
-                                        <Group gap="md" wrap="wrap">
-                                            <Group gap={4}>
-                                                <Calendar size={14} />
-                                                <Text size="sm">{a.date_start || "시작일 없음"} ~ {a.date_end || "끝나는 날 없음"}</Text>
-                                            </Group>
-                                            <Group gap={4}>
-                                                <MapPin size={14} />
-                                                <Text size="sm">{[a.region, a.venue].filter(Boolean).join(" · ") || "장소 없음"}</Text>
-                                            </Group>
-                                        </Group>
-                                        {c.review_reason && (
-                                            <Text size="xs" c={String(c.review_reason).startsWith("publish_failed") ? "red" : "dimmed"}>
-                                                분류 이유: {reasonText(c.review_reason)}
-                                            </Text>
-                                        )}
-                                        {bucket === "candidate" && !datesOk && (
-                                            <Group gap={4}>
-                                                <AlertTriangle size={14} color="var(--mantine-color-orange-6)" />
-                                                <Text size="xs" c="orange.7">시작일·끝나는 날이 모두 있어야 공개 검증을 통과합니다.</Text>
-                                            </Group>
-                                        )}
-                                        {(bucket === "human" || bucket === "consent") && !datesOk && state !== "waiting" && (
-                                            <Group gap="xs" wrap="wrap" align="center">
-                                                <Text size="xs" c="orange.7">원문에서 날짜를 확인해 넣으면 승인할 수 있습니다:</Text>
-                                                <input type="date" className="pica-date" aria-label="시작일" value={typedFor(post.id).start}
-                                                    onChange={(e) => setTypedDate(post.id, "start", e.target.value)} />
-                                                <Text size="xs" c="dimmed">~</Text>
-                                                <input type="date" className="pica-date" aria-label="끝나는 날" value={typedFor(post.id).end}
-                                                    min={typedFor(post.id).start || undefined}
-                                                    onChange={(e) => setTypedDate(post.id, "end", e.target.value)} />
-                                            </Group>
-                                        )}
-                                        {state === "waiting" && (
-                                            <Badge color="teal" variant="light" size="lg" radius="md" leftSection={<Clock size={12} />} style={{ alignSelf: "flex-start", textTransform: "none" }}>
-                                                승인됨({fmtTime(c.publish_approved_at)}), 다음 정기 실행에서 검증 뒤 공개
-                                            </Badge>
-                                        )}
-                                        {state === "failed" && (
-                                            <Badge color="red" variant="light" size="lg" radius="md" leftSection={<AlertTriangle size={12} />} style={{ alignSelf: "flex-start", textTransform: "none" }}>
-                                                승인됨, 검증 실패({fmtTime(c.publish_failed_at)}) — 다음 정기 실행에서 다시 확인
-                                            </Badge>
-                                        )}
-                                        {body && <Text size="xs" c="dimmed" lineClamp={2} style={{ wordBreak: "break-word" }}>{withIgLinks(body)}</Text>}
-                                        {noteCount > 0 && (
-                                            <Group gap={4}>
-                                                <MessageSquare size={13} color="var(--mantine-color-dimmed)" />
-                                                <Text size="xs" c="dimmed">운영자 코멘트 {noteCount}개</Text>
-                                            </Group>
-                                        )}
-                                        <Group pt="xs" gap="xs" style={{ borderTop: "1px solid var(--mantine-color-gray-1)" }}>
-                                            <Button
-                                                component="a"
-                                                href={post.source_url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                variant="subtle"
-                                                size="xs"
-                                                color="indigo"
-                                                rightSection={<ExternalLink size={12} />}
-                                            >
-                                                원문 열기
-                                            </Button>
-                                            {onOpen && <Button variant="subtle" size="xs" color="gray" onClick={() => onOpen(post)}>자세히 · 코멘트</Button>}
-                                            <Box style={{ flex: 1 }} />
-                                            <Button variant="default" size="xs" radius="xl" disabled={busy} onClick={() => reject(post)} leftSection={<XCircle size={14} />}>
-                                                반영 안 함
-                                            </Button>
-                                            {bucket === "candidate" && state !== "waiting" && (
-                                                <Button color="teal" size="xs" radius="xl" disabled={busy} onClick={() => approveOne(post)} leftSection={<CheckCircle size={14} />}>
-                                                    공개 승인
-                                                </Button>
-                                            )}
-                                            {bucket === "human" && state !== "waiting" && (
-                                                <Button color="teal" variant="light" size="xs" radius="xl" disabled={busy} onClick={() => moveToConsent(post)} rightSection={<ArrowRight size={14} />}>
-                                                    동의 필요로 옮기기
-                                                </Button>
-                                            )}
-                                            {(bucket === "human" || bucket === "consent") && state !== "waiting" && (() => {
-                                                const t = typedFor(post.id);
-                                                const typedOk = ISO.test(t.start) && ISO.test(t.end) && t.start <= t.end;
-                                                return (
-                                                    <Button color="teal" size="xs" radius="xl" disabled={busy || (!datesOk && !typedOk)}
-                                                        title={!datesOk && !typedOk ? "시작일·끝나는 날을 넣어야 승인할 수 있습니다" : undefined}
-                                                        onClick={() => approveOne(post, datesOk ? undefined : t)} leftSection={<CheckCircle size={14} />}>
-                                                        공개 승인
-                                                    </Button>
-                                                );
-                                            })()}
-                                        </Group>
-                                    </Stack>
-                                </Group>
-                            </Paper>
+                                    {state === "waiting" && (
+                                        <Badge color="teal" variant="light" size="lg" radius="md" leftSection={<Clock size={12} />} style={{ alignSelf: "flex-start", textTransform: "none" }}>
+                                            승인됨({fmtTime(c.publish_approved_at)}), 다음 정기 실행에서 검증 뒤 공개
+                                        </Badge>
+                                    )}
+                                    {state === "failed" && (
+                                        <Badge color="red" variant="light" size="lg" radius="md" leftSection={<AlertTriangle size={12} />} style={{ alignSelf: "flex-start", textTransform: "none" }}>
+                                            승인됨, 검증 실패({fmtTime(c.publish_failed_at)}) — 다음 정기 실행에서 다시 확인
+                                        </Badge>
+                                    )}
+                                </>}
+                                extra={askDates ? (
+                                    <DateFields label="원문에서 날짜를 확인해 넣으면 승인할 수 있습니다:" start={t.start} end={t.end}
+                                        onStart={(v) => setTypedDate(post.id, "start", v)} onEnd={(v) => setTypedDate(post.id, "end", v)} />
+                                ) : undefined}
+                                actions={<>
+                                    <Button variant="default" size="xs" radius="xl" disabled={busy} onClick={() => reject(post)} leftSection={<XCircle size={14} />}>
+                                        반영 안 함
+                                    </Button>
+                                    {bucket === "human" && state !== "waiting" && (
+                                        <Button color="teal" variant="light" size="xs" radius="xl" disabled={busy} onClick={() => moveToConsent(post)} rightSection={<ArrowRight size={14} />}>
+                                            동의 필요로 옮기기
+                                        </Button>
+                                    )}
+                                    {state !== "waiting" && (
+                                        <Button color="teal" size="xs" radius="xl" disabled={busy || (bucket !== "candidate" && !datesOk && !typedOk)}
+                                            title={bucket !== "candidate" && !datesOk && !typedOk ? "시작일·끝나는 날을 넣어야 승인할 수 있습니다" : undefined}
+                                            onClick={() => approveOne(post, bucket === "candidate" || datesOk ? undefined : t)} leftSection={<CheckCircle size={14} />}>
+                                            공개 승인
+                                        </Button>
+                                    )}
+                                </>}
+                            />
                         );
                     })}
                     {posts.length > shown && (

@@ -16,9 +16,12 @@ import {
     runStatusTone, splitCollectorAlerts,
     type Alert, type CollectorAlert, type CollectorRun, type DayKinds, type OpsEvent, type SourceKind,
 } from "@/lib/opsStats";
+import { ackAlert, collectorAlertKey, fetchAlertAcks, missedRunKey, unackAlert } from "@/lib/alertAcks";
+import { useAdmin } from "@/components/admin/AdminShell";
 
 // 운영 대시보드: 지금 DB(행사·수집분·장소·회원)와 수집기가 올린 인스타 리포트 숫자(ops_snapshots)를 한 화면에.
-// 숫자는 모두 이 화면을 연 관리자의 권한(RLS)으로 바로 읽는다. 쓰는 것은 없다.
+// 숫자는 모두 이 화면을 연 관리자의 권한(RLS)으로 바로 읽는다. 쓰는 것은 수집기 경고 «확인»(ops_alert_acks) 하나뿐이다
+// (운영자 2026-11-28 «확인 하면 없어지는 걸로»: 확인한 경고는 메뉴 숫자와 «살펴볼 것»에서 빠지고, 다시 켜지면 다시 보인다).
 
 const MEMBER_GOAL = 10000; // 유료 전환 기준: 가입 회원 1만 명 (docs/PLAN_community_2026-11.md 11절, profiles 행 수)
 const SECTIONS = [["alerts", "살펴볼 것"], ["trends", "추이"], ["collect", "수집"], ["spread", "분포"], ["site-visits", "방문"], ["people", "알림·회원"], ["insta", "인스타그램"]] as const;
@@ -178,9 +181,9 @@ function snapshotRows<T>(snap: Snapshot | undefined): T[] {
 function collectorAlertLines(missed: ReturnType<typeof checkMissedRun>, open: CollectorAlert[]): Alert[] {
     const a: Alert[] = [];
     if (missed.state === "missed") {
-        a.push({ level: "bad", text: `수집기 실행 누락: 마지막 실행 ${fmtTime(missed.lastRunAt)} (${Math.round(missed.hours)}시간 전, 기준 ${ALERT_RULES.collectorRunMissHours}시간 · 정기 실행 08:20·15:00)` });
+        a.push({ level: "bad", text: `수집기 실행 누락: 마지막 실행 ${fmtTime(missed.lastRunAt)} (${Math.round(missed.hours)}시간 전, 기준 ${ALERT_RULES.collectorRunMissHours}시간 · 정기 실행 08:20·15:00)`, ackKey: missedRunKey(missed) });
     }
-    for (const c of open) a.push({ level: c.level === "bad" ? "bad" : "warn", text: c.text });
+    for (const c of open) a.push({ level: c.level === "bad" ? "bad" : "warn", text: c.since ? `${c.text} (${fmtTime(c.since)} 회차부터)` : c.text, ackKey: collectorAlertKey(c) });
     return a;
 }
 
@@ -295,12 +298,26 @@ export default function AdminDashboard() {
     const [ops, setOps] = useState<Ops | null>(null);
     const [loading, setLoading] = useState(true);
     const [period, setPeriod] = useState(30);   // 추이 기간(일)
+    const [acks, setAcks] = useState<Set<string>>(new Set());   // «확인»한 경고 열쇠
+    const [ackErr, setAckErr] = useState("");
+    const { reload: reloadCounts } = useAdmin();
 
     const refresh = useCallback(async () => {
         setLoading(true);
-        setOps(await loadOps());
+        const [o, a] = await Promise.all([loadOps(), fetchAlertAcks()]);
+        setOps(o); setAcks(a);
         setLoading(false);
     }, []);
+
+    // 경고 «확인»/«되돌리기»: 메뉴의 «경고 n» 숫자도 함께 다시 센다
+    const toggleAck = async (a: Alert, on: boolean) => {
+        if (!a.ackKey) return;
+        setAckErr("");
+        const err = on ? await ackAlert(a.ackKey, a.text) : await unackAlert(a.ackKey);
+        if (err) { setAckErr(`저장하지 못했습니다: ${err}`); return; }
+        setAcks(s => { const n = new Set(s); if (on) n.add(a.ackKey!); else n.delete(a.ackKey!); return n; });
+        reloadCounts();
+    };
 
     useEffect(() => { refresh(); }, [refresh]);
 
@@ -343,7 +360,9 @@ export default function AdminDashboard() {
     if (!ops || !view) {
         return <Container fluid px={0} py={60}><Group><Loader size="sm" /><Text c="dimmed">운영 숫자를 읽는 중…</Text></Group></Container>;
     }
-    const { supply, days, lastNew, summary, instaDays, alerts, latestRuns, series, missed, resolvedCollector, trend, byBusan, instaLast } = view;
+    const { supply, days, lastNew, summary, instaDays, alerts: allAlerts, latestRuns, series, missed, resolvedCollector, trend, byBusan, instaLast } = view;
+    const alerts = allAlerts.filter(a => !a.ackKey || !acks.has(a.ackKey));
+    const ackedAlerts = allAlerts.filter(a => a.ackKey && acks.has(a.ackKey));
     const gyeongnam = supply.byRegion.filter(r => r.label !== "부산");
     const busanTotal = supply.byRegion.find(r => r.label === "부산")?.n || 0;
     const snap = ops.snapshots["insta_metrics"];
@@ -375,10 +394,27 @@ export default function AdminDashboard() {
                             {alerts.map((a, i) => (
                                 <Group key={i} gap="sm" wrap="nowrap" align="flex-start">
                                     <Badge color={LEVEL_COLOR[a.level]} variant={a.level === "info" ? "light" : "filled"} w={48} style={{ flexShrink: 0 }}>{LEVEL_LABEL[a.level]}</Badge>
-                                    {a.href ? <Anchor component={Link} href={a.href} size="sm" style={{ minWidth: 0, overflowWrap: "anywhere" }}>{a.text}</Anchor> : <Text size="sm" style={{ minWidth: 0, overflowWrap: "anywhere" }}>{a.text}</Text>}
+                                    {a.href ? <Anchor component={Link} href={a.href} size="sm" style={{ minWidth: 0, overflowWrap: "anywhere", flex: 1 }}>{a.text}</Anchor> : <Text size="sm" style={{ minWidth: 0, overflowWrap: "anywhere", flex: 1 }}>{a.text}</Text>}
+                                    {a.ackKey && <Button size="compact-xs" variant="default" radius="xl" style={{ flexShrink: 0 }} onClick={() => toggleAck(a, true)}
+                                        title="확인한 경고는 메뉴의 «경고» 숫자와 이 목록에서 빠집니다. 같은 문제가 다시 켜지면 다시 보입니다.">확인</Button>}
                                 </Group>
                             ))}
                         </Stack>
+                    )}
+                    {ackErr && <Text className="pica-err" mt={6}>{ackErr}</Text>}
+                    {ackedAlerts.length > 0 && (
+                        <Box component="details" mt="sm" id="collector-alerts-acked">
+                            <Text component="summary" size="sm" c="dimmed" style={{ cursor: "pointer" }}>확인한 경고 {ackedAlerts.length}건 (아직 풀리지 않음)</Text>
+                            <Stack gap={4} mt={6}>
+                                {ackedAlerts.map((a, i) => (
+                                    <Group key={i} gap="sm" wrap="nowrap" align="flex-start">
+                                        <Badge color={LEVEL_COLOR[a.level]} variant="light" w={48} style={{ flexShrink: 0 }}>{LEVEL_LABEL[a.level]}</Badge>
+                                        <Text size="sm" c="dimmed" style={{ minWidth: 0, overflowWrap: "anywhere", flex: 1 }}>{a.text}</Text>
+                                        <Button size="compact-xs" variant="subtle" radius="xl" style={{ flexShrink: 0 }} onClick={() => toggleAck(a, false)}>되돌리기</Button>
+                                    </Group>
+                                ))}
+                            </Stack>
+                        </Box>
                     )}
                     {missed.state === "none" && <Text size="sm" c="dimmed" mt={6}>수집기 정기 실행: 실행 기록이 아직 없습니다</Text>}
                     {resolvedCollector.length > 0 && (

@@ -9,7 +9,7 @@
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ExternalLink, Info, RefreshCw, Undo2 } from "lucide-react";
+import { Info, RefreshCw, Undo2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAdmin } from "@/components/admin/AdminShell";
 import { ReviewQueue, approvalState, type ReviewChange, type ReviewContent, type ReviewPost } from "./ReviewQueue";
@@ -17,8 +17,8 @@ import { ConsentGroups } from "./ConsentGroups";
 import { CollectedQueue, type CollectedPost } from "./CollectedQueue";
 import { PostDetailModal } from "./PostDetail";
 import { CriteriaModal } from "./Criteria";
-import { notesOf, opensDetail } from "./notes";
-import { IgHandle } from "./igLinks";
+import { JudgeCard } from "./JudgeCard";
+import { Badge, Button, Group, Text } from "@mantine/core";
 
 type Tab = "candidate" | "human" | "consent" | "pending" | "results" | "rejected";
 const TABS: { key: Tab; label: string }[] = [
@@ -192,24 +192,22 @@ function AdminInbox() {
                     loading ? <p className="py-10 text-center text-[15px] font-semibold text-ink-soft">불러오는 중…</p>
                         : results.length === 0 ? <p className="py-10 text-center text-[15px] font-semibold text-ink-soft">아직 승인한 후보가 없습니다. «공개 후보»에서 골라 승인하면 여기에 결과가 보입니다.</p>
                             : (
-                                <div className="overflow-hidden rounded-[14px] bg-card shadow-[0_1px_4px_rgba(30,26,21,.08)]">
-                                    {results.map((r, i) => {
+                                <div className="grid gap-4">
+                                    {results.map(r => {
                                         const c = r.content || {};
                                         const failed = c.publish_failed_at && String(c.publish_failed_at) >= String(c.publish_approved_at);
-                                        const state = r.status === "PUBLISHED" ? { text: "공개됨", tone: "text-accent" }
-                                            : r.status === "REVIEW" && failed ? { text: `검증에 걸림 — ${String(c.review_reason || "").replace("publish_failed: ", "")}`, tone: "text-[#8f2218]" }
-                                                : r.status === "REVIEW" ? { text: "다음 정기 실행 대기", tone: "text-ink-soft" }
-                                                    : { text: r.status === "DUPLICATE" ? "이미 공개된 행사와 같음" : r.status === "EXPIRED" ? "기간이 지나 만료" : r.status === "REJECTED" ? "반영 안 함" : r.status, tone: "text-ink-soft" };
+                                        const state = r.status === "PUBLISHED" ? { text: "공개됨", color: "teal" }
+                                            : r.status === "REVIEW" && failed ? { text: `검증에 걸림 — ${String(c.review_reason || "").replace("publish_failed: ", "")}`, color: "red" }
+                                                : r.status === "REVIEW" ? { text: "다음 정기 실행 대기", color: "gray" }
+                                                    : { text: r.status === "DUPLICATE" ? "이미 공개된 행사와 같음" : r.status === "EXPIRED" ? "기간이 지나 만료" : r.status === "REJECTED" ? "반영 안 함" : r.status, color: "gray" };
                                         return (
-                                            <div key={r.id} onClick={e => { if (opensDetail(e)) open(r); }}
-                                                className={`flex cursor-pointer flex-wrap items-baseline gap-x-3 gap-y-0.5 px-4 py-3 ${i < results.length - 1 ? "border-b border-line" : ""}`}>
-                                                <button type="button" onClick={() => open(r)} className="min-w-0 flex-1 basis-[240px] text-left text-[14.5px] font-semibold text-ink">{c.title || "제목 없음"}{notesOf(c).length > 0 ? <span className="ml-1.5 text-[12px] font-medium text-ink-soft">코멘트 {notesOf(c).length}</span> : null}</button>
-                                                <span className={`text-[13px] font-semibold ${state.tone}`}>{state.text}</span>
-                                                <span className="text-[12.5px] text-ink-soft">승인 {fmt(c.publish_approved_at)}{c.publish_approved_by ? ` · ${String(c.publish_approved_by).split("@")[0]}` : ""}</span>
-                                                {r.event_id
-                                                    ? <Link href={`/events/${r.event_id}`} className="text-[13px] font-semibold text-accent">행사 보기</Link>
-                                                    : <a href={r.source_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-0.5 text-[13px] font-semibold text-accent">원본 <ExternalLink size={12} aria-hidden /></a>}
-                                            </div>
+                                            <JudgeCard key={r.id} post={r} onOpen={() => open(r)}
+                                                status={<Group gap="xs" wrap="wrap">
+                                                    <Badge color={state.color} variant="light" size="lg" radius="md" style={{ textTransform: "none" }}>{state.text}</Badge>
+                                                    <Text size="xs" c="dimmed">승인 {fmt(c.publish_approved_at)}{c.publish_approved_by ? ` · ${String(c.publish_approved_by).split("@")[0]}` : ""}</Text>
+                                                </Group>}
+                                                actions={r.event_id ? <Button component={Link} href={`/events/${r.event_id}`} color="teal" size="xs" radius="xl">행사 보기</Button> : undefined}
+                                            />
                                         );
                                     })}
                                 </div>
@@ -224,22 +222,12 @@ function AdminInbox() {
                                     <p className="px-1 text-[13px] text-ink-soft">
                                         «반영 안 함»으로 뺀 수집분입니다({rejectedTotal}건 중 최근 {rejected.length}건). 지우지 않고 남겨 두어 같은 글이 다시 수집되지 않습니다. 잘못 뺐으면 되돌리세요.
                                     </p>
-                                    <div className="mt-3 overflow-hidden rounded-[14px] bg-card shadow-[0_1px_4px_rgba(30,26,21,.08)]">
-                                        {rejected.map((p, i) => (
-                                            <div key={p.id} onClick={e => { if (opensDetail(e)) open(p); }}
-                                                className={`flex cursor-pointer items-center gap-3 px-4 py-2.5 ${i < rejected.length - 1 ? "border-b border-line" : ""}`}>
-                                                <span className="min-w-0 flex-1">
-                                                    <button type="button" onClick={() => open(p)} className="block w-full truncate text-left text-[14px] font-semibold text-ink">{p.content?.title || "제목 없음"}</button>
-                                                    <span className="block truncate text-[12.5px] text-ink-soft">
-                                                        {p.source}{p.content?.ai_suggestion?.account ? <> · <IgHandle handle={p.content.ai_suggestion.account} /></> : ""}
-                                                        {p.content?.rejected_reason ? ` · ${String(p.content.rejected_reason)}` : ""}{notesOf(p.content).length > 0 ? ` · 코멘트 ${notesOf(p.content).length}` : ""}
-                                                    </span>
-                                                </span>
-                                                <a href={p.source_url} target="_blank" rel="noopener noreferrer" className="shrink-0 text-[13px] font-semibold text-accent">원본</a>
-                                                <button type="button" onClick={() => restore(p)} className="flex h-8 shrink-0 items-center gap-1 rounded-full border border-line px-2.5 text-[13px] font-semibold text-ink">
-                                                    <Undo2 size={13} aria-hidden />되돌리기
-                                                </button>
-                                            </div>
+                                    <div className="mt-3 grid gap-4">
+                                        {rejected.map(p => (
+                                            <JudgeCard key={p.id} post={p} onOpen={() => open(p)}
+                                                reason={p.content?.rejected_reason ? { text: `반영 안 함 — ${String(p.content.rejected_reason)}` } : undefined}
+                                                actions={<Button variant="default" size="xs" radius="xl" onClick={() => restore(p)} leftSection={<Undo2 size={14} />}>되돌리기</Button>}
+                                            />
                                         ))}
                                     </div>
                                 </>

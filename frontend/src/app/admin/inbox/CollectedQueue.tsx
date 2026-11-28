@@ -8,10 +8,11 @@
 // 이 화면은 바로 공개하지 않는다. 검증 없이 올리는 길은 «단체 제공»(리플렛)뿐이다(헌장 I).
 
 import { useMemo, useState } from "react";
-import { ExternalLink } from "lucide-react";
+import { CheckCircle, XCircle } from "lucide-react";
+import { Button, Text } from "@mantine/core";
 import { supabase } from "@/lib/supabase";
 import { todayKST } from "@/lib/utils";
-import { notesOf, opensDetail } from "./notes";
+import { DateFields, JudgeCard } from "./JudgeCard";
 
 export interface CollectedPost {
     id: string;
@@ -76,32 +77,19 @@ function Card({ p, reason, today, onDone, onOpen }: { p: CollectedPost; reason: 
         onDone(p.id, null);
     };
 
-    const input = "h-9 rounded-lg border border-line bg-paper px-2 text-[14px] text-ink";
+    // 모양은 공개 판단의 다른 탭과 같은 카드(JudgeCard). 이 탭은 날짜 넣기·«날짜 저장»·«반영 안 함»만 다르다
     return (
-        <div className={`rounded-[14px] bg-card p-4 shadow-[0_1px_4px_rgba(30,26,21,.08)] ${onOpen ? "cursor-pointer" : ""}`}
-            onClick={onOpen ? (e) => { if (opensDetail(e)) onOpen(p); } : undefined}>
-            <p className="text-[12.5px] font-semibold text-ink-soft">{p.source}{notesOf(p.content).length > 0 ? ` · 운영자 코멘트 ${notesOf(p.content).length}개` : ""}</p>
-            <p className="mt-0.5 text-[15.5px] font-semibold leading-snug text-ink">
-                {onOpen
-                    ? <button type="button" onClick={() => onOpen(p)} className="text-left font-semibold text-ink" aria-label={`${p.content?.title || "제목 없음"} 자세히 보기`}>{p.content?.title || "제목 없음"}</button>
-                    : (p.content?.title || "제목 없음")}
-            </p>
-            <p className="mt-1 text-[13px] text-ink-soft">
-                {[a.region, a.venue].filter(Boolean).join(" · ") || "장소 없음"}
-                {reason !== "nodate" && <> · {a.date_start} ~ {a.date_end}</>}
-            </p>
-            <div className="mt-3 flex flex-wrap items-end gap-2">
-                <label className="text-[12px] text-ink-soft">시작일<br /><input type="date" className={`${input} pica-date`} value={start} onChange={e => setStart(e.currentTarget.value)} /></label>
-                <label className="text-[12px] text-ink-soft">끝나는 날<br /><input type="date" className={`${input} pica-date`} value={end} min={start || undefined} onChange={e => setEnd(e.currentTarget.value)} /></label>
-                <button type="button" disabled={busy} onClick={saveDates} className="h-9 rounded-full bg-accent px-3.5 text-[13.5px] font-bold text-on-accent disabled:opacity-50">날짜 저장</button>
-                <button type="button" disabled={busy} onClick={reject} className="h-9 rounded-full border border-line px-3.5 text-[13.5px] font-semibold text-ink disabled:opacity-50">반영 안 함</button>
-                <a href={p.source_url} target="_blank" rel="noopener noreferrer" className="flex h-9 items-center gap-1 px-1 text-[13px] font-semibold text-accent">원문 열기 <ExternalLink size={13} aria-hidden /></a>
-                {onOpen && <button type="button" onClick={() => onOpen(p)} className="h-9 px-1 text-[13px] font-semibold text-ink-soft underline underline-offset-4">자세히 · 코멘트</button>}
-            </div>
-            <p className="mt-2 text-[12.5px] text-ink-soft" role="status">
+        <JudgeCard post={p} onOpen={onOpen ? () => onOpen(p) : undefined}
+            reason={{ text: reason === "nodate" ? "날짜 없음 — 자동 공개에서 빠짐" : "날짜는 범위 안인데 검증에서 멈춤(원본 링크 등)" }}
+            extra={<DateFields start={start} end={end} onStart={setStart} onEnd={setEnd} />}
+            actions={<>
+                <Button variant="default" size="xs" radius="xl" disabled={busy} onClick={reject} leftSection={<XCircle size={14} />}>반영 안 함</Button>
+                <Button color="teal" size="xs" radius="xl" disabled={busy} onClick={saveDates} leftSection={<CheckCircle size={14} />}>날짜 저장</Button>
+            </>}
+            note={<Text size="xs" c={msg ? "red" : "dimmed"} role="status">
                 {msg || (reason === "nodate" ? "원본에서 날짜를 확인해 적으면, 다음 정기 실행이 날짜·링크·중복을 확인한 뒤 공개합니다." : "날짜는 범위 안입니다. 원본 링크가 열리는지 확인해 주세요. 다음 정기 실행에서 다시 검증합니다.")}
-            </p>
-        </div>
+            </Text>}
+        />
     );
 }
 
@@ -124,12 +112,12 @@ export function CollectedQueue({ posts, loading, onChanged, onOpen }: { posts: C
 
             <h2 className={head}>날짜 없음 <span className="pica-num text-accent">{groups.nodate.length}</span></h2>
             {groups.nodate.length === 0 ? <p className="px-1 text-[13px] text-ink-soft">없음</p> : (
-                <div className="grid gap-3 md:grid-cols-2">{groups.nodate.map(p => <Card key={p.id} p={p} reason="nodate" today={today} onDone={onChanged} onOpen={onOpen} />)}</div>
+                <div className="grid gap-4">{groups.nodate.map(p => <Card key={p.id} p={p} reason="nodate" today={today} onDone={onChanged} onOpen={onOpen} />)}</div>
             )}
 
             <h2 className={head}>검증에서 멈춘 것 <span className="pica-num text-accent">{groups.stuck.length}</span></h2>
             {groups.stuck.length === 0 ? <p className="px-1 text-[13px] text-ink-soft">없음</p> : (
-                <div className="grid gap-3 md:grid-cols-2">{groups.stuck.map(p => <Card key={p.id} p={p} reason="stuck" today={today} onDone={onChanged} onOpen={onOpen} />)}</div>
+                <div className="grid gap-4">{groups.stuck.map(p => <Card key={p.id} p={p} reason="stuck" today={today} onDone={onChanged} onOpen={onOpen} />)}</div>
             )}
 
             <details className="mt-6 rounded-[14px] bg-card px-4 py-3 shadow-[0_1px_4px_rgba(30,26,21,.08)]">

@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { checkMissedRun, latestRunRows, splitCollectorAlerts, type CollectorAlert, type CollectorRun, type MissedRun } from "@/lib/opsStats";
 import { todayKST } from "@/lib/utils";
+import { collectorAlertKey, fetchAlertAcks, missedRunKey } from "@/lib/alertAcks";
 
 /**
  * 관리자 «오늘 할 일»과 메뉴 숫자에 쓰는 대기 건수 (specs/019 A1·A2).
@@ -92,9 +93,12 @@ export async function fetchAdminCounts(): Promise<AdminCounts> {
     const runs = (snaps["collector_runs"] || []) as CollectorRun[];
     const alerts = (snaps["collector_alerts"] || []) as CollectorAlert[];
     const last = latestRunRows(runs).filter(r => r.kind !== "publish");
+    // 운영자가 «확인»한 경고는 세지 않는다(운영자 2026-11-28 «확인 하면 없어지는 걸로»)
+    const acks = await fetchAlertAcks();
+    const missedRaw = checkMissedRun(runs, Date.now());
     const routine: RoutineLine = {
-        missed: checkMissedRun(runs, Date.now()),
-        openAlerts: splitCollectorAlerts(alerts, Date.now(), 7).open,
+        missed: missedRaw.state === "missed" && acks.has(missedRunKey(missedRaw)) ? { ...missedRaw, state: "ok" } : missedRaw,
+        openAlerts: splitCollectorAlerts(alerts, Date.now(), 7).open.filter(a => !acks.has(collectorAlertKey(a))),
         lastRunFailed: last.filter(r => (r.status || "").toUpperCase().includes("FAIL")).length,
         lastRunSources: last.length,
     };
