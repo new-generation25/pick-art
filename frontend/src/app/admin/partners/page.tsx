@@ -38,9 +38,8 @@ type Org = { id: string; name: string; kind: string; insta_handle: string | null
 
 // 인스타 댓글·DM 으로 받은 허락 (운영자 2026-11-28 «협약신청에 실제 협약 신청 외에, 댓글동의자 목록도 넣어»).
 // 근거는 출처(whitelist)의 동의 단계·근거 문구다. 사이트 협약 신청으로 상시 동의가 된 계정은 위 신청 목록에 있으므로 뺀다.
-// 11/26 운영자 결정: 댓글로 회신한 곳은 임시 동의(그 행사 한 건), 상시 동의는 @intermissionbusan 한 곳.
+// 운영자 기준(2026-11-28): «확정은 협약을 맺은 곳만 상시동의고, 댓글은 모두 임시동의» — 댓글·DM 허락은 늘 임시(그 행사 한 건).
 type CommentConsent = { id: string; value: string; name: string | null; role: string | null; consent: "standing" | "temporary"; consent_at: string | null; consent_evidence: string | null };
-const DECIDED_STANDING = new Set(["intermissionbusan"]);
 const fromSiteAgreement = (ev: string | null) => /^사이트 협약/.test(ev || "");
 
 function CommentConsents() {
@@ -59,7 +58,7 @@ function CommentConsents() {
         <section aria-labelledby="comment-consents" className="mt-12">
             <Title order={2} size="h3" id="comment-consents">댓글로 받은 허락 {rows && <span className="pica-num text-accent">{rows.length}</span>}</Title>
             <Text c="dimmed" size="sm" mt={4} mb="md">
-                정식 협약 신청이 아니라, 피카 인스타 계정이 단 허락 댓글·DM에 답한 계정입니다. «임시»는 그 행사 한 건만, «상시»는 앞으로의 소식까지입니다.
+                정식 협약 신청이 아니라, 피카 인스타 계정이 단 허락 댓글·DM에 답한 계정입니다. 댓글·DM 허락은 모두 «임시»(그 행사 한 건만)이고, 앞으로의 소식까지 싣는 «상시»는 위의 협약 신청을 확인한 곳만입니다.
                 단계를 바꾸려면 <Anchor component={Link} href="/admin/sources" size="sm">출처</Anchor>에서 그 계정의 동의 단계를 고릅니다.
             </Text>
             {error && <Text className="pica-err" mb="md">{error}</Text>}
@@ -77,7 +76,7 @@ function CommentConsents() {
                         <tbody>
                             {rows.map((r, i) => {
                                 const h = instaHandle(r.value);
-                                const off = r.consent === "standing" && !DECIDED_STANDING.has(h);
+                                const off = r.consent === "standing";
                                 return (
                                     <tr key={r.id} className={i < rows.length - 1 ? "border-b border-line" : ""}>
                                         <td className="px-4 py-2.5 align-top">
@@ -86,7 +85,7 @@ function CommentConsents() {
                                         </td>
                                         <td className="px-3 py-2.5 align-top whitespace-nowrap">
                                             <Badge variant="light" color={r.consent === "standing" ? "teal" : "gray"}>{r.consent === "standing" ? "상시" : "임시 · 그 행사 한 건"}</Badge>
-                                            {off && <span className="mt-1 block text-[12px] font-semibold text-[#9a4b12]">11/26 결정과 다름(임시여야 함)</span>}
+                                            {off && <span className="mt-1 block text-[12px] font-semibold text-[#9a4b12]">기준과 다름 — 댓글 허락은 임시, 상시는 협약만</span>}
                                         </td>
                                         <td className="px-3 py-2.5 align-top whitespace-nowrap pica-num">{r.consent_at || "—"}</td>
                                         <td className="px-4 py-2.5 align-top text-ink-soft" style={{ overflowWrap: "anywhere" }}>{r.consent_evidence || "—"}</td>
@@ -97,7 +96,7 @@ function CommentConsents() {
                     </table>
                 </div>
             )}
-            {rows && standing > 0 && <Text size="xs" c="dimmed" mt="xs">상시 {standing}곳 · 임시 {rows.length - standing}곳. 답글 원문과 게시물 주소는 아직 DB에 없어 여기 보이지 않습니다.</Text>}
+            {rows && rows.length > 0 && <Text size="xs" c="dimmed" mt="xs">임시 {rows.length - standing}곳{standing > 0 ? ` · 기준과 다른 상시 ${standing}곳` : ""}. 답글 원문과 게시물 주소는 아직 DB에 없어 여기 보이지 않습니다.</Text>}
         </section>
     );
 }

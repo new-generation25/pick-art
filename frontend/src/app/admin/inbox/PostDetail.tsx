@@ -21,6 +21,7 @@ import { BUCKET_LABEL, reasonText, type ReviewBucket, type ReviewChange, type Re
 import { reasonOf, type CollectedPost } from "./CollectedQueue";
 import { notesOf, type AdminNote } from "./notes";
 import { IgHandle, withIgLinks } from "./igLinks";
+import { dupLine, findPublishedDuplicates, type DupEvent } from "./dupCheck";
 
 const MAX_NOTES = 20;
 const MAX_LEN = 500;
@@ -155,7 +156,20 @@ function Detail({ post, actor, onSaved, onReview, onCollected, onRestore }: { po
         const ask = kind === "approve" ? `${bucket === "consent" ? "작가·단체 계정 글입니다. 이 글을 소개해도 된다는 허락(댓글·DM)을 받았나요?\n\n" : ""}«${title}»을(를) 공개 승인할까요?${needDates ? `\n\n넣은 날짜: ${typed.start} ~ ${typed.end}` : ""}\n\n다음 정기 실행이 날짜·원문 링크·중복을 확인한 뒤 공개합니다.`
             : kind === "consent" ? `«${title}»을(를) «동의 필요»로 옮길까요?\n\n작가·단체 계정 글이라 소개 허락을 받은 뒤 공개할 글이면 옮깁니다(아직 공개하지 않습니다).`
                 : `«${title}»을(를) 반영하지 않을까요?\n\n«반영 안 한 것»으로 갑니다. 거기서 되돌릴 수 있습니다.`;
-        if (!window.confirm(ask)) return;
+        // 공개 승인 전 중복 확인(운영자 2026-11-28 «등록 하기 전에 중복확인 절차») — 목록의 «공개 승인»과 같은 기준(dupCheck)
+        let dups: DupEvent[] = [];
+        if (kind === "approve") {
+            setBusy(true); setActMsg("이미 공개된 행사와 겹치는지 확인하는 중…");
+            try {
+                dups = await findPublishedDuplicates(String(c.title || ""), needDates ? typed.start : a.date_start, needDates ? typed.end : a.date_end);
+            } catch (e) { setBusy(false); setActMsg(e instanceof Error ? e.message : String(e)); return; }
+            setBusy(false); setActMsg("");
+            if (dups.length && window.confirm(`이미 공개된 행사와 같아 보입니다.\n\n${dups.slice(0, 3).map(dupLine).join("\n")}\n\n«확인»: 중복으로 처리하고 목록에서 뺍니다(공개하지 않음).\n«취소»: 다른 행사라면 다음 물음에서 그대로 승인할 수 있습니다.`)) {
+                await markDuplicate(dups[0]);
+                return;
+            }
+        }
+        if (!window.confirm(dups.length ? `${ask}\n\n— 이미 공개된 것과 다른 행사로 보고 승인합니다.` : ask)) return;
         setBusy(true); setActMsg("");
         const { data: cur, error: readErr } = await supabase.from("raw_posts").select("status,content").eq("id", post.id).maybeSingle();
         if (readErr || !cur || cur.status !== "REVIEW") { setBusy(false); setActMsg(`처리하지 못했습니다: ${readErr?.message || "이미 처리된 글입니다. 창을 닫고 다시 읽어 주세요"}`); return; }
@@ -164,6 +178,7 @@ function Detail({ post, actor, onSaved, onReview, onCollected, onRestore }: { po
         let status = "REVIEW";
         if (kind === "approve") {
             next.publish_approved_at = now; next.publish_approved_by = actor || undefined;
+            if (dups.length) next.dup_checked_by_admin = { at: now, by: actor || undefined, not_same_as: dups.map(e => e.id) };
             // 사람 판단에서 날짜를 넣어 승인한 경우: 공개 단계가 읽는 자리에 쓴다
             if (needDates) {
                 next.ai_suggestion = { ...(next.ai_suggestion || {}), date_start: typed.start, date_end: typed.end };
@@ -185,6 +200,20 @@ function Detail({ post, actor, onSaved, onReview, onCollected, onRestore }: { po
         if (error || !data?.length) { setActMsg(`처리하지 못했습니다: ${error?.message || "관리자 권한 또는 상태 변경을 확인해 주세요"}`); return; }
         onReview([{ id: post.id, status, content: next }]);
         setActMsg(kind === "approve" ? "공개 승인했습니다. 다음 정기 실행이 확인한 뒤 공개합니다." : kind === "consent" ? "동의 필요로 옮겼습니다." : "반영하지 않기로 했습니다.");
+    };
+    /** 이미 공개된 행사와 같은 글: DUPLICATE 로 닫고 어느 행사와 같은지 남긴다 */
+    const markDuplicate = async (ev: DupEvent) => {
+        setBusy(true); setActMsg("");
+        const { data: cur, error: readErr } = await supabase.from("raw_posts").select("status,content").eq("id", post.id).maybeSingle();
+        if (readErr || !cur || cur.status !== "REVIEW") { setBusy(false); setActMsg(`처리하지 못했습니다: ${readErr?.message || "이미 처리된 글입니다"}`); return; }
+        const now = new Date().toISOString();
+        const next: ReviewContent = { ...((cur.content || {}) as ReviewContent), duplicate_of: { event_id: ev.id, title: ev.title, by: actor || undefined, at: now }, rejected_reason: `이미 공개된 행사와 같음: ${ev.title}` };
+        delete next.publish_approved_at; delete next.publish_failed_at;
+        const { data, error } = await supabase.from("raw_posts").update({ status: "DUPLICATE", content: next }).eq("id", post.id).eq("status", "REVIEW").select("id");
+        setBusy(false);
+        if (error || !data?.length) { setActMsg(`처리하지 못했습니다: ${error?.message || "관리자 권한 또는 상태 변경을 확인해 주세요"}`); return; }
+        onReview([{ id: post.id, status: "DUPLICATE", content: next }]);
+        setActMsg(`이미 공개된 «${ev.title}»과 같은 행사로 처리했습니다.`);
     };
     const collectedReject = async () => {
         if (!window.confirm(`«${c.title || "제목 없음"}»을(를) 반영하지 않을까요?\n\n«반영 안 한 것»으로 갑니다. 거기서 되돌릴 수 있습니다.`)) return;
