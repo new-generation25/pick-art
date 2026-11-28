@@ -136,7 +136,7 @@ export const EMPTY_AGREEMENT: AgreementInput = {
 export function normInsta(v: string): string | null {
     let s = (v || "").trim();
     if (!s) return null;
-    const m = s.match(/instagram\.com\/([A-Za-z0-9._]+)/i);
+    const m = s.match(/instagram\.com\/@?([A-Za-z0-9._]+)/i);   // «instagram.com/@계정» 도 받는다
     if (m) s = m[1];
     s = s.replace(/^@/, "").toLowerCase();
     return /^[a-z0-9._]{1,30}$/.test(s) ? s : null;

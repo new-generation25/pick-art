@@ -127,6 +127,7 @@ function StatusBadges({ a }: { a: Agreement }) {
 
 /** 단체 찾기 + 고르기 + 협약 확인 */
 function ConfirmBox({ a, note, onDone, onError }: { a: Agreement; note: string; onDone: (notice: string) => void; onError: (m: string) => void }) {
+    const ih = agreementHandle(a);   // 계정 칸이 비어도 공식 주소(instagram.com/@계정 포함)에서 읽은 계정
     const [q, setQ] = useState(a.org_name);
     const [found, setFound] = useState<Org[] | null>(null);
     const [pick, setPick] = useState<string>("");
@@ -134,14 +135,14 @@ function ConfirmBox({ a, note, onDone, onError }: { a: Agreement; note: string; 
 
     const search = useCallback(async (text: string) => {
         const t = text.trim().replace(/[%,()]/g, "");
-        const ors = [t && `name.ilike.%${t}%`, `norm_name.eq.${orgNormName(text) || "-"}`, a.insta_handle && `insta_handle.eq.${a.insta_handle}`].filter(Boolean).join(",");
+        const ors = [t && `name.ilike.%${t}%`, `norm_name.eq.${orgNormName(text) || "-"}`, ih && `insta_handle.eq.${ih}`].filter(Boolean).join(",");
         const { data, error } = await supabase.from("orgs").select("id,name,kind,insta_handle,partner_since").or(ors).limit(8);
         if (error) { onError(error.message); return; }
         const list = (data || []) as Org[];
         setFound(list);
-        const exact = list.find(o => (a.insta_handle && o.insta_handle === a.insta_handle) || orgNormName(o.name) === orgNormName(a.org_name));
+        const exact = list.find(o => (ih && o.insta_handle === ih) || orgNormName(o.name) === orgNormName(a.org_name));
         setPick(exact ? exact.id : list.length ? "" : NEW_ORG);
-    }, [a.insta_handle, a.org_name, onError]);
+    }, [ih, a.org_name, onError]);
 
     useEffect(() => { search(a.org_name); }, [search, a.org_name]);
 
@@ -153,7 +154,7 @@ function ConfirmBox({ a, note, onDone, onError }: { a: Agreement; note: string; 
             let org: Partial<Org> = {};
             if (pick === NEW_ORG) {
                 const { data, error } = await supabase.from("orgs")
-                    .insert({ name: a.org_name.trim(), norm_name: orgNormName(a.org_name), kind: a.applicant_type === "person" ? "개인" : "단체", insta_handle: a.insta_handle })
+                    .insert({ name: a.org_name.trim(), norm_name: orgNormName(a.org_name), kind: a.applicant_type === "person" ? "개인" : "단체", insta_handle: agreementHandle(a) })
                     .select("id").single();
                 if (error || !data) throw new Error(`단체 만들기 실패: ${error?.message || "권한"} (같은 이름·인스타 계정의 단체가 이미 있으면 검색해서 고르세요)`);
                 orgId = data.id;
@@ -164,7 +165,9 @@ function ConfirmBox({ a, note, onDone, onError }: { a: Agreement; note: string; 
             const today = todayKST();
             const patch: Record<string, unknown> = {};
             if (!org.partner_since) patch.partner_since = today;
-            if (a.insta_handle && !org.insta_handle) patch.insta_handle = a.insta_handle;
+            // 계정 칸이 비어도 공식 주소(instagram.com/@계정 포함)에서 읽은 계정을 단체에 붙인다
+            const handle = agreementHandle(a);
+            if (handle && !org.insta_handle) patch.insta_handle = handle;
             if (Object.keys(patch).length) {
                 const o = await supabase.from("orgs").update(patch).eq("id", orgId).select("id");
                 if (o.error || !o.data?.length) throw new Error(`단체 협약 표시 실패: ${o.error?.message || "권한"}`);
@@ -199,7 +202,7 @@ function ConfirmBox({ a, note, onDone, onError }: { a: Agreement; note: string; 
                                     {" "}<Anchor component={Link} href={`/orgs/${o.id}`} target="_blank" size="xs">페이지</Anchor></span>
                             } />
                         ))}
-                        <Radio value={NEW_ORG} label={`새로 만들기(${a.applicant_type === "person" ? "개인" : "단체"}): «${a.org_name}»${a.insta_handle ? ` · @${a.insta_handle}` : ""}`} />
+                        <Radio value={NEW_ORG} label={`새로 만들기(${a.applicant_type === "person" ? "개인" : "단체"}): «${a.org_name}»${ih ? ` · @${ih}` : ""}`} />
                     </Stack>
                 </Radio.Group>
             )}
@@ -291,7 +294,7 @@ export default function AdminPartnersPage() {
                             </Text>
                             <Text size="sm" mt={4} style={{ overflowWrap: "anywhere" }}>
                                 공식: {safeUrl(a.official_url) ? <Anchor href={safeUrl(a.official_url)!} target="_blank" size="sm">{a.official_url}</Anchor> : a.official_url}
-                                {a.insta_handle && <> · <Anchor href={`https://www.instagram.com/${a.insta_handle}/`} target="_blank" size="sm">@{a.insta_handle}</Anchor></>}
+                                {agreementHandle(a) && <> · <Anchor href={`https://www.instagram.com/${agreementHandle(a)}/`} target="_blank" size="sm">@{agreementHandle(a)}</Anchor></>}
                             </Text>
                             <Group gap="xs" mt="sm">
                                 <Button size="xs" radius="xl" color="teal" variant={a.status === "new" || a.withdraw_requested_at ? "filled" : "light"} onClick={() => setDetailId(a.id)}>
@@ -314,7 +317,7 @@ export default function AdminPartnersPage() {
                         ["대표자", a.representative || "—"],
                         ["고유번호", a.reg_no || "—"],
                         ["공식 누리집·SNS", safeUrl(a.official_url) ? <Anchor href={safeUrl(a.official_url)!} target="_blank" size="sm" style={{ overflowWrap: "anywhere" }}>{a.official_url}</Anchor> : a.official_url],
-                        ["인스타그램", a.insta_handle ? <Anchor href={`https://www.instagram.com/${a.insta_handle}/`} target="_blank" size="sm">@{a.insta_handle}</Anchor> : "—"],
+                        ["인스타그램", agreementHandle(a) ? <Anchor href={`https://www.instagram.com/${agreementHandle(a)}/`} target="_blank" size="sm">@{agreementHandle(a)}</Anchor> : "—"],
                         ["담당자 연락처(비공개)", <b key="c">{a.contact_private}</b>],
                         ["공개 연락처", a.contact_public || "—"],
                         ["이미지 사용", a.image_use === "yes" ? "포스터·사진 사용 동의" : "이미지 비동의(글만)"],

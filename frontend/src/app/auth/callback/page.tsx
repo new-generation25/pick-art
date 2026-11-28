@@ -36,7 +36,8 @@ export default function AuthCallbackPage() {
             // 로그인 전에 있던 곳(?next=, 같은 사이트 경로만)으로 돌려보낸다. 첫 방문은 가입 화면이 먼저
             const next = new URLSearchParams(window.location.search).get("next");
             const back = next && next.startsWith("/") && !next.startsWith("//") ? next : "/";
-            router.replace(profile?.nickname ? back : "/welcome");
+            // 첫 방문이면 가입 화면을 거쳐 원래 자리로 돌아간다(2026-11-28: 협약 신청 중 처음 로그인한 사람이 홈으로 가 버려 신청을 못 했다)
+            router.replace(profile?.nickname ? back : back === "/" ? "/welcome" : `/welcome?next=${encodeURIComponent(back)}`);
         };
         finish();
     }, [router]);

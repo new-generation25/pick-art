@@ -58,7 +58,9 @@ export default function WelcomePage() {
             setSaving(false);
             return;
         }
-        router.replace("/");
+        // 로그인 전에 하던 곳(?next=, 같은 사이트 경로만)으로 돌아간다 — 협약 신청 양식(/partners#join) 등
+        const next = new URLSearchParams(window.location.search).get("next");
+        router.replace(next && next.startsWith("/") && !next.startsWith("//") ? next : "/");
     };
 
     const toggleInterest = (c: string) =>

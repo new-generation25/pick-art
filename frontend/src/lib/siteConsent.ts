@@ -49,7 +49,8 @@ export function consentRank(tier: string | undefined, site: SiteConsent | undefi
 export function agreementHandle(a: { insta_handle?: string | null; official_url?: string | null }): string | null {
     const direct = (a.insta_handle || "").trim().replace(/^@/, "").toLowerCase();
     if (direct) return direct;
-    const m = (a.official_url || "").match(/instagram\.com\/([A-Za-z0-9._]+)/i);
+    // «instagram.com/@계정» 처럼 @ 를 붙여 적는 사람이 있다(2026-11-28 앙상블 블랑쉬: 이 때문에 협약 확인 때 동의 단계가 안 바뀜)
+    const m = (a.official_url || "").match(/instagram\.com\/@?([A-Za-z0-9._]+)/i);
     return m && !["p", "reel", "reels", "explore", "stories"].includes(m[1].toLowerCase()) ? m[1].toLowerCase() : null;
 }
 
