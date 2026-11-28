@@ -106,8 +106,21 @@ export const PRIVACY_NOTICE =
     "수집 항목: 담당자 연락처(전화 또는 메일), 적었다면 대표자 이름. 목적: 협약 확인과 게재 관련 연락. " +
     "보유 기간: 협약이 끝나거나 철회한 날부터 1년. 동의하지 않을 수 있지만, 그러면 협약을 맺을 수 없습니다.";
 
+/**
+ * 활동 분야 (선택, 여러 개) — 운영자 2026-11-28 «장르 물어보는 (선택) 항목도 넣어».
+ * 사이트의 분야·세부 갈래(lib/categories SUBCATEGORIES)와 같은 말을 쓴다. DB 함수 submit_partner_agreement 가
+ * 이 목록(supabase/migrations/20261128050000_partner_fields.sql 의 allowed)에 있는 값만 저장하므로, 고치면 두 곳을 함께 고친다.
+ */
+export const ACTIVITY_FIELDS: { group: string; items: string[] }[] = [
+    { group: "공연", items: ["연극", "뮤지컬", "클래식·오페라", "국악·전통연희", "대중음악", "무용", "서커스·마술"] },
+    { group: "전시", items: ["회화·드로잉", "사진", "조각·설치", "미디어", "공예", "디자인·건축", "서예"] },
+    { group: "그 밖", items: ["축제", "강연·북토크", "상영회", "마켓", "체험·워크숍", "교육·강좌", "기타"] },
+];
+export const ACTIVITY_FIELD_VALUES = ACTIVITY_FIELDS.flatMap(g => g.items);
+
 export type AgreementInput = {
     applicant_type: ApplicantType | "";
+    fields: string[];
     org_name: string;
     representative: string;
     reg_no: string;
@@ -127,7 +140,7 @@ export type AgreementInput = {
 };
 
 export const EMPTY_AGREEMENT: AgreementInput = {
-    applicant_type: "", org_name: "", representative: "", reg_no: "", official_url: "", insta_handle: "", region: "",
+    applicant_type: "", fields: [], org_name: "", representative: "", reg_no: "", official_url: "", insta_handle: "", region: "",
     contact_private: "", contact_public: "", agree_listing: false, agree_collect: false, image_use: "",
     agree_confirm: false, agree_privacy: false, monthly_report: false, grant_alerts: false, grant_profile: "",
 };
@@ -145,13 +158,13 @@ export function normInsta(v: string): string | null {
 /** 입력 검사. 문제가 없으면 빈 배열 */
 export function checkAgreement(a: AgreementInput): string[] {
     const errs: string[] = [];
-    if (!a.applicant_type) errs.push("② 개인인지 단체·공간인지 골라 주세요.");
+    if (!a.applicant_type) errs.push("① 개인인지 단체·공간인지 골라 주세요.");
     if (!a.org_name.trim()) errs.push(a.applicant_type === "person" ? "활동 이름을 적어 주세요." : "단체·활동 이름을 적어 주세요.");
     if (!/^https?:\/\/\S+\.\S+/.test(a.official_url.trim())) errs.push("공식 SNS·누리집 주소(https로 시작)를 넣어 주세요.");
     if (a.insta_handle.trim() && !normInsta(a.insta_handle)) errs.push("인스타그램 계정은 @계정 또는 instagram.com/계정 모양으로 적어 주세요.");
     if (a.contact_private.trim().length < 3) errs.push("담당 연락처(전화 또는 메일)를 적어 주세요.");
-    if (CONSENT_KEYS.some(k => !a[k])) errs.push("① «전체 동의»에 체크해 주셔야 실을 수 있어요.");
-    if (!a.image_use) errs.push("① 이미지를 써도 되는지 골라 주세요.");
+    if (CONSENT_KEYS.some(k => !a[k])) errs.push("③ «전체 동의»에 체크해 주셔야 실을 수 있어요.");
+    if (!a.image_use) errs.push("③ 이미지를 써도 되는지 골라 주세요.");
     return errs;
 }
 
@@ -161,6 +174,7 @@ export function toRow(a: AgreementInput) {
     const person = a.applicant_type === "person";
     return {
         applicant_type: a.applicant_type,
+        fields: ACTIVITY_FIELD_VALUES.filter(v => (a.fields || []).includes(v)),   // 목록에 있는 것만, 목록 순서로
         org_name: a.org_name.trim(),
         representative: person ? null : opt(a.representative),   // 개인에게는 묻지 않는 칸
         reg_no: person ? null : opt(a.reg_no),

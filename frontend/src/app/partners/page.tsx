@@ -79,6 +79,8 @@ export default function PartnersPage() {
                 <header>
                     <p className="text-[13px] font-bold tracking-wide text-ink-soft">pica · 예술가·작은 단체께</p>
                     <h1 className="pica-display mt-2 text-[30px] leading-[1.25] text-ink sm:text-[40px]">내 공연·전시, 피카에 무료로 실어 드려요</h1>
+                    {/* 운영자 2026-11-28 «파트너 신청 링크 맨 위에 협력 예술인 숫자 노출» — 들어오자마자 보이는 첫 화면에 */}
+                    <PartnerCount size="lg" className="mt-3" />
                     <p className="mt-4 text-[16px] leading-relaxed text-ink">
                         피카는 부산과 김해·창원·진주 같은 동네의 공연·전시를 날짜순으로 모아 보여 주는 곳이에요.
                         소극장, 작은 극단, 동네 갤러리 행사도 큰 기관 행사와 같은 크기로 실어요.
@@ -177,7 +179,8 @@ export default function PartnersPage() {
 
                 <section id="join" className="scroll-mt-20">
                     <h2 className="pica-display text-[26px] leading-tight text-ink">동의하고 파트너십 맺기</h2>
-                    <PartnerCount className="mt-2" />
+                    {/* 큰 숫자는 맨 위로 옮겼다. 인스타 프로필 링크(#join)로 여기부터 보는 사람을 위해 작은 한 줄만 남긴다 */}
+                    <PartnerCount size="sm" className="mt-1" />
                     <p className="mt-2 text-[15px] leading-relaxed text-ink">
                         한 번 동의해 주시면 그다음 공지부터는 묻지 않고 바로 실어요. 무료이고, 언제든 그만둘 수 있어요.
                     </p>

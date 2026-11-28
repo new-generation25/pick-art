@@ -28,6 +28,7 @@ async function switchConsent(a: { id: string; insta_handle: string | null; offic
 }
 type Agreement = {
     applicant_type: "person" | "org" | null;   // 개인/단체 구분(2026-11-28 부터 받음, 그 전 신청은 null)
+    fields?: string[] | null;   // 활동 분야(선택, 2026-11-28 부터 받음)
     id: string; org_name: string; representative: string | null; reg_no: string | null; official_url: string;
     insta_handle: string | null; region: string | null; contact_private: string; contact_public: string | null;
     image_use: "yes" | "no"; extras: { monthly_report?: boolean; grant_alerts?: boolean; grant_profile?: string };
@@ -314,6 +315,7 @@ export default function AdminPartnersPage() {
                         ["신청한 쪽", `${a.applicant_type ? APPLICANT_LABEL[a.applicant_type] : "구분 없음(11/28 이전 신청)"} · ${a.user_id ? "회원으로 보냄" : "로그인 없이 보냄"}`],
                         ["이름", a.org_name],
                         ["지역", a.region || "—"],
+                        ["활동 분야", a.fields?.length ? a.fields.join(" · ") : "고르지 않음"],
                         ["대표자", a.representative || "—"],
                         ["고유번호", a.reg_no || "—"],
                         ["공식 누리집·SNS", safeUrl(a.official_url) ? <Anchor href={safeUrl(a.official_url)!} target="_blank" size="sm" style={{ overflowWrap: "anywhere" }}>{a.official_url}</Anchor> : a.official_url],

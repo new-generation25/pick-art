@@ -5,7 +5,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { GN_REGIONS } from "@/lib/regions";
 import {
-    AFTER_SUBMIT, APPLICANT_TYPES, CONSENT_ITEMS, CONSENT_KEYS, CONSENT_ORG_AUTH, CONSENT_PRIVACY, CONSENT_SUMMARY, CONTACT_EMAIL, EMPTY_AGREEMENT, EXTRAS, IS_DRAFT, PRIVACY_NOTICE, STATUS_LABEL,
+    ACTIVITY_FIELDS, AFTER_SUBMIT, APPLICANT_TYPES, CONSENT_ITEMS, CONSENT_KEYS, CONSENT_ORG_AUTH, CONSENT_PRIVACY, CONSENT_SUMMARY, CONTACT_EMAIL, EMPTY_AGREEMENT, EXTRAS, IS_DRAFT, PRIVACY_NOTICE, STATUS_LABEL,
     TERMS_SECTIONS, TERMS_VERSION, checkAgreement, toRow, type AgreementInput,
 } from "@/lib/partnerAgreement";
 import { loginHref } from "@/lib/reports";
@@ -17,6 +17,7 @@ import { loginHref } from "@/lib/reports";
 // 앱 안 브라우저 안내는 로그인 화면(/login)에서만 보인다.
 // 보내기는 DB 함수 submit_partner_agreement() 로만(회원 하루 3건·같은 연락처 하루 1번). 운영자가 확인해야 협약으로 표시된다.
 // 필수 동의 체크는 «전체 동의» 하나다(네 항목은 그 아래 목록, 개인정보는 따로 구분).
+// 순서(운영자 2026-11-28 «동의 체크는 맨 아래로»): ① 누구인가요 → ② 활동 분야(선택) → ③ 동의 → 보내기.
 const DRAFT_KEY = "pica-agreement-draft";
 type Mine = { id: string; org_name: string; status: string; created_at: string; withdraw_requested_at: string | null };
 
@@ -56,7 +57,7 @@ export function AgreementForm() {
         // 로그인하러 가기 전에 적던 내용을 되살린다(이 탭에서만, 보낸 뒤에는 지운다)
         try {
             const saved = sessionStorage.getItem(DRAFT_KEY);
-            if (saved) setForm({ ...EMPTY_AGREEMENT, ...(JSON.parse(saved) as Partial<AgreementInput>) });
+            if (saved) { const d = JSON.parse(saved) as Partial<AgreementInput>; setForm({ ...EMPTY_AGREEMENT, ...d, fields: Array.isArray(d.fields) ? d.fields : [] }); }
         } catch { /* 저장소를 못 쓰면 빈 양식으로 */ }
     }, [loadMine]);
 
@@ -140,6 +141,9 @@ export function AgreementForm() {
         );
     }
 
+    const toggleField = (v: string) =>
+        setForm(f => ({ ...f, fields: f.fields.includes(v) ? f.fields.filter(x => x !== v) : [...f.fields, v] }));
+
     const allAgreed = CONSENT_KEYS.every(k => form[k]);
     const setAll = (e: React.ChangeEvent<HTMLInputElement>) => {
         const v = e.currentTarget.checked;
@@ -149,42 +153,8 @@ export function AgreementForm() {
     return (
         <div>
             <form onSubmit={send} className="flex flex-col gap-6" noValidate>
-                <fieldset>
-                    <legend className="mb-3 text-[18px] font-bold text-ink">① 동의</legend>
-                    <div className="border-[1.5px] border-line bg-[var(--pk-card)] p-4">
-                        <label className="flex cursor-pointer items-center gap-3">
-                            <input type="checkbox" className={check} checked={allAgreed} onChange={setAll} />
-                            <span className="text-[16px] font-bold leading-snug text-ink">아래 내용에 모두 동의해요 *</span>
-                        </label>
-                        <ul className="mt-3 flex flex-col gap-1.5 text-[14.5px] leading-relaxed text-ink">
-                            {CONSENT_ITEMS.map(it => <li key={it.title}><b>{it.title}</b> · {it.text}</li>)}
-                            {form.applicant_type === "org" && <li><b>{CONSENT_ORG_AUTH.title}</b> · {CONSENT_ORG_AUTH.text}</li>}
-                            <li><b>{CONSENT_PRIVACY.title}</b> · {CONSENT_PRIVACY.text}</li>
-                        </ul>
-                        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-line pt-3 text-[15px] text-ink" role="radiogroup" aria-label="포스터·사진 사용">
-                            <b>포스터·사진 *</b>
-                            <label className="flex min-h-11 cursor-pointer items-center gap-2"><input type="radio" name="pa-image" className="h-5 w-5 accent-[var(--pk-accent)]" checked={form.image_use === "yes"} onChange={() => setForm(f => ({ ...f, image_use: "yes" }))} />써도 돼요</label>
-                            <label className="flex min-h-11 cursor-pointer items-center gap-2"><input type="radio" name="pa-image" className="h-5 w-5 accent-[var(--pk-accent)]" checked={form.image_use === "no"} onChange={() => setForm(f => ({ ...f, image_use: "no" }))} />글 정보만</label>
-                        </div>
-                        <details className="mt-1 text-[14px] leading-relaxed text-ink">
-                            <summary className="flex min-h-11 cursor-pointer items-center text-[14px] font-bold text-ink-soft underline underline-offset-4">자세히 보기{IS_DRAFT ? " (동의서 초안)" : ""}</summary>
-                            <p className="mt-1"><b>개인정보 안내</b> — {PRIVACY_NOTICE} <Link href="/privacy" className="underline underline-offset-2">개인정보처리방침</Link></p>
-                            <p className="mt-2"><b>이미지</b> — {CONSENT_SUMMARY.image.text}</p>
-                            {IS_DRAFT && <p className="mt-2 text-ink-soft">법률 검토 전 초안이에요({TERMS_VERSION}). 문구가 바뀌면 신청한 단체에 먼저 알려 드려요.</p>}
-                            {TERMS_SECTIONS.map(sec => (
-                                <section key={sec.title} className="mt-3">
-                                    <h4 className="font-bold">{sec.title}</h4>
-                                    <ol className="mt-1 list-decimal space-y-1 pl-5">
-                                        {sec.items.map((it, k) => <li key={k}>{it.strong && <b>{it.strong}</b>}{it.strong && it.text ? " " : ""}{it.text}</li>)}
-                                    </ol>
-                                </section>
-                            ))}
-                        </details>
-                    </div>
-                </fieldset>
-
                 <fieldset className="flex flex-col gap-4">
-                    <legend className="mb-3 text-[18px] font-bold text-ink">② 누구인가요</legend>
+                    <legend className="mb-3 text-[18px] font-bold text-ink">① 누구인가요</legend>
                     {/* 개인/단체 구분 (운영자 2026-11-28): 개인은 대표자·고유번호를 묻지 않고, 단체는 동의 목록에 «권한» 한 줄이 더 보인다 */}
                     <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="개인인지 단체·공간인지">
                         {APPLICANT_TYPES.map(t => (
@@ -249,6 +219,64 @@ export function AgreementForm() {
                     <div aria-hidden="true" className="absolute left-[-9999px] h-0 w-0 overflow-hidden">
                         <label htmlFor="pa-website">비워 두세요</label>
                         <input id="pa-website" tabIndex={-1} autoComplete="off" value={trap} onChange={e => setTrap(e.currentTarget.value)} />
+                    </div>
+                </fieldset>
+
+                {/* 활동 분야 (선택, 여러 개) — 운영자 2026-11-28 «장르 물어보는 (선택) 항목도 넣어». 사이트의 분야·세부 갈래와 같은 말 */}
+                <fieldset>
+                    <legend className="mb-1 text-[18px] font-bold text-ink">② 활동 분야 <span className="text-[15px] font-normal text-ink-soft">(선택 · 여러 개)</span></legend>
+                    <p className="mb-3 text-[14px] leading-relaxed text-ink-soft">고르지 않아도 보낼 수 있어요. 골라 주시면 행사를 알맞은 분야에 싣는 데 참고해요.</p>
+                    <div className="flex flex-col gap-3">
+                        {ACTIVITY_FIELDS.map(g => (
+                            <div key={g.group}>
+                                <p className="mb-1.5 text-[13px] font-bold text-ink-soft">{g.group}</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {g.items.map(v => {
+                                        const on = form.fields.includes(v);
+                                        return (
+                                            <button key={v} type="button" aria-pressed={on} onClick={() => toggleField(v)}
+                                                className={`min-h-10 rounded-full border-[1.5px] px-3.5 text-[14.5px] font-semibold ${on ? "border-[var(--pk-accent)] bg-[var(--pk-accent)] text-[var(--pk-on-accent)]" : "border-line bg-[var(--pk-card)] text-ink"}`}>
+                                                {v}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend className="mb-3 text-[18px] font-bold text-ink">③ 동의</legend>
+                    <div className="border-[1.5px] border-line bg-[var(--pk-card)] p-4">
+                        <label className="flex cursor-pointer items-center gap-3">
+                            <input type="checkbox" className={check} checked={allAgreed} onChange={setAll} />
+                            <span className="text-[16px] font-bold leading-snug text-ink">아래 내용에 모두 동의해요 *</span>
+                        </label>
+                        <ul className="mt-3 flex flex-col gap-1.5 text-[14.5px] leading-relaxed text-ink">
+                            {CONSENT_ITEMS.map(it => <li key={it.title}><b>{it.title}</b> · {it.text}</li>)}
+                            {form.applicant_type === "org" && <li><b>{CONSENT_ORG_AUTH.title}</b> · {CONSENT_ORG_AUTH.text}</li>}
+                            <li><b>{CONSENT_PRIVACY.title}</b> · {CONSENT_PRIVACY.text}</li>
+                        </ul>
+                        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-line pt-3 text-[15px] text-ink" role="radiogroup" aria-label="포스터·사진 사용">
+                            <b>포스터·사진 *</b>
+                            <label className="flex min-h-11 cursor-pointer items-center gap-2"><input type="radio" name="pa-image" className="h-5 w-5 accent-[var(--pk-accent)]" checked={form.image_use === "yes"} onChange={() => setForm(f => ({ ...f, image_use: "yes" }))} />써도 돼요</label>
+                            <label className="flex min-h-11 cursor-pointer items-center gap-2"><input type="radio" name="pa-image" className="h-5 w-5 accent-[var(--pk-accent)]" checked={form.image_use === "no"} onChange={() => setForm(f => ({ ...f, image_use: "no" }))} />글 정보만</label>
+                        </div>
+                        <details className="mt-1 text-[14px] leading-relaxed text-ink">
+                            <summary className="flex min-h-11 cursor-pointer items-center text-[14px] font-bold text-ink-soft underline underline-offset-4">자세히 보기{IS_DRAFT ? " (동의서 초안)" : ""}</summary>
+                            <p className="mt-1"><b>개인정보 안내</b> — {PRIVACY_NOTICE} <Link href="/privacy" className="underline underline-offset-2">개인정보처리방침</Link></p>
+                            <p className="mt-2"><b>이미지</b> — {CONSENT_SUMMARY.image.text}</p>
+                            {IS_DRAFT && <p className="mt-2 text-ink-soft">법률 검토 전 초안이에요({TERMS_VERSION}). 문구가 바뀌면 신청한 단체에 먼저 알려 드려요.</p>}
+                            {TERMS_SECTIONS.map(sec => (
+                                <section key={sec.title} className="mt-3">
+                                    <h4 className="font-bold">{sec.title}</h4>
+                                    <ol className="mt-1 list-decimal space-y-1 pl-5">
+                                        {sec.items.map((it, k) => <li key={k}>{it.strong && <b>{it.strong}</b>}{it.strong && it.text ? " " : ""}{it.text}</li>)}
+                                    </ol>
+                                </section>
+                            ))}
+                        </details>
                     </div>
                 </fieldset>
 
