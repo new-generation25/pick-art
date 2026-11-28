@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { appendOrgNote } from "@/lib/orgNotes";
 import { todayKST } from "@/lib/utils";
 import { APPLICANT_LABEL, STATUS_LABEL, orgNormName } from "@/lib/partnerAgreement";
-import { agreementHandle, setSourceConsent } from "@/lib/siteConsent";
+import { agreementHandle, instaHandle, setSourceConsent } from "@/lib/siteConsent";
 import { useAdmin } from "@/components/admin/AdminShell";
 
 // 정식 협약 신청 검토 (specs/016). 관리자 RLS 로 읽고 고친다.
@@ -35,6 +35,72 @@ type Agreement = {
     orgs?: { name: string } | null;
 };
 type Org = { id: string; name: string; kind: string; insta_handle: string | null; partner_since: string | null };
+
+// 인스타 댓글·DM 으로 받은 허락 (운영자 2026-11-28 «협약신청에 실제 협약 신청 외에, 댓글동의자 목록도 넣어»).
+// 근거는 출처(whitelist)의 동의 단계·근거 문구다. 사이트 협약 신청으로 상시 동의가 된 계정은 위 신청 목록에 있으므로 뺀다.
+// 11/26 운영자 결정: 댓글로 회신한 곳은 임시 동의(그 행사 한 건), 상시 동의는 @intermissionbusan 한 곳.
+type CommentConsent = { id: string; value: string; name: string | null; role: string | null; consent: "standing" | "temporary"; consent_at: string | null; consent_evidence: string | null };
+const DECIDED_STANDING = new Set(["intermissionbusan"]);
+const fromSiteAgreement = (ev: string | null) => /^사이트 협약/.test(ev || "");
+
+function CommentConsents() {
+    const [rows, setRows] = useState<CommentConsent[] | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    useEffect(() => {
+        supabase.from("whitelist").select("id,value,name,role,consent,consent_at,consent_evidence")
+            .in("consent", ["standing", "temporary"]).order("consent").order("consent_at", { ascending: false }).limit(500)
+            .then(({ data, error }) => {
+                if (error) { setError(error.message); setRows([]); return; }
+                setRows(((data || []) as CommentConsent[]).filter(r => !fromSiteAgreement(r.consent_evidence)));
+            });
+    }, []);
+    const standing = rows?.filter(r => r.consent === "standing").length ?? 0;
+    return (
+        <section aria-labelledby="comment-consents" className="mt-12">
+            <Title order={2} size="h3" id="comment-consents">댓글로 받은 허락 {rows && <span className="pica-num text-accent">{rows.length}</span>}</Title>
+            <Text c="dimmed" size="sm" mt={4} mb="md">
+                정식 협약 신청이 아니라, 피카 인스타 계정이 단 허락 댓글·DM에 답한 계정입니다. «임시»는 그 행사 한 건만, «상시»는 앞으로의 소식까지입니다.
+                단계를 바꾸려면 <Anchor component={Link} href="/admin/sources" size="sm">출처</Anchor>에서 그 계정의 동의 단계를 고릅니다.
+            </Text>
+            {error && <Text className="pica-err" mb="md">{error}</Text>}
+            {rows === null ? <Loader size="sm" /> : rows.length === 0 ? <p className="pica-empty">댓글로 받은 허락이 없습니다.</p> : (
+                <div className="overflow-x-auto rounded-[14px] bg-card shadow-[0_1px_4px_rgba(30,26,21,.08)]">
+                    <table className="w-full min-w-[640px] border-collapse text-left text-[13.5px]">
+                        <thead>
+                            <tr className="border-b border-line text-[12.5px] text-ink-soft">
+                                <th className="px-4 py-2.5 font-semibold">계정</th>
+                                <th className="px-3 py-2.5 font-semibold">동의 단계</th>
+                                <th className="px-3 py-2.5 font-semibold">날짜</th>
+                                <th className="px-4 py-2.5 font-semibold">근거</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {rows.map((r, i) => {
+                                const h = instaHandle(r.value);
+                                const off = r.consent === "standing" && !DECIDED_STANDING.has(h);
+                                return (
+                                    <tr key={r.id} className={i < rows.length - 1 ? "border-b border-line" : ""}>
+                                        <td className="px-4 py-2.5 align-top">
+                                            <a href={`https://www.instagram.com/${h}/`} target="_blank" rel="noopener noreferrer" className="pica-ig">@{h}</a>
+                                            {r.name && <span className="block text-[12.5px] text-ink-soft">{r.name}{r.role === "artist" ? " · 작가" : r.role === "group" ? " · 단체" : ""}</span>}
+                                        </td>
+                                        <td className="px-3 py-2.5 align-top whitespace-nowrap">
+                                            <Badge variant="light" color={r.consent === "standing" ? "teal" : "gray"}>{r.consent === "standing" ? "상시" : "임시 · 그 행사 한 건"}</Badge>
+                                            {off && <span className="mt-1 block text-[12px] font-semibold text-[#9a4b12]">11/26 결정과 다름(임시여야 함)</span>}
+                                        </td>
+                                        <td className="px-3 py-2.5 align-top whitespace-nowrap pica-num">{r.consent_at || "—"}</td>
+                                        <td className="px-4 py-2.5 align-top text-ink-soft" style={{ overflowWrap: "anywhere" }}>{r.consent_evidence || "—"}</td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+            {rows && standing > 0 && <Text size="xs" c="dimmed" mt="xs">상시 {standing}곳 · 임시 {rows.length - standing}곳. 답글 원문과 게시물 주소는 아직 DB에 없어 여기 보이지 않습니다.</Text>}
+        </section>
+    );
+}
 
 const COLOR: Record<string, string> = { new: "red", confirmed: "teal", rejected: "gray", withdrawn: "dark" };
 const NEW_ORG = "__new__";
@@ -239,6 +305,7 @@ export default function AdminPartnersPage() {
                     ))}
                 </Stack>
             )}
+            <CommentConsents />
         </Container>
     );
 }
