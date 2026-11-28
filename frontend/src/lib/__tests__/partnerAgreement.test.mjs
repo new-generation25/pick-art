@@ -17,9 +17,10 @@ test("목록에 있는 값만, 목록 순서로", () => {
     assert.deepEqual(row.fields, ["연극", "회화·드로잉"]);
 });
 
-test("목록은 DB 함수의 allowed 와 같은 22개(«기획» 포함)", () => {
-    assert.equal(ACTIVITY_FIELD_VALUES.length, 22);
-    assert.equal(new Set(ACTIVITY_FIELD_VALUES).size, 22);
+test("목록은 DB 함수의 allowed 와 같은 24개(분야만 고른 «공연»·«전시», «기획» 포함)", () => {
+    assert.equal(ACTIVITY_FIELD_VALUES.length, 24);
+    assert.equal(new Set(ACTIVITY_FIELD_VALUES).size, 24);
+    assert.deepEqual(toRow({ ...ok, fields: ["공연"] }).fields, ["공연"]);
     assert.deepEqual(toRow({ ...ok, fields: ["기획"] }).fields, ["기획"]);
 });
 

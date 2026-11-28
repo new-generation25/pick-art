@@ -1,13 +1,13 @@
 -- 협약 신청에 «활동 분야(선택)»를 받는다 (specs/016 덧붙임)
 --   운영자 2026-11-28 «장르 물어보는 (선택) 항목도 넣어» (피카 디자인 세션에서 받아 넘김).
 --   1) partner_agreements.fields text[]: 고른 분야(여러 개, 없으면 빈 배열). 자유 글은 받지 않는다.
---   2) submit_partner_agreement(): p->'fields' 배열에서 아래 allowed 목록에 있는 값만 저장한다(최대 22개, 화면은 하나만 고르게 한다).
+--   2) submit_partner_agreement(): p->'fields' 배열에서 아래 allowed 목록에 있는 값만 저장한다(최대 24개 — 분야만 고른 «공연»·«전시» 포함, 화면은 분야 → 세부 2단계로 하나만 고르게 한다).
 --      목록은 frontend/src/lib/partnerAgreement.ts ACTIVITY_FIELDS 와 같다. 한쪽을 고치면 다른 쪽도 고친다.
 --   예전 화면(fields 를 보내지 않음)도 그대로 동작한다(빈 배열).
 -- 되돌리기: supabase/migrations/20261128030000_partner_applicant_type.sql 의 함수 정의를 다시 실행하고
 --           ALTER TABLE public.partner_agreements DROP COLUMN fields;
 ALTER TABLE public.partner_agreements
-    ADD COLUMN IF NOT EXISTS fields text[] NOT NULL DEFAULT '{}' CHECK (cardinality(fields) <= 22);
+    ADD COLUMN IF NOT EXISTS fields text[] NOT NULL DEFAULT '{}' CHECK (cardinality(fields) <= 24);
 
 CREATE OR REPLACE FUNCTION public.submit_partner_agreement(p jsonb) RETURNS uuid
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
@@ -17,7 +17,7 @@ DECLARE
     contact text := btrim(coalesce(p->>'contact_private', ''));
     oname text := btrim(coalesce(p->>'org_name', ''));
     atype text := CASE WHEN p->>'applicant_type' IN ('person', 'org') THEN p->>'applicant_type' ELSE NULL END;
-    allowed text[] := ARRAY['연극', '뮤지컬', '클래식·오페라', '국악·전통연희', '대중음악', '무용', '서커스·마술',
+    allowed text[] := ARRAY['공연', '전시', '연극', '뮤지컬', '클래식·오페라', '국악·전통연희', '대중음악', '무용', '서커스·마술',
                             '회화·드로잉', '사진', '조각·설치', '미디어', '공예', '디자인·건축', '서예',
                             '축제', '강연·북토크', '상영회', '마켓', '체험·워크숍', '교육·강좌', '기획', '기타'];
     picked text[] := ARRAY[]::text[];

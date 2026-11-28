@@ -17,7 +17,7 @@ import { loginHref } from "@/lib/reports";
 // 앱 안 브라우저 안내는 로그인 화면(/login)에서만 보인다.
 // 보내기는 DB 함수 submit_partner_agreement() 로만(회원 하루 3건·같은 연락처 하루 1번). 운영자가 확인해야 협약으로 표시된다.
 // 필수 동의 체크는 «전체 동의» 하나다(네 항목은 그 아래 목록, 개인정보는 따로 구분).
-// 순서(운영자 2026-11-28 «동의 체크는 맨 아래로»): ① 누구인가요 → ② 활동 분야(선택, 풀다운 하나) → ③ 동의 → 보내기.
+// 순서(운영자 2026-11-28 «동의 체크는 맨 아래로»): ① 누구인가요 → ② 활동 분야(선택, 분야 → 세부 2단계) → ③ 동의 → 보내기.
 const DRAFT_KEY = "pica-agreement-draft";
 type Mine = { id: string; org_name: string; status: string; created_at: string; withdraw_requested_at: string | null };
 
@@ -37,7 +37,8 @@ export function AgreementForm() {
     const [loggedIn, setLoggedIn] = useState<boolean | undefined>(undefined);   // undefined = 확인 중
     const [mine, setMine] = useState<Mine[]>([]);
     const [uid, setUid] = useState<string | null>(null);
-    const [trap, setTrap] = useState("");  // 사람 눈에는 안 보이는 칸. 채워져 있으면 자동 프로그램으로 보고 보내지 않는다
+    const [trap, setTrap] = useState("");
+    const [otherPicked, setOtherPicked] = useState("");   // 활동 분야 «그 밖»을 고르고 세부는 아직인 상태  // 사람 눈에는 안 보이는 칸. 채워져 있으면 자동 프로그램으로 보고 보내지 않는다
 
     // 내가 보낸 것만 고른다. 일반 회원은 DB 정책으로도 자기 것만 읽히지만, 관리자는 모든 신청이 읽혀서
     // 걸러 주지 않으면 남이 보낸 신청까지 «내가 보낸 신청»에 보인다 (운영자 2026-11-28 «내가 보낸것도 아니고 나는 관리자인데»)
@@ -141,6 +142,18 @@ export function AgreementForm() {
         );
     }
 
+    // 활동 분야 2단계: 저장된 값(form.fields[0])에서 분야·세부를 읽는다. «그 밖»만 고르고 세부를 아직 안 고른 상태는 따로 기억한다
+    const saved = form.fields[0] || "";
+    const savedGroup = ACTIVITY_FIELDS.find(g => g.group === saved || g.items.includes(saved))?.group || "";
+    const fieldGroup = savedGroup || otherPicked;
+    const fieldSub = saved && saved !== savedGroup ? saved : "";
+    const pickGroup = (g: string) => {
+        setOtherPicked(g === "그 밖" ? g : "");
+        setForm(f => ({ ...f, fields: g && g !== "그 밖" ? [g] : [] }));
+    };
+    const pickSub = (v: string) => setForm(f => ({ ...f, fields: v ? [v] : fieldGroup && fieldGroup !== "그 밖" ? [fieldGroup] : [] }));
+    const pick = "h-11 w-full min-w-0 rounded-[10px] border border-line bg-[var(--pk-card)] px-3 text-[16px] text-ink";
+
     const allAgreed = CONSENT_KEYS.every(k => form[k]);
     const setAll = (e: React.ChangeEvent<HTMLInputElement>) => {
         const v = e.currentTarget.checked;
@@ -219,20 +232,27 @@ export function AgreementForm() {
                     </div>
                 </fieldset>
 
-                {/* 활동 분야 (선택, 여러 개) — 운영자 2026-11-28 «장르 물어보는 (선택) 항목도 넣어». 사이트의 분야·세부 갈래와 같은 말 */}
+                {/* 활동 분야 (선택) — 운영자 2026-11-28 «장르 물어보는 (선택) 항목도 넣어» → «협약신청은 풀다운으로 선택» → «아니 장르선택» → «2단계 선택으로».
+                    첫 칸 분야(공연·전시·그 밖) → 둘째 칸 세부. 공연·전시는 분야만 골라도 저장([«공연»]), «그 밖»은 세부를 골라야 저장. 저장 칸은 배열([값] 또는 []) */}
                 <fieldset>
-                    {/* 칩 21개 → 풀다운 한 칸, 하나만 (운영자 2026-11-28 «협약신청은 풀다운으로 선택» → «아니 장르선택»). 저장 칸은 배열 그대로([고른 값] 또는 []) */}
                     <legend className="mb-1 text-[18px] font-bold text-ink">② 활동 분야 <span className="text-[15px] font-normal text-ink-soft">(선택)</span></legend>
-                    <label htmlFor="pa-field" className="mb-2 block text-[14px] leading-relaxed text-ink-soft">고르지 않아도 보낼 수 있어요. 골라 주시면 행사를 알맞은 분야에 싣는 데 참고해요.</label>
-                    <select id="pa-field" value={form.fields[0] || ""} onChange={e => { const v = e.currentTarget.value; setForm(f => ({ ...f, fields: v ? [v] : [] })); }}
-                        className="h-11 w-full min-w-0 rounded-[10px] border border-line bg-[var(--pk-card)] px-3 text-[16px] text-ink">
-                        <option value="">고르지 않음</option>
-                        {ACTIVITY_FIELDS.map(g => (
-                            <optgroup key={g.group} label={g.group}>
-                                {g.items.map(v => <option key={v} value={v}>{v}</option>)}
-                            </optgroup>
-                        ))}
-                    </select>
+                    <p className="mb-2 text-[14px] leading-relaxed text-ink-soft">고르지 않아도 보낼 수 있어요. 골라 주시면 행사를 알맞은 분야에 싣는 데 참고해요.</p>
+                    <div className="grid grid-cols-2 gap-2">
+                        <label className="min-w-0">
+                            <span className="mb-1 block text-[13px] font-bold text-ink-soft">분야</span>
+                            <select id="pa-field-group" value={fieldGroup} onChange={e => pickGroup(e.currentTarget.value)} className={pick}>
+                                <option value="">고르지 않음</option>
+                                {ACTIVITY_FIELDS.map(g => <option key={g.group} value={g.group}>{g.group}</option>)}
+                            </select>
+                        </label>
+                        <label className="min-w-0">
+                            <span className="mb-1 block text-[13px] font-bold text-ink-soft">세부</span>
+                            <select id="pa-field" value={fieldSub} disabled={!fieldGroup} onChange={e => pickSub(e.currentTarget.value)} className={`${pick} disabled:opacity-50`}>
+                                <option value="">{fieldGroup === "그 밖" ? "고르기" : "세부 없이"}</option>
+                                {(ACTIVITY_FIELDS.find(g => g.group === fieldGroup)?.items || []).map(v => <option key={v} value={v}>{v}</option>)}
+                            </select>
+                        </label>
+                    </div>
                 </fieldset>
 
                 <fieldset>

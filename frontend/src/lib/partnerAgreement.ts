@@ -116,7 +116,8 @@ export const ACTIVITY_FIELDS: { group: string; items: string[] }[] = [
     { group: "전시", items: ["회화·드로잉", "사진", "조각·설치", "미디어", "공예", "디자인·건축", "서예"] },
     { group: "그 밖", items: ["축제", "강연·북토크", "상영회", "마켓", "체험·워크숍", "교육·강좌", "기획", "기타"] },   // «기획» 운영자 2026-11-28
 ];
-export const ACTIVITY_FIELD_VALUES = ACTIVITY_FIELDS.flatMap(g => g.items);
+/** 저장할 수 있는 값: 분야만 고른 «공연»·«전시»(2단계 선택, 운영자 2026-11-28 «2단계 선택으로») + 세부 갈래 */
+export const ACTIVITY_FIELD_VALUES = ["공연", "전시", ...ACTIVITY_FIELDS.flatMap(g => g.items)];
 
 export type AgreementInput = {
     applicant_type: ApplicantType | "";
